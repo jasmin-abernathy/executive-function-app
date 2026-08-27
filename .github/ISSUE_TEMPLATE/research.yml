@@ -1,0 +1,23 @@
+name: Research / evidence task
+description: Record a research question without storing raw participant data
+title: "[Research] "
+labels: ["type:research"]
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Research question
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence needed
+      description: Public source, aggregate, anonymised usability finding, etc.
+  - type: textarea
+    id: decision
+    attributes:
+      label: Product decision this could inform
+  - type: markdown
+    attributes:
+      value: "Never paste raw identifiable participant responses into an issue."

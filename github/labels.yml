@@ -1,0 +1,32 @@
+# Suggested GitHub labels. This file is documentation/seed data; GitHub does not import it automatically.
+labels:
+  - name: priority:P0
+    description: Framing, safeguards or blocker before MVP
+  - name: priority:P1
+    description: Functional MVP
+  - name: priority:P2
+    description: Advanced prototype after core validation
+  - name: priority:P3
+    description: Documented beta/release readiness
+  - name: priority:P4
+    description: Post-validation candidate only
+  - name: type:bug
+    description: Behaviour does not match intended implementation
+  - name: type:feature
+    description: User-visible capability
+  - name: type:research
+    description: Research/evidence task
+  - name: type:docs
+    description: Documentation
+  - name: area:privacy
+    description: Data handling or privacy
+  - name: area:accessibility
+    description: Accessibility/cognitive accessibility
+  - name: area:android
+    description: Android implementation
+  - name: needs-decision
+    description: Requires a documented product/technical decision
+  - name: blocked
+    description: Cannot progress yet
+  - name: good-first-issue
+    description: Suitable for a new contributor

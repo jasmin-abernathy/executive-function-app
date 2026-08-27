@@ -1,0 +1,10 @@
+GNU AGPL v3 — placeholder for private bootstrap
+
+Target licence for project code: GNU Affero General Public License v3.0 only (AGPL-3.0-only).
+
+Before making this repository public or distributing code under this licence, replace this placeholder with the official, unmodified GNU AGPL v3 text.
+
+Official source:
+https://www.gnu.org/licenses/agpl-3.0.txt
+
+Helpers are provided in scripts/fetch-agpl-license.sh and scripts/fetch-agpl-license.ps1.

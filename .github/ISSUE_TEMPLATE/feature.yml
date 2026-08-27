@@ -1,0 +1,43 @@
+name: Feature proposal
+description: Propose a user-visible capability or change
+title: "[Feature] "
+labels: ["type:feature"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to reduce
+      description: Describe the friction before proposing the implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: smallest
+    attributes:
+      label: Smallest useful version
+      description: What is the least complex change that could help?
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Roadmap stage
+      options:
+        - P0 — framing/safeguard
+        - P1 — functional MVP
+        - P2 — advanced prototype
+        - P3 — documented beta
+        - P4 — post-validation candidate
+        - Not sure
+  - type: textarea
+    id: burden
+    attributes:
+      label: Cognitive/configuration burden
+      description: Does this add choices, setup, pressure, streaks or failure states?
+  - type: textarea
+    id: data
+    attributes:
+      label: Privacy / data impact
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Accessibility impact

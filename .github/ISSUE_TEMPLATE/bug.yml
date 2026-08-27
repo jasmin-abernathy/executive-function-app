@@ -1,0 +1,34 @@
+name: Bug report
+description: Report behaviour that does not match the intended app or repository behaviour
+title: "[Bug] "
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "Do not include real task content, participant data, phone numbers, emails, tokens or other sensitive information."
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Describe the behaviour using synthetic/demo data.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+  - type: input
+    id: device
+    attributes:
+      label: Device / Android version
+  - type: textarea
+    id: accessibility
+    attributes:
+      label: Accessibility context (optional)
+      description: TalkBack, large text, reduced motion, etc., if relevant.
