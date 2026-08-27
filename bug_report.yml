@@ -1,0 +1,48 @@
+name: Bug / Bug
+about: Report an incorrect PTM behaviour / Signaler un comportement incorrect de PTM
+title: "[Bug] "
+labels: []
+body:
+  - type: markdown
+    attributes:
+      value: "Please do not post personal data, passwords, API keys or client-site data. / Merci de ne pas publier de données personnelles, mots de passe, clés API ou données de sites clients."
+  - type: input
+    id: version
+    attributes:
+      label: PTM version / Version de PTM
+      placeholder: "0.0.2-test4"
+    validations:
+      required: true
+  - type: input
+    id: wordpress
+    attributes:
+      label: WordPress and PHP versions / Versions WordPress et PHP
+      placeholder: "WordPress 6.x, PHP 8.x"
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened? / Que se passe-t-il ?
+      description: Describe the observed result. / Décrivez le résultat observé.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce / Étapes pour reproduire
+      placeholder: |
+        1. Open… / Ouvrir…
+        2. Click… / Cliquer…
+        3. Observe… / Constater…
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected result / Résultat attendu
+    validations:
+      required: true
+  - type: textarea
+    id: builders
+    attributes:
+      label: Relevant builder/plugins / Constructeur ou extensions concernés
+      description: "For example / Par exemple: Gutenberg, Elementor, Divi, MailPoet, UpdraftPlus…"

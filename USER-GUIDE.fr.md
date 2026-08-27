@@ -1,0 +1,77 @@
+# Pixel Trackers Manager — Guide utilisateur
+
+## À quoi sert PTM ?
+
+Pixel Trackers Manager est un assistant WordPress d’audit de confidentialité et de documentation. Il aide à voir quels services tiers sont réellement actifs, à documenter les usages de données personnelles qui concernent le site, à maintenir les pages légales et, si vous le souhaitez, à gérer le consentement des visiteurs.
+
+Il ne s’agit pas d’un outil de certification juridique. Un tableau de bord au vert signifie que PTM peut rendre compte des éléments applicables qu’il sait contrôler ; cela ne signifie pas que toutes les obligations juridiques possibles ont été certifiées.
+
+## Première ouverture
+
+L’activation de PTM ne lance pas de scan et ne modifie pas les pages publiques. L’assistant de configuration apparaît uniquement lorsqu’un administrateur ouvre Pixel Trackers Manager pour la première fois.
+
+L’assistant vérifie d’abord les trois pages de référence : Mentions légales, Politique de confidentialité et Cookies / Consentement. Il peut proposer une page existante, permettre d’en choisir une autre ou créer un brouillon adapté lorsqu’aucune page probable n’existe.
+
+L’assistant peut être quitté puis repris, ou relancé plus tard depuis Réglages.
+
+## Parcours simple conseillé
+
+1. **Confirmer les pages juridiques de référence.** Utilisez l’assistant de première ouverture ou les Réglages.
+2. **Lancer une analyse du site.** Une analyse complète permet d’établir un premier état de référence.
+3. **Examiner ce qui a été détecté.** « Actif » correspond à une preuve technique plus forte qu’un plugin simplement installé.
+4. **Compléter uniquement ce que le site ne peut pas dire.** Une information facultative inconnue n’est pas transformée automatiquement en erreur.
+5. **Vérifier la couverture documentaire.** Les éléments manquants ou partiels doivent mener directement à la section correspondante de l’Assistant RGPD.
+6. **Mettre à jour les pages.** Les modifications importantes doivent rester explicites et contrôlables.
+7. **Activer le consentement uniquement si vous le souhaitez.** La bannière native est désactivée par défaut.
+
+## Consentement : règle essentielle
+
+PTM n’essaie pas de maximiser les clics sur « Accepter ». **Tout accepter** et **Tout refuser** doivent avoir le même poids visuel. Les catégories facultatives commencent désactivées. Fermer l’interface ne vaut pas consentement.
+
+Les visiteurs peuvent rouvrir leurs préférences avec **Gérer mes choix**. Le shortcode universel est `[ptm_consent_settings]`.
+
+## Constructeurs de pages
+
+### Éditeur WordPress / Gutenberg
+
+Utilisez les shortcodes publics dans un bloc Shortcode ou laissez PTM mettre à jour les pages prises en charge après une action explicite.
+
+### Elementor
+
+PTM peut lire localement les contenus utiles et créer de nouvelles pages juridiques avec une structure Elementor lorsqu’il est clairement détecté. Le plugin doit respecter la structure réellement utilisée par le site et éviter de réécrire des données qu’il ne comprend pas assez sûrement.
+
+### Divi
+
+PTM sait reconnaître les principaux contenus utiles de Divi et travaille à la création native des nouvelles pages juridiques Divi 5. Le moteur de consentement reste indépendant de Divi.
+
+Quand un module dynamique a été bloqué avant consentement, un adaptateur peut être nécessaire pour le réinitialiser après autorisation, par exemple pour certaines cartes ou protections anti-spam.
+
+### Autres constructeurs
+
+PTM reconnaît de manière prudente plusieurs constructeurs courants. Lorsqu’aucun adaptateur d’écriture fiable n’existe, il privilégie le shortcode et l’édition manuelle plutôt qu’une modification hasardeuse de la structure interne.
+
+## Shortcodes publics
+
+- `[ptm_legal_notice]`
+- `[ptm_privacy_policy]`
+- `[ptm_cookies]`
+- `[ptm_services]`
+- `[ptm_rights]`
+- `[ptm_documents]`
+- `[ptm_consent_settings]`
+
+## Erreurs de scan
+
+Une page en erreur n’arrête pas le reste de l’analyse. Une fois toutes les URL prévues traitées, la progression atteint 100 %, même si certaines ont échoué.
+
+Une 404 qui correspond en réalité à un brouillon WordPress, une page privée, en attente ou programmée doit être présentée comme une action WordPress à traiter plutôt que comme une panne réseau classique.
+
+## Outils et pratiques externes
+
+Certaines pratiques ne peuvent pas être détectées depuis WordPress : envois groupés depuis Gmail/Outlook, contacts WhatsApp, réservations via Calendly/Koalendar, formulaires externes, tableurs, services de paiement, etc.
+
+PTM peut donc demander confirmation lorsque le contexte humain est nécessaire, tout en essayant d’abord de détecter les services visibles depuis le site.
+
+## Service externe facultatif
+
+La recherche d’entreprise française contacte l’API publique Recherche d’entreprises uniquement après une action explicite de l’administrateur. Les résultats d’audit du site ne sont pas envoyés à l’éditeur de PTM.
