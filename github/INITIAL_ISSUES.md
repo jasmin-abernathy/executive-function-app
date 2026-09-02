@@ -43,3 +43,21 @@ Create the smallest transparent path for exporting and deleting local data.
 
 ### Convert current survey findings into product hypotheses
 Only aggregated/anonymised findings; no raw response export in Git.
+
+### Validate intention-restoring return screen
+
+Test whether reopening directly on preserved task context reduces the effort required to resume after an interruption.
+
+Compare:
+
+- the standard Today / dashboard view;
+- a direct resume card showing the previous intention and next physical step.
+
+Observe, with explicit participant consent:
+
+- time before the first useful action;
+- ability to remember what was being done;
+- perceived effort and pressure;
+- unwanted additional screen time.
+
+The test must not require passive application-usage tracking, accessibility-service monitoring or app-blocking permissions.
