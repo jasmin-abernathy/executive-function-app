@@ -24,7 +24,7 @@ class FocusTransitionsTest {
 
         assertEquals(FocusStatus.RUNNING, result.status)
         assertEquals(7_000, result.elapsedBeforeSegmentMs)
-        assertEquals(20_000, result.segmentStartedAt)
+        assertEquals(20_000L, result.segmentStartedAt)
     }
 
     @Test
