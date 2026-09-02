@@ -453,7 +453,7 @@ C’est une tentative pour rendre une partie importante de l’organisation quot
 
 Le projet est actuellement porté par **Jasmin Lévêque / Le Potager du Web**.
 
-À plus long terme, une structuration coopérative, **Le Potager des Communs**, est envisagée comme projet de future SCOP pouvant mutualiser développement, design, maintenance et gouvernance entre plusieurs projets numériques.
+À plus long terme, une structuration coopérative, **Le Verger du Numérique**, est envisagée comme projet de future SCOP pouvant mutualiser développement, design, maintenance et gouvernance entre plusieurs projets numériques.
 
 Il ne s’agit **pas actuellement d’une coopérative déjà constituée**.
 
