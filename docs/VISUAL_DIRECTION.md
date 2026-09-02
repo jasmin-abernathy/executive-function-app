@@ -1,38 +1,91 @@
-# Visual direction
+# Charte graphique / Visual direction
 
-Status: provisional implementation palette — 2026-09-02. The illustration quote brief has been sent to the illustrator.
+Statut : **base d’interface validée, illustration encore provisoire — 2 septembre 2026**. Le brief de devis a été envoyé à l’illustrateurice.
 
-## Established direction
+Ce document est la source de vérité pour le prototype. Il remplace la précédente interprétation beige, sauge, terracotta et marron tirée des moodboards.
 
-The product has its own visual identity. It must not inherit the green brand language of Le Potager du Web.
+## Intention
 
-The existing application moodboards establish a direction that is:
+L’application doit être :
 
-- warm, handmade and reassuring;
-- lively and slightly imperfect rather than clinically minimal;
-- built around thin expressive lines, simple textures and ordinary crafted objects;
-- compatible with the future companion and workshop layer without making that layer mandatory in P1.
+- claire, lumineuse, joyeuse et immédiatement lisible ;
+- chaleureuse et humaine, sans esthétique de « tech froide » ;
+- adulte, sans devenir clinique ni enfantine ;
+- simple et aérée, avec très peu de bruit visuel ;
+- organique dans ses formes et futurement enrichie d’illustrations artisanales.
 
-## Provisional P1 palette
+Le style artisanal guide les formes, les traits et les futures illustrations. **Il ne définit pas la couleur de fond de l’interface.** Les textures, objets et irrégularités du moodboard ne doivent jamais transformer l’écran principal en palette beige ou marron.
 
-The source moodboards contain swatches but no authoritative hexadecimal specification. The following implementation values are accessibility-adjusted approximations of those swatches:
+## Palette source retenue
 
-| Role | Value | Source direction |
+| Rôle | Couleur | Valeur | Usage |
+| --- | --- | --- | --- |
+| Identité | Bleu lavande | `#8B8DEB` | aplats de marque, conteneurs, repères visuels |
+| Énergie | Jaune lumineux | `#FFD93D` | actions positives, mise en avant ponctuelle |
+| Fond | Crème très clair | `#FFF9F0` | fond principal, repos visuel |
+| Texte | Anthracite | `#2D2D2D` | texte principal et texte sur couleurs claires |
+
+Cette palette est la dernière palette chiffrée explicitement retenue pour l’application.
+
+## Tons d’implémentation accessibles
+
+Les valeurs suivantes sont des dérivés techniques, pas une nouvelle palette :
+
+| Jeton | Valeur | Raison |
 | --- | --- | --- |
-| Background | `#FAF3E5` | warm ivory |
-| Surface | `#FFF9EE` | light paper |
-| Primary | `#59664F` | darkened sage for accessible buttons |
-| Primary container | `#DDE2CF` | pale sage |
-| Secondary | `#9B4E35` | darkened terracotta |
-| Secondary container | `#F2D2C3` | dusty peach |
-| Tertiary | `#8A6520` | darkened mustard |
-| Text | `#2F2924` | warm charcoal |
+| Lavande accessible | `#6567C7` | texte, icônes et boutons avec texte blanc ; contraste AA |
+| Lavande clair | `#8B8DEB` | teinte source, utilisée avec texte anthracite |
+| Conteneur lavande | `#E8E4EF` à `#F4F0FA` | surfaces secondaires discrètes |
+| Conteneur jaune | `#FFF1A6` | accent énergétique sans éblouissement |
+| Surface | `#FFFDF9` | cartes sur fond crème |
 
-The original visible moodboard swatches are approximately `#EACA9A`, `#9FA785`, `#8A8E7B`, `#CD7F5A`, `#A17C73`, `#926740` and `#CA9848`. Darker values are used where necessary to retain readable contrast with white text.
+Contrastes vérifiés pour le thème clair :
 
-## Guardrails
+- `#2D2D2D` sur `#FFF9F0` : environ **13.2:1** ;
+- `#FFFFFF` sur `#6567C7` : environ **4.9:1** ;
+- `#2D2D2D` sur `#8B8DEB` : environ **4.7:1** ;
+- `#2D2D2D` sur `#FFD93D` : environ **10:1**.
 
-- Android dynamic colour is disabled: the operating system must not replace the product identity.
-- Colour never carries meaning alone.
-- The companion and decorative workshop are optional future layers, not prerequisites for capture or focus.
-- The quote brief has been sent to the illustrator. The final palette and illustration execution will replace these provisional values after that professional design pass.
+## Accents secondaires
+
+Les discussions plus récentes ajoutent un **bleu clair** pour le calme et un **orange doux** pour la chaleur. Leurs valeurs finales n’ont pas encore été arrêtées par l’illustrateurice.
+
+Le prototype utilise provisoirement :
+
+- bleu clair `#83C7E8` ;
+- orange doux `#F28A62`.
+
+Ils restent secondaires et ne doivent pas remplacer le duo lavande–jaune.
+
+## Formes et composition
+
+- cartes arrondies de `20 dp` ;
+- grands conteneurs de `28 dp` ;
+- boutons et contrôles tactiles d’au moins `48 dp` ;
+- espacement généreux et hiérarchie courte ;
+- une action principale évidente par zone ;
+- illustrations simples et organiques, jamais indispensables à la compréhension ;
+- aucune alerte rouge, série quotidienne ou décoration anxiogène sur l’accueil.
+
+## Accessibilité et sobriété
+
+- le texte courant vise WCAG AA ;
+- aucune information n’est transmise uniquement par la couleur ;
+- les textes restent agrandissables ;
+- les animations respectent la réduction de mouvement ;
+- le mode sombre conserve lavande, jaune et bleu, sans revenir au vert ou au marron ;
+- les couleurs dynamiques Android sont désactivées afin que le système ne remplace pas l’identité de l’application.
+
+## Compagnon et illustration
+
+Le compagnon reste une couche facultative, discrète, douce, légèrement étrange et jamais culpabilisante. Son style final, les textures et les éléments d’atelier seront définis après le retour de l’illustrateurice. Ils ne bloquent pas le développement du cœur capture → action → focus → interruption → reprise.
+
+## Interdits
+
+- identité verte héritée du Potager du Web ;
+- dominante marron, terracotta ou sauge ;
+- fond beige sombre ;
+- violet saturé sur de grandes surfaces ;
+- esthétique infantile, médicale ou futuriste ;
+- gamification punitive ;
+- remplacement automatique de la palette par les couleurs du téléphone.

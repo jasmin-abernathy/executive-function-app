@@ -1,56 +1,123 @@
 package org.lepotager.executivefunction.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+
+/**
+ * Product colours agreed during the visual-direction discussions.
+ *
+ * Lavender, yellow, cream and anthracite are the source palette. Soft blue and
+ * orange remain secondary implementation accents until the illustrator's final
+ * identity pass. Keep those accents out of state semantics: colour never carries
+ * meaning on its own.
+ */
+object AppPalette {
+    val Lavender = Color(0xFF8B8DEB)
+    val LavenderAccessible = Color(0xFF6567C7)
+    val EnergyYellow = Color(0xFFFFD93D)
+    val Cream = Color(0xFFFFF9F0)
+    val Anthracite = Color(0xFF2D2D2D)
+    val SoftBlue = Color(0xFF83C7E8)
+    val SoftOrange = Color(0xFFF28A62)
+}
 
 private val LightColors = lightColorScheme(
-    primary = Color(0xFF59664F),
+    primary = AppPalette.LavenderAccessible,
     onPrimary = Color.White,
-    primaryContainer = Color(0xFFDDE2CF),
-    onPrimaryContainer = Color(0xFF1D281A),
-    secondary = Color(0xFF9B4E35),
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFF2D2C3),
-    onSecondaryContainer = Color(0xFF3B0B00),
-    tertiary = Color(0xFF8A6520),
+    primaryContainer = AppPalette.Lavender,
+    onPrimaryContainer = Color(0xFF222238),
+    secondary = AppPalette.EnergyYellow,
+    onSecondary = AppPalette.Anthracite,
+    secondaryContainer = Color(0xFFFFF1A6),
+    onSecondaryContainer = Color(0xFF3C3100),
+    tertiary = Color(0xFF4C7892),
     onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFF3DCA9),
-    onTertiaryContainer = Color(0xFF2A1C00),
-    background = Color(0xFFFAF3E5),
-    onBackground = Color(0xFF2F2924),
-    surface = Color(0xFFFFF9EE),
-    onSurface = Color(0xFF2F2924),
-    surfaceVariant = Color(0xFFEFE3CF),
-    onSurfaceVariant = Color(0xFF51483F),
-    outline = Color(0xFF7B6D60),
+    tertiaryContainer = Color(0xFFD6F1FF),
+    onTertiaryContainer = Color(0xFF17394B),
+    background = AppPalette.Cream,
+    onBackground = AppPalette.Anthracite,
+    surface = Color(0xFFFFFDF9),
+    onSurface = AppPalette.Anthracite,
+    surfaceVariant = Color(0xFFF4F0FA),
+    onSurfaceVariant = Color(0xFF565461),
+    surfaceDim = Color(0xFFE5DFE8),
+    surfaceBright = Color(0xFFFFFDF9),
+    surfaceContainerLowest = Color.White,
+    surfaceContainerLow = Color(0xFFFAF5FF),
+    surfaceContainer = Color(0xFFF4F0FA),
+    surfaceContainerHigh = Color(0xFFEEEAF5),
+    surfaceContainerHighest = Color(0xFFE8E4EF),
+    outline = Color(0xFF77727F),
+    outlineVariant = Color(0xFFC8C3CF),
+    inverseSurface = Color(0xFF303038),
+    inverseOnSurface = Color(0xFFF7F1FA),
+    inversePrimary = Color(0xFFC7C7FF),
+    surfaceTint = AppPalette.LavenderAccessible,
+    error = Color(0xFFBA1A1A),
+    onError = Color.White,
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002),
 )
 
 private val DarkColors = darkColorScheme(
-    primary = Color(0xFFBEC8AA),
-    onPrimary = Color(0xFF293422),
-    primaryContainer = Color(0xFF414D39),
-    onPrimaryContainer = Color(0xFFDDE2CF),
-    secondary = Color(0xFFFFB59A),
-    onSecondary = Color(0xFF5B1B08),
-    secondaryContainer = Color(0xFF7B3520),
-    onSecondaryContainer = Color(0xFFFFDBCF),
-    tertiary = Color(0xFFE3BC67),
-    onTertiary = Color(0xFF3D2E00),
-    background = Color(0xFF1D1A17),
-    onBackground = Color(0xFFEAE1D8),
-    surface = Color(0xFF231F1B),
-    onSurface = Color(0xFFEAE1D8),
-    surfaceVariant = Color(0xFF4A4139),
-    onSurfaceVariant = Color(0xFFD3C4B7),
-    outline = Color(0xFF9C8D80),
+    primary = Color(0xFFC7C7FF),
+    onPrimary = Color(0xFF303278),
+    primaryContainer = Color(0xFF4B4DAA),
+    onPrimaryContainer = Color(0xFFE5E5FF),
+    secondary = AppPalette.EnergyYellow,
+    onSecondary = Color(0xFF342B00),
+    secondaryContainer = Color(0xFF675500),
+    onSecondaryContainer = Color(0xFFFFF0A0),
+    tertiary = Color(0xFFA8DFFF),
+    onTertiary = Color(0xFF00344A),
+    tertiaryContainer = Color(0xFF20566F),
+    onTertiaryContainer = Color(0xFFD6F1FF),
+    background = Color(0xFF191820),
+    onBackground = Color(0xFFF4F0FA),
+    surface = Color(0xFF211F29),
+    onSurface = Color(0xFFF4F0FA),
+    surfaceVariant = Color(0xFF45434E),
+    onSurfaceVariant = Color(0xFFCAC5D1),
+    surfaceDim = Color(0xFF191820),
+    surfaceBright = Color(0xFF3B3943),
+    surfaceContainerLowest = Color(0xFF14131A),
+    surfaceContainerLow = Color(0xFF211F29),
+    surfaceContainer = Color(0xFF25232D),
+    surfaceContainerHigh = Color(0xFF302E38),
+    surfaceContainerHighest = Color(0xFF3B3943),
+    outline = Color(0xFF938F9B),
+    outlineVariant = Color(0xFF494650),
+    inverseSurface = Color(0xFFE6E1E9),
+    inverseOnSurface = Color(0xFF303038),
+    inversePrimary = AppPalette.LavenderAccessible,
+    surfaceTint = Color(0xFFC7C7FF),
+    error = Color(0xFFFFB4AB),
+    onError = Color(0xFF690005),
+    errorContainer = Color(0xFF93000A),
+    onErrorContainer = Color(0xFFFFDAD6),
+)
+
+private val AppShapes = Shapes(
+    extraSmall = RoundedCornerShape(8.dp),
+    small = RoundedCornerShape(12.dp),
+    medium = RoundedCornerShape(20.dp),
+    large = RoundedCornerShape(28.dp),
+    extraLarge = RoundedCornerShape(36.dp),
 )
 
 @Composable
 fun ExecutiveFunctionTheme(content: @Composable () -> Unit) {
     val colors = if (isSystemInDarkTheme()) DarkColors else LightColors
-    MaterialTheme(colorScheme = colors, content = content)
+    MaterialTheme(
+        colorScheme = colors,
+        shapes = AppShapes,
+        content = content,
+    )
 }

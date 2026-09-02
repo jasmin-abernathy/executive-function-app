@@ -242,6 +242,8 @@ L’application doit rester totalement utile lorsque cette couche est désactiv�
 
 L’identité graphique et le design définitif du compagnon sont encore en développement.
 
+La [charte graphique du prototype](docs/VISUAL_DIRECTION.md) fixe la palette d’interface claire, ses dérivés accessibles et la séparation entre interface fonctionnelle et futures illustrations. Un [aperçu HTML interactif de l’accueil](docs/home-preview.html) permet de contrôler cette direction sans compiler l’application.
+
 ---
 
 ## Possibilités ultérieures

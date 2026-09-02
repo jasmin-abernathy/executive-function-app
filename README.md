@@ -242,6 +242,8 @@ The app must remain fully useful when this layer is disabled.
 
 The visual identity and final companion design are still in development.
 
+The [prototype visual-direction guide](docs/VISUAL_DIRECTION.md) defines the light interface palette, its accessible implementation tones, and the boundary between functional UI and future illustration work. An [interactive HTML home preview](docs/home-preview.html) makes that direction reviewable without compiling the application.
+
 ---
 
 ## Later possibilities
