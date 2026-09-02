@@ -138,38 +138,27 @@ The app should not require a generative-AI API to decide what the user ought to 
 
 ## Current status
 
-**Stage: advanced product design / pre-prototype.**
+**Stage: runnable P1 Android prototype.**
 
-The project already includes or is actively developing:
-
-- exploratory user research;
-- a product-validation survey;
-- community and competitor benchmarking;
-- functional architecture;
-- a P0–P4 roadmap;
-- privacy and local-first principles;
-- accessibility requirements;
-- a living risk register;
-- free-core / paid-extension boundaries;
-- GitHub governance and repository structure.
-
-The next technical milestone is an **Android prototype of the central loop**:
+The repository now contains a reproducible Android application for the complete first loop:
 
 ```text
-Capture
-   ↓
-Choose next action
-   ↓
-Start focus session
-   ↓
-Interruption
-   ↓
-Resume
+Capture → choose → start → focus → interrupt → resume → finish or postpone
 ```
 
-The first prototype is intentionally smaller than the full product vision.
+Implemented today:
 
----
+- ultra-fast local capture with an optional first small step;
+- manual task choice and full-screen elapsed-time focus;
+- quick capture without leaving focus;
+- durable interruption context and a non-punitive return screen;
+- resume, reduce, postpone/switch and complete transitions;
+- process-restart-safe SQLite persistence;
+- French and English resources;
+- large touch targets, scalable text and TalkBack semantics;
+- unit tests, Android lint and APK assembly in CI.
+
+There is no account, network permission, analytics SDK, cloud backend or automatic cloud backup. This is a validation prototype, not a claim of clinical effectiveness.
 
 ## What the first prototype should validate
 
@@ -310,7 +299,13 @@ The prototype should favour:
 - low background activity;
 - integrations that never become hidden dependencies.
 
-Build instructions will be added once the Android prototype reaches a stable, reproducible runnable state.
+Build locally with JDK 17 and Android SDK 37:
+
+```bash
+./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+```
+
+The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 

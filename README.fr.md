@@ -138,38 +138,27 @@ L’application ne doit pas avoir besoin d’une API d’IA générative pour d�
 
 ## État actuel du projet
 
-**Stade : conception produit avancée / pré-prototype.**
+**Stade : prototype Android P1 exécutable.**
 
-Le projet comprend déjà ou développe actuellement :
-
-- une recherche utilisateur exploratoire ;
-- un questionnaire de validation produit ;
-- des benchmarks communautaires et concurrentiels ;
-- une architecture fonctionnelle ;
-- une roadmap P0–P4 ;
-- des principes privacy / local-first ;
-- des exigences d’accessibilité ;
-- un registre de risques ;
-- une séparation entre cœur gratuit et extensions payantes ;
-- une structure de gouvernance et de pilotage GitHub.
-
-Le prochain jalon technique est un **prototype Android de la boucle centrale** :
+Le dépôt contient désormais une application Android reproductible couvrant toute la première boucle :
 
 ```text
-Capturer
-   ↓
-Choisir la prochaine action
-   ↓
-Démarrer une session
-   ↓
-Interruption
-   ↓
-Reprendre
+Capturer → choisir → commencer → se concentrer → interrompre → reprendre → terminer ou reporter
 ```
 
-Le premier prototype est volontairement beaucoup plus petit que la vision complète du produit.
+Déjà implémenté :
 
----
+- capture locale ultra-rapide avec premier petit pas facultatif ;
+- choix manuel et minuteur plein écran en temps écoulé ;
+- capture rapide sans quitter le focus ;
+- contexte d’interruption durable et écran de retour non punitif ;
+- reprise, réduction, report/changement et fin ;
+- persistance SQLite résistante au redémarrage du processus ;
+- ressources françaises et anglaises ;
+- grandes cibles tactiles, texte agrandissable et sémantique TalkBack ;
+- tests unitaires, lint Android et assemblage de l’APK dans la CI.
+
+Il n’y a ni compte, ni permission réseau, ni SDK analytics, ni backend cloud, ni sauvegarde cloud automatique. Il s’agit d’un prototype de validation, pas d’une revendication d’efficacité clinique.
 
 ## Ce que le premier prototype doit permettre de valider
 
@@ -310,7 +299,13 @@ Le prototype doit privilégier :
 - peu d’activité inutile en arrière-plan ;
 - des intégrations qui ne deviennent jamais des dépendances cachées.
 
-Les instructions de build seront ajoutées lorsque le prototype Android aura atteint un état exécutable stable et reproductible.
+Compiler localement avec JDK 17 et Android SDK 37 :
+
+```bash
+./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+```
+
+L’APK de développement est généré dans `app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 

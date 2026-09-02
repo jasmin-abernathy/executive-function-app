@@ -1,20 +1,35 @@
-# Android application source
+# Android application
 
-This directory is intentionally **not** filled with a fake Android project yet.
+This directory contains the runnable P1 Android prototype.
 
-When implementation starts, create the Android project here (Kotlin + Jetpack Compose is the current target) and keep the first architecture deliberately small.
+## Implemented loop
 
-## Intended first modules / responsibilities
+`capture → choose → start → focus → interrupt → resume → complete/postpone`
 
-The exact package names can wait, but P1 should keep clear boundaries between:
+- Kotlin + Jetpack Compose UI;
+- direct, transactional SQLite persistence;
+- no account, backend, network permission or analytics SDK;
+- process-restart-safe elapsed-time focus sessions;
+- quick capture while a focus session remains active;
+- French and English resources;
+- accessibility semantics and visible alternatives to every action.
 
-- **capture** — ultra-fast creation of an inbox item;
-- **tasks** — local task/inbox model and simple organization;
-- **focus** — timer/session state;
-- **resume** — interruption and return state;
-- **settings** — readability, motion and local preferences;
-- **data** — local persistence and export/delete boundaries.
+## Build
 
-Avoid creating service abstractions, cloud modules or a complex navigation graph before the P1 loop needs them.
+Requirements: JDK 17 and Android SDK 37.
 
-See [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md).
+```bash
+./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+```
+
+The APK is written to `app/build/outputs/apk/debug/app-debug.apk`.
+
+## Boundaries
+
+- `model/` contains durable task/session state.
+- `domain/` owns pure clock and transition rules.
+- `data/` owns SQLite and transactional orchestration.
+- `ui/` renders the three P1 surfaces: Today, Focus and Resume.
+- `AppViewModel` is the small boundary between UI and repository.
+
+The project deliberately has no dependency-injection framework, navigation framework, remote service abstraction or background service in P1. See [`../docs/ARCHITECTURE.md`](../docs/ARCHITECTURE.md).

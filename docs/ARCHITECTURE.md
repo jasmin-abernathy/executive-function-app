@@ -8,7 +8,7 @@
 - local-first storage
 - no mandatory account for the core app
 
-Dependency versions are intentionally **not pinned in this bootstrap kit**. They should be selected when the first compilable Android project is created, so the repository does not start with stale build configuration.
+The first compilable project pins a mutually compatible toolchain and lets Dependabot propose controlled updates. The current baseline is documented in the Gradle files and verified in CI.
 
 ## Architectural priorities
 
@@ -19,15 +19,18 @@ Dependency versions are intentionally **not pinned in this bootstrap kit**. They
 5. **Testable state transitions** — especially start → interrupt → resume → finish/return.
 6. **Accessibility semantics close to UI code** — not added as a release afterthought.
 
-## Likely Android building blocks
-
-These are directions, not locked dependencies:
+## P1 Android building blocks
 
 - Compose for UI;
-- a local database for structured task/session data;
-- DataStore-style preferences for small settings;
+- `SQLiteOpenHelper` for structured task/session data and explicit transactions;
+- `StateFlow` for the observable in-process snapshot;
+- pure functions for clock and focus-state transitions;
 - Android local notifications / alarms where appropriate;
 - WorkManager only when actual deferrable background work exists.
+
+SQLite is used directly in P1 to avoid annotation processing, generated code and an additional persistence abstraction before the schema justifies it. A unique partial index enforces one active focus session. State changes are persisted atomically; the running timer is derived from timestamps instead of writing once per second.
+
+The application requests no network permission and disables automatic Android cloud backup. Export and restore must be explicit future user actions.
 
 ## Avoid in P1
 

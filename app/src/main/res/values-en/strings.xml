@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Executive Functions</string>
+    <string name="home_title">Where do we start?</string>
+    <string name="home_subtitle">Put down what is on your mind, then choose just one thing.</string>
+    <string name="capture_label">Something to remember</string>
+    <string name="capture_support">A title is enough. Nothing else is required.</string>
+    <string name="first_step_optional">First small step (optional)</string>
+    <string name="add_first_step">Add a first small step</string>
+    <string name="capture_action">Set aside</string>
+    <string name="ready_title">Ready when you are</string>
+    <string name="empty_tasks">Nothing waiting. You can begin with one very small thing.</string>
+    <string name="first_step_value">First step: %1$s</string>
+    <string name="start_action">Start</string>
+    <string name="focus_label">Just one thing now</string>
+    <string name="timer_accessible">%1$d hours, %2$d minutes, %3$d seconds</string>
+    <string name="quick_capture_action">Note without leaving</string>
+    <string name="interrupt_action">I need to stop</string>
+    <string name="complete_action">Done</string>
+    <string name="quick_capture_title">Keep the thought for later</string>
+    <string name="interrupt_title">Keep your place</string>
+    <string name="interrupt_explanation">You can return right here. A note may help, but it is optional.</string>
+    <string name="interrupt_note_optional">Where were you? (optional)</string>
+    <string name="save_and_stop">Save and stop</string>
+    <string name="resume_title">Let’s ease back in</string>
+    <string name="resume_subtitle">There is nothing to catch up on. Just choose what helps now.</string>
+    <string name="resume_context">You were here: %1$s</string>
+    <string name="resume_action">Resume</string>
+    <string name="make_smaller_action">Make the first step smaller</string>
+    <string name="choose_another_action">Postpone and choose something else</string>
+    <string name="make_smaller_title">What is the smallest possible step?</string>
+    <string name="smaller_step_label">New first step</string>
+    <string name="save_and_resume">Save and resume</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="error_title">That was not saved</string>
+    <string name="error_message">Nothing was intentionally discarded. Try again; if it keeps happening, restart the app.</string>
+</resources>

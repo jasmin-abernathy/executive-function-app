@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fonctions exécutives</string>
+    <string name="home_title">Par quoi commencer ?</string>
+    <string name="home_subtitle">Pose ce qui te traverse l’esprit, puis choisis une seule chose.</string>
+    <string name="capture_label">À ne pas oublier</string>
+    <string name="capture_support">Un titre suffit. Rien d’autre n’est obligatoire.</string>
+    <string name="first_step_optional">Premier petit pas (facultatif)</string>
+    <string name="add_first_step">Ajouter un premier petit pas</string>
+    <string name="capture_action">Mettre de côté</string>
+    <string name="ready_title">Prêt quand tu l’es</string>
+    <string name="empty_tasks">Rien en attente. Tu peux commencer par une toute petite chose.</string>
+    <string name="first_step_value">Premier pas : %1$s</string>
+    <string name="start_action">Commencer</string>
+    <string name="focus_label">Une seule chose maintenant</string>
+    <string name="timer_accessible">%1$d heures, %2$d minutes, %3$d secondes</string>
+    <string name="quick_capture_action">Noter sans quitter</string>
+    <string name="interrupt_action">Je dois m’interrompre</string>
+    <string name="complete_action">C’est fait</string>
+    <string name="quick_capture_title">Garder l’idée pour plus tard</string>
+    <string name="interrupt_title">Garder le fil</string>
+    <string name="interrupt_explanation">Tu pourras revenir exactement ici. Une note peut aider, mais elle n’est pas obligatoire.</string>
+    <string name="interrupt_note_optional">Où en étais-tu ? (facultatif)</string>
+    <string name="save_and_stop">Enregistrer et arrêter</string>
+    <string name="resume_title">On reprend doucement</string>
+    <string name="resume_subtitle">Aucun retard à rattraper. Choisis simplement ce qui t’aide maintenant.</string>
+    <string name="resume_context">Tu en étais là : %1$s</string>
+    <string name="resume_action">Reprendre</string>
+    <string name="make_smaller_action">Rendre le premier pas plus petit</string>
+    <string name="choose_another_action">Reporter et choisir autre chose</string>
+    <string name="make_smaller_title">Quel serait le plus petit pas possible ?</string>
+    <string name="smaller_step_label">Nouveau premier pas</string>
+    <string name="save_and_resume">Enregistrer et reprendre</string>
+    <string name="cancel">Annuler</string>
+    <string name="ok">OK</string>
+    <string name="error_title">Ça n’a pas été enregistré</string>
+    <string name="error_message">Rien n’a été perdu volontairement. Réessaie ; si le problème continue, redémarre l’application.</string>
+</resources>
