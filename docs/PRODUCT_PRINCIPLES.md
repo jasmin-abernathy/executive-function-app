@@ -41,3 +41,11 @@ Do not collect data simply because it might become useful later. Keep user-creat
 ## 10. Evidence before expansion
 
 Advanced features belong after the core loop has been observed with real users. The backlog is not a promise.
+
+## 11. Protect intention, not attention
+
+The app should preserve and restore what the user intended to do, especially after an interruption or when returning to the app.
+
+It should not compete for attention through infinite feeds, unnecessary badges, engagement loops, excessive notifications or guilt-based screen-time goals.
+
+When useful context exists, reopening the app should surface the active task or next physical step before secondary content.
