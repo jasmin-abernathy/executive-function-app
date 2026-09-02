@@ -68,7 +68,21 @@ Le mode sombre doit rester moins contrasté visuellement qu’un thème noir et 
 
 ## Compagnon et illustration
 
-Le compagnon reste une couche facultative, discrète et jamais culpabilisante. Les illustrations pourront apporter du caractère et une texture artisanale, mais devront fonctionner sur le fond blanc et respecter la palette de l’interface. Elles ne doivent jamais être indispensables à la compréhension d’une action.
+Le compagnon est la principale source de chaleur et de personnalité de l’interface. Il reste facultatif, discret et jamais culpabilisant. Sa présence ne doit ni masquer une action ni ajouter une étape obligatoire.
+
+La première implémentation utilise une silhouette vectorielle provisoire, fantomatique et légèrement animale. Elle sert à valider les emplacements et les réactions avant l’intégration des fichiers de l’illustrateurice. Elle doit pouvoir être remplacée sans modifier la logique des écrans.
+
+États actuellement prévus :
+
+- repos discret sur l’accueil ;
+- réaction curieuse au toucher ;
+- confirmation douce après une capture réussie ;
+- présence rassurante sur l’écran de reprise ;
+- absence volontaire pendant le focus afin de limiter la distraction.
+
+Le ton est doux, un peu étrange et socialement maladroit. Il peut employer un humour sec ou naïf, mais jamais un vocabulaire de coach, une félicitation excessive, une série quotidienne, une mine triste après une absence ou une formulation laissant entendre que l’utilisateur a échoué.
+
+Les illustrations définitives devront fonctionner sur fond transparent, rester lisibles sur le blanc et sur le mode sombre, et respecter les couleurs de l’interface. Elles ne doivent jamais être indispensables à la compréhension d’une action.
 
 ## Interdits
 

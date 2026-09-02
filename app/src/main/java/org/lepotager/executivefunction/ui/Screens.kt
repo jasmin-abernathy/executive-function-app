@@ -1,15 +1,25 @@
 package org.lepotager.executivefunction.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
@@ -25,6 +35,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -59,6 +70,14 @@ fun HomeScreen(
     var title by remember { mutableStateOf("") }
     var firstStep by remember { mutableStateOf("") }
     var showFirstStep by remember { mutableStateOf(false) }
+    var companionMood by remember { mutableStateOf(CompanionMood.Idle) }
+
+    LaunchedEffect(companionMood) {
+        if (companionMood != CompanionMood.Idle) {
+            delay(3_800)
+            companionMood = CompanionMood.Idle
+        }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -77,12 +96,23 @@ fun HomeScreen(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Spacer(Modifier.height(14.dp))
+            CompanionPanel(
+                mood = companionMood,
+                onClick = { companionMood = CompanionMood.Listening },
+            )
         }
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = appCardColors(),
                 border = appBorder(),
+                shape = RoundedCornerShape(
+                    topStart = 28.dp,
+                    topEnd = 18.dp,
+                    bottomEnd = 28.dp,
+                    bottomStart = 18.dp,
+                ),
             ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
@@ -121,6 +151,7 @@ fun HomeScreen(
                                 title = ""
                                 firstStep = ""
                                 showFirstStep = false
+                                companionMood = CompanionMood.Safekeeping
                             }
                         },
                         enabled = title.isNotBlank(),
@@ -144,10 +175,7 @@ fun HomeScreen(
         }
         if (tasks.isEmpty()) {
             item {
-                Text(
-                    text = stringResource(R.string.empty_tasks),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                EmptyTasksPanel()
             }
         } else {
             items(tasks, key = { it.id }) { task ->
@@ -163,6 +191,12 @@ private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
         modifier = Modifier.fillMaxWidth(),
         colors = appCardColors(),
         border = appBorder(),
+        shape = RoundedCornerShape(
+            topStart = 22.dp,
+            topEnd = 14.dp,
+            bottomEnd = 22.dp,
+            bottomStart = 14.dp,
+        ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -318,10 +352,15 @@ fun ResumeScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
     ) {
+        CompanionPanel(
+            mood = CompanionMood.WelcomeBack,
+            onClick = null,
+        )
         Text(
             text = stringResource(R.string.resume_title),
             style = MaterialTheme.typography.headlineLarge,
@@ -390,6 +429,48 @@ fun ResumeScreen(
             onDismiss = { showSmaller = false },
             onConfirm = { onResume(it) },
         )
+    }
+}
+
+@Composable
+private fun EmptyTasksPanel() {
+    Surface(
+        shape = RoundedCornerShape(
+            topStart = 24.dp,
+            topEnd = 16.dp,
+            bottomEnd = 24.dp,
+            bottomStart = 16.dp,
+        ),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        border = appBorder(),
+    ) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Surface(
+                modifier = Modifier.size(42.dp),
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                border = appBorder(),
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.empty_tasks),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f),
+            )
+        }
     }
 }
 

@@ -10,6 +10,15 @@
     <string name="capture_action">Set aside</string>
     <string name="ready_title">Ready when you are</string>
     <string name="empty_tasks">Nothing waiting. You can begin with one very small thing.</string>
+    <string name="companion_interaction_description">Let the companion react</string>
+    <string name="companion_idle_title">I’ll stay here. I quite like it.</string>
+    <string name="companion_idle_body">You can put down an idea without organising everything.</string>
+    <string name="companion_listening_title">Oh. Hello.</string>
+    <string name="companion_listening_body">I was checking whether that button did anything.</string>
+    <string name="companion_saved_title">It’s safe here.</string>
+    <string name="companion_saved_body">You don’t have to keep holding it in your head.</string>
+    <string name="companion_welcome_title">I kept your place.</string>
+    <string name="companion_welcome_body">It didn’t seem to be going anywhere.</string>
     <string name="first_step_value">First step: %1$s</string>
     <string name="start_action">Start</string>
     <string name="focus_label">Just one thing now</string>
