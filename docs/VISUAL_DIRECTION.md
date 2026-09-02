@@ -1,91 +1,83 @@
 # Charte graphique / Visual direction
 
-Statut : **base d’interface validée, illustration encore provisoire — 2 septembre 2026**. Le brief de devis a été envoyé à l’illustrateurice.
+Statut : **direction d’interface validée — 2 septembre 2026**. Le brief de devis a été envoyé à l’illustrateurice.
 
-Ce document est la source de vérité pour le prototype. Il remplace la précédente interprétation beige, sauge, terracotta et marron tirée des moodboards.
+Ce document est la source de vérité pour l’interface. Il remplace toutes les palettes précédemment envisagées, notamment beige, marron, terracotta, lavande, jaune et bleu.
 
 ## Intention
 
-L’application doit être :
+L’application doit être calme, claire et immédiatement lisible. L’interface s’efface derrière l’action à accomplir : elle n’utilise ni aplats saturés, ni décoration gratuite, ni code couleur complexe.
 
-- claire, lumineuse, joyeuse et immédiatement lisible ;
-- chaleureuse et humaine, sans esthétique de « tech froide » ;
-- adulte, sans devenir clinique ni enfantine ;
-- simple et aérée, avec très peu de bruit visuel ;
-- organique dans ses formes et futurement enrichie d’illustrations artisanales.
+Le style artisanal et organique reste pertinent pour les futures illustrations. Il ne doit pas modifier la palette de l’interface, réduire le contraste ou transformer l’accueil en moodboard.
 
-Le style artisanal guide les formes, les traits et les futures illustrations. **Il ne définit pas la couleur de fond de l’interface.** Les textures, objets et irrégularités du moodboard ne doivent jamais transformer l’écran principal en palette beige ou marron.
+## Thème clair
 
-## Palette source retenue
+Le thème clair utilise quatre rôles visuels principaux :
 
-| Rôle | Couleur | Valeur | Usage |
-| --- | --- | --- | --- |
-| Identité | Bleu lavande | `#8B8DEB` | aplats de marque, conteneurs, repères visuels |
-| Énergie | Jaune lumineux | `#FFD93D` | actions positives, mise en avant ponctuelle |
-| Fond | Crème très clair | `#FFF9F0` | fond principal, repos visuel |
-| Texte | Anthracite | `#2D2D2D` | texte principal et texte sur couleurs claires |
-
-Cette palette est la dernière palette chiffrée explicitement retenue pour l’application.
-
-## Tons d’implémentation accessibles
-
-Les valeurs suivantes sont des dérivés techniques, pas une nouvelle palette :
-
-| Jeton | Valeur | Raison |
+| Rôle | Valeur | Usage |
 | --- | --- | --- |
-| Lavande accessible | `#6567C7` | texte, icônes et boutons avec texte blanc ; contraste AA |
-| Lavande clair | `#8B8DEB` | teinte source, utilisée avec texte anthracite |
-| Conteneur lavande | `#E8E4EF` à `#F4F0FA` | surfaces secondaires discrètes |
-| Conteneur jaune | `#FFF1A6` | accent énergétique sans éblouissement |
-| Surface | `#FFFDF9` | cartes sur fond crème |
+| Fond | `#FFFFFF` | fond principal et grandes surfaces |
+| Bouton | `#EAF6ED` | fond très pâle des actions |
+| Bordure | `#B7D8BF` | contours, champs et décorations discrètes |
+| Texte | `#2D2D2D` | textes, libellés et icônes |
 
-Contrastes vérifiés pour le thème clair :
+Le ton `#F6FBF7` est uniquement un dérivé de surface très léger pour les états et conteneurs secondaires. Il ne constitue pas une couleur d’accent supplémentaire.
 
-- `#2D2D2D` sur `#FFF9F0` : environ **13.2:1** ;
-- `#FFFFFF` sur `#6567C7` : environ **4.9:1** ;
-- `#2D2D2D` sur `#8B8DEB` : environ **4.7:1** ;
-- `#2D2D2D` sur `#FFD93D` : environ **10:1**.
+Règles :
 
-## Accents secondaires
+- le fond d’un écran reste blanc ;
+- les cartes restent blanches et sont délimitées par une bordure vert clair ;
+- les boutons sont plus clairs que leurs bordures ;
+- le texte sur les boutons reste anthracite ;
+- aucun vert saturé ou foncé n’est utilisé comme aplat d’action.
 
-Les discussions plus récentes ajoutent un **bleu clair** pour le calme et un **orange doux** pour la chaleur. Leurs valeurs finales n’ont pas encore été arrêtées par l’illustrateurice.
+## Mode sombre doux
 
-Le prototype utilise provisoirement :
+Le mode sombre suit automatiquement le réglage Android. Il conserve une dominante neutre légèrement végétale, sans noir pur, marron ou accent saturé.
 
-- bleu clair `#83C7E8` ;
-- orange doux `#F28A62`.
+| Rôle | Valeur | Usage |
+| --- | --- | --- |
+| Fond | `#1D2420` | fond principal |
+| Surface | `#252E29` | cartes et dialogues |
+| Surface relevée | `#2A342E` | conteneurs secondaires |
+| Bouton | `#314238` | actions douces |
+| Bordure | `#789582` | contours et champs |
+| Texte | `#EEF3EF` | texte principal |
+| Texte secondaire | `#C8D2CB` | indications et descriptions |
 
-Ils restent secondaires et ne doivent pas remplacer le duo lavande–jaune.
+Le mode sombre doit rester moins contrasté visuellement qu’un thème noir et blanc, tout en maintenant une lisibilité suffisante pour le texte courant.
 
-## Formes et composition
+## Composants
 
-- cartes arrondies de `20 dp` ;
+- cartes arrondies de `20 dp`, avec bordure de `1 dp` ;
 - grands conteneurs de `28 dp` ;
 - boutons et contrôles tactiles d’au moins `48 dp` ;
-- espacement généreux et hiérarchie courte ;
-- une action principale évidente par zone ;
-- illustrations simples et organiques, jamais indispensables à la compréhension ;
-- aucune alerte rouge, série quotidienne ou décoration anxiogène sur l’accueil.
+- une seule action principale évidente par zone ;
+- champs blancs en clair, surfaces douces en sombre, toujours bordés ;
+- ombres légères et neutres, jamais colorées ;
+- aucun état n’est communiqué uniquement par la couleur.
 
 ## Accessibilité et sobriété
 
-- le texte courant vise WCAG AA ;
-- aucune information n’est transmise uniquement par la couleur ;
-- les textes restent agrandissables ;
-- les animations respectent la réduction de mouvement ;
-- le mode sombre conserve lavande, jaune et bleu, sans revenir au vert ou au marron ;
-- les couleurs dynamiques Android sont désactivées afin que le système ne remplace pas l’identité de l’application.
+- texte principal anthracite sur blanc en clair ;
+- texte blanc cassé sur fond anthracite-vert en sombre ;
+- textes agrandissables et zones tactiles accessibles ;
+- animations compatibles avec la réduction de mouvement ;
+- couleurs dynamiques Android désactivées pour préserver la direction ;
+- aucune série quotidienne, alerte agressive ou décoration culpabilisante.
 
 ## Compagnon et illustration
 
-Le compagnon reste une couche facultative, discrète, douce, légèrement étrange et jamais culpabilisante. Son style final, les textures et les éléments d’atelier seront définis après le retour de l’illustrateurice. Ils ne bloquent pas le développement du cœur capture → action → focus → interruption → reprise.
+Le compagnon reste une couche facultative, discrète et jamais culpabilisante. Les illustrations pourront apporter du caractère et une texture artisanale, mais devront fonctionner sur le fond blanc et respecter la palette de l’interface. Elles ne doivent jamais être indispensables à la compréhension d’une action.
 
 ## Interdits
 
-- identité verte héritée du Potager du Web ;
-- dominante marron, terracotta ou sauge ;
-- fond beige sombre ;
-- violet saturé sur de grandes surfaces ;
+- fond beige, crème, marron ou vert foncé en thème clair ;
+- boutons vert saturé ;
+- palette multicolore ;
+- aplats lavande, jaune, orange ou bleu ;
+- texte gris trop clair ;
+- noir pur en mode sombre ;
 - esthétique infantile, médicale ou futuriste ;
 - gamification punitive ;
 - remplacement automatique de la palette par les couleurs du téléphone.

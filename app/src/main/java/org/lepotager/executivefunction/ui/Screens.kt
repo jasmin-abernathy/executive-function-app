@@ -1,5 +1,6 @@
 package org.lepotager.executivefunction.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,12 +16,15 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -75,7 +79,11 @@ fun HomeScreen(
             )
         }
         item {
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = appCardColors(),
+                border = appBorder(),
+            ) {
                 Column(
                     modifier = Modifier.padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -87,6 +95,7 @@ fun HomeScreen(
                         label = { Text(stringResource(R.string.capture_label)) },
                         supportingText = { Text(stringResource(R.string.capture_support)) },
                         singleLine = true,
+                        colors = appTextFieldColors(),
                     )
                     if (showFirstStep) {
                         OutlinedTextField(
@@ -95,9 +104,13 @@ fun HomeScreen(
                             modifier = Modifier.fillMaxWidth(),
                             label = { Text(stringResource(R.string.first_step_optional)) },
                             singleLine = true,
+                            colors = appTextFieldColors(),
                         )
                     } else {
-                        TextButton(onClick = { showFirstStep = true }) {
+                        TextButton(
+                            onClick = { showFirstStep = true },
+                            colors = appTextButtonColors(),
+                        ) {
                             Icon(Icons.Default.Add, contentDescription = null)
                             Text(stringResource(R.string.add_first_step))
                         }
@@ -111,6 +124,7 @@ fun HomeScreen(
                             }
                         },
                         enabled = title.isNotBlank(),
+                        colors = appButtonColors(),
                         modifier = Modifier
                             .fillMaxWidth()
                             .sizeIn(minHeight = 48.dp),
@@ -145,7 +159,11 @@ fun HomeScreen(
 
 @Composable
 private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = appCardColors(),
+        border = appBorder(),
+    ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -160,6 +178,7 @@ private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
             }
             Button(
                 onClick = onStart,
+                colors = appButtonColors(),
                 modifier = Modifier.sizeIn(minHeight = 48.dp),
             ) {
                 Icon(Icons.Default.PlayArrow, contentDescription = null)
@@ -208,7 +227,7 @@ fun FocusScreen(
             Text(
                 text = stringResource(R.string.focus_label),
                 style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Text(
                 text = activeFocus.task.title,
@@ -241,6 +260,7 @@ fun FocusScreen(
         ) {
             FilledTonalButton(
                 onClick = { showCapture = true },
+                colors = appTonalButtonColors(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
@@ -250,6 +270,8 @@ fun FocusScreen(
             }
             OutlinedButton(
                 onClick = { showInterrupt = true },
+                colors = appOutlinedButtonColors(),
+                border = appBorder(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
@@ -258,6 +280,7 @@ fun FocusScreen(
             }
             Button(
                 onClick = onComplete,
+                colors = appButtonColors(),
                 modifier = Modifier
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
@@ -312,7 +335,11 @@ fun ResumeScreen(
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Card(modifier = Modifier.fillMaxWidth()) {
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = appCardColors(),
+            border = appBorder(),
+        ) {
             Column(
                 modifier = Modifier.padding(18.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -328,6 +355,7 @@ fun ResumeScreen(
         }
         Button(
             onClick = { onResume(null) },
+            colors = appButtonColors(),
             modifier = Modifier
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
@@ -337,6 +365,7 @@ fun ResumeScreen(
         }
         FilledTonalButton(
             onClick = { showSmaller = true },
+            colors = appTonalButtonColors(),
             modifier = Modifier
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
@@ -345,6 +374,8 @@ fun ResumeScreen(
         }
         OutlinedButton(
             onClick = onPostpone,
+            colors = appOutlinedButtonColors(),
+            border = appBorder(),
             modifier = Modifier
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
@@ -374,14 +405,23 @@ private fun CaptureDialog(onDismiss: () -> Unit, onCapture: (String) -> Unit) {
                 onValueChange = { value = it },
                 label = { Text(stringResource(R.string.capture_label)) },
                 singleLine = true,
+                colors = appTextFieldColors(),
             )
         },
         confirmButton = {
-            TextButton(onClick = { onCapture(value) }, enabled = value.isNotBlank()) {
+            TextButton(
+                onClick = { onCapture(value) },
+                enabled = value.isNotBlank(),
+                colors = appTextButtonColors(),
+            ) {
                 Text(stringResource(R.string.capture_action))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
     )
 }
 
@@ -398,13 +438,20 @@ private fun InterruptDialog(onDismiss: () -> Unit, onConfirm: (String?) -> Unit)
                     value = note,
                     onValueChange = { note = it },
                     label = { Text(stringResource(R.string.interrupt_note_optional)) },
+                    colors = appTextFieldColors(),
                 )
             }
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(note) }) { Text(stringResource(R.string.save_and_stop)) }
+            TextButton(onClick = { onConfirm(note) }, colors = appTextButtonColors()) {
+                Text(stringResource(R.string.save_and_stop))
+            }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
     )
 }
 
@@ -423,14 +470,23 @@ private fun SmallerStepDialog(
                 value = value,
                 onValueChange = { value = it },
                 label = { Text(stringResource(R.string.smaller_step_label)) },
+                colors = appTextFieldColors(),
             )
         },
         confirmButton = {
-            TextButton(onClick = { onConfirm(value) }, enabled = value.isNotBlank()) {
+            TextButton(
+                onClick = { onConfirm(value) },
+                enabled = value.isNotBlank(),
+                colors = appTextButtonColors(),
+            ) {
                 Text(stringResource(R.string.save_and_resume))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
+        dismissButton = {
+            TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
     )
 }
 
@@ -440,9 +496,63 @@ fun ErrorDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.error_title)) },
         text = { Text(stringResource(R.string.error_message)) },
-        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.ok)) } },
+        confirmButton = {
+            TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
+                Text(stringResource(R.string.ok))
+            }
+        },
     )
 }
+
+@Composable
+private fun appCardColors() = CardDefaults.cardColors(
+    containerColor = MaterialTheme.colorScheme.surface,
+    contentColor = MaterialTheme.colorScheme.onSurface,
+)
+
+@Composable
+private fun appButtonColors() = ButtonDefaults.buttonColors(
+    containerColor = MaterialTheme.colorScheme.primaryContainer,
+    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    disabledContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
+    disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.45f),
+)
+
+@Composable
+private fun appTonalButtonColors() = ButtonDefaults.filledTonalButtonColors(
+    containerColor = MaterialTheme.colorScheme.primaryContainer,
+    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    disabledContainerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
+    disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.45f),
+)
+
+@Composable
+private fun appOutlinedButtonColors() = ButtonDefaults.outlinedButtonColors(
+    contentColor = MaterialTheme.colorScheme.onSurface,
+    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+)
+
+@Composable
+private fun appTextButtonColors() = ButtonDefaults.textButtonColors(
+    contentColor = MaterialTheme.colorScheme.onSurface,
+    disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+)
+
+@Composable
+private fun appTextFieldColors() = OutlinedTextFieldDefaults.colors(
+    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+    cursorColor = MaterialTheme.colorScheme.onSurface,
+    focusedBorderColor = MaterialTheme.colorScheme.outline,
+    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+    unfocusedLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    focusedSupportingTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+    unfocusedSupportingTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+)
+
+@Composable
+private fun appBorder() = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
 
 private fun formatElapsed(milliseconds: Long): String {
     val totalSeconds = milliseconds / 1_000
