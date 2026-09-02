@@ -453,7 +453,7 @@ It is an attempt to make an important part of everyday organisation **easier to 
 
 The project is currently led by **Jasmin Lévêque / Le Potager du Web**.
 
-A longer-term cooperative structure, **Le Potager des Communs**, is being explored as a future SCOP project that could mutualise development, design, maintenance and governance across several digital projects.
+A longer-term cooperative structure, **Le Verger du Numérique**, is being explored as a future SCOP project that could mutualise development, design, maintenance and governance across several digital projects.
 
 It is **not currently presented as an already constituted cooperative**.
 
