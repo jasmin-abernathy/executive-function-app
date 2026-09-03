@@ -1,7 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://app.lepotager.org/</loc></url>
-  <url><loc>https://app.lepotager.org/en/</loc></url>
-  <url><loc>https://app.lepotager.org/adhd-app/</loc></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://app.lepotager.org/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/"/>
+  </url>
   <url><loc>https://app.lepotager.org/adhd-app/v2/</loc></url>
+  <url>
+    <loc>https://app.lepotager.org/mentions-legales.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/mentions-legales.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/legal-notice.html"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/legal-notice.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/mentions-legales.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/legal-notice.html"/>
+  </url>
 </urlset>
