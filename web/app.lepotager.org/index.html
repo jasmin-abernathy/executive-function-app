@@ -17,7 +17,9 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/accessibility.css">
   <script defer src="/assets/app.js"></script>
+  <script defer src="/accessibility.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
@@ -51,6 +53,8 @@
           <span aria-hidden="true">/</span>
           <a href="/en/" lang="en" hreflang="en" data-language="en">EN</a>
         </div>
+
+        <button class="accessibility-toggle" type="button" data-app-accessibility-toggle aria-pressed="false">Version accessible</button>
 
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" data-menu-toggle>
           <span class="sr-only">Ouvrir le menu</span>
