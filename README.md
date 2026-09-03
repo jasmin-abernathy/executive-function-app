@@ -153,7 +153,6 @@ Implemented today:
 - quick capture without leaving focus;
 - durable interruption context and a non-punitive return screen;
 - resume, reduce, postpone/switch and complete transitions;
-- a first interactive companion presence on home and return screens;
 - process-restart-safe SQLite persistence;
 - French and English resources;
 - large touch targets, scalable text and TalkBack semantics;
@@ -218,7 +217,7 @@ The preferred direction is flexibility rather than making an imperfect day destr
 
 ## Companion and visual progression
 
-A companion and small home/crafting layer are being developed as an **optional motivation layer**, not as the heart of the app. A first temporary vector silhouette now lives on the home screen: it reacts to touch and successful capture, then deliberately stays out of focus mode.
+A companion and small home/crafting layer are being considered as an **optional motivation layer**, not as the heart of the app. No character or graphical substitute is included in the prototype until the official illustrations are ready.
 
 The current direction is a companion that is:
 
@@ -241,7 +240,7 @@ Real-world effort may eventually create visible and persistent progress through 
 
 The app must remain fully useful when this layer is disabled.
 
-The visual identity and final companion design are still in development. The current behaviour is designed so final illustration assets can replace the placeholder without changing the functional flow.
+The visual identity and final companion design are still being developed with the illustrator. Integration will start from the official assets, without a generated temporary silhouette and without changing the functional flow.
 
 The [prototype visual-direction guide](docs/VISUAL_DIRECTION.md) defines the light interface palette, its accessible implementation tones, and the boundary between functional UI and future illustration work. An [interactive HTML home preview](docs/home-preview.html) makes that direction reviewable without compiling the application.
 

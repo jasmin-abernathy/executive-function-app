@@ -10,15 +10,6 @@
     <string name="capture_action">Mettre de côté</string>
     <string name="ready_title">Prêt quand tu l’es</string>
     <string name="empty_tasks">Rien en attente. Tu peux commencer par une toute petite chose.</string>
-    <string name="companion_interaction_description">Faire réagir le compagnon</string>
-    <string name="companion_idle_title">Je reste là. Ça me convient bien.</string>
-    <string name="companion_idle_body">Tu peux poser une idée sans tout organiser.</string>
-    <string name="companion_listening_title">Oh. Bonjour.</string>
-    <string name="companion_listening_body">Je vérifiais si ce bouton faisait quelque chose.</string>
-    <string name="companion_saved_title">C’est posé ici.</string>
-    <string name="companion_saved_body">Tu n’as plus besoin de le garder en tête.</string>
-    <string name="companion_welcome_title">J’ai gardé ta place.</string>
-    <string name="companion_welcome_body">Elle n’avait pas l’air de vouloir partir.</string>
     <string name="first_step_value">Premier pas : %1$s</string>
     <string name="start_action">Commencer</string>
     <string name="focus_label">Une seule chose maintenant</string>

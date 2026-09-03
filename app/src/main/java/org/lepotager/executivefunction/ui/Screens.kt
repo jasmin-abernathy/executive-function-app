@@ -69,14 +69,6 @@ fun HomeScreen(
     var title by remember { mutableStateOf("") }
     var firstStep by remember { mutableStateOf("") }
     var showFirstStep by remember { mutableStateOf(false) }
-    var companionMood by remember { mutableStateOf(CompanionMood.Idle) }
-
-    LaunchedEffect(companionMood) {
-        if (companionMood != CompanionMood.Idle) {
-            delay(3_800)
-            companionMood = CompanionMood.Idle
-        }
-    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -94,11 +86,6 @@ fun HomeScreen(
                 text = stringResource(R.string.home_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Spacer(Modifier.height(14.dp))
-            CompanionPanel(
-                mood = companionMood,
-                onClick = { companionMood = CompanionMood.Listening },
             )
         }
         item {
@@ -150,7 +137,6 @@ fun HomeScreen(
                                 title = ""
                                 firstStep = ""
                                 showFirstStep = false
-                                companionMood = CompanionMood.Safekeeping
                             }
                         },
                         enabled = title.isNotBlank(),
@@ -356,10 +342,6 @@ fun ResumeScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
     ) {
-        CompanionPanel(
-            mood = CompanionMood.WelcomeBack,
-            onClick = null,
-        )
         Text(
             text = stringResource(R.string.resume_title),
             style = MaterialTheme.typography.headlineLarge,

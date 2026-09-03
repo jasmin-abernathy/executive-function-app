@@ -153,7 +153,6 @@ Déjà implémenté :
 - capture rapide sans quitter le focus ;
 - contexte d’interruption durable et écran de retour non punitif ;
 - reprise, réduction, report/changement et fin ;
-- première présence interactive du compagnon sur l’accueil et la reprise ;
 - persistance SQLite résistante au redémarrage du processus ;
 - ressources françaises et anglaises ;
 - grandes cibles tactiles, texte agrandissable et sémantique TalkBack ;
@@ -218,7 +217,7 @@ La direction générale privilégie la souplesse plutôt qu’un planning minute
 
 ## Compagnon et progression visuelle
 
-Un compagnon et une petite couche maison / artisanat sont développés comme **couche de motivation facultative**, pas comme cœur de l’application. Une première silhouette vectorielle provisoire est intégrée à l’accueil : elle réagit au toucher et après une capture réussie, puis reste volontairement absente du mode focus.
+Un compagnon et une petite couche maison / artisanat sont envisagés comme **couche de motivation facultative**, pas comme cœur de l’application. Aucun personnage ou substitut graphique n’est intégré au prototype tant que les illustrations officielles ne sont pas prêtes.
 
 La direction actuelle est celle d’un compagnon :
 
@@ -241,7 +240,7 @@ L’effort réalisé dans le monde réel pourra éventuellement produire une pro
 
 L’application doit rester totalement utile lorsque cette couche est désactivée.
 
-L’identité graphique et le design définitif du compagnon sont encore en développement. La logique actuelle est conçue pour recevoir les illustrations finales sans modifier le parcours fonctionnel.
+L’identité graphique et le design définitif du compagnon sont encore en développement avec l’illustrateurice. Son intégration sera préparée à partir des fichiers officiels, sans passer par une silhouette générée provisoire et sans modifier le parcours fonctionnel.
 
 La [charte graphique du prototype](docs/VISUAL_DIRECTION.md) fixe la palette d’interface claire, ses dérivés accessibles et la séparation entre interface fonctionnelle et futures illustrations. Un [aperçu HTML interactif de l’accueil](docs/home-preview.html) permet de contrôler cette direction sans compiler l’application.
 

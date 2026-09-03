@@ -68,11 +68,11 @@ Le mode sombre doit rester moins contrasté visuellement qu’un thème noir et 
 
 ## Compagnon et illustration
 
-Le compagnon est la principale source de chaleur et de personnalité de l’interface. Il reste facultatif, discret et jamais culpabilisant. Sa présence ne doit ni masquer une action ni ajouter une étape obligatoire.
+Le futur compagnon pourra devenir une source de chaleur et de personnalité de l’interface. Il restera facultatif, discret et jamais culpabilisant. Sa présence ne devra ni masquer une action ni ajouter une étape obligatoire.
 
-La première implémentation utilise une silhouette vectorielle provisoire, fantomatique et légèrement animale. Elle sert à valider les emplacements et les réactions avant l’intégration des fichiers de l’illustrateurice. Elle doit pouvoir être remplacée sans modifier la logique des écrans.
+Aucun personnage, avatar de remplacement ou silhouette générée n’est intégré avant la livraison des illustrations officielles. Les emplacements et réactions seront validés directement avec ces fichiers afin d’éviter qu’un visuel provisoire ne devienne une référence involontaire.
 
-États actuellement prévus :
+États envisagés après réception des illustrations :
 
 - repos discret sur l’accueil ;
 - réaction curieuse au toucher ;
@@ -82,7 +82,7 @@ La première implémentation utilise une silhouette vectorielle provisoire, fant
 
 Le ton est doux, un peu étrange et socialement maladroit. Il peut employer un humour sec ou naïf, mais jamais un vocabulaire de coach, une félicitation excessive, une série quotidienne, une mine triste après une absence ou une formulation laissant entendre que l’utilisateur a échoué.
 
-Les illustrations définitives devront fonctionner sur fond transparent, rester lisibles sur le blanc et sur le mode sombre, et respecter les couleurs de l’interface. Elles ne doivent jamais être indispensables à la compréhension d’une action.
+Les illustrations officielles devront fonctionner sur fond transparent, rester lisibles sur le blanc et sur le mode sombre, et respecter les couleurs de l’interface. Elles ne devront jamais être indispensables à la compréhension d’une action.
 
 ## Interdits
 
