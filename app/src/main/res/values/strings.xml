@@ -43,4 +43,25 @@
     <string name="focus_notification_interrupted_detail">%1$s · %2$s</string>
     <string name="focus_notification_unknown_task">Session en cours</string>
     <string name="focus_notification_restoring">Je retrouve ta session…</string>
+    <string name="focus_notification_action_interrupt">Interrompre</string>
+    <string name="focus_notification_action_resume">Reprendre</string>
+    <string name="focus_notification_action_capture">Noter</string>
+    <string name="focus_notification_action_pip">Mini</string>
+    <string name="focus_notification_action_complete">Terminer</string>
+
+    <string name="shortcut_capture_short">Noter</string>
+    <string name="shortcut_capture_long">Noter une idée rapidement</string>
+    <string name="shortcut_pip_short">Mini minuteur</string>
+    <string name="shortcut_pip_long">Afficher le focus en mini-fenêtre</string>
+    <string name="shortcut_focus_settings_short">Options focus</string>
+    <string name="shortcut_focus_settings_long">Régler les surfaces de focus</string>
+
+    <string name="focus_surface_settings_title">Options de présence du focus</string>
+    <string name="focus_surface_settings_explanation">Ces options restent facultatives. Elles servent à tester plusieurs façons de garder le fil sans rendre l’application plus insistante.</string>
+    <string name="focus_surface_keep_screen_on">Garder l’écran allumé</string>
+    <string name="focus_surface_keep_screen_on_detail">Empêche l’écran de s’éteindre pendant une session active. Désactivé par défaut pour préserver la batterie.</string>
+    <string name="focus_surface_auto_pip">Mini-fenêtre automatique</string>
+    <string name="focus_surface_auto_pip_detail">Passe automatiquement en Picture-in-Picture quand tu quittes l’app pendant un focus. Désactivé par défaut.</string>
+    <string name="focus_surface_notification_actions">Actions dans la notification</string>
+    <string name="focus_surface_notification_actions_detail">Affiche les raccourcis interrompre, reprendre, noter, mini-fenêtre et terminer quand le système a la place.</string>
 </resources>

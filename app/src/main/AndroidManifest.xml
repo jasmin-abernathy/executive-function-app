@@ -9,11 +9,27 @@
         android:theme="@style/Theme.ExecutiveFunction">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:exported="true"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <meta-data
+                android:name="android.app.shortcuts"
+                android:resource="@xml/shortcuts" />
         </activity>
+
+        <activity
+            android:name=".focus.FocusSurfaceSettingsActivity"
+            android:exported="true"
+            android:label="@string/focus_surface_settings_title" />
+
+        <receiver
+            android:name=".focus.FocusNotificationActionReceiver"
+            android:enabled="true"
+            android:exported="false" />
     </application>
 </manifest>
