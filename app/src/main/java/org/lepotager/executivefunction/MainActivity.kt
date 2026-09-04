@@ -153,6 +153,8 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         // Notification actions may mutate the database while this Activity is away.
         viewModel.reload()
+        val running = viewModel.snapshot.value.activeFocus?.session?.status == FocusStatus.RUNNING
+        applyKeepScreenOn(running)
     }
 
     override fun onNewIntent(intent: Intent) {
