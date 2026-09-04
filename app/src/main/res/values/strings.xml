@@ -35,4 +35,12 @@
     <string name="ok">OK</string>
     <string name="error_title">Ça n’a pas été enregistré</string>
     <string name="error_message">Rien n’a été perdu volontairement. Réessaie ; si le problème continue, redémarre l’application.</string>
+
+    <string name="focus_notification_channel">Session de focus</string>
+    <string name="focus_notification_channel_description">Garde la session en cours visible quand l’application n’est pas au premier plan.</string>
+    <string name="focus_notification_running">Une seule chose maintenant</string>
+    <string name="focus_notification_interrupted">Prêt à reprendre quand tu veux</string>
+    <string name="focus_notification_interrupted_detail">%1$s · %2$s</string>
+    <string name="focus_notification_unknown_task">Session en cours</string>
+    <string name="focus_notification_restoring">Je retrouve ta session…</string>
 </resources>
