@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.glance.Button
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
@@ -17,11 +18,13 @@ import androidx.glance.appwidget.appWidgetBackground
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.background
+import androidx.glance.clickable
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
+import androidx.glance.layout.defaultWeight
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
@@ -36,8 +39,9 @@ import org.lepotager.executivefunction.MainActivity
 /**
  * Static home-screen presence for the companion.
  *
- * The widget intentionally contains no animation. Artwork is represented by a
- * neutral development slot until the illustrator's production assets arrive.
+ * There is deliberately no animation. The artwork slot stays neutral until the
+ * illustrator's production assets are available; no temporary animal art is
+ * introduced by the app.
  */
 class CompanionWidget : GlanceAppWidget() {
     companion object {
@@ -53,9 +57,7 @@ class CompanionWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, MEDIUM))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        provideContent {
-            CompanionWidgetContent()
-        }
+        provideContent { CompanionWidgetContent() }
     }
 }
 
@@ -64,8 +66,6 @@ private fun CompanionWidgetContent() {
     val context = LocalContext.current
     val size = LocalSize.current
     val isSmall = size.width < 130.dp || size.height < 96.dp
-
-    val openIntent = widgetIntent(context, CompanionWidget.ACTION_OPEN)
 
     Box(
         modifier = GlanceModifier
@@ -77,7 +77,7 @@ private fun CompanionWidgetContent() {
         contentAlignment = Alignment.Center,
     ) {
         if (isSmall) {
-            SmallCompanion(openIntent)
+            SmallCompanion(widgetIntent(context, CompanionWidget.ACTION_OPEN))
         } else {
             MediumCompanion(context)
         }
@@ -87,22 +87,19 @@ private fun CompanionWidgetContent() {
 @Composable
 private fun SmallCompanion(openIntent: Intent) {
     Column(
-        modifier = GlanceModifier.fillMaxSize(),
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .clickable(actionStartActivity(openIntent)),
         horizontalAlignment = Alignment.Horizontal.CenterHorizontally,
         verticalAlignment = Alignment.Vertical.CenterVertically,
     ) {
-        // Artwork slot only. Do not replace with temporary generated character art.
+        // Reserved artwork slot. Replaced only when official companion assets land.
         Text(
             text = "•••",
             style = TextStyle(
                 color = ColorProvider(Color(0xFF5D665F)),
                 fontWeight = FontWeight.Bold,
             ),
-        )
-        Spacer(GlanceModifier.height(4.dp))
-        androidx.glance.Button(
-            text = "Ouvrir",
-            onClick = actionStartActivity(openIntent),
         )
     }
 }
@@ -141,13 +138,13 @@ private fun MediumCompanion(context: Context) {
         Spacer(GlanceModifier.defaultWeight())
 
         Row(modifier = GlanceModifier.fillMaxWidth()) {
-            androidx.glance.Button(
+            Button(
                 text = "Reprendre",
                 onClick = actionStartActivity(widgetIntent(context, CompanionWidget.ACTION_RESUME)),
                 modifier = GlanceModifier.defaultWeight(),
             )
             Spacer(GlanceModifier.width(8.dp))
-            androidx.glance.Button(
+            Button(
                 text = "Noter",
                 onClick = actionStartActivity(widgetIntent(context, CompanionWidget.ACTION_CAPTURE)),
                 modifier = GlanceModifier.defaultWeight(),
