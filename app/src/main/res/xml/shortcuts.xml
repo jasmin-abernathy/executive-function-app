@@ -29,4 +29,15 @@
                 android:value="picture_in_picture" />
         </intent>
     </shortcut>
+
+    <shortcut
+        android:shortcutId="focus_surface_settings"
+        android:enabled="true"
+        android:shortcutShortLabel="@string/shortcut_focus_settings_short"
+        android:shortcutLongLabel="@string/shortcut_focus_settings_long">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:targetPackage="org.lepotager.executivefunction"
+            android:targetClass="org.lepotager.executivefunction.focus.FocusSurfaceSettingsActivity" />
+    </shortcut>
 </shortcuts>
