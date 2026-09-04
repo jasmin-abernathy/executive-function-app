@@ -3,7 +3,6 @@ package org.lepotager.executivefunction.widget
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.Button
@@ -76,18 +75,9 @@ class CompanionWidget : GlanceAppWidget() {
     }
 }
 
-private val WidgetSurface = ColorProvider(
-    day = Color(0xFFF6FBF7),
-    night = Color(0xFF252E29),
-)
-private val WidgetText = ColorProvider(
-    day = Color(0xFF2D2D2D),
-    night = Color(0xFFEEF3EF),
-)
-private val WidgetMutedText = ColorProvider(
-    day = Color(0xFF59655E),
-    night = Color(0xFFC8D2CB),
-)
+private val WidgetSurface = ColorProvider(R.color.widget_surface)
+private val WidgetText = ColorProvider(R.color.widget_text)
+private val WidgetMutedText = ColorProvider(R.color.widget_muted_text)
 
 @Composable
 private fun CompanionWidgetContent(
