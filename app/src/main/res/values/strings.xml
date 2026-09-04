@@ -51,4 +51,21 @@
     <string name="companion_widget_open">Ouvrir</string>
     <string name="companion_widget_resume">Reprendre</string>
     <string name="companion_widget_capture">Noter</string>
+
+    <string name="companion_widget_config_title">Configurer le compagnon</string>
+    <string name="companion_widget_config_explanation">Le widget reste statique. Ces réglages changent seulement ce qu’un toucher fait et les informations affichées ; aucun visuel provisoire n’est ajouté.</string>
+    <string name="companion_widget_config_tap_title">Quand tu touches le petit widget</string>
+    <string name="companion_widget_config_tap_open">Ouvrir l’application</string>
+    <string name="companion_widget_config_tap_resume">Reprendre si possible</string>
+    <string name="companion_widget_config_tap_capture">Noter rapidement</string>
+    <string name="companion_widget_config_context">Afficher le contexte de tâche</string>
+    <string name="companion_widget_config_buttons">Afficher les boutons du widget moyen</string>
+    <string name="companion_widget_config_scene_title">Scène statique future</string>
+    <string name="companion_widget_config_scene_explanation">Le choix prépare l’asset officiel qui sera utilisé plus tard. Pour l’instant, aucune illustration n’est générée ni affichée.</string>
+    <string name="companion_widget_config_scene_auto">Changer automatiquement avec le temps</string>
+    <string name="companion_widget_config_scene_resting">Repos</string>
+    <string name="companion_widget_config_scene_crafting">Bricolage</string>
+    <string name="companion_widget_config_scene_sewing">Couture</string>
+    <string name="companion_widget_config_scene_observing">Observation</string>
+    <string name="companion_widget_config_save">Enregistrer le widget</string>
 </resources>
