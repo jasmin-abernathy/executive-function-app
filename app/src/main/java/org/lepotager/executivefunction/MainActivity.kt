@@ -39,9 +39,12 @@ class MainActivity : ComponentActivity() {
                 val error by viewModel.error.collectAsStateWithLifecycle()
                 val notificationPermissionLauncher = rememberLauncherForActivityResult(
                     ActivityResultContracts.RequestPermission(),
-                ) {
-                    // Focus itself never depends on the permission result.
-                    // If denied, the in-app timer remains fully usable.
+                ) { granted ->
+                    // Focus itself never depends on this permission. If it is granted
+                    // after the session has already started, surface that session now.
+                    if (granted) {
+                        viewModel.refreshFocusPresence()
+                    }
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
