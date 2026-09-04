@@ -38,6 +38,8 @@
 
     <string name="companion_widget_description">A calm home-screen presence for resuming or noting something without searching through the app.</string>
     <string name="companion_widget_title">Your companion is here</string>
+    <string name="companion_widget_art_pending">Official artwork coming later</string>
+    <string name="companion_widget_art_pending_short">Artwork later</string>
     <string name="companion_widget_scene_resting">Resting quietly</string>
     <string name="companion_widget_scene_crafting">Tinkering in their corner</string>
     <string name="companion_widget_scene_sewing">Sewing something</string>
