@@ -12,6 +12,4 @@
     android:targetCellWidth="1"
     android:targetCellHeight="1"
     android:updatePeriodMillis="0"
-    android:widgetCategory="home_screen"
-    android:configure="org.lepotager.executivefunction.widget.CompanionWidgetConfigActivity"
-    android:widgetFeatures="reconfigurable|configuration_optional" />
+    android:widgetCategory="home_screen" />
