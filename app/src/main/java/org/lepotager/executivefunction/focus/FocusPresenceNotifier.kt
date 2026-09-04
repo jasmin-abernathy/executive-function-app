@@ -17,6 +17,7 @@ import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.FocusStatus
+import org.lepotager.executivefunction.navigation.ExternalLaunchAction
 
 /**
  * Mirrors the local focus state into one lightweight Android notification.
@@ -27,6 +28,7 @@ import org.lepotager.executivefunction.model.FocusStatus
 class FocusPresenceNotifier(private val context: Context) {
     private val appContext = context.applicationContext
     private val notificationManager = appContext.getSystemService(NotificationManager::class.java)
+    private val preferences = FocusSurfacePreferences(appContext)
 
     init {
         createNotificationChannel()
@@ -105,7 +107,56 @@ class FocusPresenceNotifier(private val context: Context) {
                 .setShowWhen(false)
         }
 
+        if (preferences.load().notificationActions) {
+            addActions(builder, running)
+        }
+
         return builder.build()
+    }
+
+    private fun addActions(builder: NotificationCompat.Builder, running: Boolean) {
+        if (running) {
+            builder.addAction(
+                android.R.drawable.ic_media_pause,
+                getString(R.string.focus_notification_action_interrupt),
+                broadcastPendingIntent(
+                    FocusNotificationActionReceiver.ACTION_INTERRUPT,
+                    REQUEST_INTERRUPT,
+                ),
+            )
+        } else {
+            builder.addAction(
+                android.R.drawable.ic_media_play,
+                getString(R.string.focus_notification_action_resume),
+                broadcastPendingIntent(
+                    FocusNotificationActionReceiver.ACTION_RESUME,
+                    REQUEST_RESUME,
+                ),
+            )
+        }
+
+        builder.addAction(
+            android.R.drawable.ic_menu_add,
+            getString(R.string.focus_notification_action_capture),
+            launchPendingIntent(ExternalLaunchAction.CAPTURE, REQUEST_CAPTURE),
+        )
+
+        if (running) {
+            builder.addAction(
+                android.R.drawable.ic_menu_view,
+                getString(R.string.focus_notification_action_pip),
+                launchPendingIntent(ExternalLaunchAction.PICTURE_IN_PICTURE, REQUEST_PIP),
+            )
+        }
+
+        builder.addAction(
+            android.R.drawable.ic_menu_save,
+            getString(R.string.focus_notification_action_complete),
+            broadcastPendingIntent(
+                FocusNotificationActionReceiver.ACTION_COMPLETE,
+                REQUEST_COMPLETE,
+            ),
+        )
     }
 
     private fun openAppPendingIntent(): PendingIntent {
@@ -115,6 +166,31 @@ class FocusPresenceNotifier(private val context: Context) {
         return PendingIntent.getActivity(
             appContext,
             REQUEST_OPEN_APP,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    private fun launchPendingIntent(action: String, requestCode: Int): PendingIntent {
+        val intent = Intent(appContext, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(ExternalLaunchAction.EXTRA, action)
+        }
+        return PendingIntent.getActivity(
+            appContext,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+    }
+
+    private fun broadcastPendingIntent(action: String, requestCode: Int): PendingIntent {
+        val intent = Intent(appContext, FocusNotificationActionReceiver::class.java).apply {
+            this.action = action
+        }
+        return PendingIntent.getBroadcast(
+            appContext,
+            requestCode,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
@@ -161,5 +237,10 @@ class FocusPresenceNotifier(private val context: Context) {
         private const val CHANNEL_ID = "focus_presence"
         private const val NOTIFICATION_ID = 2101
         private const val REQUEST_OPEN_APP = 2102
+        private const val REQUEST_INTERRUPT = 2103
+        private const val REQUEST_RESUME = 2104
+        private const val REQUEST_CAPTURE = 2105
+        private const val REQUEST_PIP = 2106
+        private const val REQUEST_COMPLETE = 2107
     }
 }
