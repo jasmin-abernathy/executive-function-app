@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widget_config_title">Configure companion</string>
+    <string name="widget_config_tap_label">When you tap the compact widget</string>
+    <string name="widget_config_action_open">Open the app</string>
+    <string name="widget_config_action_resume">Resume what was in progress</string>
+    <string name="widget_config_action_capture">Quickly note something</string>
+    <string name="widget_config_show_context">Show task context in the medium widget</string>
+    <string name="widget_config_save">Save</string>
+</resources>
