@@ -34,12 +34,27 @@ class FocusNotificationManager(
 
     fun sync(activeFocus: ActiveFocus?) {
         val state = FocusNotificationStateFactory.create(activeFocus, now())
-        if (state.kind == FocusNotificationKind.HIDDEN || !canPostNotifications()) {
+        if (state.kind == FocusNotificationKind.HIDDEN || !notificationManager.areNotificationsEnabled()) {
             cancel()
             return
         }
 
-        notificationManager.notify(NOTIFICATION_ID, buildNotification(state))
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            cancel()
+            return
+        }
+
+        // Permission may still be revoked between the explicit check and notify().
+        // Handle that race instead of suppressing the lint rule globally.
+        try {
+            notificationManager.notify(NOTIFICATION_ID, buildNotification(state))
+        } catch (_: SecurityException) {
+            cancel()
+        }
     }
 
     fun cancel() {
@@ -96,13 +111,6 @@ class FocusNotificationManager(
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
-    }
-
-    private fun canPostNotifications(): Boolean {
-        if (!notificationManager.areNotificationsEnabled()) return false
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
-        return ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
     }
 
     private fun createChannel() {
