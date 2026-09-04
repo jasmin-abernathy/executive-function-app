@@ -43,11 +43,12 @@ class MainActivity : ComponentActivity() {
     private val viewModel: AppViewModel by viewModels()
     private val focusSurfacePreferences by lazy { FocusSurfacePreferences(this) }
     private var externalLaunchAction by mutableStateOf<String?>(null)
+    private var captureInitialText by mutableStateOf("")
     private var inPictureInPicture by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        externalLaunchAction = intent.externalLaunchAction()
+        resolveLaunchIntent(intent)
         enableEdgeToEdge()
         setContent {
             ExecutiveFunctionTheme {
@@ -132,10 +133,11 @@ class MainActivity : ComponentActivity() {
                         !snapshot.loading
                     ) {
                         QuickCaptureDialog(
-                            onDismiss = { externalLaunchAction = null },
+                            initialValue = captureInitialText,
+                            onDismiss = ::clearCaptureLaunch,
                             onCapture = { title ->
                                 viewModel.capture(title, null) {
-                                    externalLaunchAction = null
+                                    clearCaptureLaunch()
                                 }
                             },
                         )
@@ -160,7 +162,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        externalLaunchAction = intent.externalLaunchAction()
+        resolveLaunchIntent(intent)
     }
 
     override fun onUserLeaveHint() {
@@ -201,6 +203,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun Intent.externalLaunchAction(): String? =
-        getStringExtra(ExternalLaunchAction.EXTRA)
+    private fun resolveLaunchIntent(intent: Intent) {
+        if (intent.action == Intent.ACTION_SEND && intent.type == "text/plain") {
+            captureInitialText = intent.getCharSequenceExtra(Intent.EXTRA_TEXT)
+                ?.toString()
+                ?.trim()
+                .orEmpty()
+            externalLaunchAction = ExternalLaunchAction.CAPTURE
+            return
+        }
+
+        captureInitialText = ""
+        externalLaunchAction = intent.getStringExtra(ExternalLaunchAction.EXTRA)
+    }
+
+    private fun clearCaptureLaunch() {
+        externalLaunchAction = null
+        captureInitialText = ""
+    }
 }
