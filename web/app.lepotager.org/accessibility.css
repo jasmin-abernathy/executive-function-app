@@ -7,3 +7,9 @@ html[data-app-accessible="true"] .site-header{background:#fff!important;backdrop
 html[data-app-accessible="true"] .project-card,html[data-app-accessible="true"] .value-card,html[data-app-accessible="true"] .link-card{box-shadow:none!important}
 html[data-app-accessible="true"] :focus-visible{outline:4px solid #005fcc!important;outline-offset:3px!important}
 html[data-app-accessible="true"] *,html[data-app-accessible="true"] *::before,html[data-app-accessible="true"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+
+html[data-site-ref="prestadmin"] [data-site-context]{color:#765d00}
+@media(max-width:520px){
+ .accessibility-toggle{width:46px;padding:0;overflow:hidden;color:transparent;position:relative}
+ .accessibility-toggle::after{content:"Aa";position:absolute;inset:0;display:grid;place-items:center;color:#173d2b;font-weight:850}
+}
