@@ -12,6 +12,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.AppWidgetId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
@@ -61,6 +62,8 @@ class CompanionWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, MEDIUM))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val appWidgetId = (id as? AppWidgetId)?.appWidgetId
+        val preferences = CompanionWidgetPreferences.load(context, appWidgetId)
         val state = withContext(Dispatchers.IO) {
             val database = AppDatabase(context.applicationContext)
             CompanionWidgetStateFactory.create(
@@ -69,7 +72,7 @@ class CompanionWidget : GlanceAppWidget() {
                 dayOfYear = LocalDate.now().dayOfYear,
             )
         }
-        provideContent { CompanionWidgetContent(state) }
+        provideContent { CompanionWidgetContent(state, preferences) }
     }
 }
 
@@ -87,7 +90,10 @@ private val WidgetMutedText = ColorProvider(
 )
 
 @Composable
-private fun CompanionWidgetContent(state: CompanionWidgetState) {
+private fun CompanionWidgetContent(
+    state: CompanionWidgetState,
+    preferences: CompanionWidgetPreferencesData,
+) {
     val context = LocalContext.current
     val size = LocalSize.current
     val isSmall = size.width < 130.dp || size.height < 96.dp
@@ -102,20 +108,20 @@ private fun CompanionWidgetContent(state: CompanionWidgetState) {
         contentAlignment = Alignment.Center,
     ) {
         if (isSmall) {
-            SmallCompanion(context)
+            SmallCompanion(context, preferences.compactTapAction)
         } else {
-            MediumCompanion(context, state)
+            MediumCompanion(context, state, preferences.showTaskContext)
         }
     }
 }
 
 @Composable
-private fun SmallCompanion(context: Context) {
+private fun SmallCompanion(context: Context, tapAction: CompanionTapAction) {
     // Empty reserved slot: the official static illustration will fill this area later.
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .clickable(actionStartActivity(widgetIntent(context, CompanionWidget.ACTION_OPEN))),
+            .clickable(actionStartActivity(widgetIntent(context, tapAction.intentAction()))),
         contentAlignment = Alignment.Center,
     ) {
         Spacer(
@@ -127,7 +133,11 @@ private fun SmallCompanion(context: Context) {
 }
 
 @Composable
-private fun MediumCompanion(context: Context, state: CompanionWidgetState) {
+private fun MediumCompanion(
+    context: Context,
+    state: CompanionWidgetState,
+    showTaskContext: Boolean,
+) {
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Row(
             modifier = GlanceModifier.fillMaxWidth(),
@@ -149,12 +159,14 @@ private fun MediumCompanion(context: Context, state: CompanionWidgetState) {
                     ),
                     maxLines = 1,
                 )
-                Spacer(GlanceModifier.height(3.dp))
-                Text(
-                    text = statusText(context, state),
-                    style = TextStyle(color = WidgetMutedText),
-                    maxLines = 2,
-                )
+                if (showTaskContext) {
+                    Spacer(GlanceModifier.height(3.dp))
+                    Text(
+                        text = statusText(context, state),
+                        style = TextStyle(color = WidgetMutedText),
+                        maxLines = 2,
+                    )
+                }
             }
         }
 
@@ -183,6 +195,12 @@ private fun MediumCompanion(context: Context, state: CompanionWidgetState) {
             )
         }
     }
+}
+
+private fun CompanionTapAction.intentAction(): String = when (this) {
+    CompanionTapAction.OPEN -> CompanionWidget.ACTION_OPEN
+    CompanionTapAction.RESUME -> CompanionWidget.ACTION_RESUME
+    CompanionTapAction.CAPTURE -> CompanionWidget.ACTION_CAPTURE
 }
 
 private fun statusText(context: Context, state: CompanionWidgetState): String = when (state.status) {
