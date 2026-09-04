@@ -51,4 +51,21 @@
     <string name="companion_widget_open">Open</string>
     <string name="companion_widget_resume">Resume</string>
     <string name="companion_widget_capture">Note</string>
+
+    <string name="companion_widget_config_title">Configure companion</string>
+    <string name="companion_widget_config_explanation">The widget stays static. These settings only change tap behavior and visible information; no temporary artwork is added.</string>
+    <string name="companion_widget_config_tap_title">When you tap the small widget</string>
+    <string name="companion_widget_config_tap_open">Open the app</string>
+    <string name="companion_widget_config_tap_resume">Resume when possible</string>
+    <string name="companion_widget_config_tap_capture">Quick note</string>
+    <string name="companion_widget_config_context">Show task context</string>
+    <string name="companion_widget_config_buttons">Show buttons on the medium widget</string>
+    <string name="companion_widget_config_scene_title">Future static scene</string>
+    <string name="companion_widget_config_scene_explanation">This choice prepares which official asset may be used later. No illustration is generated or displayed for now.</string>
+    <string name="companion_widget_config_scene_auto">Change automatically over time</string>
+    <string name="companion_widget_config_scene_resting">Resting</string>
+    <string name="companion_widget_config_scene_crafting">Crafting</string>
+    <string name="companion_widget_config_scene_sewing">Sewing</string>
+    <string name="companion_widget_config_scene_observing">Observing</string>
+    <string name="companion_widget_config_save">Save widget</string>
 </resources>

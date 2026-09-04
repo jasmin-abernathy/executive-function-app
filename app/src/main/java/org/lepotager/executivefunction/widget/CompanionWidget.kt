@@ -12,6 +12,7 @@ import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
+import androidx.glance.appwidget.AppWidgetId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
@@ -61,15 +62,24 @@ class CompanionWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, MEDIUM))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
+        val appWidgetId = (id as? AppWidgetId)?.appWidgetId
+        val preferences = CompanionWidgetPreferences.load(context, appWidgetId)
         val state = withContext(Dispatchers.IO) {
             val database = AppDatabase(context.applicationContext)
             CompanionWidgetStateFactory.create(
                 activeFocus = database.activeFocus(),
                 openTasks = database.openTasks(),
                 dayOfYear = LocalDate.now().dayOfYear,
-            )
+            ).let { automatic ->
+                automatic.copy(
+                    scene = CompanionWidgetPreferences.resolveScene(
+                        preferences.scenePreference,
+                        automatic.scene,
+                    ),
+                )
+            }
         }
-        provideContent { CompanionWidgetContent(state) }
+        provideContent { CompanionWidgetContent(state, preferences) }
     }
 }
 
@@ -87,7 +97,10 @@ private val WidgetMutedText = ColorProvider(
 )
 
 @Composable
-private fun CompanionWidgetContent(state: CompanionWidgetState) {
+private fun CompanionWidgetContent(
+    state: CompanionWidgetState,
+    preferences: CompanionWidgetPreferencesData,
+) {
     val context = LocalContext.current
     val size = LocalSize.current
     val isSmall = size.width < 130.dp || size.height < 96.dp
@@ -102,20 +115,20 @@ private fun CompanionWidgetContent(state: CompanionWidgetState) {
         contentAlignment = Alignment.Center,
     ) {
         if (isSmall) {
-            SmallCompanion(context)
+            SmallCompanion(context, preferences.compactTapAction)
         } else {
-            MediumCompanion(context, state)
+            MediumCompanion(context, state, preferences)
         }
     }
 }
 
 @Composable
-private fun SmallCompanion(context: Context) {
+private fun SmallCompanion(context: Context, tapAction: CompanionTapAction) {
     // Empty reserved slot: the official static illustration will fill this area later.
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .clickable(actionStartActivity(widgetIntent(context, CompanionWidget.ACTION_OPEN))),
+            .clickable(actionStartActivity(widgetIntent(context, tapAction.intentAction()))),
         contentAlignment = Alignment.Center,
     ) {
         Spacer(
@@ -130,13 +143,17 @@ private fun SmallCompanion(context: Context) {
 private fun MediumCompanion(
     context: Context,
     state: CompanionWidgetState,
+    preferences: CompanionWidgetPreferencesData,
 ) {
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Row(
-            modifier = GlanceModifier.fillMaxWidth(),
+            modifier = GlanceModifier
+                .fillMaxWidth()
+                .clickable(actionStartActivity(widgetIntent(context, CompanionWidget.ACTION_OPEN))),
             verticalAlignment = Alignment.Vertical.CenterVertically,
         ) {
             // Reserved official-artwork slot. Intentionally blank during development.
+            // state.scene is already resolved and will map to the official static asset later.
             Spacer(
                 modifier = GlanceModifier
                     .width(48.dp)
@@ -152,40 +169,49 @@ private fun MediumCompanion(
                     ),
                     maxLines = 1,
                 )
-                Spacer(GlanceModifier.height(3.dp))
-                Text(
-                    text = statusText(context, state),
-                    style = TextStyle(color = WidgetMutedText),
-                    maxLines = 2,
-                )
+                if (preferences.showTaskContext) {
+                    Spacer(GlanceModifier.height(3.dp))
+                    Text(
+                        text = statusText(context, state),
+                        style = TextStyle(color = WidgetMutedText),
+                        maxLines = 2,
+                    )
+                }
             }
         }
 
-        Spacer(GlanceModifier.height(8.dp))
-
-        Row(modifier = GlanceModifier.fillMaxWidth()) {
-            Button(
-                text = primaryActionText(context, state.status),
-                onClick = actionStartActivity(
-                    widgetIntent(
-                        context,
-                        if (state.status == CompanionWidgetStatus.RESUMABLE) {
-                            CompanionWidget.ACTION_RESUME
-                        } else {
-                            CompanionWidget.ACTION_OPEN
-                        },
+        if (preferences.showButtons) {
+            Spacer(GlanceModifier.height(8.dp))
+            Row(modifier = GlanceModifier.fillMaxWidth()) {
+                Button(
+                    text = primaryActionText(context, state.status),
+                    onClick = actionStartActivity(
+                        widgetIntent(
+                            context,
+                            if (state.status == CompanionWidgetStatus.RESUMABLE) {
+                                CompanionWidget.ACTION_RESUME
+                            } else {
+                                CompanionWidget.ACTION_OPEN
+                            },
+                        ),
                     ),
-                ),
-                modifier = GlanceModifier.width(82.dp),
-            )
-            Spacer(GlanceModifier.width(8.dp))
-            Button(
-                text = context.getString(R.string.companion_widget_capture),
-                onClick = actionStartActivity(widgetIntent(context, CompanionWidget.ACTION_CAPTURE)),
-                modifier = GlanceModifier.width(70.dp),
-            )
+                    modifier = GlanceModifier.width(82.dp),
+                )
+                Spacer(GlanceModifier.width(8.dp))
+                Button(
+                    text = context.getString(R.string.companion_widget_capture),
+                    onClick = actionStartActivity(widgetIntent(context, CompanionWidget.ACTION_CAPTURE)),
+                    modifier = GlanceModifier.width(70.dp),
+                )
+            }
         }
     }
+}
+
+private fun CompanionTapAction.intentAction(): String = when (this) {
+    CompanionTapAction.OPEN -> CompanionWidget.ACTION_OPEN
+    CompanionTapAction.RESUME -> CompanionWidget.ACTION_RESUME
+    CompanionTapAction.CAPTURE -> CompanionWidget.ACTION_CAPTURE
 }
 
 private fun statusText(context: Context, state: CompanionWidgetState): String = when (state.status) {
