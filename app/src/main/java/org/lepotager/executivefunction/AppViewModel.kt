@@ -10,9 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.data.FocusRepository
+import org.lepotager.executivefunction.notification.FocusNotificationManager
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = FocusRepository(AppDatabase(application))
+    private val focusNotificationManager = FocusNotificationManager(application)
     val snapshot = repository.snapshot
 
     private val mutableError = MutableStateFlow<Throwable?>(null)
@@ -23,24 +25,29 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        launch { repository.load() }
+        launch(::syncFocusNotification) { repository.load() }
     }
 
     fun capture(title: String, firstStep: String? = null, after: () -> Unit = {}) =
         launch(after) { repository.capture(title, firstStep) }
 
-    fun start(taskId: String) = launch { repository.start(taskId) }
+    fun start(taskId: String) = launch(::syncFocusNotification) { repository.start(taskId) }
 
-    fun interrupt(note: String?) = launch { repository.interrupt(note) }
+    fun interrupt(note: String?) = launch(::syncFocusNotification) { repository.interrupt(note) }
 
-    fun resume(firstStep: String? = null) = launch { repository.resume(firstStep) }
+    fun resume(firstStep: String? = null) =
+        launch(::syncFocusNotification) { repository.resume(firstStep) }
 
-    fun postpone() = launch { repository.postpone() }
+    fun postpone() = launch(::syncFocusNotification) { repository.postpone() }
 
-    fun complete() = launch { repository.complete() }
+    fun complete() = launch(::syncFocusNotification) { repository.complete() }
 
     fun clearError() {
         mutableError.value = null
+    }
+
+    private fun syncFocusNotification() {
+        focusNotificationManager.sync(snapshot.value.activeFocus)
     }
 
     private fun launch(after: () -> Unit = {}, block: suspend () -> Unit) {
