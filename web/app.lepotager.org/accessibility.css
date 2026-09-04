@@ -11,5 +11,22 @@ html[data-app-accessible="true"] *,html[data-app-accessible="true"] *::before,ht
 html[data-site-ref="prestadmin"] [data-site-context]{color:#765d00}
 @media(max-width:520px){
  .accessibility-toggle{width:46px;padding:0;overflow:hidden;color:transparent;position:relative}
- .accessibility-toggle::after{content:"Aa";position:absolute;inset:0;display:grid;place-items:center;color:#173d2b;font-weight:850}
+}
+/* repo-factory: universal-access-icon */
+[class*="a11y-toggle"]::before,
+[class*="accessibility-toggle"]::before{
+  content:"";
+  display:inline-block;
+  width:1.15em;
+  height:1.15em;
+  flex:0 0 1.15em;
+  margin-right:.4em;
+  vertical-align:-.18em;
+  background:#005fcc;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='none' stroke='black' stroke-width='2'/%3E%3Ccircle cx='12' cy='6.2' r='1.8' fill='black'/%3E%3Cpath d='M6.7 9h10.6v2H13v2.5l3.1 5.2h-2.5L12 15.9l-1.6 2.8H7.9l3.1-5.2V11H6.7z' fill='black'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='none' stroke='black' stroke-width='2'/%3E%3Ccircle cx='12' cy='6.2' r='1.8' fill='black'/%3E%3Cpath d='M6.7 9h10.6v2H13v2.5l3.1 5.2h-2.5L12 15.9l-1.6 2.8H7.9l3.1-5.2V11H6.7z' fill='black'/%3E%3C/svg%3E") center/contain no-repeat;
+}
+@media(max-width:520px){
+  [class*="a11y-toggle"],[class*="accessibility-toggle"]{font-size:0!important}
+  [class*="a11y-toggle"]::before,[class*="accessibility-toggle"]::before{width:20px;height:20px;flex-basis:20px;margin:0;vertical-align:middle}
 }
