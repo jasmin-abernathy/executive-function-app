@@ -14,6 +14,15 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".widget.CompanionWidgetConfigureActivity"
+            android:exported="true"
+            android:label="@string/companion_widget_config_title">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <receiver
             android:name=".widget.CompanionWidgetReceiver"
             android:enabled="true"
