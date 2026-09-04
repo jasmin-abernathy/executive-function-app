@@ -35,4 +35,12 @@
     <string name="ok">OK</string>
     <string name="error_title">That was not saved</string>
     <string name="error_message">Nothing was intentionally discarded. Try again; if it keeps happening, restart the app.</string>
+
+    <string name="focus_notification_channel">Focus session</string>
+    <string name="focus_notification_channel_description">Keeps the current session visible while the app is not in the foreground.</string>
+    <string name="focus_notification_running">Just one thing now</string>
+    <string name="focus_notification_interrupted">Ready to resume when you are</string>
+    <string name="focus_notification_interrupted_detail">%1$s · %2$s</string>
+    <string name="focus_notification_unknown_task">Focus session</string>
+    <string name="focus_notification_restoring">Restoring your session…</string>
 </resources>
