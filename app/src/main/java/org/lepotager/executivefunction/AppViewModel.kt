@@ -10,10 +10,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.data.FocusRepository
-import org.lepotager.executivefunction.focus.FocusPresenceService
+import org.lepotager.executivefunction.focus.FocusPresenceNotifier
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = FocusRepository(AppDatabase(application))
+    private val focusPresenceNotifier = FocusPresenceNotifier(application)
     val snapshot = repository.snapshot
 
     private val mutableError = MutableStateFlow<Throwable?>(null)
@@ -58,17 +59,21 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         syncFocusPresence()
     }
 
+    fun refreshFocusPresence() {
+        syncFocusPresence()
+    }
+
     fun clearError() {
         mutableError.value = null
     }
 
     private fun syncFocusPresence() {
-        // The database state is authoritative. A notification/launcher failure must
+        // Local task/session state is authoritative. A SystemUI/permission issue must
         // never turn a successful task transition into an app error.
         try {
-            FocusPresenceService.sync(getApplication(), repository.snapshot.value.activeFocus)
+            focusPresenceNotifier.sync(repository.snapshot.value.activeFocus)
         } catch (_: Throwable) {
-            // The service will reconcile next time the app is opened or state changes.
+            // The next state change or app opening will try again.
         }
     }
 
