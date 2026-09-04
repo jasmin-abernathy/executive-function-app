@@ -35,4 +35,6 @@
     <string name="ok">OK</string>
     <string name="error_title">Ça n’a pas été enregistré</string>
     <string name="error_message">Rien n’a été perdu volontairement. Réessaie ; si le problème continue, redémarre l’application.</string>
+
+    <string name="companion_widget_description">Une présence calme sur l’écran d’accueil pour reprendre ou noter sans chercher dans l’application.</string>
 </resources>
