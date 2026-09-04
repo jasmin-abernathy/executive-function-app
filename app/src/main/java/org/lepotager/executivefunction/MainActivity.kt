@@ -1,9 +1,14 @@
 package org.lepotager.executivefunction
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +18,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.lepotager.executivefunction.model.FocusStatus
 import org.lepotager.executivefunction.ui.ErrorDialog
@@ -31,6 +37,12 @@ class MainActivity : ComponentActivity() {
             ExecutiveFunctionTheme {
                 val snapshot by viewModel.snapshot.collectAsStateWithLifecycle()
                 val error by viewModel.error.collectAsStateWithLifecycle()
+                val notificationPermissionLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission(),
+                ) {
+                    // Focus itself never depends on the permission result.
+                    // If denied, the in-app timer remains fully usable.
+                }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
                     Box(
@@ -59,7 +71,20 @@ class MainActivity : ComponentActivity() {
                             else -> HomeScreen(
                                 tasks = snapshot.tasks,
                                 onCapture = viewModel::capture,
-                                onStart = viewModel::start,
+                                onStart = { taskId ->
+                                    if (
+                                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                        ContextCompat.checkSelfPermission(
+                                            this@MainActivity,
+                                            Manifest.permission.POST_NOTIFICATIONS,
+                                        ) != PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        notificationPermissionLauncher.launch(
+                                            Manifest.permission.POST_NOTIFICATIONS,
+                                        )
+                                    }
+                                    viewModel.start(taskId)
+                                },
                             )
                         }
                     }
