@@ -52,12 +52,6 @@ class FocusPresenceService : Service() {
                 )
             }
 
-            ACTION_STOP -> {
-                stopForeground(STOP_FOREGROUND_REMOVE)
-                stopSelf()
-                return START_NOT_STICKY
-            }
-
             else -> {
                 // START_STICKY can recreate the service with a null intent after the
                 // process was reclaimed. Re-adopt foreground state immediately, then
@@ -212,7 +206,6 @@ class FocusPresenceService : Service() {
         private const val REQUEST_OPEN_APP = 2102
 
         private const val ACTION_SYNC = "org.lepotager.executivefunction.focus.SYNC"
-        private const val ACTION_STOP = "org.lepotager.executivefunction.focus.STOP"
         private const val EXTRA_TASK_TITLE = "task_title"
         private const val EXTRA_ELAPSED_MS = "elapsed_ms"
         private const val EXTRA_RUNNING = "running"
@@ -238,10 +231,9 @@ class FocusPresenceService : Service() {
         }
 
         fun stop(context: Context) {
-            val intent = Intent(context, FocusPresenceService::class.java).apply {
-                action = ACTION_STOP
-            }
-            context.applicationContext.startService(intent)
+            context.applicationContext.stopService(
+                Intent(context, FocusPresenceService::class.java),
+            )
         }
     }
 }
