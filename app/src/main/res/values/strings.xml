@@ -38,6 +38,8 @@
 
     <string name="companion_widget_description">Une présence calme sur l’écran d’accueil pour reprendre ou noter sans chercher dans l’application.</string>
     <string name="companion_widget_title">Ton compagnon est là</string>
+    <string name="companion_widget_art_pending">Visuel officiel à venir</string>
+    <string name="companion_widget_art_pending_short">Visuel à venir</string>
     <string name="companion_widget_scene_resting">Se repose tranquillement</string>
     <string name="companion_widget_scene_crafting">Bricole dans son coin</string>
     <string name="companion_widget_scene_sewing">Coud quelque chose</string>
