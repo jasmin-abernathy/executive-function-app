@@ -43,4 +43,14 @@
     <string name="focus_notification_interrupted_detail">%1$s · %2$s</string>
     <string name="focus_notification_unknown_task">Session en cours</string>
     <string name="focus_notification_restoring">Je retrouve ta session…</string>
+    <string name="focus_notification_action_interrupt">Interrompre</string>
+    <string name="focus_notification_action_resume">Reprendre</string>
+    <string name="focus_notification_action_capture">Noter</string>
+    <string name="focus_notification_action_pip">Mini</string>
+    <string name="focus_notification_action_complete">Terminer</string>
+
+    <string name="shortcut_capture_short">Noter</string>
+    <string name="shortcut_capture_long">Noter une idée rapidement</string>
+    <string name="shortcut_pip_short">Mini minuteur</string>
+    <string name="shortcut_pip_long">Afficher le focus en mini-fenêtre</string>
 </resources>
