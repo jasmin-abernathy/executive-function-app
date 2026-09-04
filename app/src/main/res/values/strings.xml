@@ -35,4 +35,9 @@
     <string name="ok">OK</string>
     <string name="error_title">Ça n’a pas été enregistré</string>
     <string name="error_message">Rien n’a été perdu volontairement. Réessaie ; si le problème continue, redémarre l’application.</string>
+
+    <string name="focus_notification_channel_name">Session de concentration</string>
+    <string name="focus_notification_channel_description">Affiche discrètement la session active hors de l’application.</string>
+    <string name="focus_notification_running">Concentration en cours</string>
+    <string name="focus_notification_resumable">À reprendre · %1$s</string>
 </resources>
