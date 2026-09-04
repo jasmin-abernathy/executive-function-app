@@ -3,7 +3,6 @@ package org.lepotager.executivefunction.widget
 import android.content.Context
 import android.content.Intent
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.glance.Button
@@ -12,7 +11,6 @@ import androidx.glance.GlanceModifier
 import androidx.glance.LocalContext
 import androidx.glance.LocalSize
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.AppWidgetId
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.SizeMode
 import androidx.glance.appwidget.action.actionStartActivity
@@ -21,7 +19,6 @@ import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
 import androidx.glance.appwidget.updateAll
 import androidx.glance.background
-import androidx.glance.color.ColorProvider
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
 import androidx.glance.layout.Column
@@ -35,6 +32,7 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
+import androidx.glance.unit.ColorProvider
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -62,8 +60,6 @@ class CompanionWidget : GlanceAppWidget() {
     override val sizeMode: SizeMode = SizeMode.Responsive(setOf(SMALL, MEDIUM))
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val appWidgetId = (id as? AppWidgetId)?.appWidgetId
-        val preferences = CompanionWidgetPreferences.load(context, appWidgetId)
         val state = withContext(Dispatchers.IO) {
             val database = AppDatabase(context.applicationContext)
             CompanionWidgetStateFactory.create(
@@ -72,28 +68,16 @@ class CompanionWidget : GlanceAppWidget() {
                 dayOfYear = LocalDate.now().dayOfYear,
             )
         }
-        provideContent { CompanionWidgetContent(state, preferences) }
+        provideContent { CompanionWidgetContent(state) }
     }
 }
 
-private val WidgetSurface = ColorProvider(
-    day = Color(0xFFF6FBF7),
-    night = Color(0xFF252E29),
-)
-private val WidgetText = ColorProvider(
-    day = Color(0xFF2D2D2D),
-    night = Color(0xFFEEF3EF),
-)
-private val WidgetMutedText = ColorProvider(
-    day = Color(0xFF59655E),
-    night = Color(0xFFC8D2CB),
-)
+private val WidgetSurface = ColorProvider(R.color.widget_surface)
+private val WidgetText = ColorProvider(R.color.widget_text)
+private val WidgetMutedText = ColorProvider(R.color.widget_muted_text)
 
 @Composable
-private fun CompanionWidgetContent(
-    state: CompanionWidgetState,
-    preferences: CompanionWidgetPreferencesData,
-) {
+private fun CompanionWidgetContent(state: CompanionWidgetState) {
     val context = LocalContext.current
     val size = LocalSize.current
     val isSmall = size.width < 130.dp || size.height < 96.dp
@@ -108,20 +92,20 @@ private fun CompanionWidgetContent(
         contentAlignment = Alignment.Center,
     ) {
         if (isSmall) {
-            SmallCompanion(context, preferences.compactTapAction)
+            SmallCompanion(context)
         } else {
-            MediumCompanion(context, state, preferences.showTaskContext)
+            MediumCompanion(context, state)
         }
     }
 }
 
 @Composable
-private fun SmallCompanion(context: Context, tapAction: CompanionTapAction) {
+private fun SmallCompanion(context: Context) {
     // Empty reserved slot: the official static illustration will fill this area later.
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
-            .clickable(actionStartActivity(widgetIntent(context, tapAction.intentAction()))),
+            .clickable(actionStartActivity(widgetIntent(context, CompanionWidget.ACTION_OPEN))),
         contentAlignment = Alignment.Center,
     ) {
         Spacer(
@@ -136,7 +120,6 @@ private fun SmallCompanion(context: Context, tapAction: CompanionTapAction) {
 private fun MediumCompanion(
     context: Context,
     state: CompanionWidgetState,
-    showTaskContext: Boolean,
 ) {
     Column(modifier = GlanceModifier.fillMaxSize()) {
         Row(
@@ -159,14 +142,12 @@ private fun MediumCompanion(
                     ),
                     maxLines = 1,
                 )
-                if (showTaskContext) {
-                    Spacer(GlanceModifier.height(3.dp))
-                    Text(
-                        text = statusText(context, state),
-                        style = TextStyle(color = WidgetMutedText),
-                        maxLines = 2,
-                    )
-                }
+                Spacer(GlanceModifier.height(3.dp))
+                Text(
+                    text = statusText(context, state),
+                    style = TextStyle(color = WidgetMutedText),
+                    maxLines = 2,
+                )
             }
         }
 
@@ -195,12 +176,6 @@ private fun MediumCompanion(
             )
         }
     }
-}
-
-private fun CompanionTapAction.intentAction(): String = when (this) {
-    CompanionTapAction.OPEN -> CompanionWidget.ACTION_OPEN
-    CompanionTapAction.RESUME -> CompanionWidget.ACTION_RESUME
-    CompanionTapAction.CAPTURE -> CompanionWidget.ACTION_CAPTURE
 }
 
 private fun statusText(context: Context, state: CompanionWidgetState): String = when (state.status) {
