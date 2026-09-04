@@ -22,6 +22,11 @@
                 android:resource="@xml/shortcuts" />
         </activity>
 
+        <activity
+            android:name=".focus.FocusSurfaceSettingsActivity"
+            android:exported="true"
+            android:label="@string/focus_surface_settings_title" />
+
         <receiver
             android:name=".focus.FocusNotificationActionReceiver"
             android:enabled="true"
