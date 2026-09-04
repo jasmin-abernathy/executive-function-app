@@ -25,10 +25,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     init {
-        launch {
-            repository.load()
-            syncFocusPresence()
-        }
+        reload()
+    }
+
+    fun reload() = launch {
+        repository.load()
+        syncFocusPresence()
     }
 
     fun capture(title: String, firstStep: String? = null, after: () -> Unit = {}) =
