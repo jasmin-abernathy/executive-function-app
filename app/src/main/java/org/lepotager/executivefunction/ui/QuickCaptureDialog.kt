@@ -18,10 +18,11 @@ import org.lepotager.executivefunction.R
  */
 @Composable
 fun QuickCaptureDialog(
+    initialValue: String = "",
     onDismiss: () -> Unit,
     onCapture: (String) -> Unit,
 ) {
-    var value by remember { mutableStateOf("") }
+    var value by remember(initialValue) { mutableStateOf(initialValue) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
