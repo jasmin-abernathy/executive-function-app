@@ -35,4 +35,20 @@
     <string name="ok">OK</string>
     <string name="error_title">That was not saved</string>
     <string name="error_message">Nothing was intentionally discarded. Try again; if it keeps happening, restart the app.</string>
+
+    <string name="companion_widget_description">A calm home-screen presence for resuming or noting something without searching through the app.</string>
+    <string name="companion_widget_title">Your companion is here</string>
+    <string name="companion_widget_art_pending">Official artwork coming later</string>
+    <string name="companion_widget_art_pending_short">Artwork later</string>
+    <string name="companion_widget_scene_resting">Resting quietly</string>
+    <string name="companion_widget_scene_crafting">Tinkering in their corner</string>
+    <string name="companion_widget_scene_sewing">Sewing something</string>
+    <string name="companion_widget_scene_observing">Watching the room</string>
+    <string name="companion_widget_status_focusing">In progress: %1$s</string>
+    <string name="companion_widget_status_resumable">You can resume: %1$s</string>
+    <string name="companion_widget_status_ready">When you want: %1$s</string>
+    <string name="companion_widget_status_quiet">Nothing is pressing.</string>
+    <string name="companion_widget_open">Open</string>
+    <string name="companion_widget_resume">Resume</string>
+    <string name="companion_widget_capture">Note</string>
 </resources>

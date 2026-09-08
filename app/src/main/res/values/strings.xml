@@ -35,4 +35,20 @@
     <string name="ok">OK</string>
     <string name="error_title">Ça n’a pas été enregistré</string>
     <string name="error_message">Rien n’a été perdu volontairement. Réessaie ; si le problème continue, redémarre l’application.</string>
+
+    <string name="companion_widget_description">Une présence calme sur l’écran d’accueil pour reprendre ou noter sans chercher dans l’application.</string>
+    <string name="companion_widget_title">Ton compagnon est là</string>
+    <string name="companion_widget_art_pending">Visuel officiel à venir</string>
+    <string name="companion_widget_art_pending_short">Visuel à venir</string>
+    <string name="companion_widget_scene_resting">Se repose tranquillement</string>
+    <string name="companion_widget_scene_crafting">Bricole dans son coin</string>
+    <string name="companion_widget_scene_sewing">Coud quelque chose</string>
+    <string name="companion_widget_scene_observing">Observe ce qui l’entoure</string>
+    <string name="companion_widget_status_focusing">En cours : %1$s</string>
+    <string name="companion_widget_status_resumable">Tu peux reprendre : %1$s</string>
+    <string name="companion_widget_status_ready">Quand tu veux : %1$s</string>
+    <string name="companion_widget_status_quiet">Rien ne presse.</string>
+    <string name="companion_widget_open">Ouvrir</string>
+    <string name="companion_widget_resume">Reprendre</string>
+    <string name="companion_widget_capture">Noter</string>
 </resources>

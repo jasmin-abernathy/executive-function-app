@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.data.FocusRepository
+import org.lepotager.executivefunction.widget.updateCompanionWidgets
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = FocusRepository(AppDatabase(application))
@@ -46,6 +47,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private fun launch(after: () -> Unit = {}, block: suspend () -> Unit) {
         viewModelScope.launch(exceptionHandler) {
             block()
+            // Widget refresh is best-effort: a launcher/widget issue must never
+            // turn a successful task action into an app error.
+            try {
+                updateCompanionWidgets(getApplication())
+            } catch (_: Throwable) {
+                // The normal app remains authoritative; the widget can refresh later.
+            }
             after()
         }
     }
