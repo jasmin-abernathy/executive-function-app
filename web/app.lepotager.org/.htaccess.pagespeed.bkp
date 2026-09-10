@@ -1,0 +1,19 @@
+# o2switch pagespeed start / DO NOT REMOVE OR EDIT
+<IfModule pagespeed_module>
+ModPagespeed on
+ModPagespeedRewriteLevel PassThrough
+ModPagespeedEnableFilters add_head,canonicalize_javascript_libraries,collapse_whitespace,combine_css,convert_meta_tags,dedup_inlined_images,extend_cache,hint_preload_subresources,rewrite_javascript,move_css_above_scripts,insert_dns_prefetch
+</IfModule>
+# o2switch pagespeed end / DO NOT REMOVE OR EDIT
+
+
+
+
+
+
+
+
+
+
+
+
