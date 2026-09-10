@@ -32,6 +32,8 @@ data class FocusSession(
     val interruptionNote: String?,
     val createdAt: Long,
     val updatedAt: Long,
+    /** Suggested countdown learned locally from earlier completed occurrences. */
+    val targetDurationMs: Long? = null,
 )
 
 data class ActiveFocus(

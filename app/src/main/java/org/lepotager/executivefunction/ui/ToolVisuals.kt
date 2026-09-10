@@ -1,5 +1,9 @@
 package org.lepotager.executivefunction.ui
 
+import android.animation.ValueAnimator
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -9,6 +13,10 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -17,7 +25,15 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlin.math.PI
+import kotlin.math.sin
 
 /**
  * Functional marks only. They do not define the companion, its objects,
@@ -58,9 +74,10 @@ internal fun ToolGlyph(
     kind: ToolGlyphKind,
     modifier: Modifier = Modifier,
     dieFace: Int = 5,
+    glyphSize: Dp = 22.dp,
 ) {
     val color = LocalContentColor.current
-    Canvas(modifier = modifier.size(22.dp)) {
+    Canvas(modifier = modifier.size(glyphSize)) {
         val strokeWidth = 2.dp.toPx()
         val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Round)
         val left = size.width * 0.18f
@@ -133,6 +150,73 @@ internal fun ToolGlyph(
                 )
                 drawLine(color, Offset(size.width * 0.31f, center.y), Offset(size.width * 0.69f, center.y), strokeWidth, StrokeCap.Round)
             }
+        }
+    }
+}
+
+/** A functional die animation; it deliberately does not define illustration or companion style. */
+@Composable
+internal fun AnimatedDieBadge(
+    rollKey: Int,
+    finalFace: Int,
+    description: String,
+    onRollFinished: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val progress = remember { Animatable(1f) }
+    val haptic = LocalHapticFeedback.current
+    val latestOnFinished by rememberUpdatedState(onRollFinished)
+    val animationsEnabled = remember { ValueAnimator.areAnimatorsEnabled() }
+
+    LaunchedEffect(rollKey) {
+        if (rollKey <= 0) return@LaunchedEffect
+        progress.snapTo(0f)
+        if (animationsEnabled) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            progress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 760, easing = FastOutSlowInEasing),
+            )
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+        } else {
+            progress.snapTo(1f)
+        }
+        latestOnFinished()
+    }
+
+    val fraction = progress.value
+    val rolling = rollKey > 0 && fraction < 1f
+    val shownFace = if (rolling) {
+        (((fraction * 17).toInt() + rollKey) % 6) + 1
+    } else {
+        finalFace.coerceIn(1, 6)
+    }
+    val jump = if (rolling) sin(PI * fraction).toFloat() else 0f
+
+    Surface(
+        modifier = modifier
+            .semantics { contentDescription = description }
+            .graphicsLayer {
+                rotationZ = if (rolling) 720f * fraction else 0f
+                translationY = -32.dp.toPx() * jump
+                val scale = 1f + 0.12f * jump
+                scaleX = scale
+                scaleY = scale
+                shadowElevation = (4.dp + 10.dp * jump).toPx()
+            }
+            .size(72.dp),
+        shape = RoundedCornerShape(22.dp),
+        color = MaterialTheme.colorScheme.primaryContainer,
+        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        shadowElevation = 4.dp,
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            ToolGlyph(
+                kind = ToolGlyphKind.DRAW,
+                dieFace = shownFace,
+                glyphSize = 40.dp,
+            )
         }
     }
 }
