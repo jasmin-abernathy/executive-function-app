@@ -19,17 +19,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -129,7 +124,8 @@ fun HomeScreen(
                             onClick = { showFirstStep = true },
                             colors = appTextButtonColors(),
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null)
+                            ToolGlyph(ToolGlyphKind.CAPTURE)
+                            Spacer(Modifier.size(8.dp))
                             Text(stringResource(R.string.add_first_step))
                         }
                     }
@@ -166,6 +162,8 @@ fun HomeScreen(
                         .fillMaxWidth()
                         .sizeIn(minHeight = 48.dp),
                 ) {
+                    ToolGlyph(ToolGlyphKind.DRAW)
+                    Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.draw_action))
                 }
             }
@@ -220,6 +218,10 @@ private fun TaskDrawPanel(
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
+            ToolBadge(
+                kind = ToolGlyphKind.DRAW,
+                dieFace = stableDieFace(task.id),
+            )
             Text(
                 text = stringResource(R.string.draw_result_label),
                 style = MaterialTheme.typography.labelLarge,
@@ -252,6 +254,8 @@ private fun TaskDrawPanel(
                         .weight(1f)
                         .sizeIn(minHeight = 48.dp),
                 ) {
+                    ToolGlyph(ToolGlyphKind.DRAW, dieFace = stableDieFace(task.id))
+                    Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.redraw_action))
                 }
                 Button(
@@ -261,6 +265,8 @@ private fun TaskDrawPanel(
                         .weight(1f)
                         .sizeIn(minHeight = 48.dp),
                 ) {
+                    ToolGlyph(ToolGlyphKind.START)
+                    Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.start_action))
                 }
             }
@@ -298,7 +304,8 @@ private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
                 colors = appButtonColors(),
                 modifier = Modifier.sizeIn(minHeight = 48.dp),
             ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = null)
+                ToolGlyph(ToolGlyphKind.START)
+                Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.start_action))
             }
         }
@@ -362,14 +369,20 @@ fun FocusScreen(
             }
         }
 
-        Text(
-            text = formatElapsed(elapsed),
-            fontSize = 54.sp,
-            fontWeight = FontWeight.Light,
-            modifier = Modifier.semantics {
-                contentDescription = accessibleElapsed
-            },
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            ToolBadge(ToolGlyphKind.CLOCK)
+            Text(
+                text = formatElapsed(elapsed),
+                fontSize = 54.sp,
+                fontWeight = FontWeight.Light,
+                modifier = Modifier.semantics {
+                    contentDescription = accessibleElapsed
+                },
+            )
+        }
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -382,7 +395,8 @@ fun FocusScreen(
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
             ) {
-                Icon(Icons.Default.Add, contentDescription = null)
+                ToolGlyph(ToolGlyphKind.CAPTURE)
+                Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.quick_capture_action))
             }
             OutlinedButton(
@@ -393,6 +407,8 @@ fun FocusScreen(
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
             ) {
+                ToolGlyph(ToolGlyphKind.PAUSE)
+                Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.interrupt_action))
             }
             Button(
@@ -402,7 +418,8 @@ fun FocusScreen(
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
             ) {
-                Icon(Icons.Default.Check, contentDescription = null)
+                ToolGlyph(ToolGlyphKind.COMPLETE)
+                Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.complete_action))
             }
         }
@@ -478,7 +495,8 @@ fun ResumeScreen(
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
         ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = null)
+            ToolGlyph(ToolGlyphKind.START)
+            Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.resume_action))
         }
         FilledTonalButton(
@@ -488,6 +506,8 @@ fun ResumeScreen(
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
         ) {
+            ToolGlyph(ToolGlyphKind.REDUCE)
+            Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.make_smaller_action))
         }
         OutlinedButton(
@@ -498,6 +518,8 @@ fun ResumeScreen(
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
         ) {
+            ToolGlyph(ToolGlyphKind.POSTPONE)
+            Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.choose_another_action))
         }
     }
@@ -537,10 +559,7 @@ private fun EmptyTasksPanel() {
                 border = appBorder(),
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                    )
+                    ToolGlyph(ToolGlyphKind.COMPLETE)
                 }
             }
             Text(
