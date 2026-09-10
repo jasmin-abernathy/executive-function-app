@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.domain.TaskDraw
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.TaskItem
 
@@ -69,6 +70,7 @@ fun HomeScreen(
     var title by remember { mutableStateOf("") }
     var firstStep by remember { mutableStateOf("") }
     var showFirstStep by remember { mutableStateOf(false) }
+    var drawnTask by remember(tasks) { mutableStateOf<TaskItem?>(null) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -150,6 +152,38 @@ fun HomeScreen(
                 }
             }
         }
+        if (tasks.isNotEmpty()) {
+            item {
+                FilledTonalButton(
+                    onClick = {
+                        drawnTask = TaskDraw.pick(
+                            tasks = tasks,
+                            previousTaskId = drawnTask?.id,
+                        )
+                    },
+                    colors = appTonalButtonColors(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .sizeIn(minHeight = 48.dp),
+                ) {
+                    Text(stringResource(R.string.draw_action))
+                }
+            }
+            drawnTask?.let { task ->
+                item(key = "drawn-${task.id}") {
+                    TaskDrawPanel(
+                        task = task,
+                        onRedraw = {
+                            drawnTask = TaskDraw.pick(
+                                tasks = tasks,
+                                previousTaskId = task.id,
+                            )
+                        },
+                        onStart = { onStart(task.id) },
+                    )
+                }
+            }
+        }
         item {
             Text(
                 text = stringResource(R.string.ready_title),
@@ -165,6 +199,70 @@ fun HomeScreen(
         } else {
             items(tasks, key = { it.id }) { task ->
                 TaskCard(task = task, onStart = { onStart(task.id) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun TaskDrawPanel(
+    task: TaskItem,
+    onRedraw: () -> Unit,
+    onStart: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = appCardColors(),
+        border = appBorder(),
+        shape = RoundedCornerShape(22.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.draw_result_label),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = task.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { heading() },
+            )
+            task.firstStep?.let {
+                Text(
+                    text = stringResource(R.string.first_step_value, it),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Text(
+                text = stringResource(R.string.draw_result_support),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = onRedraw,
+                    colors = appOutlinedButtonColors(),
+                    border = appBorder(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .sizeIn(minHeight = 48.dp),
+                ) {
+                    Text(stringResource(R.string.redraw_action))
+                }
+                Button(
+                    onClick = onStart,
+                    colors = appButtonColors(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .sizeIn(minHeight = 48.dp),
+                ) {
+                    Text(stringResource(R.string.start_action))
+                }
             }
         }
     }

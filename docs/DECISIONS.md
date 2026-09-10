@@ -10,3 +10,4 @@ Use this file for small decisions. Use an ADR under `docs/adr/` for decisions th
 | 2026-08 | No advertising and no generative AI in the app core | Accepted |
 | 2026-08 | Accessibility belongs in the free core | Accepted |
 | 2026-08 | Android target: Kotlin + Jetpack Compose | Current direction |
+| 2026-09 | Choice-paralysis aid uses an optional, local task draw; it proposes but never auto-starts, penalises a redraw or replaces manual choice | Accepted |

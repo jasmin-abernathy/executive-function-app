@@ -24,13 +24,15 @@ The first compilable project pins a mutually compatible toolchain and lets Depen
 - Compose for UI;
 - `SQLiteOpenHelper` for structured task/session data and explicit transactions;
 - `StateFlow` for the observable in-process snapshot;
-- pure functions for clock and focus-state transitions;
+- pure functions for clock, focus-state transitions and optional task draws;
 - Android local notifications / alarms where appropriate;
 - WorkManager only when actual deferrable background work exists.
 
 SQLite is used directly in P1 to avoid annotation processing, generated code and an additional persistence abstraction before the schema justifies it. A unique partial index enforces one active focus session. State changes are persisted atomically; the running timer is derived from timestamps instead of writing once per second.
 
 The application requests no network permission and disables automatic Android cloud backup. Export and restore must be explicit future user actions.
+
+The choice-paralysis aid is deliberately implemented as a pure local selector. It only considers currently ready tasks, avoids immediately returning the same task when another candidate exists, and never starts work without a second explicit user action. Future energy/time filters must narrow this eligible set before the draw rather than merely decorating the result.
 
 ## Avoid in P1
 

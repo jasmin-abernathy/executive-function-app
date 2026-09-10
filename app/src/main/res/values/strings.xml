@@ -8,6 +8,10 @@
     <string name="first_step_optional">Premier petit pas (facultatif)</string>
     <string name="add_first_step">Ajouter un premier petit pas</string>
     <string name="capture_action">Mettre de côté</string>
+    <string name="draw_action">Je n’arrive pas à choisir : tirer une tâche</string>
+    <string name="draw_result_label">Le dé propose</string>
+    <string name="draw_result_support">Ce n’est qu’une proposition. Tu peux relancer sans te justifier.</string>
+    <string name="redraw_action">Relancer</string>
     <string name="ready_title">Prêt quand tu l’es</string>
     <string name="empty_tasks">Rien en attente. Tu peux commencer par une toute petite chose.</string>
     <string name="first_step_value">Premier pas : %1$s</string>

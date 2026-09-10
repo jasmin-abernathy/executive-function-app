@@ -8,6 +8,10 @@
     <string name="first_step_optional">First small step (optional)</string>
     <string name="add_first_step">Add a first small step</string>
     <string name="capture_action">Set aside</string>
+    <string name="draw_action">I can’t choose: draw a task</string>
+    <string name="draw_result_label">The die suggests</string>
+    <string name="draw_result_support">This is only a suggestion. You can roll again, no explanation needed.</string>
+    <string name="redraw_action">Roll again</string>
     <string name="ready_title">Ready when you are</string>
     <string name="empty_tasks">Nothing waiting. You can begin with one very small thing.</string>
     <string name="first_step_value">First step: %1$s</string>
