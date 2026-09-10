@@ -36,12 +36,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -66,6 +68,16 @@ fun HomeScreen(
     var firstStep by remember { mutableStateOf("") }
     var showFirstStep by remember { mutableStateOf(false) }
     var drawnTask by remember(tasks) { mutableStateOf<TaskItem?>(null) }
+    var pendingDraw by remember(tasks) { mutableStateOf<TaskItem?>(null) }
+    var drawRollKey by remember { mutableIntStateOf(0) }
+    var isDrawing by remember { mutableStateOf(false) }
+
+    fun beginDraw(previousTaskId: String?) {
+        val next = TaskDraw.pick(tasks = tasks, previousTaskId = previousTaskId) ?: return
+        pendingDraw = next
+        isDrawing = true
+        drawRollKey += 1
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -151,12 +163,8 @@ fun HomeScreen(
         if (tasks.isNotEmpty()) {
             item {
                 FilledTonalButton(
-                    onClick = {
-                        drawnTask = TaskDraw.pick(
-                            tasks = tasks,
-                            previousTaskId = drawnTask?.id,
-                        )
-                    },
+                    onClick = { beginDraw(drawnTask?.id) },
+                    enabled = !isDrawing,
                     colors = appTonalButtonColors(),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -167,16 +175,31 @@ fun HomeScreen(
                     Text(stringResource(R.string.draw_action))
                 }
             }
-            drawnTask?.let { task ->
+            if (isDrawing || drawnTask != null) {
+                item(key = "animated-task-die") {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val finalTask = pendingDraw ?: drawnTask
+                        AnimatedDieBadge(
+                            rollKey = drawRollKey,
+                            finalFace = finalTask?.let { stableDieFace(it.id) } ?: 1,
+                            description = stringResource(R.string.die_rolling_accessible),
+                            onRollFinished = {
+                                pendingDraw?.let { drawnTask = it }
+                                pendingDraw = null
+                                isDrawing = false
+                            },
+                        )
+                    }
+                }
+            }
+            if (!isDrawing) drawnTask?.let { task ->
                 item(key = "drawn-${task.id}") {
                     TaskDrawPanel(
                         task = task,
-                        onRedraw = {
-                            drawnTask = TaskDraw.pick(
-                                tasks = tasks,
-                                previousTaskId = task.id,
-                            )
-                        },
+                        onRedraw = { beginDraw(task.id) },
                         onStart = { onStart(task.id) },
                     )
                 }
@@ -315,6 +338,8 @@ private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
 @Composable
 fun FocusScreen(
     activeFocus: ActiveFocus,
+    overlayEnabled: Boolean,
+    onToggleOverlay: () -> Unit,
     onQuickCapture: (String, String?, () -> Unit) -> Unit,
     onInterrupt: (String?) -> Unit,
     onComplete: () -> Unit,
@@ -329,12 +354,19 @@ fun FocusScreen(
         }
     }
     val elapsed = SessionClock.elapsedMs(activeFocus.session, now)
-    val elapsedSeconds = elapsed / 1_000
+    val targetDuration = activeFocus.session.targetDurationMs
+    val overtime = targetDuration?.let { (elapsed - it).coerceAtLeast(0) } ?: 0L
+    val displayedTime = when {
+        targetDuration == null -> elapsed
+        overtime > 0 -> overtime
+        else -> (targetDuration - elapsed).coerceAtLeast(0)
+    }
+    val displayedSeconds = displayedTime / 1_000
     val accessibleElapsed = stringResource(
         R.string.timer_accessible,
-        elapsedSeconds / 3_600,
-        (elapsedSeconds % 3_600) / 60,
-        elapsedSeconds % 60,
+        displayedSeconds / 3_600,
+        (displayedSeconds % 3_600) / 60,
+        displayedSeconds % 60,
     )
 
     Column(
@@ -375,7 +407,18 @@ fun FocusScreen(
         ) {
             ToolBadge(ToolGlyphKind.CLOCK)
             Text(
-                text = formatElapsed(elapsed),
+                text = stringResource(
+                    when {
+                        targetDuration == null -> R.string.stopwatch_learning_label
+                        overtime > 0 -> R.string.timer_overtime_label
+                        else -> R.string.timer_suggested_label
+                    },
+                ),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = (if (overtime > 0) "+" else "") + formatElapsed(displayedTime),
                 fontSize = 54.sp,
                 fontWeight = FontWeight.Light,
                 modifier = Modifier.semantics {
@@ -388,6 +431,22 @@ fun FocusScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            FilledTonalButton(
+                onClick = onToggleOverlay,
+                colors = appTonalButtonColors(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .sizeIn(minHeight = 48.dp),
+            ) {
+                ToolGlyph(ToolGlyphKind.CLOCK)
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    stringResource(
+                        if (overlayEnabled) R.string.hide_floating_timer
+                        else R.string.show_floating_timer,
+                    ),
+                )
+            }
             FilledTonalButton(
                 onClick = { showCapture = true },
                 colors = appTonalButtonColors(),
@@ -675,6 +734,28 @@ fun ErrorDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.error_title)) },
         text = { Text(stringResource(R.string.error_message)) },
+        confirmButton = {
+            TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+    )
+}
+
+@Composable
+fun CompletionFeedbackDialog(minutesAhead: Long, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.completion_ahead_title)) },
+        text = {
+            Text(
+                pluralStringResource(
+                    R.plurals.completion_ahead_message,
+                    minutesAhead.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                    minutesAhead,
+                ),
+            )
+        },
         confirmButton = {
             TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
                 Text(stringResource(R.string.ok))

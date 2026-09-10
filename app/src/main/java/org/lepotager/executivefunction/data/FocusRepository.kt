@@ -48,6 +48,7 @@ class FocusRepository internal constructor(
     suspend fun start(taskId: String) = mutate {
         requireNotNull(database.taskById(taskId))
         val timestamp = now()
+        val learnedTargetDurationMs = database.suggestedDurationMs(taskId)
         database.startFocus(
             taskId,
             FocusSession(
@@ -59,6 +60,7 @@ class FocusRepository internal constructor(
                 interruptionNote = null,
                 createdAt = timestamp,
                 updatedAt = timestamp,
+                targetDurationMs = learnedTargetDurationMs,
             ),
         )
         refresh()
