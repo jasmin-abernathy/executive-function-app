@@ -440,3 +440,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .legal-updated { margin: 8px 0 0; color: #858e88; font-size: .82rem; }
 @media (max-width: 800px) { .legal-layout { grid-template-columns: 1fr; } .legal-toc { position: static; grid-template-columns: repeat(2,minmax(0,1fr)); } .legal-toc strong { grid-column: 1/-1; } }
 @media (max-width: 560px) { .legal-hero { padding-top: 66px; } .legal-details > div { grid-template-columns: 1fr; gap: 4px; } .legal-toc { grid-template-columns: 1fr; } }
+
+/* Research panel status visibility */
+.research-status.is-visible {
+    display: block;
+}

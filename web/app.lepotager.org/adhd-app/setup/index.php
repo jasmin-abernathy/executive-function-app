@@ -10,7 +10,28 @@ session_set_cookie_params([
 session_start();
 
 $root = dirname(__DIR__);
-$configFile = $root . '/config.php';
+
+$home = getenv('HOME');
+
+if (!is_string($home) || $home === '') {
+    $serverHome = $_SERVER['HOME'] ?? '';
+    if (is_string($serverHome) && $serverHome !== '') {
+        $home = $serverHome;
+    }
+}
+
+if (!is_string($home) || $home === '') {
+    $marker = '/public_html/';
+    $position = strpos(__DIR__, $marker);
+    if ($position !== false) {
+        $home = substr(__DIR__, 0, $position);
+    }
+}
+
+$configFile = is_string($home) && $home !== ''
+    ? rtrim($home, '/') . '/private/executive-function-app/config.php'
+    : $root . '/config.php';
+
 $installed = is_file($configFile);
 $error = '';
 $success = false;
@@ -136,7 +157,7 @@ if (!$installed && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $generatedConfig = "<?php\n\ndeclare(strict_types=1);\n\nreturn " . var_export($config, true) . ";\n";
 
         if (@file_put_contents($configFile, $generatedConfig, LOCK_EX) === false) {
-            throw new RuntimeException('The database was created, but config.php could not be written. Copy the generated configuration shown below into a new config.php file in the app root.');
+            throw new RuntimeException('The database was created, but the private configuration file could not be written.');
         }
         @chmod($configFile, 0600);
         $success = true;
@@ -233,7 +254,7 @@ if (!$installed && $_SERVER['REQUEST_METHOD'] === 'POST') {
       </form>
       <?php if ($generatedConfig !== '' && !$success): ?>
         <h2>Generated config.php</h2>
-        <p>The installer could not write the file automatically. Create <code>config.php</code> in the app root and paste this exact content:</p>
+        <p>The installer could not write the file automatically. Save this configuration in the private configuration file outside the public web root:</p>
         <textarea class="text-field" rows="18" readonly><?= htmlspecialchars($generatedConfig, ENT_QUOTES, 'UTF-8') ?></textarea>
       <?php endif; ?>
     <?php endif; ?>

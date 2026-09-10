@@ -28,7 +28,26 @@ function h(mixed $v): string {
 }
 
 $root = dirname(__DIR__);
-$configPath = $root . '/config.php';
+$home = getenv('HOME');
+
+if (!is_string($home) || $home === '') {
+    $serverHome = $_SERVER['HOME'] ?? '';
+    if (is_string($serverHome) && $serverHome !== '') {
+        $home = $serverHome;
+    }
+}
+
+if (!is_string($home) || $home === '') {
+    $marker = '/public_html/';
+    $position = strpos(__DIR__, $marker);
+    if ($position !== false) {
+        $home = substr(__DIR__, 0, $position);
+    }
+}
+
+$configPath = is_string($home) && $home !== ''
+    ? rtrim($home, '/') . '/private/executive-function-app/config.php'
+    : $root . '/config.php';
 $bootstrapPath = $root . '/includes/bootstrap.php';
 $results = [];
 $fatal = null;
@@ -49,9 +68,9 @@ function test(string $label, callable $fn): void {
 }
 
 try {
-    test('Root config.php', function() use ($configPath) {
-        if (!is_file($configPath)) throw new RuntimeException('Missing /adhd-app/config.php');
-        if (!is_readable($configPath)) throw new RuntimeException('/adhd-app/config.php is not readable');
+    test('Private shared configuration', function() use ($configPath) {
+        if (!is_file($configPath)) throw new RuntimeException('Missing private application configuration');
+        if (!is_readable($configPath)) throw new RuntimeException('Private application configuration is not readable');
         return 'found / readable';
     });
 
@@ -145,7 +164,7 @@ small{display:block;margin-top:18px;opacity:.75;line-height:1.5}
 </div>
 <?php endforeach; ?>
 <small>
-Read-only check. It uses the real shared configuration at <code>/adhd-app/config.php</code>.
+Read-only check. It uses the real shared configuration stored outside the public web root.
 It does not display database credentials and performs only SELECT queries.<br>
 Delete this file after sending the result.
 </small>

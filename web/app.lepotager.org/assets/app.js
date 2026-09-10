@@ -60,3 +60,57 @@ nav?.querySelectorAll('a').forEach((link) => {
 document.querySelectorAll('[data-year]').forEach((el) => {
   el.textContent = new Date().getFullYear();
 });
+
+// Research panel form feedback
+(() => {
+  const params = new URLSearchParams(window.location.search);
+  const state = params.get('research');
+
+  if (!state) return;
+
+  const status = document.querySelector('[data-research-status]');
+  if (!status) return;
+
+  const lang = document.documentElement.lang === 'en' ? 'en' : 'fr';
+
+  const messages = {
+    fr: {
+      'check-email': 'Merci ! Regarde maintenant ta boîte mail pour confirmer ton inscription.',
+      'already': 'Cette adresse est déjà inscrite au panel de recherche.',
+      'invalid': 'Vérifie les champs obligatoires puis réessaie.',
+      'invalid-email': 'L’adresse e-mail indiquée ne semble pas valide.',
+      'error': 'Une erreur technique est survenue. Tu peux réessayer dans quelques instants.'
+    },
+    en: {
+      'check-email': 'Thanks! Check your inbox now to confirm your signup.',
+      'already': 'This email address is already registered for the research panel.',
+      'invalid': 'Please check the required fields and try again.',
+      'invalid-email': 'The email address does not appear to be valid.',
+      'error': 'A technical error occurred. Please try again shortly.'
+    }
+  };
+
+  status.textContent =
+    messages[lang][state]
+    || messages[lang].error;
+
+  status.style.display = 'block';
+  status.classList.add('is-visible');
+
+  if (state === 'check-email' || state === 'already') {
+    status.classList.add('is-success');
+  } else {
+    status.classList.add('is-error');
+  }
+
+  const cleanUrl = new URL(window.location.href);
+  cleanUrl.searchParams.delete('research');
+
+  history.replaceState(
+    null,
+    '',
+    cleanUrl.pathname
+      + cleanUrl.search
+      + cleanUrl.hash
+  );
+})();
