@@ -18,7 +18,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
-import kotlin.math.absoluteValue
 
 /**
  * Functional marks only. They do not define the companion, its objects,
@@ -138,7 +137,7 @@ internal fun ToolGlyph(
     }
 }
 
-internal fun stableDieFace(taskId: String): Int = (taskId.hashCode().absoluteValue % 6) + 1
+internal fun stableDieFace(taskId: String): Int = ((taskId.hashCode() and Int.MAX_VALUE) % 6) + 1
 
 private fun diceDots(face: Int): List<Offset> {
     val tl = Offset(0.27f, 0.27f)
