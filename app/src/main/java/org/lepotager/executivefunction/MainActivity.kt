@@ -45,7 +45,7 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(snapshot.activeFocus?.session?.status) {
                     if (snapshot.activeFocus?.session?.status != FocusStatus.RUNNING && overlayEnabled) {
-                        setOverlayEnabled(false)
+                        updateOverlayEnabled(false)
                     }
                 }
 
@@ -101,7 +101,7 @@ class MainActivity : ComponentActivity() {
         super.onResume()
         if (waitingForOverlayPermission) {
             waitingForOverlayPermission = false
-            if (Settings.canDrawOverlays(this)) setOverlayEnabled(true)
+            if (Settings.canDrawOverlays(this)) updateOverlayEnabled(true)
         } else {
             val shouldBeEnabled = overlayPreference() && Settings.canDrawOverlays(this)
             overlayEnabled = shouldBeEnabled
@@ -112,9 +112,9 @@ class MainActivity : ComponentActivity() {
 
     private fun toggleOverlay() {
         if (overlayEnabled) {
-            setOverlayEnabled(false)
+            updateOverlayEnabled(false)
         } else if (Settings.canDrawOverlays(this)) {
-            setOverlayEnabled(true)
+            updateOverlayEnabled(true)
         } else {
             waitingForOverlayPermission = true
             startActivity(
@@ -126,7 +126,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun setOverlayEnabled(enabled: Boolean) {
+    private fun updateOverlayEnabled(enabled: Boolean) {
         overlayEnabled = enabled
         getSharedPreferences(FocusOverlayService.PREFERENCES, Context.MODE_PRIVATE)
             .edit()
