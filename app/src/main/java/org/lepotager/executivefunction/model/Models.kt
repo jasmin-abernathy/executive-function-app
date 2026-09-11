@@ -14,6 +14,15 @@ enum class FocusStatus {
     COMPLETED,
 }
 
+enum class TaskColor {
+    NEUTRAL,
+    SAGE,
+    BLUE,
+    TERRACOTTA,
+    LAVENDER,
+    SAND,
+}
+
 data class TaskItem(
     val id: String,
     val title: String,
@@ -21,6 +30,8 @@ data class TaskItem(
     val status: TaskStatus,
     val createdAt: Long,
     val updatedAt: Long,
+    val color: TaskColor = TaskColor.NEUTRAL,
+    val sortPosition: Long = 0,
 )
 
 data class FocusSession(

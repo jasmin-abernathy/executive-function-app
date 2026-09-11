@@ -7,11 +7,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -25,6 +27,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -32,6 +35,8 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.font.FontWeight
 import kotlin.math.PI
 import kotlin.math.sin
 
@@ -77,6 +82,16 @@ internal fun ToolGlyph(
     glyphSize: Dp = 22.dp,
 ) {
     val color = LocalContentColor.current
+    if (kind == ToolGlyphKind.DRAW) {
+        D10Glyph(
+            face = dieFace,
+            modifier = modifier.size(glyphSize),
+            fillColor = color.copy(alpha = 0.14f),
+            outlineColor = color,
+            numberSize = glyphSize * 0.38f,
+        )
+        return
+    }
     Canvas(modifier = modifier.size(glyphSize)) {
         val strokeWidth = 2.dp.toPx()
         val stroke = Stroke(width = strokeWidth, cap = StrokeCap.Round)
@@ -91,25 +106,7 @@ internal fun ToolGlyph(
                 drawLine(color, Offset(center.x, top), Offset(center.x, bottom), strokeWidth, StrokeCap.Round)
                 drawLine(color, Offset(left, center.y), Offset(right, center.y), strokeWidth, StrokeCap.Round)
             }
-            ToolGlyphKind.DRAW -> {
-                drawRoundRect(
-                    color = color,
-                    topLeft = Offset(left, top),
-                    size = Size(right - left, bottom - top),
-                    cornerRadius = CornerRadius(size.minDimension * 0.12f),
-                    style = stroke,
-                )
-                diceDots(dieFace.coerceIn(1, 6)).forEach { dot ->
-                    drawCircle(
-                        color = color,
-                        radius = size.minDimension * 0.045f,
-                        center = Offset(
-                            left + (right - left) * dot.x,
-                            top + (bottom - top) * dot.y,
-                        ),
-                    )
-                }
-            }
+            ToolGlyphKind.DRAW -> Unit
             ToolGlyphKind.START -> {
                 val path = Path().apply {
                     moveTo(size.width * 0.34f, top)
@@ -187,56 +184,90 @@ internal fun AnimatedDieBadge(
     val fraction = progress.value
     val rolling = rollKey > 0 && fraction < 1f
     val shownFace = if (rolling) {
-        (((fraction * 17).toInt() + rollKey) % 6) + 1
-    } else {
-        finalFace.coerceIn(1, 6)
-    }
+        ((fraction * 29).toInt() + rollKey) % 10
+    } else finalFace.coerceIn(0, 9)
     val jump = if (rolling) sin(PI * fraction).toFloat() else 0f
 
-    Surface(
+    Box(
         modifier = modifier
             .semantics { contentDescription = description }
             .graphicsLayer {
                 rotationZ = if (rolling) 720f * fraction else 0f
+                rotationX = if (rolling) 24f * sin(PI * fraction * 2).toFloat() else 0f
+                rotationY = if (rolling) 18f * sin(PI * fraction * 3).toFloat() else 0f
                 translationY = -32.dp.toPx() * jump
                 val scale = 1f + 0.12f * jump
                 scaleX = scale
                 scaleY = scale
                 shadowElevation = (4.dp + 10.dp * jump).toPx()
             }
-            .size(72.dp),
-        shape = RoundedCornerShape(22.dp),
-        color = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-        shadowElevation = 4.dp,
+            .size(84.dp),
+        contentAlignment = Alignment.Center,
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            ToolGlyph(
-                kind = ToolGlyphKind.DRAW,
-                dieFace = shownFace,
-                glyphSize = 40.dp,
-            )
-        }
+        D10Glyph(
+            face = shownFace,
+            modifier = Modifier.size(76.dp),
+            fillColor = MaterialTheme.colorScheme.primaryContainer,
+            outlineColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            shadowColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.22f),
+            numberSize = 22.dp,
+        )
     }
 }
 
-internal fun stableDieFace(taskId: String): Int = ((taskId.hashCode() and Int.MAX_VALUE) % 6) + 1
+internal fun stableDieFace(taskId: String): Int = (taskId.hashCode() and Int.MAX_VALUE) % 10
 
-private fun diceDots(face: Int): List<Offset> {
-    val tl = Offset(0.27f, 0.27f)
-    val tr = Offset(0.73f, 0.27f)
-    val ml = Offset(0.27f, 0.50f)
-    val c = Offset(0.50f, 0.50f)
-    val mr = Offset(0.73f, 0.50f)
-    val bl = Offset(0.27f, 0.73f)
-    val br = Offset(0.73f, 0.73f)
-    return when (face) {
-        1 -> listOf(c)
-        2 -> listOf(tl, br)
-        3 -> listOf(tl, c, br)
-        4 -> listOf(tl, tr, bl, br)
-        5 -> listOf(tl, tr, c, bl, br)
-        else -> listOf(tl, tr, ml, mr, bl, br)
+@Composable
+private fun D10Glyph(
+    face: Int,
+    modifier: Modifier,
+    fillColor: androidx.compose.ui.graphics.Color,
+    outlineColor: androidx.compose.ui.graphics.Color,
+    shadowColor: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color.Transparent,
+    numberSize: Dp,
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Canvas(Modifier.matchParentSize()) {
+            fun polygon(vararg points: Offset) = Path().apply {
+                moveTo(points.first().x, points.first().y)
+                points.drop(1).forEach { lineTo(it.x, it.y) }
+                close()
+            }
+            val w = size.width
+            val h = size.height
+            val top = Offset(w * 0.50f, h * 0.05f)
+            val upperRight = Offset(w * 0.82f, h * 0.29f)
+            val right = Offset(w * 0.91f, h * 0.55f)
+            val bottom = Offset(w * 0.50f, h * 0.95f)
+            val left = Offset(w * 0.09f, h * 0.55f)
+            val upperLeft = Offset(w * 0.18f, h * 0.29f)
+            val centerLeft = Offset(w * 0.31f, h * 0.36f)
+            val centerRight = Offset(w * 0.69f, h * 0.36f)
+            val centerBottom = Offset(w * 0.50f, h * 0.83f)
+            val outer = polygon(top, upperRight, right, bottom, left, upperLeft)
+            if (shadowColor.alpha > 0f) {
+                translate(top = h * 0.045f) { drawPath(outer, shadowColor) }
+            }
+            drawPath(outer, fillColor)
+            drawPath(polygon(top, upperRight, centerRight, centerLeft, upperLeft), androidx.compose.ui.graphics.Color.White.copy(alpha = 0.12f))
+            drawPath(polygon(upperRight, right, bottom, centerBottom, centerRight), outlineColor.copy(alpha = 0.13f))
+            drawPath(polygon(left, upperLeft, centerLeft, centerBottom, bottom), androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.10f))
+            val stroke = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round)
+            drawPath(outer, outlineColor, style = stroke)
+            listOf(
+                top to centerLeft,
+                top to centerRight,
+                centerLeft to centerRight,
+                centerLeft to centerBottom,
+                centerRight to centerBottom,
+                centerBottom to bottom,
+            ).forEach { (start, end) -> drawLine(outlineColor.copy(alpha = 0.62f), start, end, stroke.width) }
+        }
+        Text(
+            text = face.coerceIn(0, 9).toString(),
+            color = outlineColor,
+            fontSize = numberSize.value.sp,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }

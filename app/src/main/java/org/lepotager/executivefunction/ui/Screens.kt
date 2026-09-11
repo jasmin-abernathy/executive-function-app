@@ -1,6 +1,7 @@
 package org.lepotager.executivefunction.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -16,7 +17,7 @@ import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
@@ -25,11 +26,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -42,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -56,13 +60,22 @@ import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.domain.TaskDraw
 import org.lepotager.executivefunction.model.ActiveFocus
+import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.model.TaskItem
 
 @Composable
 fun HomeScreen(
     tasks: List<TaskItem>,
-    onCapture: (String, String?, () -> Unit) -> Unit,
+    drawEnabled: Boolean,
+    pauseSuggestionsEnabled: Boolean,
+    pauseAfterMinutes: Int,
+    onCapture: (String, String?, TaskColor, () -> Unit) -> Unit,
     onStart: (String) -> Unit,
+    onMoveTask: (String, Int) -> Unit,
+    onSetTaskColor: (String, TaskColor) -> Unit,
+    onSetDrawEnabled: (Boolean) -> Unit,
+    onSetPauseSuggestionsEnabled: (Boolean) -> Unit,
+    onSetPauseAfterMinutes: (Int) -> Unit,
 ) {
     var title by remember { mutableStateOf("") }
     var firstStep by remember { mutableStateOf("") }
@@ -71,6 +84,8 @@ fun HomeScreen(
     var pendingDraw by remember(tasks) { mutableStateOf<TaskItem?>(null) }
     var drawRollKey by remember { mutableIntStateOf(0) }
     var isDrawing by remember { mutableStateOf(false) }
+    var selectedColor by remember { mutableStateOf(TaskColor.NEUTRAL) }
+    var organizing by remember { mutableStateOf(false) }
 
     fun beginDraw(previousTaskId: String?) {
         val next = TaskDraw.pick(tasks = tasks, previousTaskId = previousTaskId) ?: return
@@ -141,12 +156,18 @@ fun HomeScreen(
                             Text(stringResource(R.string.add_first_step))
                         }
                     }
+                    Text(
+                        text = stringResource(R.string.task_color_optional),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                    TaskColorPicker(selected = selectedColor, onSelect = { selectedColor = it })
                     Button(
                         onClick = {
-                            onCapture(title, firstStep) {
+                            onCapture(title, firstStep, selectedColor) {
                                 title = ""
                                 firstStep = ""
                                 showFirstStep = false
+                                selectedColor = TaskColor.NEUTRAL
                             }
                         },
                         enabled = title.isNotBlank(),
@@ -160,7 +181,52 @@ fun HomeScreen(
                 }
             }
         }
-        if (tasks.isNotEmpty()) {
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    text = stringResource(R.string.ready_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.semantics { heading() },
+                )
+                if (tasks.size > 1) {
+                    TextButton(
+                        onClick = { organizing = !organizing },
+                        colors = appTextButtonColors(),
+                    ) {
+                        Text(
+                            stringResource(
+                                if (organizing) R.string.finish_organizing
+                                else R.string.organize_tasks,
+                            ),
+                        )
+                    }
+                }
+            }
+        }
+        if (tasks.isEmpty()) {
+            item {
+                EmptyTasksPanel()
+            }
+        } else {
+            itemsIndexed(tasks, key = { _, task -> task.id }) { index, task ->
+                TaskCard(
+                    task = task,
+                    organizing = organizing,
+                    canMoveUp = index > 0,
+                    canMoveDown = index < tasks.lastIndex,
+                    onMoveUp = { onMoveTask(task.id, -1) },
+                    onMoveDown = { onMoveTask(task.id, 1) },
+                    onSetColor = { onSetTaskColor(task.id, it) },
+                    onStart = { onStart(task.id) },
+                )
+            }
+        }
+        if (drawEnabled && tasks.isNotEmpty()) {
             item {
                 FilledTonalButton(
                     onClick = { beginDraw(drawnTask?.id) },
@@ -184,7 +250,7 @@ fun HomeScreen(
                         val finalTask = pendingDraw ?: drawnTask
                         AnimatedDieBadge(
                             rollKey = drawRollKey,
-                            finalFace = finalTask?.let { stableDieFace(it.id) } ?: 1,
+                            finalFace = finalTask?.let { stableDieFace(it.id) } ?: 0,
                             description = stringResource(R.string.die_rolling_accessible),
                             onRollFinished = {
                                 pendingDraw?.let { drawnTask = it }
@@ -206,24 +272,175 @@ fun HomeScreen(
             }
         }
         item {
-            Text(
-                text = stringResource(R.string.ready_title),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.semantics { heading() },
+            SupportOptionsCard(
+                drawEnabled = drawEnabled,
+                pauseSuggestionsEnabled = pauseSuggestionsEnabled,
+                pauseAfterMinutes = pauseAfterMinutes,
+                onSetDrawEnabled = onSetDrawEnabled,
+                onSetPauseSuggestionsEnabled = onSetPauseSuggestionsEnabled,
+                onSetPauseAfterMinutes = onSetPauseAfterMinutes,
             )
         }
-        if (tasks.isEmpty()) {
-            item {
-                EmptyTasksPanel()
+    }
+}
+
+@Composable
+private fun SupportOptionsCard(
+    drawEnabled: Boolean,
+    pauseSuggestionsEnabled: Boolean,
+    pauseAfterMinutes: Int,
+    onSetDrawEnabled: (Boolean) -> Unit,
+    onSetPauseSuggestionsEnabled: (Boolean) -> Unit,
+    onSetPauseAfterMinutes: (Int) -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = appCardColors(),
+        border = appBorder(),
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.support_options_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.random_draw_option))
+                    Text(
+                        text = stringResource(R.string.random_draw_option_support),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(checked = drawEnabled, onCheckedChange = onSetDrawEnabled)
             }
-        } else {
-            items(tasks, key = { it.id }) { task ->
-                TaskCard(task = task, onStart = { onStart(task.id) })
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.pause_suggestions_option))
+                    Text(
+                        text = stringResource(R.string.pause_suggestions_support),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = pauseSuggestionsEnabled,
+                    onCheckedChange = onSetPauseSuggestionsEnabled,
+                )
+            }
+            if (pauseSuggestionsEnabled) {
+                Text(
+                    text = stringResource(R.string.pause_after_label),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    listOf(15, 25, 45, 60).forEach { minutes ->
+                        FilterChip(
+                            selected = pauseAfterMinutes == minutes,
+                            onClick = { onSetPauseAfterMinutes(minutes) },
+                            label = { Text(stringResource(R.string.minutes_short, minutes)) },
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
+                }
             }
         }
     }
 }
+
+@Composable
+private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) {
+    TaskColor.entries.chunked(3).forEach { rowColors ->
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+        ) {
+            rowColors.forEach { color ->
+                val palette = taskPalette(color)
+                val name = taskColorName(color)
+                Surface(
+                    onClick = { onSelect(color) },
+                    modifier = Modifier
+                        .size(42.dp)
+                        .semantics { contentDescription = name },
+                    shape = CircleShape,
+                    color = palette.container,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    border = BorderStroke(
+                        if (selected == color) 3.dp else 1.dp,
+                        if (selected == color) MaterialTheme.colorScheme.onSurface else palette.border,
+                    ),
+                ) {
+                    if (selected == color) {
+                        Box(contentAlignment = Alignment.Center) {
+                            ToolGlyph(ToolGlyphKind.COMPLETE, glyphSize = 18.dp)
+                        }
+                    }
+                }
+            }
+        }
+        Spacer(Modifier.height(6.dp))
+    }
+}
+
+private data class TaskPalette(val container: Color, val border: Color)
+
+@Composable
+private fun taskPalette(color: TaskColor): TaskPalette {
+    val dark = isSystemInDarkTheme()
+    return when (color) {
+        TaskColor.NEUTRAL -> TaskPalette(
+            MaterialTheme.colorScheme.surface,
+            MaterialTheme.colorScheme.outline,
+        )
+        TaskColor.SAGE -> if (dark) TaskPalette(Color(0xFF28342C), Color(0xFF71917A))
+            else TaskPalette(Color(0xFFEDF6EF), Color(0xFFA9CBB2))
+        TaskColor.BLUE -> if (dark) TaskPalette(Color(0xFF27313A), Color(0xFF7189A0))
+            else TaskPalette(Color(0xFFEEF4FA), Color(0xFFA8C4DD))
+        TaskColor.TERRACOTTA -> if (dark) TaskPalette(Color(0xFF392D29), Color(0xFFA57B6C))
+            else TaskPalette(Color(0xFFF9F0EC), Color(0xFFD6AD9D))
+        TaskColor.LAVENDER -> if (dark) TaskPalette(Color(0xFF322B39), Color(0xFF8E79A0))
+            else TaskPalette(Color(0xFFF4EFF9), Color(0xFFC4ADD8))
+        TaskColor.SAND -> if (dark) TaskPalette(Color(0xFF393428), Color(0xFF9C8B61))
+            else TaskPalette(Color(0xFFFAF5E8), Color(0xFFD9C493))
+    }
+}
+
+@Composable
+private fun taskColorName(color: TaskColor): String = stringResource(
+    when (color) {
+        TaskColor.NEUTRAL -> R.string.task_color_neutral
+        TaskColor.SAGE -> R.string.task_color_sage
+        TaskColor.BLUE -> R.string.task_color_blue
+        TaskColor.TERRACOTTA -> R.string.task_color_terracotta
+        TaskColor.LAVENDER -> R.string.task_color_lavender
+        TaskColor.SAND -> R.string.task_color_sand
+    },
+)
+
+@Composable
+private fun taskCardColors(color: TaskColor) = CardDefaults.cardColors(
+    containerColor = taskPalette(color).container,
+    contentColor = MaterialTheme.colorScheme.onSurface,
+)
+
+@Composable
+private fun taskBorder(color: TaskColor) = BorderStroke(1.dp, taskPalette(color).border)
 
 @Composable
 private fun TaskDrawPanel(
@@ -233,8 +450,8 @@ private fun TaskDrawPanel(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = appCardColors(),
-        border = appBorder(),
+        colors = taskCardColors(task.color),
+        border = taskBorder(task.color),
         shape = RoundedCornerShape(22.dp),
     ) {
         Column(
@@ -298,11 +515,20 @@ private fun TaskDrawPanel(
 }
 
 @Composable
-private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
+private fun TaskCard(
+    task: TaskItem,
+    organizing: Boolean,
+    canMoveUp: Boolean,
+    canMoveDown: Boolean,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
+    onSetColor: (TaskColor) -> Unit,
+    onStart: () -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = appCardColors(),
-        border = appBorder(),
+        colors = taskCardColors(task.color),
+        border = taskBorder(task.color),
         shape = RoundedCornerShape(
             topStart = 22.dp,
             topEnd = 14.dp,
@@ -322,6 +548,33 @@ private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            if (organizing) {
+                Text(
+                    text = stringResource(R.string.choose_task_color),
+                    style = MaterialTheme.typography.labelLarge,
+                )
+                TaskColorPicker(selected = task.color, onSelect = onSetColor)
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    OutlinedButton(
+                        onClick = onMoveUp,
+                        enabled = canMoveUp,
+                        colors = appOutlinedButtonColors(),
+                        border = appBorder(),
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(R.string.move_task_up))
+                    }
+                    OutlinedButton(
+                        onClick = onMoveDown,
+                        enabled = canMoveDown,
+                        colors = appOutlinedButtonColors(),
+                        border = appBorder(),
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Text(stringResource(R.string.move_task_down))
+                    }
+                }
+            }
             Button(
                 onClick = onStart,
                 colors = appButtonColors(),
@@ -339,6 +592,8 @@ private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
 fun FocusScreen(
     activeFocus: ActiveFocus,
     overlayEnabled: Boolean,
+    pauseSuggestionsEnabled: Boolean,
+    pauseAfterMinutes: Int,
     onToggleOverlay: () -> Unit,
     onQuickCapture: (String, String?, () -> Unit) -> Unit,
     onInterrupt: (String?) -> Unit,
@@ -346,7 +601,18 @@ fun FocusScreen(
 ) {
     var showCapture by remember { mutableStateOf(false) }
     var showInterrupt by remember { mutableStateOf(false) }
+    var showPauseSuggestion by remember(activeFocus.session.id) { mutableStateOf(false) }
     var now by remember(activeFocus.session.id) { mutableLongStateOf(System.currentTimeMillis()) }
+    var nextPausePromptAtMs by remember(
+        activeFocus.session.id,
+        activeFocus.session.segmentStartedAt,
+        pauseAfterMinutes,
+    ) {
+        mutableLongStateOf(
+            SessionClock.elapsedMs(activeFocus.session, System.currentTimeMillis()) +
+                pauseAfterMinutes * 60_000L,
+        )
+    }
     LaunchedEffect(activeFocus.session.id, activeFocus.session.segmentStartedAt) {
         while (true) {
             now = System.currentTimeMillis()
@@ -354,6 +620,18 @@ fun FocusScreen(
         }
     }
     val elapsed = SessionClock.elapsedMs(activeFocus.session, now)
+    LaunchedEffect(elapsed, pauseSuggestionsEnabled, nextPausePromptAtMs) {
+        if (
+            pauseSuggestionsEnabled &&
+            nextPausePromptAtMs != Long.MAX_VALUE &&
+            elapsed >= nextPausePromptAtMs
+        ) {
+            showPauseSuggestion = true
+        }
+    }
+    LaunchedEffect(pauseSuggestionsEnabled) {
+        if (!pauseSuggestionsEnabled) showPauseSuggestion = false
+    }
     val targetDuration = activeFocus.session.targetDurationMs
     val overtime = targetDuration?.let { (elapsed - it).coerceAtLeast(0) } ?: 0L
     val displayedTime = when {
@@ -496,6 +774,23 @@ fun FocusScreen(
             onConfirm = { note ->
                 showInterrupt = false
                 onInterrupt(note)
+            },
+        )
+    }
+    if (showPauseSuggestion) {
+        PauseSuggestionDialog(
+            minutes = pauseAfterMinutes,
+            onPause = {
+                showPauseSuggestion = false
+                onInterrupt(null)
+            },
+            onContinue = {
+                showPauseSuggestion = false
+                nextPausePromptAtMs = Long.MAX_VALUE
+            },
+            onRemindLater = {
+                showPauseSuggestion = false
+                nextPausePromptAtMs = elapsed + 10 * 60_000L
             },
         )
     }
@@ -688,6 +983,35 @@ private fun InterruptDialog(onDismiss: () -> Unit, onConfirm: (String?) -> Unit)
         dismissButton = {
             TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
                 Text(stringResource(R.string.cancel))
+            }
+        },
+    )
+}
+
+@Composable
+private fun PauseSuggestionDialog(
+    minutes: Int,
+    onPause: () -> Unit,
+    onContinue: () -> Unit,
+    onRemindLater: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onContinue,
+        title = { Text(stringResource(R.string.pause_suggestion_title)) },
+        text = { Text(stringResource(R.string.pause_suggestion_message, minutes)) },
+        confirmButton = {
+            TextButton(onClick = onPause, colors = appTextButtonColors()) {
+                Text(stringResource(R.string.take_a_pause))
+            }
+        },
+        dismissButton = {
+            Column(horizontalAlignment = Alignment.End) {
+                TextButton(onClick = onRemindLater, colors = appTextButtonColors()) {
+                    Text(stringResource(R.string.remind_pause_later))
+                }
+                TextButton(onClick = onContinue, colors = appTextButtonColors()) {
+                    Text(stringResource(R.string.continue_without_pause))
+                }
             }
         },
     )

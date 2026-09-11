@@ -13,6 +13,7 @@ import org.lepotager.executivefunction.model.AppSnapshot
 import org.lepotager.executivefunction.model.FocusSession
 import org.lepotager.executivefunction.model.FocusStatus
 import org.lepotager.executivefunction.model.TaskItem
+import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.model.TaskStatus
 import java.util.UUID
 
@@ -28,7 +29,11 @@ class FocusRepository internal constructor(
 
     suspend fun load() = mutate { refresh() }
 
-    suspend fun capture(title: String, firstStep: String? = null) = mutate {
+    suspend fun capture(
+        title: String,
+        firstStep: String? = null,
+        color: TaskColor = TaskColor.NEUTRAL,
+    ) = mutate {
         val cleanTitle = title.trim()
         require(cleanTitle.isNotEmpty())
         val timestamp = now()
@@ -40,6 +45,8 @@ class FocusRepository internal constructor(
                 status = TaskStatus.READY,
                 createdAt = timestamp,
                 updatedAt = timestamp,
+                color = color,
+                sortPosition = database.nextTaskPosition(),
             ),
         )
         refresh()
@@ -63,6 +70,16 @@ class FocusRepository internal constructor(
                 targetDurationMs = learnedTargetDurationMs,
             ),
         )
+        refresh()
+    }
+
+    suspend fun moveTask(taskId: String, offset: Int) = mutate {
+        database.moveOpenTask(taskId, offset)
+        refresh()
+    }
+
+    suspend fun setTaskColor(taskId: String, color: TaskColor) = mutate {
+        database.updateTaskColor(taskId, color)
         refresh()
     }
 

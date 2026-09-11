@@ -9,6 +9,7 @@ import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.FocusSession
 import org.lepotager.executivefunction.model.FocusStatus
 import org.lepotager.executivefunction.model.TaskItem
+import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.model.TaskStatus
 import org.lepotager.executivefunction.domain.TimeLearning
 import java.util.Locale
@@ -29,6 +30,8 @@ internal class AppDatabase(context: Context) :
                 title TEXT NOT NULL CHECK(length(trim(title)) > 0),
                 learning_key TEXT NOT NULL,
                 first_step TEXT,
+                color_key TEXT NOT NULL DEFAULT 'NEUTRAL',
+                sort_position INTEGER NOT NULL DEFAULT 0,
                 status TEXT NOT NULL,
                 created_at INTEGER NOT NULL,
                 updated_at INTEGER NOT NULL
@@ -55,6 +58,7 @@ internal class AppDatabase(context: Context) :
         db.execSQL("CREATE INDEX tasks_status_updated ON tasks(status, updated_at DESC)")
         db.execSQL("CREATE INDEX sessions_task ON focus_sessions(task_id, updated_at DESC)")
         db.execSQL("CREATE INDEX tasks_learning_key ON tasks(learning_key)")
+        db.execSQL("CREATE INDEX tasks_sort_position ON tasks(sort_position)")
         db.execSQL(
             "CREATE UNIQUE INDEX one_active_focus ON focus_sessions(is_active) WHERE is_active = 1",
         )
@@ -68,6 +72,13 @@ internal class AppDatabase(context: Context) :
             db.execSQL("CREATE INDEX tasks_learning_key ON tasks(learning_key)")
             db.execSQL("ALTER TABLE focus_sessions ADD COLUMN target_duration_ms INTEGER")
             version = 2
+        }
+        if (version == 2) {
+            db.execSQL("ALTER TABLE tasks ADD COLUMN color_key TEXT NOT NULL DEFAULT 'NEUTRAL'")
+            db.execSQL("ALTER TABLE tasks ADD COLUMN sort_position INTEGER NOT NULL DEFAULT 0")
+            db.execSQL("UPDATE tasks SET sort_position = rowid")
+            db.execSQL("CREATE INDEX tasks_sort_position ON tasks(sort_position)")
+            version = 3
         }
         check(version == newVersion) { "Missing migration from $oldVersion to $newVersion" }
     }
@@ -87,6 +98,14 @@ internal class AppDatabase(context: Context) :
         "1",
     ).use { cursor -> if (cursor.moveToFirst()) cursor.toTask() else null }
 
+    fun nextTaskPosition(): Long = readableDatabase.rawQuery(
+        "SELECT COALESCE(MAX(sort_position), -1) + 1 FROM tasks",
+        null,
+    ).use { cursor ->
+        cursor.moveToFirst()
+        cursor.getLong(0)
+    }
+
     fun openTasks(): List<TaskItem> = readableDatabase.query(
         "tasks",
         TASK_COLUMNS,
@@ -94,8 +113,36 @@ internal class AppDatabase(context: Context) :
         arrayOf(TaskStatus.COMPLETED.name),
         null,
         null,
-        "CASE status WHEN 'INTERRUPTED' THEN 0 WHEN 'IN_PROGRESS' THEN 1 ELSE 2 END, updated_at DESC",
+        "sort_position ASC, created_at ASC",
     ).use { cursor -> buildList { while (cursor.moveToNext()) add(cursor.toTask()) } }
+
+    fun moveOpenTask(taskId: String, offset: Int) = transaction { db ->
+        val ids = db.query(
+            "tasks",
+            arrayOf("id"),
+            "status != ?",
+            arrayOf(TaskStatus.COMPLETED.name),
+            null,
+            null,
+            "sort_position ASC, created_at ASC",
+        ).use { cursor ->
+            buildList { while (cursor.moveToNext()) add(cursor.getString(0)) }
+        }.toMutableList()
+        val from = ids.indexOf(taskId)
+        if (from == -1) return@transaction
+        val to = (from + offset).coerceIn(ids.indices)
+        if (from == to) return@transaction
+        ids.add(to, ids.removeAt(from))
+        ids.forEachIndexed { index, id ->
+            val values = ContentValues().apply { put("sort_position", index.toLong()) }
+            require(db.update("tasks", values, "id = ?", arrayOf(id)) == 1)
+        }
+    }
+
+    fun updateTaskColor(taskId: String, color: TaskColor) {
+        val values = ContentValues().apply { put("color_key", color.name) }
+        require(writableDatabase.update("tasks", values, "id = ?", arrayOf(taskId)) == 1)
+    }
 
     fun activeFocus(): ActiveFocus? {
         val session = readableDatabase.query(
@@ -229,6 +276,8 @@ internal class AppDatabase(context: Context) :
         put("title", title)
         put("learning_key", learningKey(title))
         putNullableString("first_step", firstStep)
+        put("color_key", color.name)
+        put("sort_position", sortPosition)
         put("status", status.name)
         put("created_at", createdAt)
         put("updated_at", updatedAt)
@@ -255,10 +304,14 @@ internal class AppDatabase(context: Context) :
         id = getString(getColumnIndexOrThrow("id")),
         title = getString(getColumnIndexOrThrow("title")),
         firstStep = getNullableString("first_step"),
-    status = TaskStatus.valueOf(getString(getColumnIndexOrThrow("status"))),
-    createdAt = getLong(getColumnIndexOrThrow("created_at")),
-    updatedAt = getLong(getColumnIndexOrThrow("updated_at")),
-)
+        status = TaskStatus.valueOf(getString(getColumnIndexOrThrow("status"))),
+        createdAt = getLong(getColumnIndexOrThrow("created_at")),
+        updatedAt = getLong(getColumnIndexOrThrow("updated_at")),
+        color = runCatching {
+            TaskColor.valueOf(getString(getColumnIndexOrThrow("color_key")))
+        }.getOrDefault(TaskColor.NEUTRAL),
+        sortPosition = getLong(getColumnIndexOrThrow("sort_position")),
+    )
 
     private fun Cursor.toSession() = FocusSession(
         id = getString(getColumnIndexOrThrow("id")),
@@ -284,8 +337,17 @@ internal class AppDatabase(context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "executive-function.db"
-        const val DATABASE_VERSION = 2
-        val TASK_COLUMNS = arrayOf("id", "title", "first_step", "status", "created_at", "updated_at")
+        const val DATABASE_VERSION = 3
+        val TASK_COLUMNS = arrayOf(
+            "id",
+            "title",
+            "first_step",
+            "color_key",
+            "sort_position",
+            "status",
+            "created_at",
+            "updated_at",
+        )
         val SESSION_COLUMNS = arrayOf(
             "id",
             "task_id",

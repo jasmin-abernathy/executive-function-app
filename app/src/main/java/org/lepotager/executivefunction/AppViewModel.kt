@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.data.FocusRepository
 import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.model.TaskColor
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = FocusRepository(AppDatabase(application))
@@ -29,10 +30,20 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         launch { repository.load() }
     }
 
-    fun capture(title: String, firstStep: String? = null, after: () -> Unit = {}) =
-        launch(after) { repository.capture(title, firstStep) }
+    fun capture(
+        title: String,
+        firstStep: String? = null,
+        color: TaskColor = TaskColor.NEUTRAL,
+        after: () -> Unit = {},
+    ) = launch(after) { repository.capture(title, firstStep, color) }
 
     fun start(taskId: String) = launch { repository.start(taskId) }
+
+    fun moveTask(taskId: String, offset: Int) = launch { repository.moveTask(taskId, offset) }
+
+    fun setTaskColor(taskId: String, color: TaskColor) = launch {
+        repository.setTaskColor(taskId, color)
+    }
 
     fun interrupt(note: String?) = launch { repository.interrupt(note) }
 
