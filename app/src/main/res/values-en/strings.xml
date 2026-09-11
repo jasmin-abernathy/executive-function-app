@@ -77,4 +77,18 @@
     <string name="ok">OK</string>
     <string name="error_title">That was not saved</string>
     <string name="error_message">Nothing was intentionally discarded. Try again; if it keeps happening, restart the app.</string>
+    <string name="open_journal">Planning, steps and learning</string>
+    <string name="adaptation_rule">Optional filters: declared energy, available time and context. Your manual order stays unchanged.</string>
+    <string name="adaptation_suggestion">Based on these filters and your importance setting: %1$s</string>
+    <string name="adaptation_empty">No tasks match the filters. Change them in Planning or choose manually.</string>
+    <string name="check_in_title">How are you feeling now?</string>
+    <string name="check_in_body">If you wish, share your mood, motivation and energy. This check-in is optional.</string>
+    <string name="check_in_answer">Check in</string>
+    <string name="not_now">Not now</string>
+    <string name="mini_timer">Android mini window</string>
+    <string name="open_notes">Keep a note</string>
+    <string name="task_reminder">A task, when you are ready</string>
+    <string name="start_requested_task">Start this task? Another active session will be preserved as postponed.</string>
+    <string name="widget_draw">Suggest a task with the die</string>
+    <string name="apply_suggested_order">Put matching tasks first, by importance</string>
 </resources>

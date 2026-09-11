@@ -4,10 +4,11 @@ on:
   # Heavy Android builds are opt-in on branches. Normal pushes to main do not
   # compile an APK; use Run workflow when an installable build is actually needed.
   workflow_dispatch:
-  push:
-    tags:
-      - "v*"
-      - "apk-*"
+    inputs:
+      build_apk:
+        description: "Generate an APK only when explicitly requested"
+        type: boolean
+        default: false
   pull_request:
     paths:
       - "app/**"
@@ -37,9 +38,13 @@ jobs:
           distribution: temurin
           java-version: "17"
       - uses: gradle/actions/setup-gradle@v6
-      - name: Test, lint, and assemble
-        run: ./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug --stacktrace
+      - name: Test and lint (no APK)
+        run: ./gradlew :app:testDebugUnitTest :app:lintDebug --stacktrace
+      - name: Assemble APK on explicit request only
+        if: github.event_name == 'workflow_dispatch' && inputs.build_apk
+        run: ./gradlew :app:assembleDebug --stacktrace
       - uses: actions/upload-artifact@v7
+        if: github.event_name == 'workflow_dispatch' && inputs.build_apk
         with:
           name: executive-function-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk

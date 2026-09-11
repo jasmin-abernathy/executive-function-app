@@ -30,15 +30,35 @@ import org.lepotager.executivefunction.ui.ResumeScreen
 import org.lepotager.executivefunction.ui.theme.ExecutiveFunctionTheme
 
 class MainActivity : ComponentActivity() {
+    private val notificationPermission = registerForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestPermission()) { viewModel.reload() }
     private val viewModel: AppViewModel by viewModels()
     private var overlayEnabled by mutableStateOf(false)
     private var drawEnabled by mutableStateOf(true)
     private var pauseSuggestionsEnabled by mutableStateOf(true)
     private var pauseAfterMinutes by mutableStateOf(25)
     private var waitingForOverlayPermission = false
+    private var showCheckIn by mutableStateOf(false)
+    private var miniWindow by mutableStateOf(false)
+    private var requestedTask by mutableStateOf<String?>(null)
+    private var externalCapture by mutableStateOf(false)
+    private var drawRequest by mutableStateOf(0)
+    private val focusChanges=object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: Context,intent: Intent) { viewModel.reload() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        androidx.core.content.ContextCompat.registerReceiver(this,focusChanges,android.content.IntentFilter(FocusPresence.CHANGED),androidx.core.content.ContextCompat.RECEIVER_NOT_EXPORTED)
+    }
+
+    override fun onStop() {
+        unregisterReceiver(focusChanges)
+        super.onStop()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        consumeIntent(intent)
         overlayEnabled = overlayPreference() && Settings.canDrawOverlays(this)
         val preferences = appPreferences()
         drawEnabled = preferences.getBoolean(KEY_DRAW_ENABLED, true)
@@ -50,8 +70,40 @@ class MainActivity : ComponentActivity() {
                 val snapshot by viewModel.snapshot.collectAsStateWithLifecycle()
                 val error by viewModel.error.collectAsStateWithLifecycle()
                 val completionLeadMinutes by viewModel.completionLeadMinutes.collectAsStateWithLifecycle()
+                if(externalCapture) {
+                    org.lepotager.executivefunction.ui.ExternalCaptureDialog(
+                        onDismiss={externalCapture=false},
+                        onCapture={title->viewModel.capture(title,null,TaskColor.NEUTRAL){externalCapture=false}},
+                    )
+                }
+                snapshot.tasks.firstOrNull {it.id==requestedTask}?.let {task->
+                    androidx.compose.material3.AlertDialog(
+                        onDismissRequest={requestedTask=null},title={androidx.compose.material3.Text(task.title)},
+                        text={androidx.compose.material3.Text(getString(R.string.start_requested_task))},
+                        confirmButton={androidx.compose.material3.TextButton(onClick={requestedTask=null;viewModel.start(task.id)}){androidx.compose.material3.Text(getString(R.string.start_action))}},
+                        dismissButton={androidx.compose.material3.TextButton(onClick={requestedTask=null}){androidx.compose.material3.Text(getString(R.string.not_now))}},
+                    )
+                }
+                LaunchedEffect(snapshot.loading, snapshot.activeFocus?.session?.id) {
+                    val prefs=getSharedPreferences("wellbeing",MODE_PRIVATE)
+                    val now=System.currentTimeMillis()
+                    if(!snapshot.loading && snapshot.activeFocus==null && prefs.getBoolean("enabled",true) && now-prefs.getLong("last_prompt",0L)>=14_400_000L) {
+                        prefs.edit().putLong("last_prompt",now).apply()
+                        showCheckIn=true
+                    }
+                }
+                if(showCheckIn) androidx.compose.material3.AlertDialog(
+                    onDismissRequest={showCheckIn=false},
+                    title={androidx.compose.material3.Text(getString(R.string.check_in_title))},
+                    text={androidx.compose.material3.Text(getString(R.string.check_in_body))},
+                    confirmButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false;startActivity(Intent(this@MainActivity,JournalActivity::class.java).putExtra("section","state"))}) {androidx.compose.material3.Text(getString(R.string.check_in_answer))}},
+                    dismissButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false}) {androidx.compose.material3.Text(getString(R.string.not_now))}},
+                )
 
                 LaunchedEffect(snapshot.activeFocus?.session?.status) {
+                    if(snapshot.activeFocus!=null) drawRequest=0
+                    if(snapshot.activeFocus?.session?.status == FocusStatus.RUNNING && appPreferences().getBoolean("keep_screen_on",false)) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     if (snapshot.activeFocus?.session?.status != FocusStatus.RUNNING && overlayEnabled) {
                         updateOverlayEnabled(false)
                     }
@@ -64,12 +116,16 @@ class MainActivity : ComponentActivity() {
                             .padding(padding),
                     ) {
                         when {
+                            miniWindow && snapshot.activeFocus!=null -> org.lepotager.executivefunction.ui.MiniTimer(requireNotNull(snapshot.activeFocus))
                             snapshot.loading -> CircularProgressIndicator(
                                 modifier = Modifier.align(Alignment.Center),
                             )
 
                             snapshot.activeFocus?.session?.status == FocusStatus.RUNNING -> FocusScreen(
                                 activeFocus = requireNotNull(snapshot.activeFocus),
+                                onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("task",snapshot.activeFocus?.task?.id)) },
+                                onNote = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("section","notes")) },
+                                onMini = ::enterMiniWindow,
                                 overlayEnabled = overlayEnabled,
                                 pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                 pauseAfterMinutes = pauseAfterMinutes,
@@ -89,16 +145,29 @@ class MainActivity : ComponentActivity() {
 
                             else -> HomeScreen(
                                 tasks = snapshot.tasks,
+                                drawRequest = drawRequest,
+                                onApplySuggestedOrder = viewModel::applySuggestedOrder,
+                                eligibleDrawIds = snapshot.eligibleDrawIds,
+                                suggestedTaskId = snapshot.suggestedTaskId,
+                                onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
                                 drawEnabled = drawEnabled,
                                 pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                 pauseAfterMinutes = pauseAfterMinutes,
                                 onCapture = viewModel::capture,
-                                onStart = viewModel::start,
+                                onStart = { id ->
+                                    if (android.os.Build.VERSION.SDK_INT >= 33 &&
+                                        androidx.core.content.ContextCompat.checkSelfPermission(this@MainActivity, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED &&
+                                        !appPreferences().getBoolean("notification_permission_asked", false)) {
+                                        appPreferences().edit().putBoolean("notification_permission_asked", true).apply()
+                                        notificationPermission.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                                    }
+                                    viewModel.start(id)
+                                },
                                 onMoveTask = viewModel::moveTask,
                                 onSetTaskColor = viewModel::setTaskColor,
-                                onSetDrawEnabled = ::setDrawEnabled,
-                                onSetPauseSuggestionsEnabled = ::setPauseSuggestionsEnabled,
-                                onSetPauseAfterMinutes = ::setPauseAfterMinutes,
+                                onSetDrawEnabled = ::saveDrawPreference,
+                                onSetPauseSuggestionsEnabled = ::savePausePreference,
+                                onSetPauseAfterMinutes = ::savePauseInterval,
                             )
                         }
                     }
@@ -119,6 +188,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        viewModel.reload()
+        if (appPreferences().getBoolean("keep_screen_on", false) && viewModel.snapshot.value.activeFocus?.session?.status==FocusStatus.RUNNING) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (waitingForOverlayPermission) {
             waitingForOverlayPermission = false
             if (Settings.canDrawOverlays(this)) updateOverlayEnabled(true)
@@ -128,6 +200,24 @@ class MainActivity : ComponentActivity() {
             if (shouldBeEnabled) FocusOverlayService.start(this)
             else FocusOverlayService.stop(this)
         }
+    }
+
+    override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
+        super.onPictureInPictureModeChanged(isInPictureInPictureMode,newConfig)
+        miniWindow=isInPictureInPictureMode
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if(appPreferences().getBoolean("auto_pip",false)) enterMiniWindow()
+    }
+
+    private fun enterMiniWindow() {
+        val active=viewModel.snapshot.value.activeFocus ?: return
+        if(active.session.status!=FocusStatus.RUNNING || !packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE)) return
+        val pause=android.app.RemoteAction(android.graphics.drawable.Icon.createWithResource(this,R.drawable.ic_timer_notification),getString(R.string.interrupt_action),getString(R.string.interrupt_action),FocusPresence.action(this,active,"pause"))
+        if(overlayEnabled) updateOverlayEnabled(false)
+        enterPictureInPictureMode(android.app.PictureInPictureParams.Builder().setAspectRatio(android.util.Rational(4,3)).setActions(listOf(pause)).build())
     }
 
     private fun toggleOverlay() {
@@ -146,6 +236,23 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        consumeIntent(intent)
+        viewModel.reload()
+    }
+
+    private fun consumeIntent(intent: Intent?) {
+        requestedTask=intent?.getStringExtra("requested_task")
+        when(intent?.getStringExtra("quick_action")) {
+            "capture" -> externalCapture=true
+            "draw" -> drawRequest+=1
+        }
+        intent?.removeExtra("requested_task")
+        intent?.removeExtra("quick_action")
+    }
+
     private fun updateOverlayEnabled(enabled: Boolean) {
         overlayEnabled = enabled
         getSharedPreferences(FocusOverlayService.PREFERENCES, Context.MODE_PRIVATE)
@@ -159,17 +266,17 @@ class MainActivity : ComponentActivity() {
         getSharedPreferences(FocusOverlayService.PREFERENCES, Context.MODE_PRIVATE)
             .getBoolean(FocusOverlayService.KEY_ENABLED, false)
 
-    private fun setDrawEnabled(enabled: Boolean) {
+    private fun saveDrawPreference(enabled: Boolean) {
         drawEnabled = enabled
         appPreferences().edit().putBoolean(KEY_DRAW_ENABLED, enabled).apply()
     }
 
-    private fun setPauseSuggestionsEnabled(enabled: Boolean) {
+    private fun savePausePreference(enabled: Boolean) {
         pauseSuggestionsEnabled = enabled
         appPreferences().edit().putBoolean(KEY_PAUSE_ENABLED, enabled).apply()
     }
 
-    private fun setPauseAfterMinutes(minutes: Int) {
+    private fun savePauseInterval(minutes: Int) {
         pauseAfterMinutes = minutes.coerceIn(5, 120)
         appPreferences().edit().putInt(KEY_PAUSE_MINUTES, pauseAfterMinutes).apply()
     }

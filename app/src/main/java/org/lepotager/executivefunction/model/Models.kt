@@ -56,4 +56,6 @@ data class AppSnapshot(
     val tasks: List<TaskItem> = emptyList(),
     val activeFocus: ActiveFocus? = null,
     val loading: Boolean = true,
+    val eligibleDrawIds: Set<String>? = null,
+    val suggestedTaskId: String? = null,
 )

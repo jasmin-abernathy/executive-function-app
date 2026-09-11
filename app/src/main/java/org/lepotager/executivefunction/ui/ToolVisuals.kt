@@ -7,7 +7,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.matchParentSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LocalContentColor
@@ -163,7 +162,7 @@ internal fun AnimatedDieBadge(
     val progress = remember { Animatable(1f) }
     val haptic = LocalHapticFeedback.current
     val latestOnFinished by rememberUpdatedState(onRollFinished)
-    val animationsEnabled = remember { ValueAnimator.areAnimatorsEnabled() }
+    val animationsEnabled = ValueAnimator.areAnimatorsEnabled() && !org.lepotager.executivefunction.ui.theme.LocalCalmMode.current
 
     LaunchedEffect(rollKey) {
         if (rollKey <= 0) return@LaunchedEffect
@@ -228,7 +227,7 @@ private fun D10Glyph(
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Canvas(Modifier.matchParentSize()) {
-            fun polygon(vararg points: Offset) = Path().apply {
+            fun polygon(points: List<Offset>) = Path().apply {
                 moveTo(points.first().x, points.first().y)
                 points.drop(1).forEach { lineTo(it.x, it.y) }
                 close()
@@ -244,14 +243,14 @@ private fun D10Glyph(
             val centerLeft = Offset(w * 0.31f, h * 0.36f)
             val centerRight = Offset(w * 0.69f, h * 0.36f)
             val centerBottom = Offset(w * 0.50f, h * 0.83f)
-            val outer = polygon(top, upperRight, right, bottom, left, upperLeft)
+            val outer = polygon(listOf(top, upperRight, right, bottom, left, upperLeft))
             if (shadowColor.alpha > 0f) {
                 translate(top = h * 0.045f) { drawPath(outer, shadowColor) }
             }
             drawPath(outer, fillColor)
-            drawPath(polygon(top, upperRight, centerRight, centerLeft, upperLeft), androidx.compose.ui.graphics.Color.White.copy(alpha = 0.12f))
-            drawPath(polygon(upperRight, right, bottom, centerBottom, centerRight), outlineColor.copy(alpha = 0.13f))
-            drawPath(polygon(left, upperLeft, centerLeft, centerBottom, bottom), androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.10f))
+            drawPath(polygon(listOf(top, upperRight, centerRight, centerLeft, upperLeft)), androidx.compose.ui.graphics.Color.White.copy(alpha = 0.12f))
+            drawPath(polygon(listOf(upperRight, right, bottom, centerBottom, centerRight)), outlineColor.copy(alpha = 0.13f))
+            drawPath(polygon(listOf(left, upperLeft, centerLeft, centerBottom, bottom)), androidx.compose.ui.graphics.Color.Black.copy(alpha = 0.10f))
             val stroke = Stroke(width = 1.6.dp.toPx(), cap = StrokeCap.Round)
             drawPath(outer, outlineColor, style = stroke)
             listOf(

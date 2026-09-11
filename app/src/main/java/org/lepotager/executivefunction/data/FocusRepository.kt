@@ -27,7 +27,7 @@ class FocusRepository internal constructor(
     private val mutableSnapshot = MutableStateFlow(AppSnapshot())
     val snapshot: StateFlow<AppSnapshot> = mutableSnapshot.asStateFlow()
 
-    suspend fun load() = mutate { refresh() }
+    suspend fun load() = mutate { LearningJournal(database).materializeRecurrences(); refresh() }
 
     suspend fun capture(
         title: String,
@@ -56,13 +56,21 @@ class FocusRepository internal constructor(
         requireNotNull(database.taskById(taskId))
         val timestamp = now()
         val learnedTargetDurationMs = database.suggestedDurationMs(taskId)
+        val previous = database.activeFocus()
+        if (previous?.task?.id == taskId && previous.session.status == FocusStatus.RUNNING) return@mutate
+        if (previous?.task?.id == taskId && previous.session.status == FocusStatus.INTERRUPTED) {
+            database.resumeFocus(FocusTransitions.resume(previous.session, timestamp), previous.task.firstStep)
+            refresh()
+            return@mutate
+        }
+        val carried = database.postponedElapsedMs(taskId)
         database.startFocus(
             taskId,
             FocusSession(
                 id = newId(),
                 taskId = taskId,
                 status = FocusStatus.RUNNING,
-                elapsedBeforeSegmentMs = 0,
+                elapsedBeforeSegmentMs = carried,
                 segmentStartedAt = timestamp,
                 interruptionNote = null,
                 createdAt = timestamp,
@@ -75,6 +83,15 @@ class FocusRepository internal constructor(
 
     suspend fun moveTask(taskId: String, offset: Int) = mutate {
         database.moveOpenTask(taskId, offset)
+        refresh()
+    }
+
+    suspend fun applySuggestedOrder() = mutate {
+        val tasks=database.openTasks()
+        val eligible=database.eligibleDrawIds(tasks) ?: return@mutate
+        val journal=LearningJournal(database)
+        val candidates=tasks.filter {it.id in eligible}.sortedByDescending {journal.planning(it.id).importance}
+        database.applyTaskOrder((candidates+tasks.filter {it.id !in eligible}).map {it.id})
         refresh()
     }
 
@@ -120,10 +137,15 @@ class FocusRepository internal constructor(
     }
 
     private fun refresh() {
+        val tasks=database.openTasks()
+        val eligible=database.eligibleDrawIds(tasks)
+        val journal=LearningJournal(database)
         mutableSnapshot.value = AppSnapshot(
-            tasks = database.openTasks(),
+            tasks = tasks,
             activeFocus = database.activeFocus(),
             loading = false,
+            eligibleDrawIds = eligible,
+            suggestedTaskId = if(eligible==null) null else tasks.filter { it.id in eligible && it.status==TaskStatus.READY }.maxByOrNull { journal.planning(it.id).importance }?.id,
         )
     }
 

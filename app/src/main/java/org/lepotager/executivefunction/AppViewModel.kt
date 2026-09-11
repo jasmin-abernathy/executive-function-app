@@ -38,8 +38,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     ) = launch(after) { repository.capture(title, firstStep, color) }
 
     fun start(taskId: String) = launch { repository.start(taskId) }
+    fun reload() = launch { repository.load() }
 
     fun moveTask(taskId: String, offset: Int) = launch { repository.moveTask(taskId, offset) }
+    fun applySuggestedOrder() = launch { repository.applySuggestedOrder() }
 
     fun setTaskColor(taskId: String, color: TaskColor) = launch {
         repository.setTaskColor(taskId, color)
@@ -76,6 +78,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private fun launch(after: () -> Unit = {}, block: suspend () -> Unit) {
         viewModelScope.launch(exceptionHandler) {
             block()
+            // Notification permission/OS failures must not invalidate a saved task.
+            try { FocusPresence.sync(getApplication(), snapshot.value.activeFocus) } catch (_: Exception) { }
             after()
         }
     }

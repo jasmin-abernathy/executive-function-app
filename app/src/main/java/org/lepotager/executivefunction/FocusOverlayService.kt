@@ -63,7 +63,7 @@ class FocusOverlayService : Service() {
             stopSelf()
             return START_NOT_STICKY
         }
-        startForeground(NOTIFICATION_ID, buildNotification(active))
+        startForeground(FocusPresence.ID, FocusPresence.build(this, active))
         if (overlayView == null) createOverlay()
         handler.removeCallbacks(ticker)
         ticker.run()
@@ -74,6 +74,9 @@ class FocusOverlayService : Service() {
         handler.removeCallbacks(ticker)
         overlayView?.let { runCatching { windowManager.removeView(it) } }
         overlayView = null
+        stopForeground(STOP_FOREGROUND_DETACH)
+        runCatching { FocusPresence.sync(this, database.activeFocus()) }
+        database.close()
         super.onDestroy()
     }
 
@@ -87,13 +90,13 @@ class FocusOverlayService : Service() {
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = dp(22).toFloat()
-                setColor(Color.rgb(232, 244, 235))
-                setStroke(dp(1), Color.rgb(174, 205, 182))
+                setColor(getColor(R.color.floating_background))
+                setStroke(dp(1), getColor(R.color.floating_border))
             }
             elevation = dp(8).toFloat()
         }
         timerView = TextView(this).apply {
-            setTextColor(Color.rgb(28, 49, 35))
+            setTextColor(getColor(R.color.floating_text))
             textSize = 18f
             typeface = Typeface.MONOSPACE
             setTypeface(typeface, Typeface.BOLD)
@@ -104,7 +107,9 @@ class FocusOverlayService : Service() {
             textSize = 22f
             gravity = Gravity.CENTER
             contentDescription = getString(R.string.hide_floating_timer)
-            setTextColor(Color.rgb(54, 70, 59))
+            setTextColor(getColor(R.color.floating_text))
+            minimumWidth = dp(48)
+            minimumHeight = dp(48)
             setPadding(dp(8), dp(2), dp(8), dp(2))
             setOnClickListener {
                 setEnabledPreference(false)
@@ -132,6 +137,7 @@ class FocusOverlayService : Service() {
     }
 
     private fun installDragAndOpen(view: View, params: WindowManager.LayoutParams) {
+        view.setOnClickListener { openApp() }
         var startX = 0
         var startY = 0
         var touchX = 0f
@@ -151,13 +157,13 @@ class FocusOverlayService : Service() {
                     val dx = (touchX - event.rawX).roundToInt()
                     val dy = (event.rawY - touchY).roundToInt()
                     moved = moved || abs(dx) > dp(4) || abs(dy) > dp(4)
-                    params.x = (startX + dx).coerceAtLeast(0)
-                    params.y = (startY + dy).coerceAtLeast(0)
+                    params.x = (startX + dx).coerceIn(0, (resources.displayMetrics.widthPixels - view.width).coerceAtLeast(0))
+                    params.y = (startY + dy).coerceIn(0, (resources.displayMetrics.heightPixels - view.height).coerceAtLeast(0))
                     windowManager.updateViewLayout(view, params)
                     true
                 }
                 MotionEvent.ACTION_UP -> {
-                    if (!moved) openApp()
+                    if (!moved) view.performClick()
                     true
                 }
                 else -> false

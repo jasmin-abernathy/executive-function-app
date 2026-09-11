@@ -56,6 +56,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import androidx.lifecycle.repeatOnLifecycle
 import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.domain.TaskDraw
@@ -66,6 +67,11 @@ import org.lepotager.executivefunction.model.TaskItem
 @Composable
 fun HomeScreen(
     tasks: List<TaskItem>,
+    onJournal: () -> Unit = {},
+    eligibleDrawIds: Set<String>? = null,
+    suggestedTaskId: String? = null,
+    drawRequest: Int = 0,
+    onApplySuggestedOrder: () -> Unit = {},
     drawEnabled: Boolean,
     pauseSuggestionsEnabled: Boolean,
     pauseAfterMinutes: Int,
@@ -88,10 +94,13 @@ fun HomeScreen(
     var organizing by remember { mutableStateOf(false) }
 
     fun beginDraw(previousTaskId: String?) {
-        val next = TaskDraw.pick(tasks = tasks, previousTaskId = previousTaskId) ?: return
+        val next = TaskDraw.pick(tasks = tasks.filter { eligibleDrawIds==null || it.id in eligibleDrawIds }, previousTaskId = previousTaskId) ?: return
         pendingDraw = next
         isDrawing = true
         drawRollKey += 1
+    }
+    LaunchedEffect(drawRequest) {
+        if(drawRequest>0 && drawEnabled) beginDraw(null)
     }
 
     LazyColumn(
@@ -100,6 +109,15 @@ fun HomeScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         item {
+            TextButton(onClick = onJournal) {
+                Text(stringResource(R.string.open_journal))
+            }
+            if(eligibleDrawIds!=null) {
+                Text(stringResource(R.string.adaptation_rule))
+                tasks.firstOrNull { it.id==suggestedTaskId }?.let { Text(stringResource(R.string.adaptation_suggestion,it.title)) }
+                if(eligibleDrawIds.isEmpty()) Text(stringResource(R.string.adaptation_empty))
+                if(eligibleDrawIds.isNotEmpty()) TextButton(onClick=onApplySuggestedOrder) {Text(stringResource(R.string.apply_suggested_order))}
+            }
             Text(
                 text = stringResource(R.string.home_title),
                 style = MaterialTheme.typography.headlineLarge,
@@ -591,6 +609,9 @@ private fun TaskCard(
 @Composable
 fun FocusScreen(
     activeFocus: ActiveFocus,
+    onJournal: () -> Unit = {},
+    onMini: () -> Unit = {},
+    onNote: () -> Unit = {},
     overlayEnabled: Boolean,
     pauseSuggestionsEnabled: Boolean,
     pauseAfterMinutes: Int,
@@ -603,20 +624,23 @@ fun FocusScreen(
     var showInterrupt by remember { mutableStateOf(false) }
     var showPauseSuggestion by remember(activeFocus.session.id) { mutableStateOf(false) }
     var now by remember(activeFocus.session.id) { mutableLongStateOf(System.currentTimeMillis()) }
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
     var nextPausePromptAtMs by remember(
         activeFocus.session.id,
         activeFocus.session.segmentStartedAt,
         pauseAfterMinutes,
     ) {
         mutableLongStateOf(
-            SessionClock.elapsedMs(activeFocus.session, System.currentTimeMillis()) +
-                pauseAfterMinutes * 60_000L,
+            org.lepotager.executivefunction.PauseSchedule.deadline(context, activeFocus, pauseAfterMinutes),
         )
     }
     LaunchedEffect(activeFocus.session.id, activeFocus.session.segmentStartedAt) {
-        while (true) {
-            now = System.currentTimeMillis()
-            delay(1_000)
+        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            while (true) {
+                now = System.currentTimeMillis()
+                delay(1_000)
+            }
         }
     }
     val elapsed = SessionClock.elapsedMs(activeFocus.session, now)
@@ -650,6 +674,7 @@ fun FocusScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
@@ -709,6 +734,9 @@ fun FocusScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            TextButton(onClick = onJournal) { Text(stringResource(R.string.open_journal)) }
+            TextButton(onClick = onMini) { Text(stringResource(R.string.mini_timer)) }
+            TextButton(onClick = onNote) { Text(stringResource(R.string.open_notes)) }
             FilledTonalButton(
                 onClick = onToggleOverlay,
                 colors = appTonalButtonColors(),
@@ -782,15 +810,18 @@ fun FocusScreen(
             minutes = pauseAfterMinutes,
             onPause = {
                 showPauseSuggestion = false
+                org.lepotager.executivefunction.PauseSchedule.set(context, activeFocus, elapsed + pauseAfterMinutes * 60_000L)
                 onInterrupt(null)
             },
             onContinue = {
                 showPauseSuggestion = false
                 nextPausePromptAtMs = Long.MAX_VALUE
+                org.lepotager.executivefunction.PauseSchedule.set(context, activeFocus, nextPausePromptAtMs)
             },
             onRemindLater = {
                 showPauseSuggestion = false
                 nextPausePromptAtMs = elapsed + 10 * 60_000L
+                org.lepotager.executivefunction.PauseSchedule.set(context, activeFocus, nextPausePromptAtMs)
             },
         )
     }

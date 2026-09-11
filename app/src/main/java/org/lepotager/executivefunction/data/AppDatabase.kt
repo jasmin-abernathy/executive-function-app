@@ -14,7 +14,7 @@ import org.lepotager.executivefunction.model.TaskStatus
 import org.lepotager.executivefunction.domain.TimeLearning
 import java.util.Locale
 
-internal class AppDatabase(context: Context) :
+internal class AppDatabase(private val context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     override fun onConfigure(db: SQLiteDatabase) {
@@ -62,6 +62,7 @@ internal class AppDatabase(context: Context) :
         db.execSQL(
             "CREATE UNIQUE INDEX one_active_focus ON focus_sessions(is_active) WHERE is_active = 1",
         )
+        createLearningTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -80,7 +81,39 @@ internal class AppDatabase(context: Context) :
             db.execSQL("CREATE INDEX tasks_sort_position ON tasks(sort_position)")
             version = 3
         }
+        if (version == 3) {
+            createLearningTables(db)
+            version = 4
+        }
         check(version == newVersion) { "Missing migration from $oldVersion to $newVersion" }
+    }
+
+    private fun createLearningTables(db: SQLiteDatabase) {
+        db.execSQL("CREATE TABLE learning_exclusions (session_id TEXT PRIMARY KEY REFERENCES focus_sessions(id) ON DELETE CASCADE)")
+        db.execSQL("CREATE TABLE learning_overrides (learning_key TEXT PRIMARY KEY, duration_ms INTEGER NOT NULL CHECK(duration_ms > 0))")
+        db.execSQL("CREATE TABLE task_steps (id TEXT PRIMARY KEY, task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE, title TEXT NOT NULL, position INTEGER NOT NULL, completed INTEGER NOT NULL DEFAULT 0)")
+        db.execSQL("CREATE TABLE task_planning (task_id TEXT PRIMARY KEY REFERENCES tasks(id) ON DELETE CASCADE, importance INTEGER NOT NULL DEFAULT 0, energy INTEGER NOT NULL DEFAULT 0, context TEXT NOT NULL DEFAULT '', today TEXT NOT NULL DEFAULT '')")
+        db.execSQL("CREATE TABLE check_ins (id TEXT PRIMARY KEY, recorded_at INTEGER NOT NULL, mood INTEGER NOT NULL, motivation INTEGER NOT NULL, energy INTEGER NOT NULL)")
+        db.execSQL("CREATE TABLE quick_notes (id TEXT PRIMARY KEY, body TEXT NOT NULL, created_at INTEGER NOT NULL)")
+        db.execSQL("CREATE TABLE session_context (session_id TEXT PRIMARY KEY REFERENCES focus_sessions(id) ON DELETE CASCADE, check_in_id TEXT REFERENCES check_ins(id) ON DELETE SET NULL)")
+        db.execSQL("CREATE TABLE learning_resets (learning_key TEXT PRIMARY KEY, cutoff INTEGER NOT NULL)")
+        db.execSQL("CREATE TABLE recurrences (source_task_id TEXT PRIMARY KEY REFERENCES tasks(id) ON DELETE CASCADE, interval_days INTEGER NOT NULL CHECK(interval_days > 0), next_date TEXT NOT NULL)")
+        db.execSQL("CREATE TABLE task_reminders (task_id TEXT PRIMARY KEY REFERENCES tasks(id) ON DELETE CASCADE, due_at INTEGER NOT NULL)")
+        db.execSQL("CREATE TABLE session_steps (session_id TEXT NOT NULL REFERENCES focus_sessions(id) ON DELETE CASCADE, position INTEGER NOT NULL, title TEXT NOT NULL, PRIMARY KEY(session_id,position))")
+    }
+
+    fun eligibleDrawIds(tasks: List<TaskItem>): Set<String>? {
+        val preferences=context.getSharedPreferences("wellbeing",Context.MODE_PRIVATE)
+        if(!preferences.getBoolean("adapt",false)) return null
+        val journal=LearningJournal(this)
+        val recent=journal.checkIns().firstOrNull()?.takeIf { System.currentTimeMillis()-it.date in 0..14_400_000L }
+        val energy=if(preferences.getBoolean("low_energy",false)) 1 else recent?.energy
+        val minutes=preferences.getInt("available_minutes",0).takeIf { it>0 }
+        val selectedContext=preferences.getString("context","").orEmpty()
+        return tasks.filter { task ->
+            val plan=journal.planning(task.id)
+            org.lepotager.executivefunction.domain.TaskEligibility.accepts(plan.energy,energy,suggestedDurationMs(task.id),minutes,plan.context,selectedContext)
+        }.map { it.id }.toSet()
     }
 
     fun insertTask(task: TaskItem) {
@@ -97,6 +130,13 @@ internal class AppDatabase(context: Context) :
         null,
         "1",
     ).use { cursor -> if (cursor.moveToFirst()) cursor.toTask() else null }
+
+    // Each reopened session already carries earlier segments: use the latest,
+    // never SUM, which would double-count earlier work after multiple reports.
+    fun postponedElapsedMs(taskId: String): Long = readableDatabase.rawQuery(
+        "SELECT elapsed_before_segment_ms FROM focus_sessions WHERE task_id=? AND status='POSTPONED' ORDER BY updated_at DESC, rowid DESC LIMIT 1",
+        arrayOf(taskId),
+    ).use { if (it.moveToFirst()) it.getLong(0) else 0L }
 
     fun nextTaskPosition(): Long = readableDatabase.rawQuery(
         "SELECT COALESCE(MAX(sort_position), -1) + 1 FROM tasks",
@@ -144,6 +184,12 @@ internal class AppDatabase(context: Context) :
         require(writableDatabase.update("tasks", values, "id = ?", arrayOf(taskId)) == 1)
     }
 
+    fun applyTaskOrder(ids: List<String>) = transaction { db ->
+        val open=openTasks().map {it.id}
+        require(ids.size==open.size && ids.toSet()==open.toSet())
+        ids.forEachIndexed {position,id -> db.update("tasks",ContentValues().apply{put("sort_position",position)},"id=?",arrayOf(id))}
+    }
+
     fun activeFocus(): ActiveFocus? {
         val session = readableDatabase.query(
             "focus_sessions",
@@ -164,6 +210,10 @@ internal class AppDatabase(context: Context) :
      * the learning calculation or exposing data outside the device.
      */
     fun suggestedDurationMs(taskId: String): Long? {
+        readableDatabase.rawQuery(
+            "SELECT duration_ms FROM learning_overrides WHERE learning_key = (SELECT learning_key FROM tasks WHERE id = ?)",
+            arrayOf(taskId),
+        ).use { if (it.moveToFirst()) return it.getLong(0) }
         val sql = """
             SELECT COUNT(*) AS completed_count,
                    MAX(s.elapsed_before_segment_ms) AS longest_duration
@@ -174,6 +224,8 @@ internal class AppDatabase(context: Context) :
                   SELECT learning_key FROM tasks WHERE id = ? LIMIT 1
               )
               AND s.elapsed_before_segment_ms > 0
+              AND NOT EXISTS (SELECT 1 FROM learning_exclusions e WHERE e.session_id = s.id)
+              AND s.created_at > COALESCE((SELECT cutoff FROM learning_resets WHERE learning_key=history_task.learning_key), -1)
         """.trimIndent()
         return readableDatabase.rawQuery(
             sql,
@@ -191,6 +243,8 @@ internal class AppDatabase(context: Context) :
         deactivateExistingFocus(db, session.updatedAt)
         updateTaskStatus(db, taskId, TaskStatus.IN_PROGRESS, session.updatedAt)
         db.insertOrThrow("focus_sessions", null, session.toValues(isActive = true))
+        val recent=LearningJournal(this).checkIns().firstOrNull()?.takeIf { session.createdAt-it.date in 0..14_400_000L }
+        if(recent!=null) db.insertOrThrow("session_context",null,ContentValues().apply {put("session_id",session.id);put("check_in_id",recent.id)})
     }
 
     fun interruptFocus(session: FocusSession) = transaction { db ->
@@ -211,6 +265,9 @@ internal class AppDatabase(context: Context) :
     fun closeFocus(session: FocusSession, taskStatus: TaskStatus) = transaction { db ->
         updateSession(db, session, isActive = false)
         updateTaskStatus(db, session.taskId, taskStatus, session.updatedAt)
+        if (session.status == FocusStatus.COMPLETED) {
+            db.execSQL("INSERT OR IGNORE INTO session_steps(session_id,position,title) SELECT ?,position,title FROM task_steps WHERE task_id=?", arrayOf(session.id,session.taskId))
+        }
     }
 
     private fun deactivateExistingFocus(db: SQLiteDatabase, now: Long) {
@@ -337,7 +394,7 @@ internal class AppDatabase(context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "executive-function.db"
-        const val DATABASE_VERSION = 3
+        const val DATABASE_VERSION = 4
         val TASK_COLUMNS = arrayOf(
             "id",
             "title",

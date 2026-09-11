@@ -7,6 +7,8 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -117,11 +119,21 @@ private val AppShapes = Shapes(
     extraLarge = RoundedCornerShape(36.dp),
 )
 
+val LocalCalmMode = staticCompositionLocalOf { false }
+
 @Composable
 fun ExecutiveFunctionTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
+    val context=LocalContext.current
+    val preferences=remember {context.getSharedPreferences("app_preferences",android.content.Context.MODE_PRIVATE)}
+    var calm by remember {mutableStateOf(preferences.getBoolean("calm",false))}
+    DisposableEffect(preferences) {
+        val listener=android.content.SharedPreferences.OnSharedPreferenceChangeListener { p,key -> if(key=="calm") calm=p.getBoolean("calm",false) }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {preferences.unregisterOnSharedPreferenceChangeListener(listener)}
+    }
+    CompositionLocalProvider(LocalCalmMode provides calm) { MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
         shapes = AppShapes,
         content = content,
-    )
+    ) }
 }
