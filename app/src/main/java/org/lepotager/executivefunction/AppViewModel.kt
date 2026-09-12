@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.data.FocusRepository
+import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.model.TaskColor
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val repository = FocusRepository(AppDatabase(application))
@@ -17,6 +19,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private val mutableError = MutableStateFlow<Throwable?>(null)
     val error: StateFlow<Throwable?> = mutableError.asStateFlow()
+    private val mutableCompletionLeadMinutes = MutableStateFlow<Long?>(null)
+    val completionLeadMinutes: StateFlow<Long?> = mutableCompletionLeadMinutes.asStateFlow()
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         mutableError.value = throwable
@@ -26,10 +30,34 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         launch { repository.load() }
     }
 
-    fun capture(title: String, firstStep: String? = null, after: () -> Unit = {}) =
-        launch(after) { repository.capture(title, firstStep) }
+    fun capture(
+        title: String,
+        firstStep: String? = null,
+        color: TaskColor = TaskColor.NEUTRAL,
+        after: () -> Unit = {},
+    ) = launch(after) { repository.capture(title, firstStep, color) }
 
     fun start(taskId: String) = launch { repository.start(taskId) }
+    fun reload() = launch { repository.load() }
+
+    fun moveTask(taskId: String, offset: Int) = launch { repository.moveTask(taskId, offset) }
+    fun applyTaskOrder(ids: List<String>, onSettled: (Boolean) -> Unit) {
+        viewModelScope.launch(exceptionHandler) {
+            var saved = false
+            try {
+                repository.applyTaskOrder(ids)
+                saved = true
+            } finally {
+                onSettled(saved)
+            }
+        }
+    }
+
+    fun applySuggestedOrder() = launch { repository.applySuggestedOrder() }
+
+    fun setTaskColor(taskId: String, color: TaskColor) = launch {
+        repository.setTaskColor(taskId, color)
+    }
 
     fun interrupt(note: String?) = launch { repository.interrupt(note) }
 
@@ -37,15 +65,33 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun postpone() = launch { repository.postpone() }
 
-    fun complete() = launch { repository.complete() }
+    fun complete() {
+        val active = snapshot.value.activeFocus
+        val remainingMs = active?.session?.targetDurationMs?.let { target ->
+            target - SessionClock.elapsedMs(active.session, System.currentTimeMillis())
+        }
+        launch(
+            after = {
+                if (remainingMs != null && remainingMs > 0) {
+                    mutableCompletionLeadMinutes.value = (remainingMs + 59_999L) / 60_000L
+                }
+            },
+        ) { repository.complete() }
+    }
 
     fun clearError() {
         mutableError.value = null
     }
 
+    fun clearCompletionFeedback() {
+        mutableCompletionLeadMinutes.value = null
+    }
+
     private fun launch(after: () -> Unit = {}, block: suspend () -> Unit) {
         viewModelScope.launch(exceptionHandler) {
             block()
+            // Notification permission/OS failures must not invalidate a saved task.
+            try { FocusPresence.sync(getApplication(), snapshot.value.activeFocus) } catch (_: Exception) { }
             after()
         }
     }

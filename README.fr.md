@@ -149,16 +149,19 @@ Capturer → choisir → commencer → se concentrer → interrompre → reprend
 Déjà implémenté :
 
 - capture locale ultra-rapide avec premier petit pas facultatif ;
-- choix manuel et minuteur plein écran en temps écoulé ;
+- ordre manuel par poignée ou boutons ↑/↓, mélange facultatif des tâches admissibles au D10 ; le widget reste une proposition seule, puis minuteur plein écran en temps écoulé ;
 - capture rapide sans quitter le focus ;
 - contexte d’interruption durable et écran de retour non punitif ;
 - reprise, réduction, report/changement et fin ;
 - persistance SQLite résistante au redémarrage du processus ;
 - ressources françaises et anglaises ;
 - grandes cibles tactiles, texte agrandissable et sémantique TalkBack ;
-- tests unitaires, lint Android et assemblage de l’APK dans la CI.
+- tests unitaires et lint Android ; APK uniquement sur demande explicite.
 
 Il n’y a ni compte, ni permission réseau, ni SDK analytics, ni backend cloud, ni sauvegarde cloud automatique. Il s’agit d’un prototype de validation, pas d’une revendication d’efficacité clinique.
+
+
+Le lot de septembre ajoute le suivi corrigeable des durées, les étapes ordonnées, la vue Aujourd’hui, les répétitions simples, les check-ins facultatifs, les filtres énergie/temps/contexte, les notes, les rappels locaux, le widget, le minuteur en notification/PiP et la sauvegarde/restauration locale. L’ordre suggéré doit être appliqué volontairement. Les limites et règles exactes sont décrites dans [la décision 0006](docs/adr/0006-transparent-learning-and-user-led-planning.md).
 
 ## Ce que le premier prototype doit permettre de valider
 
@@ -304,10 +307,10 @@ Le prototype doit privilégier :
 Compiler localement avec JDK 17 et Android SDK 37 :
 
 ```bash
-./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :app:testDebugUnitTest :app:lintDebug
 ```
 
-L’APK de développement est généré dans `app/build/outputs/apk/debug/app-debug.apk`.
+Sur demande explicite, lancer `./gradlew :app:assembleDebug`. L’APK de développement est généré dans `app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="app_background">#1D2420</color>
+    <color name="floating_background">#202224</color>
+    <color name="floating_border">#718779</color>
+    <color name="floating_text">#F1F3F2</color>
 </resources>

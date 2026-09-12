@@ -14,7 +14,6 @@ const preferredBrowserLanguage = () => {
 
 const languageTarget = (language) => `${language === 'en' ? '/en/' : '/'}${window.location.hash || ''}`;
 
-// Automatic detection only until the visitor explicitly chooses FR or EN.
 try {
   const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
   const targetLanguage = savedLanguage === 'fr' || savedLanguage === 'en'
@@ -44,17 +43,29 @@ const setHeaderState = () => {
 setHeaderState();
 window.addEventListener('scroll', setHeaderState, { passive: true });
 
+const setMenuState = (open) => {
+  if (!toggle || !nav) return;
+  toggle.setAttribute('aria-expanded', String(open));
+  nav.dataset.open = String(open);
+  nav.classList.toggle('is-open', open);
+};
+
+const closeMenu = () => setMenuState(false);
+
 toggle?.addEventListener('click', () => {
-  const isOpen = toggle.getAttribute('aria-expanded') === 'true';
-  toggle.setAttribute('aria-expanded', String(!isOpen));
-  nav?.classList.toggle('is-open', !isOpen);
+  setMenuState(toggle.getAttribute('aria-expanded') !== 'true');
 });
 
 nav?.querySelectorAll('a').forEach((link) => {
-  link.addEventListener('click', () => {
-    toggle?.setAttribute('aria-expanded', 'false');
-    nav.classList.remove('is-open');
-  });
+  link.addEventListener('click', closeMenu);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') closeMenu();
+});
+
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 900) closeMenu();
 });
 
 document.querySelectorAll('[data-year]').forEach((el) => {
@@ -72,7 +83,6 @@ document.querySelectorAll('[data-year]').forEach((el) => {
   if (!status) return;
 
   const lang = document.documentElement.lang === 'en' ? 'en' : 'fr';
-
   const messages = {
     fr: {
       'check-email': 'Merci ! Regarde maintenant ta boîte mail pour confirmer ton inscription.',
@@ -90,27 +100,12 @@ document.querySelectorAll('[data-year]').forEach((el) => {
     }
   };
 
-  status.textContent =
-    messages[lang][state]
-    || messages[lang].error;
-
+  status.textContent = messages[lang][state] || messages[lang].error;
   status.style.display = 'block';
   status.classList.add('is-visible');
-
-  if (state === 'check-email' || state === 'already') {
-    status.classList.add('is-success');
-  } else {
-    status.classList.add('is-error');
-  }
+  status.classList.add(state === 'check-email' || state === 'already' ? 'is-success' : 'is-error');
 
   const cleanUrl = new URL(window.location.href);
   cleanUrl.searchParams.delete('research');
-
-  history.replaceState(
-    null,
-    '',
-    cleanUrl.pathname
-      + cleanUrl.search
-      + cleanUrl.hash
-  );
+  history.replaceState(null, '', cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
 })();

@@ -149,16 +149,19 @@ Capture → choose → start → focus → interrupt → resume → finish or po
 Implemented today:
 
 - ultra-fast local capture with an optional first small step;
-- manual task choice and full-screen elapsed-time focus;
+- manual ordering with handles or ↑/↓ buttons, optional D10 shuffle of eligible tasks; the widget only proposes a task, followed by full-screen elapsed-time focus;
 - quick capture without leaving focus;
 - durable interruption context and a non-punitive return screen;
 - resume, reduce, postpone/switch and complete transitions;
 - process-restart-safe SQLite persistence;
 - French and English resources;
 - large touch targets, scalable text and TalkBack semantics;
-- unit tests, Android lint and APK assembly in CI.
+- unit tests and Android lint; APK packaging only on explicit request.
 
 There is no account, network permission, analytics SDK, cloud backend or automatic cloud backup. This is a validation prototype, not a claim of clinical effectiveness.
+
+
+The September batch adds correctable duration learning, ordered steps, Today, simple repetitions, optional check-ins, energy/time/context filters, notes, local reminders, a widget, notification/PiP timers and local backup/restore. Suggested ordering requires an explicit action. Exact rules and limits are documented in [decision 0006](docs/adr/0006-transparent-learning-and-user-led-planning.md).
 
 ## What the first prototype should validate
 
@@ -304,10 +307,10 @@ The prototype should favour:
 Build locally with JDK 17 and Android SDK 37:
 
 ```bash
-./gradlew :app:testDebugUnitTest :app:lintDebug :app:assembleDebug
+./gradlew :app:testDebugUnitTest :app:lintDebug
 ```
 
-The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
+On explicit request, run `./gradlew :app:assembleDebug`. The debug APK is generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
 ---
 

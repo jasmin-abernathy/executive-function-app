@@ -7,6 +7,8 @@ import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
@@ -14,8 +16,8 @@ import androidx.compose.ui.unit.dp
  * Quiet, deliberately narrow product palette.
  *
  * The light interface is white, pale green and anthracite only. The dark theme
- * follows the system setting and keeps the same identity with desaturated,
- * green-tinted charcoal surfaces instead of pure black or saturated accents.
+ * follows the system setting with neutral charcoal surfaces. Green remains an
+ * accent for actions and borders instead of tinting the whole interface.
  */
 object AppPalette {
     val White = Color(0xFFFFFFFF)
@@ -24,13 +26,13 @@ object AppPalette {
     val GreenButton = Color(0xFFEAF6ED)
     val GreenSurface = Color(0xFFF6FBF7)
 
-    val DarkBackground = Color(0xFF1D2420)
-    val DarkSurface = Color(0xFF252E29)
-    val DarkSurfaceRaised = Color(0xFF2A342E)
-    val DarkButton = Color(0xFF314238)
-    val DarkBorder = Color(0xFF789582)
-    val DarkText = Color(0xFFEEF3EF)
-    val DarkMutedText = Color(0xFFC8D2CB)
+    val DarkBackground = Color(0xFF18191A)
+    val DarkSurface = Color(0xFF202224)
+    val DarkSurfaceRaised = Color(0xFF292C2E)
+    val DarkButton = Color(0xFF26362D)
+    val DarkBorder = Color(0xFF718779)
+    val DarkText = Color(0xFFF1F3F2)
+    val DarkMutedText = Color(0xFFC9CECB)
 }
 
 private val LightColors = lightColorScheme(
@@ -117,11 +119,21 @@ private val AppShapes = Shapes(
     extraLarge = RoundedCornerShape(36.dp),
 )
 
+val LocalCalmMode = staticCompositionLocalOf { false }
+
 @Composable
 fun ExecutiveFunctionTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
+    val context=LocalContext.current
+    val preferences=remember {context.getSharedPreferences("app_preferences",android.content.Context.MODE_PRIVATE)}
+    var calm by remember {mutableStateOf(preferences.getBoolean("calm",false))}
+    DisposableEffect(preferences) {
+        val listener=android.content.SharedPreferences.OnSharedPreferenceChangeListener { p,key -> if(key=="calm") calm=p.getBoolean("calm",false) }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {preferences.unregisterOnSharedPreferenceChangeListener(listener)}
+    }
+    CompositionLocalProvider(LocalCalmMode provides calm) { MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
         shapes = AppShapes,
         content = content,
-    )
+    ) }
 }

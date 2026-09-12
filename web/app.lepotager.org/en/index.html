@@ -3,28 +3,30 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Le Potager des Apps: useful, lightweight and open digital tools designed with privacy and user control in mind, developed by Le Potager du Web.">
+  <meta name="description" content="Le Verger du Numérique: useful, lightweight and open digital tools designed with privacy and user control in mind, developed by Le Potager du Web.">
   <meta name="theme-color" content="#173d2b">
-  <meta property="og:title" content="Le Potager des Apps">
+  <meta property="og:title" content="Le Verger du Numérique">
   <meta property="og:description" content="Digital tools built from real uses: useful, lightweight, open and privacy-respecting.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://app.lepotager.org/en/">
-  <title>Le Potager des Apps — Useful, lightweight and open tools</title>
+  <title>Le Verger du Numérique — Useful, lightweight and open tools</title>
   <link rel="canonical" href="https://app.lepotager.org/en/">
-  <link rel="alternate" hreflang="en" href="https://app.lepotager.org/">
+  <link rel="alternate" hreflang="fr" href="https://app.lepotager.org/">
   <link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/">
   <link rel="alternate" hreflang="x-default" href="https://app.lepotager.org/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
   <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/accessibility.css">
   <script defer src="/assets/app.js"></script>
+  <script defer src="/accessibility.js"></script>
 </head>
 <body>
   <a class="skip-link" href="#contenu">Skip to content</a>
 
   <header class="site-header" data-header>
     <div class="shell header-inner">
-      <a class="brand" href="#top" aria-label="Le Potager des Apps — home">
+      <a class="brand" href="#top" aria-label="Le Verger du Numérique — home">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 48 48" role="img">
             <path d="M24 40V19" />
@@ -33,8 +35,8 @@
           </svg>
         </span>
         <span>
-          <strong>Le Potager</strong>
-          <small>des Apps</small>
+          <strong>Le Verger</strong>
+          <small data-site-context data-context-default="du Numérique · Le Potager du Web">du Numérique · Le Potager du Web</small>
         </span>
       </a>
 
@@ -47,10 +49,12 @@
         </nav>
 
         <div class="language-switch" aria-label="Language">
-          <a class="is-active" href="/" lang="en" hreflang="en" aria-current="page" data-language="fr">FR</a>
+          <a href="/" lang="fr" hreflang="fr" data-language="fr">FR</a>
           <span aria-hidden="true">/</span>
           <a class="is-active" href="/en/" lang="en" hreflang="en" aria-current="page" data-language="en">EN</a>
         </div>
+
+        <button class="accessibility-toggle" type="button" data-app-accessibility-toggle aria-pressed="false">Accessible version</button>
 
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="navigation" data-menu-toggle>
           <span class="sr-only">Open menu</span>
@@ -79,7 +83,7 @@
           </ul>
         </div>
 
-        <aside class="hero-card" aria-label="Manifeste court">
+        <aside class="hero-card" aria-label="Short manifesto">
           <span class="hero-card-label">The garden rule</span>
           <p>A feature does not belong here simply because it is possible. It has to answer a real use case.</p>
           <div class="growth-lines" aria-hidden="true">
@@ -127,9 +131,9 @@
     <section id="projets" class="section">
       <div class="shell">
         <div class="section-heading">
-          <p class="eyebrow">Projects</p>
+          <p class="eyebrow">Open projects</p>
           <h2>What is growing right now.</h2>
-          <p>Some projects can already be tested; others are still prototypes or exploratory work. Their status is shown deliberately.</p>
+          <p>The associated repositories are public or being prepared for public release. Variants of the same tool are grouped together to keep the overview readable.</p>
         </div>
 
         <div class="projects-grid">
@@ -143,64 +147,172 @@
             <p class="project-summary">Share a location with a trusted contact by SMS, without relying on an Internet connection or cloud account for the core feature.</p>
             <ul class="project-points">
               <li>Local-first processing</li>
-              <li>Explicitly authorised contact</li>
+              <li>Explicitly authorised contacts</li>
               <li>No advertising or analytics SDK</li>
-              <li>Open development and documentation</li>
+              <li>Open code and documentation</li>
             </ul>
             <p class="project-note">VeVak is not an emergency service and does not replace official emergency or safety features.</p>
             <div class="project-links">
+              <a href="https://vevak.lepotager.org/">Discover VeVak <span aria-hidden="true">↗</span></a>
               <a href="https://github.com/jasmin-abernathy/vevak">Source code <span aria-hidden="true">↗</span></a>
-              <a href="https://github.com/jasmin-abernathy/vevak#fran%C3%A7ais">Documentation <span aria-hidden="true">↗</span></a>
             </div>
           </article>
 
           <article class="project-card">
             <div class="project-topline">
               <span class="status status-research">Research & prototype</span>
-              <span class="project-kind">Android · FR/EN</span>
+              <span class="project-kind">Android · AGPL</span>
             </div>
             <div class="project-symbol symbol-soft" aria-hidden="true">↺</div>
             <h3>Executive functions / ADHD app</h3>
             <p class="project-summary">A tool designed around getting started, refocusing, and above all resuming after an interruption, without punitive mechanics or productivity debt.</p>
             <ul class="project-points">
               <li>User research in progress</li>
-              <li>Designed to complement existing tools</li>
-              <li>Privacy et fonctionnement local au cœur du projet</li>
+              <li>Local operation preferred</li>
               <li>Customisable, non-judgemental interface</li>
+              <li>French and English development</li>
             </ul>
             <div class="project-links">
-              <a href="/adhd-app/">Take part in the study <span aria-hidden="true">→</span></a>
+              <a href="/adhd-app/v2/">Take part in the study <span aria-hidden="true">→</span></a>
+              <a href="https://github.com/jasmin-abernathy/executive-function-app">Source code <span aria-hidden="true">↗</span></a>
             </div>
           </article>
 
           <article class="project-card">
             <div class="project-topline">
               <span class="status status-dev">In development</span>
-              <span class="project-kind">WordPress</span>
+              <span class="project-kind">WordPress · SPIP · Grav · GPL</span>
             </div>
             <div class="project-symbol symbol-line" aria-hidden="true">P</div>
             <h3>Pixel Trackers Manager</h3>
-            <p class="project-summary">A WordPress plugin that makes trackers visible, helps audit them, and guides the alignment of information pages and consent settings.</p>
+            <p class="project-summary">A family of tools that makes trackers visible, helps audit them, and guides the alignment of consent settings and information pages.</p>
             <ul class="project-points">
               <li>Tracker detection and inventory</li>
               <li>Understandable actions rather than an opaque score</li>
-              <li>Guided setup for legal and privacy pages</li>
-              <li>Designed as technical assistance, not legal certification</li>
+              <li>Shared rules across several CMSs</li>
+              <li>Technical assistance, not legal certification</li>
             </ul>
             <div class="project-links">
-              <a href="https://rgpd.lepotager.org/">Visit the privacy lab <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/jasmin-abernathy/pixel-trackers-manager">WordPress <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/jasmin-abernathy/pixel-trackers-manager-spip">SPIP <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/jasmin-abernathy/pixel-trackers-manager-grav">Grav <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/jasmin-abernathy/ptm-rules">PTM rules <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+
+          <article class="project-card">
+            <div class="project-topline">
+              <span class="status status-active">Active prototype</span>
+              <span class="project-kind">Web · AGPL</span>
+            </div>
+            <div class="project-symbol symbol-soft" aria-hidden="true">R</div>
+            <h3>GDPR comparator</h3>
+            <p class="project-summary">A lightweight comparator for identifying GDPR service providers through explicit criteria and regional filters, without AI-generated ranking.</p>
+            <ul class="project-points">
+              <li>Readable and verifiable criteria</li>
+              <li>Grand Est and Moselle filters</li>
+              <li>Grouped and minimised data</li>
+              <li>Automatable updates</li>
+            </ul>
+            <div class="project-links">
+              <a href="https://rgpd.lepotager.org/comparateur/">Open the comparator <span aria-hidden="true">↗</span></a>
+              <a href="https://github.com/jasmin-abernathy/rgpd-lepotager">Source code <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+
+          <article class="project-card">
+            <div class="project-topline">
+              <span class="status status-dev">In development</span>
+              <span class="project-kind">Android · AGPL</span>
+            </div>
+            <div class="project-symbol symbol-line" aria-hidden="true">M</div>
+            <h3>Mon Manager Web</h3>
+            <p class="project-summary">A generic Android app that can connect to multiple compatible websites and build its interface from a common protocol without downloading executable code.</p>
+            <ul class="project-points">
+              <li>Site-provided branding and modules</li>
+              <li>Tokens protected by Android Keystore</li>
+              <li>Local cache and small offline mutations</li>
+              <li>Business integrations kept server-side</li>
+            </ul>
+            <div class="project-links">
+              <a href="https://github.com/jasmin-abernathy/lepotager-site-manager">Source code <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+
+          <article class="project-card">
+            <div class="project-topline">
+              <span class="status status-research">Pilot 0.2</span>
+              <span class="project-kind">Webxdc · Delta Chat · AGPL</span>
+            </div>
+            <div class="project-symbol symbol-soft" aria-hidden="true">A</div>
+            <h3>Verger Associations</h3>
+            <p class="project-summary">A free, lightweight, local-first suite for associations, collectives, co-ops and similar organisations, built around collaborative mini-apps rather than a central platform.</p>
+            <ul class="project-points">
+              <li>First module: meetings and decisions</li>
+              <li>Runs in Delta Chat through Webxdc</li>
+              <li>Markdown and JSON exports</li>
+              <li>No additional application account</li>
+            </ul>
+            <div class="project-links">
+              <a href="https://github.com/jasmin-abernathy/verger-associations">Source code <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+
+          <article class="project-card">
+            <div class="project-topline">
+              <span class="status status-dev">Alpha</span>
+              <span class="project-kind">Web · AGPL</span>
+            </div>
+            <div class="project-symbol symbol-line" aria-hidden="true">L</div>
+            <h3>Librairie universelle</h3>
+            <p class="project-summary">A work-centred MVP: search for a book once, compare its editions, and see different legal ways to access it, including identified free ebooks.</p>
+            <ul class="project-points">
+              <li>Explicit bibliographic sources</li>
+              <li>No AI in search or ranking</li>
+              <li>No behavioural profiling</li>
+              <li>Self-publishing with human validation</li>
+            </ul>
+            <div class="project-links">
+              <a href="https://github.com/jasmin-abernathy/librairie-universelle">Source code <span aria-hidden="true">↗</span></a>
             </div>
           </article>
 
           <article class="project-card project-muted">
             <div class="project-topline">
-              <span class="status status-explore">Exploration</span>
-              <span class="project-kind">Web / mobile</span>
+              <span class="status status-explore">Phase 0</span>
+              <span class="project-kind">Web · AGPL</span>
             </div>
             <div class="project-symbol symbol-muted" aria-hidden="true">＋</div>
-            <h3>Local commerce & delivery</h3>
-            <p class="project-summary">Exploration of an open tool connecting local shops, couriers and communities without recreating the dependency models of large platforms.</p>
-            <p class="project-note">The functional scope and governance model are still being defined.</p>
+            <h3>Delivery aggregator</h3>
+            <p class="project-summary">A web MVP for searching and comparing restaurants listed across several delivery services, clearly separating estimates from platform-confirmed data.</p>
+            <ul class="project-points">
+              <li>No platform passwords collected</li>
+              <li>No scraping of consumer interfaces</li>
+              <li>Price, fee and delivery-time comparison when legally available</li>
+              <li>Redirect to the official checkout</li>
+            </ul>
+            <div class="project-links">
+              <a href="https://github.com/jasmin-abernathy/delivery-aggregator-web">Source code <span aria-hidden="true">↗</span></a>
+            </div>
+          </article>
+
+          <article class="project-card project-muted">
+            <div class="project-topline">
+              <span class="status status-explore">Technical POC</span>
+              <span class="project-kind">Matrix · Jitsi · AGPL</span>
+            </div>
+            <div class="project-symbol symbol-muted" aria-hidden="true">C</div>
+            <h3>Communication libre</h3>
+            <p class="project-summary">A self-hostable, reversible communication stack for collectives and associations, assembling existing free-software components rather than rebuilding a messenger.</p>
+            <ul class="project-points">
+              <li>Matrix / Synapse and Element</li>
+              <li>Jitsi Meet and Coturn</li>
+              <li>Secrets generated outside Git</li>
+              <li>Independent project with no claimed official affiliation</li>
+            </ul>
+            <div class="project-links">
+              <a href="https://github.com/jasmin-abernathy/communication-libre">Source code <span aria-hidden="true">↗</span></a>
+            </div>
           </article>
         </div>
       </div>
@@ -215,7 +327,7 @@
         <div class="participation-copy">
           <p>User research for the executive functions / ADHD app is currently underway. You can take part in the current study or join the panel to hear about future studies and user tests for this app.</p>
           <div class="participation-actions">
-            <a class="button button-light" href="/adhd-app/">Take part in the ADHD study</a>
+            <a class="button button-light" href="/adhd-app/v2/">Take part in the ADHD study</a>
           </div>
 
           <div class="research-signup" id="research">
@@ -258,38 +370,27 @@
 
         <div class="links-grid">
           <a class="link-card" href="https://www.lepotager.org/">
-            <span>
-              <small>Main activity</small>
-              <strong>Le Potager du Web</strong>
-            </span>
+            <span><small>Main activity</small><strong>Le Potager du Web</strong></span>
             <span aria-hidden="true">↗</span>
           </a>
           <a class="link-card" href="https://github.com/jasmin-abernathy">
-            <span>
-              <small>Code & public repositories</small>
-              <strong>GitHub</strong>
-            </span>
+            <span><small>Code & public repositories</small><strong>GitHub</strong></span>
             <span aria-hidden="true">↗</span>
           </a>
-          <a class="link-card" href="/adhd-app/">
-            <span>
-              <small>User research</small>
-              <strong>Executive functions study</strong>
-            </span>
+          <a class="link-card" href="https://vevak.lepotager.org/">
+            <span><small>Local-first Android app</small><strong>VeVak</strong></span>
+            <span aria-hidden="true">↗</span>
+          </a>
+          <a class="link-card" href="/adhd-app/v2/">
+            <span><small>User research</small><strong>Executive functions study</strong></span>
             <span aria-hidden="true">→</span>
           </a>
           <a class="link-card" href="https://rgpd.lepotager.org/">
-            <span>
-              <small>Web experimentation</small>
-              <strong>Privacy lab</strong>
-            </span>
+            <span><small>Web experimentation</small><strong>Privacy lab</strong></span>
             <span aria-hidden="true">↗</span>
           </a>
           <a class="link-card" href="mailto:contact@lepotager.org">
-            <span>
-              <small>Question, testing, contribution</small>
-              <strong>contact@lepotager.org</strong>
-            </span>
+            <span><small>Question, testing, contribution</small><strong>contact@lepotager.org</strong></span>
             <span aria-hidden="true">→</span>
           </a>
         </div>
@@ -304,7 +405,7 @@
           <span class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 48 48"><path d="M24 40V19"/><path d="M24 25c-7.8 0-13-4.8-13-12 7.6 0 13 4.5 13 12Z"/><path d="M24 20c7.8 0 13-4.8 13-12-7.6 0-13 4.5-13 12Z"/></svg>
           </span>
-          <span><strong>Le Potager</strong><small>des Apps</small></span>
+          <span><strong>Le Verger</strong><small>du Numérique</small></span>
         </a>
         <p>Useful, lightweight, open digital tools that respect privacy.</p>
       </div>
