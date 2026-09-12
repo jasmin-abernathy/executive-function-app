@@ -10,6 +10,8 @@ import org.lepotager.executivefunction.model.FocusSession
 import org.lepotager.executivefunction.model.FocusStatus
 import org.lepotager.executivefunction.model.TaskItem
 import org.lepotager.executivefunction.model.TaskStatus
+import org.lepotager.executivefunction.domain.TimeLearning
+import java.util.Locale
 
 internal class AppDatabase(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
@@ -25,6 +27,7 @@ internal class AppDatabase(context: Context) :
             CREATE TABLE tasks (
                 id TEXT PRIMARY KEY NOT NULL,
                 title TEXT NOT NULL CHECK(length(trim(title)) > 0),
+                learning_key TEXT NOT NULL,
                 first_step TEXT,
                 status TEXT NOT NULL,
                 created_at INTEGER NOT NULL,
@@ -42,6 +45,7 @@ internal class AppDatabase(context: Context) :
                 elapsed_before_segment_ms INTEGER NOT NULL DEFAULT 0 CHECK(elapsed_before_segment_ms >= 0),
                 segment_started_at INTEGER,
                 interruption_note TEXT,
+                target_duration_ms INTEGER CHECK(target_duration_ms IS NULL OR target_duration_ms > 0),
                 created_at INTEGER NOT NULL,
                 updated_at INTEGER NOT NULL,
                 FOREIGN KEY(task_id) REFERENCES tasks(id) ON DELETE CASCADE
@@ -50,14 +54,22 @@ internal class AppDatabase(context: Context) :
         )
         db.execSQL("CREATE INDEX tasks_status_updated ON tasks(status, updated_at DESC)")
         db.execSQL("CREATE INDEX sessions_task ON focus_sessions(task_id, updated_at DESC)")
+        db.execSQL("CREATE INDEX tasks_learning_key ON tasks(learning_key)")
         db.execSQL(
             "CREATE UNIQUE INDEX one_active_focus ON focus_sessions(is_active) WHERE is_active = 1",
         )
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        // Schema version 1 is the first public prototype. Future migrations must preserve local data.
-        check(oldVersion == newVersion) { "Missing migration from $oldVersion to $newVersion" }
+        var version = oldVersion
+        if (version == 1) {
+            db.execSQL("ALTER TABLE tasks ADD COLUMN learning_key TEXT")
+            db.execSQL("UPDATE tasks SET learning_key = lower(trim(title))")
+            db.execSQL("CREATE INDEX tasks_learning_key ON tasks(learning_key)")
+            db.execSQL("ALTER TABLE focus_sessions ADD COLUMN target_duration_ms INTEGER")
+            version = 2
+        }
+        check(version == newVersion) { "Missing migration from $oldVersion to $newVersion" }
     }
 
     fun insertTask(task: TaskItem) {
@@ -97,6 +109,35 @@ internal class AppDatabase(context: Context) :
             "1",
         ).use { cursor -> if (cursor.moveToFirst()) cursor.toSession() else null } ?: return null
         return taskById(session.taskId)?.let { ActiveFocus(it, session) }
+    }
+
+    /**
+     * Repeated tasks are currently matched by a conservative normalized title.
+     * A future explicit task-template UI can replace the key without changing
+     * the learning calculation or exposing data outside the device.
+     */
+    fun suggestedDurationMs(taskId: String): Long? {
+        val sql = """
+            SELECT COUNT(*) AS completed_count,
+                   MAX(s.elapsed_before_segment_ms) AS longest_duration
+            FROM focus_sessions s
+            INNER JOIN tasks history_task ON history_task.id = s.task_id
+            WHERE s.status = ?
+              AND history_task.learning_key = (
+                  SELECT learning_key FROM tasks WHERE id = ? LIMIT 1
+              )
+              AND s.elapsed_before_segment_ms > 0
+        """.trimIndent()
+        return readableDatabase.rawQuery(
+            sql,
+            arrayOf(FocusStatus.COMPLETED.name, taskId),
+        ).use { cursor ->
+            if (!cursor.moveToFirst()) return@use null
+            val completedCount = cursor.getInt(cursor.getColumnIndexOrThrow("completed_count"))
+            val longestColumn = cursor.getColumnIndexOrThrow("longest_duration")
+            val longest = if (cursor.isNull(longestColumn)) null else cursor.getLong(longestColumn)
+            TimeLearning.suggestedDurationMs(completedCount, longest)
+        }
     }
 
     fun startFocus(taskId: String, session: FocusSession) = transaction { db ->
@@ -186,6 +227,7 @@ internal class AppDatabase(context: Context) :
     private fun TaskItem.toValues() = ContentValues().apply {
         put("id", id)
         put("title", title)
+        put("learning_key", learningKey(title))
         putNullableString("first_step", firstStep)
         put("status", status.name)
         put("created_at", createdAt)
@@ -200,6 +242,7 @@ internal class AppDatabase(context: Context) :
         put("elapsed_before_segment_ms", elapsedBeforeSegmentMs)
         if (segmentStartedAt == null) putNull("segment_started_at") else put("segment_started_at", segmentStartedAt)
         putNullableString("interruption_note", interruptionNote)
+        if (targetDurationMs == null) putNull("target_duration_ms") else put("target_duration_ms", targetDurationMs)
         put("created_at", createdAt)
         put("updated_at", updatedAt)
     }
@@ -212,10 +255,10 @@ internal class AppDatabase(context: Context) :
         id = getString(getColumnIndexOrThrow("id")),
         title = getString(getColumnIndexOrThrow("title")),
         firstStep = getNullableString("first_step"),
-        status = TaskStatus.valueOf(getString(getColumnIndexOrThrow("status"))),
-        createdAt = getLong(getColumnIndexOrThrow("created_at")),
-        updatedAt = getLong(getColumnIndexOrThrow("updated_at")),
-    )
+    status = TaskStatus.valueOf(getString(getColumnIndexOrThrow("status"))),
+    createdAt = getLong(getColumnIndexOrThrow("created_at")),
+    updatedAt = getLong(getColumnIndexOrThrow("updated_at")),
+)
 
     private fun Cursor.toSession() = FocusSession(
         id = getString(getColumnIndexOrThrow("id")),
@@ -226,6 +269,7 @@ internal class AppDatabase(context: Context) :
         interruptionNote = getNullableString("interruption_note"),
         createdAt = getLong(getColumnIndexOrThrow("created_at")),
         updatedAt = getLong(getColumnIndexOrThrow("updated_at")),
+        targetDurationMs = getNullableLong("target_duration_ms"),
     )
 
     private fun Cursor.getNullableString(column: String): String? {
@@ -240,7 +284,7 @@ internal class AppDatabase(context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "executive-function.db"
-        const val DATABASE_VERSION = 1
+        const val DATABASE_VERSION = 2
         val TASK_COLUMNS = arrayOf("id", "title", "first_step", "status", "created_at", "updated_at")
         val SESSION_COLUMNS = arrayOf(
             "id",
@@ -249,8 +293,14 @@ internal class AppDatabase(context: Context) :
             "elapsed_before_segment_ms",
             "segment_started_at",
             "interruption_note",
+            "target_duration_ms",
             "created_at",
             "updated_at",
         )
+
+        fun learningKey(title: String): String = title
+            .trim()
+            .lowercase(Locale.ROOT)
+            .replace(Regex("\\s+"), " ")
     }
 }

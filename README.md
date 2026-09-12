@@ -149,7 +149,7 @@ Capture → choose → start → focus → interrupt → resume → finish or po
 Implemented today:
 
 - ultra-fast local capture with an optional first small step;
-- manual task choice and full-screen elapsed-time focus;
+- manual choice or optional local task draw, followed by full-screen elapsed-time focus;
 - quick capture without leaving focus;
 - durable interruption context and a non-punitive return screen;
 - resume, reduce, postpone/switch and complete transitions;

@@ -19,17 +19,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -41,12 +36,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -57,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.domain.TaskDraw
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.TaskItem
 
@@ -69,6 +67,17 @@ fun HomeScreen(
     var title by remember { mutableStateOf("") }
     var firstStep by remember { mutableStateOf("") }
     var showFirstStep by remember { mutableStateOf(false) }
+    var drawnTask by remember(tasks) { mutableStateOf<TaskItem?>(null) }
+    var pendingDraw by remember(tasks) { mutableStateOf<TaskItem?>(null) }
+    var drawRollKey by remember { mutableIntStateOf(0) }
+    var isDrawing by remember { mutableStateOf(false) }
+
+    fun beginDraw(previousTaskId: String?) {
+        val next = TaskDraw.pick(tasks = tasks, previousTaskId = previousTaskId) ?: return
+        pendingDraw = next
+        isDrawing = true
+        drawRollKey += 1
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -127,7 +136,8 @@ fun HomeScreen(
                             onClick = { showFirstStep = true },
                             colors = appTextButtonColors(),
                         ) {
-                            Icon(Icons.Default.Add, contentDescription = null)
+                            ToolGlyph(ToolGlyphKind.CAPTURE)
+                            Spacer(Modifier.size(8.dp))
                             Text(stringResource(R.string.add_first_step))
                         }
                     }
@@ -150,6 +160,51 @@ fun HomeScreen(
                 }
             }
         }
+        if (tasks.isNotEmpty()) {
+            item {
+                FilledTonalButton(
+                    onClick = { beginDraw(drawnTask?.id) },
+                    enabled = !isDrawing,
+                    colors = appTonalButtonColors(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .sizeIn(minHeight = 48.dp),
+                ) {
+                    ToolGlyph(ToolGlyphKind.DRAW)
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.draw_action))
+                }
+            }
+            if (isDrawing || drawnTask != null) {
+                item(key = "animated-task-die") {
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        val finalTask = pendingDraw ?: drawnTask
+                        AnimatedDieBadge(
+                            rollKey = drawRollKey,
+                            finalFace = finalTask?.let { stableDieFace(it.id) } ?: 1,
+                            description = stringResource(R.string.die_rolling_accessible),
+                            onRollFinished = {
+                                pendingDraw?.let { drawnTask = it }
+                                pendingDraw = null
+                                isDrawing = false
+                            },
+                        )
+                    }
+                }
+            }
+            if (!isDrawing) drawnTask?.let { task ->
+                item(key = "drawn-${task.id}") {
+                    TaskDrawPanel(
+                        task = task,
+                        onRedraw = { beginDraw(task.id) },
+                        onStart = { onStart(task.id) },
+                    )
+                }
+            }
+        }
         item {
             Text(
                 text = stringResource(R.string.ready_title),
@@ -165,6 +220,78 @@ fun HomeScreen(
         } else {
             items(tasks, key = { it.id }) { task ->
                 TaskCard(task = task, onStart = { onStart(task.id) })
+            }
+        }
+    }
+}
+
+@Composable
+private fun TaskDrawPanel(
+    task: TaskItem,
+    onRedraw: () -> Unit,
+    onStart: () -> Unit,
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = appCardColors(),
+        border = appBorder(),
+        shape = RoundedCornerShape(22.dp),
+    ) {
+        Column(
+            modifier = Modifier.padding(18.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            ToolBadge(
+                kind = ToolGlyphKind.DRAW,
+                dieFace = stableDieFace(task.id),
+            )
+            Text(
+                text = stringResource(R.string.draw_result_label),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = task.title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { heading() },
+            )
+            task.firstStep?.let {
+                Text(
+                    text = stringResource(R.string.first_step_value, it),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Text(
+                text = stringResource(R.string.draw_result_support),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = onRedraw,
+                    colors = appOutlinedButtonColors(),
+                    border = appBorder(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .sizeIn(minHeight = 48.dp),
+                ) {
+                    ToolGlyph(ToolGlyphKind.DRAW, dieFace = stableDieFace(task.id))
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.redraw_action))
+                }
+                Button(
+                    onClick = onStart,
+                    colors = appButtonColors(),
+                    modifier = Modifier
+                        .weight(1f)
+                        .sizeIn(minHeight = 48.dp),
+                ) {
+                    ToolGlyph(ToolGlyphKind.START)
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.start_action))
+                }
             }
         }
     }
@@ -200,7 +327,8 @@ private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
                 colors = appButtonColors(),
                 modifier = Modifier.sizeIn(minHeight = 48.dp),
             ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = null)
+                ToolGlyph(ToolGlyphKind.START)
+                Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.start_action))
             }
         }
@@ -210,6 +338,8 @@ private fun TaskCard(task: TaskItem, onStart: () -> Unit) {
 @Composable
 fun FocusScreen(
     activeFocus: ActiveFocus,
+    overlayEnabled: Boolean,
+    onToggleOverlay: () -> Unit,
     onQuickCapture: (String, String?, () -> Unit) -> Unit,
     onInterrupt: (String?) -> Unit,
     onComplete: () -> Unit,
@@ -224,12 +354,19 @@ fun FocusScreen(
         }
     }
     val elapsed = SessionClock.elapsedMs(activeFocus.session, now)
-    val elapsedSeconds = elapsed / 1_000
+    val targetDuration = activeFocus.session.targetDurationMs
+    val overtime = targetDuration?.let { (elapsed - it).coerceAtLeast(0) } ?: 0L
+    val displayedTime = when {
+        targetDuration == null -> elapsed
+        overtime > 0 -> overtime
+        else -> (targetDuration - elapsed).coerceAtLeast(0)
+    }
+    val displayedSeconds = displayedTime / 1_000
     val accessibleElapsed = stringResource(
         R.string.timer_accessible,
-        elapsedSeconds / 3_600,
-        (elapsedSeconds % 3_600) / 60,
-        elapsedSeconds % 60,
+        displayedSeconds / 3_600,
+        (displayedSeconds % 3_600) / 60,
+        displayedSeconds % 60,
     )
 
     Column(
@@ -264,19 +401,52 @@ fun FocusScreen(
             }
         }
 
-        Text(
-            text = formatElapsed(elapsed),
-            fontSize = 54.sp,
-            fontWeight = FontWeight.Light,
-            modifier = Modifier.semantics {
-                contentDescription = accessibleElapsed
-            },
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            ToolBadge(ToolGlyphKind.CLOCK)
+            Text(
+                text = stringResource(
+                    when {
+                        targetDuration == null -> R.string.stopwatch_learning_label
+                        overtime > 0 -> R.string.timer_overtime_label
+                        else -> R.string.timer_suggested_label
+                    },
+                ),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = (if (overtime > 0) "+" else "") + formatElapsed(displayedTime),
+                fontSize = 54.sp,
+                fontWeight = FontWeight.Light,
+                modifier = Modifier.semantics {
+                    contentDescription = accessibleElapsed
+                },
+            )
+        }
 
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            FilledTonalButton(
+                onClick = onToggleOverlay,
+                colors = appTonalButtonColors(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .sizeIn(minHeight = 48.dp),
+            ) {
+                ToolGlyph(ToolGlyphKind.CLOCK)
+                Spacer(Modifier.size(8.dp))
+                Text(
+                    stringResource(
+                        if (overlayEnabled) R.string.hide_floating_timer
+                        else R.string.show_floating_timer,
+                    ),
+                )
+            }
             FilledTonalButton(
                 onClick = { showCapture = true },
                 colors = appTonalButtonColors(),
@@ -284,7 +454,8 @@ fun FocusScreen(
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
             ) {
-                Icon(Icons.Default.Add, contentDescription = null)
+                ToolGlyph(ToolGlyphKind.CAPTURE)
+                Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.quick_capture_action))
             }
             OutlinedButton(
@@ -295,6 +466,8 @@ fun FocusScreen(
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
             ) {
+                ToolGlyph(ToolGlyphKind.PAUSE)
+                Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.interrupt_action))
             }
             Button(
@@ -304,7 +477,8 @@ fun FocusScreen(
                     .fillMaxWidth()
                     .sizeIn(minHeight = 48.dp),
             ) {
-                Icon(Icons.Default.Check, contentDescription = null)
+                ToolGlyph(ToolGlyphKind.COMPLETE)
+                Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.complete_action))
             }
         }
@@ -380,7 +554,8 @@ fun ResumeScreen(
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
         ) {
-            Icon(Icons.Default.PlayArrow, contentDescription = null)
+            ToolGlyph(ToolGlyphKind.START)
+            Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.resume_action))
         }
         FilledTonalButton(
@@ -390,6 +565,8 @@ fun ResumeScreen(
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
         ) {
+            ToolGlyph(ToolGlyphKind.REDUCE)
+            Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.make_smaller_action))
         }
         OutlinedButton(
@@ -400,6 +577,8 @@ fun ResumeScreen(
                 .fillMaxWidth()
                 .sizeIn(minHeight = 48.dp),
         ) {
+            ToolGlyph(ToolGlyphKind.POSTPONE)
+            Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.choose_another_action))
         }
     }
@@ -439,10 +618,7 @@ private fun EmptyTasksPanel() {
                 border = appBorder(),
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                    )
+                    ToolGlyph(ToolGlyphKind.COMPLETE)
                 }
             }
             Text(
@@ -558,6 +734,28 @@ fun ErrorDialog(onDismiss: () -> Unit) {
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.error_title)) },
         text = { Text(stringResource(R.string.error_message)) },
+        confirmButton = {
+            TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
+                Text(stringResource(R.string.ok))
+            }
+        },
+    )
+}
+
+@Composable
+fun CompletionFeedbackDialog(minutesAhead: Long, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.completion_ahead_title)) },
+        text = {
+            Text(
+                pluralStringResource(
+                    R.plurals.completion_ahead_message,
+                    minutesAhead.coerceAtMost(Int.MAX_VALUE.toLong()).toInt(),
+                    minutesAhead,
+                ),
+            )
+        },
         confirmButton = {
             TextButton(onClick = onDismiss, colors = appTextButtonColors()) {
                 Text(stringResource(R.string.ok))

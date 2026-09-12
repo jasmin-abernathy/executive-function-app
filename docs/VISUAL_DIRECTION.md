@@ -95,3 +95,16 @@ Les illustrations officielles devront fonctionner sur fond transparent, rester l
 - esthétique infantile, médicale ou futuriste ;
 - gamification punitive ;
 - remplacement automatique de la palette par les couleurs du téléphone.
+
+## Graphismes des outils fonctionnels
+
+Les fonctions annexes utilisent une famille de pictogrammes tracés directement en Compose :
+
+- même zone de dessin de `22 dp` et même épaisseur de trait ;
+- badges de `44 dp`, bordure vert clair et fond d’action très pâle ;
+- signes simples : capture, dé, démarrage, temps, pause, validation, réduction et report ;
+- pictogramme toujours accompagné d’un libellé pour les actions importantes ;
+- aucune dépendance à une bibliothèque graphique lourde ;
+- aucune reprise du style, du logo ou des illustrations d’une application tierce.
+
+Ces graphismes sont strictement fonctionnels. Ils ne préfigurent ni le compagnon, ni ses objets, ni le logo, ni l’univers illustré à produire avec l’illustrateurice.

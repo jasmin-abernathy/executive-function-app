@@ -22,3 +22,10 @@ Accessibility is part of P1, not a final polish pass.
 - Keep optional configuration behind progressive disclosure.
 - Preserve context after interruption.
 - Do not use guilt, urgency or scarcity copy to force engagement.
+
+## Pictogrammes fonctionnels
+
+- Les pictogrammes décoratifs placés à côté d’un libellé ne reçoivent pas de description redondante.
+- Une action ne dépend jamais de la compréhension du pictogramme seul.
+- Le dé affiche un résultat graphique, mais la tâche proposée reste annoncée en texte.
+- Les animations éventuelles devront respecter la préférence système de réduction des mouvements ; la version actuelle reste statique.
