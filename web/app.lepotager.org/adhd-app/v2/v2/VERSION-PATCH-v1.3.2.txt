@@ -1,0 +1,5 @@
+ADHD Survey V2 — patch v1.3.2
+
+Adds an optional one-shot email reminder for adult participants when pausing.
+Preserves v1.3.1 language detection, textual Français / English selector, halfway marker, selection-limit feedback, app.lepotager.org exit links and V1-like admin.
+No minor participant email is collected.

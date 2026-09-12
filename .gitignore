@@ -11,3 +11,6 @@ captures/
 *.keystore
 *.apk
 *.aab
+
+# Configuration de production — jamais dans Git
+web/app.lepotager.org/adhd-app/config.php

@@ -1,0 +1,38 @@
+name: PHP lint
+
+on:
+  push:
+    paths:
+      - 'web/app.lepotager.org/**/*.php'
+      - '.github/workflows/php-lint.yml'
+  pull_request:
+    paths:
+      - 'web/app.lepotager.org/**/*.php'
+      - '.github/workflows/php-lint.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  php-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          coverage: none
+
+      - name: Lint PHP
+        shell: bash
+        run: |
+          set -euo pipefail
+          find web/app.lepotager.org \
+            -type f \
+            -name '*.php' \
+            -print0 \
+            | xargs -0 -n1 php -l
