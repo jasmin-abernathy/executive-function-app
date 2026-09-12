@@ -52,6 +52,11 @@ class FocusRepository internal constructor(
         refresh()
     }
 
+    suspend fun addQuickNote(text: String) = mutate {
+        LearningJournal(database).note(text)
+        refresh()
+    }
+
     suspend fun start(taskId: String) = mutate {
         requireNotNull(database.taskById(taskId))
         val timestamp = now()
