@@ -1,5 +1,8 @@
 package org.lepotager.executivefunction.ui
 
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
@@ -43,6 +46,11 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -78,6 +86,7 @@ fun HomeScreen(
     onCapture: (String, String?, TaskColor, () -> Unit) -> Unit,
     onStart: (String) -> Unit,
     onMoveTask: (String, Int) -> Unit,
+    onApplyTaskOrder: (List<String>, (Boolean) -> Unit) -> Unit,
     onSetTaskColor: (String, TaskColor) -> Unit,
     onSetDrawEnabled: (Boolean) -> Unit,
     onSetPauseSuggestionsEnabled: (Boolean) -> Unit,
@@ -86,217 +95,249 @@ fun HomeScreen(
     var title by remember { mutableStateOf("") }
     var firstStep by remember { mutableStateOf("") }
     var showFirstStep by remember { mutableStateOf(false) }
-    var drawnTask by remember(tasks) { mutableStateOf<TaskItem?>(null) }
-    var pendingDraw by remember(tasks) { mutableStateOf<TaskItem?>(null) }
+    var drawnTaskId by remember { mutableStateOf<String?>(null) }
+    var pendingDrawTaskId by remember { mutableStateOf<String?>(null) }
     var drawRollKey by remember { mutableIntStateOf(0) }
     var isDrawing by remember { mutableStateOf(false) }
     var selectedColor by remember { mutableStateOf(TaskColor.NEUTRAL) }
     var organizing by remember { mutableStateOf(false) }
 
-    fun beginDraw(previousTaskId: String?) {
-        val next = TaskDraw.pick(tasks = tasks.filter { eligibleDrawIds==null || it.id in eligibleDrawIds }, previousTaskId = previousTaskId) ?: return
-        pendingDraw = next
-        isDrawing = true
-        drawRollKey += 1
+    val reorder = rememberTaskReorder(tasks, onApplyTaskOrder)
+    var proposalOnly by remember { mutableStateOf(false) }
+    var handledDrawRequest by remember { mutableIntStateOf(0) }
+    fun beginDraw(previousTaskId: String?, onlyPropose: Boolean = false) {
+        if (isDrawing || reorder.saving || reorder.dragged != null) return
+        val order = TaskDraw.permute(tasks, eligibleDrawIds, previousTaskId)
+        val next = if (onlyPropose) TaskDraw.pick(
+            tasks.filter { eligibleDrawIds == null || it.id in eligibleDrawIds }, previousTaskId,
+        ) else order.proposed
+        if (next == null) return
+        fun present() {
+            proposalOnly = onlyPropose
+            pendingDrawTaskId = next.id
+            isDrawing = true
+            drawRollKey += 1
+        }
+        if (onlyPropose) present() else {
+            reorder.saving = true
+            onApplyTaskOrder(order.tasks.map { it.id }) { saved ->
+                reorder.saving = false
+                if (saved) present()
+            }
+        }
     }
-    LaunchedEffect(drawRequest) {
-        if(drawRequest>0 && drawEnabled) beginDraw(null)
+    LaunchedEffect(drawRequest, tasks, drawEnabled, reorder.saving, reorder.dragged, isDrawing) {
+        if (drawRequest > handledDrawRequest && drawEnabled && tasks.isNotEmpty() &&
+            !reorder.saving && !isDrawing && reorder.dragged == null) {
+            handledDrawRequest = drawRequest
+            beginDraw(null, onlyPropose = true)
+        }
+    }
+    LaunchedEffect(drawnTaskId, isDrawing) {
+        if (!isDrawing && drawEnabled && tasks.any { it.id == drawnTaskId }) {
+            // Header, capture, list title, tasks, then the explicit draw button.
+            // Reveal the result without adding motion in calm mode.
+            reorder.listState.scrollToItem(tasks.size + 4)
+        }
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(20.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        item {
-            TextButton(onClick = onJournal) {
-                Text(stringResource(R.string.open_journal))
-            }
-            if(eligibleDrawIds!=null) {
-                Text(stringResource(R.string.adaptation_rule))
-                tasks.firstOrNull { it.id==suggestedTaskId }?.let { Text(stringResource(R.string.adaptation_suggestion,it.title)) }
-                if(eligibleDrawIds.isEmpty()) Text(stringResource(R.string.adaptation_empty))
-                if(eligibleDrawIds.isNotEmpty()) TextButton(onClick=onApplySuggestedOrder) {Text(stringResource(R.string.apply_suggested_order))}
-            }
-            Text(
-                text = stringResource(R.string.home_title),
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.semantics { heading() },
-            )
-            Text(
-                text = stringResource(R.string.home_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = appCardColors(),
-                border = appBorder(),
-                shape = RoundedCornerShape(
-                    topStart = 28.dp,
-                    topEnd = 18.dp,
-                    bottomEnd = 28.dp,
-                    bottomStart = 18.dp,
-                ),
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    OutlinedTextField(
-                        value = title,
-                        onValueChange = { title = it },
-                        modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(R.string.capture_label)) },
-                        supportingText = { Text(stringResource(R.string.capture_support)) },
-                        singleLine = true,
-                        colors = appTextFieldColors(),
-                    )
-                    if (showFirstStep) {
-                        OutlinedTextField(
-                            value = firstStep,
-                            onValueChange = { firstStep = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text(stringResource(R.string.first_step_optional)) },
-                            singleLine = true,
-                            colors = appTextFieldColors(),
-                        )
-                    } else {
-                        TextButton(
-                            onClick = { showFirstStep = true },
-                            colors = appTextButtonColors(),
-                        ) {
-                            ToolGlyph(ToolGlyphKind.CAPTURE)
-                            Spacer(Modifier.size(8.dp))
-                            Text(stringResource(R.string.add_first_step))
-                        }
-                    }
-                    Text(
-                        text = stringResource(R.string.task_color_optional),
-                        style = MaterialTheme.typography.labelLarge,
-                    )
-                    TaskColorPicker(selected = selectedColor, onSelect = { selectedColor = it })
-                    Button(
-                        onClick = {
-                            onCapture(title, firstStep, selectedColor) {
-                                title = ""
-                                firstStep = ""
-                                showFirstStep = false
-                                selectedColor = TaskColor.NEUTRAL
-                            }
-                        },
-                        enabled = title.isNotBlank(),
-                        colors = appButtonColors(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .sizeIn(minHeight = 48.dp),
-                    ) {
-                        Text(stringResource(R.string.capture_action))
-                    }
+    Box(Modifier.fillMaxSize()) {
+        LazyColumn(
+            state = reorder.listState,
+            userScrollEnabled = reorder.dragged == null,
+            modifier = Modifier.fillMaxSize().testTag("home-task-list"),
+            contentPadding = PaddingValues(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item {
+                TextButton(onClick = onJournal) {
+                    Text(stringResource(R.string.open_journal))
                 }
-            }
-        }
-        item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
+                if(eligibleDrawIds!=null) {
+                    Text(stringResource(R.string.adaptation_rule))
+                    tasks.firstOrNull { it.id==suggestedTaskId }?.let { Text(stringResource(R.string.adaptation_suggestion,it.title)) }
+                    if(eligibleDrawIds.isEmpty()) Text(stringResource(R.string.adaptation_empty))
+                    if(eligibleDrawIds.isNotEmpty()) TextButton(onClick=onApplySuggestedOrder) {Text(stringResource(R.string.apply_suggested_order))}
+                }
                 Text(
-                    text = stringResource(R.string.ready_title),
-                    style = MaterialTheme.typography.titleLarge,
+                    text = stringResource(R.string.home_title),
+                    style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.semantics { heading() },
                 )
-                if (tasks.size > 1) {
-                    TextButton(
-                        onClick = { organizing = !organizing },
-                        colors = appTextButtonColors(),
-                    ) {
-                        Text(
-                            stringResource(
-                                if (organizing) R.string.finish_organizing
-                                else R.string.organize_tasks,
-                            ),
-                        )
-                    }
-                }
-            }
-        }
-        if (tasks.isEmpty()) {
-            item {
-                EmptyTasksPanel()
-            }
-        } else {
-            itemsIndexed(tasks, key = { _, task -> task.id }) { index, task ->
-                TaskCard(
-                    task = task,
-                    organizing = organizing,
-                    canMoveUp = index > 0,
-                    canMoveDown = index < tasks.lastIndex,
-                    onMoveUp = { onMoveTask(task.id, -1) },
-                    onMoveDown = { onMoveTask(task.id, 1) },
-                    onSetColor = { onSetTaskColor(task.id, it) },
-                    onStart = { onStart(task.id) },
+                Text(
+                    text = stringResource(R.string.home_subtitle),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-        }
-        if (drawEnabled && tasks.isNotEmpty()) {
             item {
-                FilledTonalButton(
-                    onClick = { beginDraw(drawnTask?.id) },
-                    enabled = !isDrawing,
-                    colors = appTonalButtonColors(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .sizeIn(minHeight = 48.dp),
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = appCardColors(),
+                    border = appBorder(),
+                    shape = RoundedCornerShape(
+                        topStart = 28.dp,
+                        topEnd = 18.dp,
+                        bottomEnd = 28.dp,
+                        bottomStart = 18.dp,
+                    ),
                 ) {
-                    ToolGlyph(ToolGlyphKind.DRAW)
-                    Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.draw_action))
-                }
-            }
-            if (isDrawing || drawnTask != null) {
-                item(key = "animated-task-die") {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center,
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        val finalTask = pendingDraw ?: drawnTask
-                        AnimatedDieBadge(
-                            rollKey = drawRollKey,
-                            finalFace = finalTask?.let { stableDieFace(it.id) } ?: 0,
-                            description = stringResource(R.string.die_rolling_accessible),
-                            onRollFinished = {
-                                pendingDraw?.let { drawnTask = it }
-                                pendingDraw = null
-                                isDrawing = false
-                            },
+                        OutlinedTextField(
+                            value = title,
+                            onValueChange = { title = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text(stringResource(R.string.capture_label)) },
+                            supportingText = { Text(stringResource(R.string.capture_support)) },
+                            singleLine = true,
+                            colors = appTextFieldColors(),
                         )
+                        if (showFirstStep) {
+                            OutlinedTextField(
+                                value = firstStep,
+                                onValueChange = { firstStep = it },
+                                modifier = Modifier.fillMaxWidth(),
+                                label = { Text(stringResource(R.string.first_step_optional)) },
+                                singleLine = true,
+                                colors = appTextFieldColors(),
+                            )
+                        } else {
+                            TextButton(
+                                onClick = { showFirstStep = true },
+                                colors = appTextButtonColors(),
+                            ) {
+                                ToolGlyph(ToolGlyphKind.CAPTURE)
+                                Spacer(Modifier.size(8.dp))
+                                Text(stringResource(R.string.add_first_step))
+                            }
+                        }
+                        Text(
+                            text = stringResource(R.string.task_color_optional),
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                        TaskColorPicker(selected = selectedColor, onSelect = { selectedColor = it })
+                        Button(
+                            onClick = {
+                                onCapture(title, firstStep, selectedColor) {
+                                    title = ""
+                                    firstStep = ""
+                                    showFirstStep = false
+                                    selectedColor = TaskColor.NEUTRAL
+                                }
+                            },
+                            enabled = title.isNotBlank(),
+                            colors = appButtonColors(),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .sizeIn(minHeight = 48.dp),
+                        ) {
+                            Text(stringResource(R.string.capture_action))
+                        }
                     }
                 }
             }
-            if (!isDrawing) drawnTask?.let { task ->
-                item(key = "drawn-${task.id}") {
-                    TaskDrawPanel(
+            item {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(
+                        text = stringResource(R.string.ready_title),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.semantics { heading() },
+                    )
+                    if (tasks.size > 1) {
+                        TextButton(
+                            onClick = { organizing = !organizing },
+                            colors = appTextButtonColors(),
+                        ) {
+                            Text(
+                                stringResource(
+                                    if (organizing) R.string.finish_organizing
+                                    else R.string.organize_tasks,
+                                ),
+                            )
+                        }
+                    }
+                }
+            }
+            if (tasks.isEmpty()) {
+                item {
+                    EmptyTasksPanel()
+                }
+            } else {
+                itemsIndexed(reorder.visibleTasks, key = { _, task -> task.id }) { index, task ->
+                    TaskCard(
                         task = task,
-                        onRedraw = { beginDraw(task.id) },
+                        handleModifier = reorder.handle(task.id, !isDrawing && !reorder.saving),
+                        organizing = organizing,
+                        canMoveUp = index > 0 && !reorder.saving && reorder.dragged == null && !isDrawing,
+                        canMoveDown = index < tasks.lastIndex && !reorder.saving && reorder.dragged == null && !isDrawing,
+                        onMoveUp = { onMoveTask(task.id, -1) },
+                        onMoveDown = { onMoveTask(task.id, 1) },
+                        onSetColor = { onSetTaskColor(task.id, it) },
                         onStart = { onStart(task.id) },
                     )
                 }
             }
+            if (drawEnabled && tasks.isNotEmpty()) {
+                item {
+                    FilledTonalButton(
+                        onClick = { beginDraw(drawnTaskId) },
+                        enabled = !isDrawing && !reorder.saving && reorder.dragged == null && tasks.any {
+                            it.status == org.lepotager.executivefunction.model.TaskStatus.READY && (eligibleDrawIds == null || it.id in eligibleDrawIds)
+                        },
+                        colors = appTonalButtonColors(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .sizeIn(minHeight = 48.dp),
+                    ) {
+                        ToolGlyph(ToolGlyphKind.DRAW)
+                        Spacer(Modifier.size(8.dp))
+                        Text(stringResource(R.string.draw_action))
+                    }
+                }
+                if (!isDrawing) tasks.firstOrNull { it.id == drawnTaskId }?.let { task ->
+                    item(key = "drawn-${task.id}") {
+                        TaskDrawPanel(
+                            task = task,
+                            proposalOnly = proposalOnly,
+                            onRedraw = { beginDraw(task.id, proposalOnly) },
+                            onStart = { onStart(task.id) },
+                        )
+                    }
+                }
+            }
+            item {
+                SupportOptionsCard(
+                    drawEnabled = drawEnabled,
+                    pauseSuggestionsEnabled = pauseSuggestionsEnabled,
+                    pauseAfterMinutes = pauseAfterMinutes,
+                    onSetDrawEnabled = onSetDrawEnabled,
+                    onSetPauseSuggestionsEnabled = onSetPauseSuggestionsEnabled,
+                    onSetPauseAfterMinutes = onSetPauseAfterMinutes,
+                )
+            }
         }
-        item {
-            SupportOptionsCard(
-                drawEnabled = drawEnabled,
-                pauseSuggestionsEnabled = pauseSuggestionsEnabled,
-                pauseAfterMinutes = pauseAfterMinutes,
-                onSetDrawEnabled = onSetDrawEnabled,
-                onSetPauseSuggestionsEnabled = onSetPauseSuggestionsEnabled,
-                onSetPauseAfterMinutes = onSetPauseAfterMinutes,
+        if (isDrawing) Box(
+            modifier = Modifier.fillMaxSize().zIndex(10f),
+            contentAlignment = Alignment.Center,
+        ) {
+            AnimatedDieBadge(
+                rollKey = drawRollKey,
+                finalFace = pendingDrawTaskId?.let { stableDieFace(it) } ?: 0,
+                description = stringResource(R.string.die_rolling_accessible),
+                onRollFinished = {
+                    drawnTaskId = pendingDrawTaskId
+                    pendingDrawTaskId = null
+                    isDrawing = false
+                },
             )
         }
     }
@@ -463,9 +504,11 @@ private fun taskBorder(color: TaskColor) = BorderStroke(1.dp, taskPalette(color)
 @Composable
 private fun TaskDrawPanel(
     task: TaskItem,
+    proposalOnly: Boolean,
     onRedraw: () -> Unit,
     onStart: () -> Unit,
 ) {
+    val startLabel = stringResource(R.string.start_action)
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = taskCardColors(task.color),
@@ -476,30 +519,37 @@ private fun TaskDrawPanel(
             modifier = Modifier.padding(18.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-            ToolBadge(
-                kind = ToolGlyphKind.DRAW,
-                dieFace = stableDieFace(task.id),
-            )
-            Text(
-                text = stringResource(R.string.draw_result_label),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(
-                text = task.title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.semantics { heading() },
-            )
-            task.firstStep?.let {
+            Column(
+                modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)
+                    .clickable(onClickLabel = startLabel, role = Role.Button, onClick = onStart)
+                    .semantics { liveRegion = LiveRegionMode.Polite },
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                ToolBadge(
+                    kind = ToolGlyphKind.DRAW,
+                    dieFace = stableDieFace(task.id),
+                )
                 Text(
-                    text = stringResource(R.string.first_step_value, it),
-                    style = MaterialTheme.typography.bodyMedium,
+                    text = stringResource(R.string.draw_result_label),
+                    style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                Text(
+                    text = task.title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.semantics { heading() },
+                )
+                task.firstStep?.let {
+                    Text(
+                        text = stringResource(R.string.first_step_value, it),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
             }
             Text(
-                text = stringResource(R.string.draw_result_support),
+                text = stringResource(if (proposalOnly) R.string.draw_result_support else R.string.draw_order_result_support),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -535,6 +585,7 @@ private fun TaskDrawPanel(
 @Composable
 private fun TaskCard(
     task: TaskItem,
+    handleModifier: Modifier = Modifier,
     organizing: Boolean,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
@@ -558,7 +609,22 @@ private fun TaskCard(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            Text(task.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+            val handleLabel = stringResource(R.string.reorder_handle, task.title)
+            val upLabel = stringResource(R.string.move_task_up)
+            val downLabel = stringResource(R.string.move_task_down)
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(task.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+                Box(
+                    Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).then(handleModifier).semantics(mergeDescendants = true) {
+                        contentDescription = handleLabel
+                        customActions = buildList {
+                            if (canMoveUp) add(CustomAccessibilityAction(upLabel) { onMoveUp(); true })
+                            if (canMoveDown) add(CustomAccessibilityAction(downLabel) { onMoveDown(); true })
+                        }
+                    },
+                    contentAlignment = Alignment.Center,
+                ) { Text("⋮", fontSize = 28.sp) }
+            }
             task.firstStep?.let {
                 Text(
                     text = stringResource(R.string.first_step_value, it),

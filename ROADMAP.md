@@ -6,7 +6,7 @@ Cette liste distingue les comportements présents dans le code des pistes future
 | --- | --- |
 | Capture, focus, interruption et reprise | Présents, avec notes et conservation du temps actif après report |
 | Ordre choisi par l'utilisateur | Présent ; suggestion de nouvel ordre uniquement sur action volontaire |
-| Dé facultatif D10 légèrement 3D | Dessin Compose, animation et mode calme ; aucune illustration externe |
+| Dé facultatif D10 en 3D | Surimpression Compose de 500 ms, mode calme ; mélange explicite des tâches admissibles, widget limité à une proposition |
 | Couleurs des blocs | Palette choisie par tâche, variantes claires et sombres |
 | Pauses proposées après un délai | Délai configurable, continuer ou reporter ; aucune pause forcée |
 | Temps visible ailleurs | Notification, fenêtre flottante et PiP facultatifs |

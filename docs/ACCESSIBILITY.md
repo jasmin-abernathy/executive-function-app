@@ -27,5 +27,6 @@ Accessibility is part of P1, not a final polish pass.
 
 - Les pictogrammes décoratifs placés à côté d’un libellé ne reçoivent pas de description redondante.
 - Une action ne dépend jamais de la compréhension du pictogramme seul.
-- Le dé affiche un résultat graphique, mais la tâche proposée reste annoncée en texte.
-- Les animations éventuelles devront respecter la préférence système de réduction des mouvements ; la version actuelle reste statique.
+- Le dé affiche un résultat graphique, mais la tâche proposée reste annoncée en texte. Son bloc titre/premier pas permet de démarrer avec une action TalkBack nommée ; « Commencer » reste visible et « Relancer » reste une action séparée.
+- Chaque tâche conserve une poignée de 48 dp minimum et des actions TalkBack Monter/Descendre. Le mode Organiser conserve les boutons ↑/↓ ; le glissement n’est jamais obligatoire.
+- Le D10 tourne pendant 500 ms dans une surimpression Compose interne. Le mode calme ou la désactivation des animations système affiche le résultat immédiatement, sans vibration.

@@ -81,6 +81,11 @@ class FocusRepository internal constructor(
         refresh()
     }
 
+    suspend fun applyTaskOrder(ids: List<String>) = mutate {
+        database.applyTaskOrder(ids)
+        refresh()
+    }
+
     suspend fun moveTask(taskId: String, offset: Int) = mutate {
         database.moveOpenTask(taskId, offset)
         refresh()

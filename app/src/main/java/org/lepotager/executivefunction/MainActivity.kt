@@ -164,6 +164,7 @@ class MainActivity : ComponentActivity() {
                                     viewModel.start(id)
                                 },
                                 onMoveTask = viewModel::moveTask,
+                                onApplyTaskOrder = viewModel::applyTaskOrder,
                                 onSetTaskColor = viewModel::setTaskColor,
                                 onSetDrawEnabled = ::saveDrawPreference,
                                 onSetPauseSuggestionsEnabled = ::savePausePreference,

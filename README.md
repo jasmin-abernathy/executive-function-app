@@ -149,7 +149,7 @@ Capture → choose → start → focus → interrupt → resume → finish or po
 Implemented today:
 
 - ultra-fast local capture with an optional first small step;
-- manual choice or optional local task draw, followed by full-screen elapsed-time focus;
+- manual ordering with handles or ↑/↓ buttons, optional D10 shuffle of eligible tasks; the widget only proposes a task, followed by full-screen elapsed-time focus;
 - quick capture without leaving focus;
 - durable interruption context and a non-punitive return screen;
 - resume, reduce, postpone/switch and complete transitions;

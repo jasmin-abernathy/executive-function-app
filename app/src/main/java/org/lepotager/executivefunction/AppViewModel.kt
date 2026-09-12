@@ -41,6 +41,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun reload() = launch { repository.load() }
 
     fun moveTask(taskId: String, offset: Int) = launch { repository.moveTask(taskId, offset) }
+    fun applyTaskOrder(ids: List<String>, onSettled: (Boolean) -> Unit) {
+        viewModelScope.launch(exceptionHandler) {
+            var saved = false
+            try {
+                repository.applyTaskOrder(ids)
+                saved = true
+            } finally {
+                onSettled(saved)
+            }
+        }
+    }
+
     fun applySuggestedOrder() = launch { repository.applySuggestedOrder() }
 
     fun setTaskColor(taskId: String, color: TaskColor) = launch {

@@ -23,7 +23,7 @@
     <string name="pause_suggestions_support">The timer keeps running until you choose to pause.</string>
     <string name="pause_after_label">Suggest a pause after</string>
     <string name="minutes_short">%1$d min</string>
-    <string name="draw_action">I can’t choose: draw a task</string>
+    <string name="draw_action">Shuffle task order with the die</string>
     <string name="draw_result_label">The die suggests</string>
     <string name="draw_result_support">This is only a suggestion. You can roll again, no explanation needed.</string>
     <string name="redraw_action">Roll again</string>
@@ -78,7 +78,7 @@
     <string name="error_title">That was not saved</string>
     <string name="error_message">Nothing was intentionally discarded. Try again; if it keeps happening, restart the app.</string>
     <string name="open_journal">Planning, steps and learning</string>
-    <string name="adaptation_rule">Optional filters: declared energy, available time and context. Your manual order stays unchanged.</string>
+    <string name="adaptation_rule">Optional filters: declared energy, available time and context. The die shuffles matching tasks when you request it.</string>
     <string name="adaptation_suggestion">Based on these filters and your importance setting: %1$s</string>
     <string name="adaptation_empty">No tasks match the filters. Change them in Planning or choose manually.</string>
     <string name="check_in_title">How are you feeling now?</string>
@@ -91,4 +91,6 @@
     <string name="start_requested_task">Start this task? Another active session will be preserved as postponed.</string>
     <string name="widget_draw">Suggest a task with the die</string>
     <string name="apply_suggested_order">Put matching tasks first, by importance</string>
+    <string name="draw_order_result_support">The order has been shuffled. Nothing starts automatically: you can roll again or arrange the tasks.</string>
+    <string name="reorder_handle">Reorder %1$s. Hold and drag, or use Move up and Move down.</string>
 </resources>

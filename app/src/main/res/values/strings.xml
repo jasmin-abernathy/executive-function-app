@@ -23,7 +23,7 @@
     <string name="pause_suggestions_support">Le timer continue tant que tu ne choisis pas de faire une pause.</string>
     <string name="pause_after_label">Proposer une pause après</string>
     <string name="minutes_short">%1$d min</string>
-    <string name="draw_action">Je n’arrive pas à choisir : tirer une tâche</string>
+    <string name="draw_action">Mélanger l’ordre des tâches au dé</string>
     <string name="draw_result_label">Le dé propose</string>
     <string name="draw_result_support">Ce n’est qu’une proposition. Tu peux relancer sans te justifier.</string>
     <string name="redraw_action">Relancer</string>
@@ -78,7 +78,7 @@
     <string name="error_title">Ça n’a pas été enregistré</string>
     <string name="error_message">Rien n’a été perdu volontairement. Réessaie ; si le problème continue, redémarre l’application.</string>
     <string name="open_journal">Organisation, étapes et suivi</string>
-    <string name="adaptation_rule">Filtres facultatifs : énergie déclarée, temps disponible et contexte. Ton ordre manuel reste inchangé.</string>
+    <string name="adaptation_rule">Filtres facultatifs : énergie déclarée, temps disponible et contexte. Le dé mélange les tâches compatibles si tu le demandes.</string>
     <string name="adaptation_suggestion">Selon ces filtres et l’importance renseignée : %1$s</string>
     <string name="adaptation_empty">Aucune tâche ne correspond aux filtres. Tu peux les modifier dans Organisation ou choisir manuellement.</string>
     <string name="check_in_title">Comment ça va maintenant ?</string>
@@ -91,4 +91,6 @@
     <string name="start_requested_task">Commencer cette tâche ? Une autre session en cours sera conservée comme reportée.</string>
     <string name="widget_draw">Proposer une tâche au dé</string>
     <string name="apply_suggested_order">Placer les tâches compatibles en premier, par importance</string>
+    <string name="draw_order_result_support">L’ordre a été mélangé. Rien ne démarre automatiquement : tu peux relancer ou réorganiser les tâches.</string>
+    <string name="reorder_handle">Réordonner %1$s. Appui long puis glisser, ou utiliser Monter et Descendre.</string>
 </resources>

@@ -149,7 +149,7 @@ Capturer → choisir → commencer → se concentrer → interrompre → reprend
 Déjà implémenté :
 
 - capture locale ultra-rapide avec premier petit pas facultatif ;
-- choix manuel ou tirage facultatif d’une tâche, puis minuteur plein écran en temps écoulé ;
+- ordre manuel par poignée ou boutons ↑/↓, mélange facultatif des tâches admissibles au D10 ; le widget reste une proposition seule, puis minuteur plein écran en temps écoulé ;
 - capture rapide sans quitter le focus ;
 - contexte d’interruption durable et écran de retour non punitif ;
 - reprise, réduction, report/changement et fin ;

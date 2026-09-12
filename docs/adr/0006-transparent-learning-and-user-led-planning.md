@@ -4,7 +4,7 @@ Décision du 11 septembre 2026. Cette tranche complète le noyau Android ; elle 
 
 ## Organisation
 
-L'ordre manuel et les couleurs choisies restent conservés. Le dé D10 animé demeure facultatif. L'adaptation est désactivée par défaut : après activation, énergie disponible, durée connue et contexte filtrent les propositions. Une durée inconnue n'exclut pas une tâche. L'importance départage les propositions ; un bouton applique volontairement l'ordre suggéré.
+Les couleurs choisies restent conservées. L’ordre est modifiable manuellement ou par un mélange explicitement demandé au D10 facultatif ; les tâches non admissibles conservent leur ordre relatif. Voir [ADR 0007](0007-d10-and-manual-order.md). L'adaptation est désactivée par défaut : après activation, énergie disponible, durée connue et contexte filtrent les propositions. Une durée inconnue n'exclut pas une tâche. Un bouton distinct applique volontairement l’ordre suggéré par importance ; le mélange au dé reste aléatoire parmi les tâches admissibles.
 
 La section « Tâches et suivi » donne accès aux étapes cochables et réordonnables, au premier pas, au repère Aujourd'hui, aux occurrences terminées et à la répétition. Aujourd'hui correspond à une date locale, sans report automatique. Une répétition simple, tous les N jours, matérialise au prochain chargement au plus une occurrence ouverte par famille. Aucun arriéré n'est créé après une absence. Ce mécanisme n'est pas un agenda avec rendez-vous fixes ni un moteur de récurrences complexes.
 

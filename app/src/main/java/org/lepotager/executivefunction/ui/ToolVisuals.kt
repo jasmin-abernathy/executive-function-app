@@ -162,16 +162,18 @@ internal fun AnimatedDieBadge(
     val progress = remember { Animatable(1f) }
     val haptic = LocalHapticFeedback.current
     val latestOnFinished by rememberUpdatedState(onRollFinished)
-    val animationsEnabled = ValueAnimator.areAnimatorsEnabled() && !org.lepotager.executivefunction.ui.theme.LocalCalmMode.current
+    val duration = org.lepotager.executivefunction.domain.DieMotion.durationMillis(
+        org.lepotager.executivefunction.ui.theme.LocalCalmMode.current, ValueAnimator.areAnimatorsEnabled(),
+    )
 
     LaunchedEffect(rollKey) {
         if (rollKey <= 0) return@LaunchedEffect
         progress.snapTo(0f)
-        if (animationsEnabled) {
+        if (duration > 0) {
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
             progress.animateTo(
                 targetValue = 1f,
-                animationSpec = tween(durationMillis = 760, easing = FastOutSlowInEasing),
+                animationSpec = tween(durationMillis = duration, easing = FastOutSlowInEasing),
             )
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
         } else {
@@ -200,17 +202,10 @@ internal fun AnimatedDieBadge(
                 scaleY = scale
                 shadowElevation = (4.dp + 10.dp * jump).toPx()
             }
-            .size(84.dp),
+            .size(180.dp),
         contentAlignment = Alignment.Center,
     ) {
-        D10Glyph(
-            face = shownFace,
-            modifier = Modifier.size(76.dp),
-            fillColor = MaterialTheme.colorScheme.primaryContainer,
-            outlineColor = MaterialTheme.colorScheme.onPrimaryContainer,
-            shadowColor = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.22f),
-            numberSize = 22.dp,
-        )
+        D10Mesh(fraction, shownFace, Modifier.size(170.dp))
     }
 }
 

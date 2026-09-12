@@ -179,7 +179,7 @@ class JournalActivity : ComponentActivity() {
                     }
                     if(section=="settings") item {
                         Text(label("Adaptation facultative","Optional adaptation"),style=MaterialTheme.typography.titleLarge)
-                        Row {Switch(checked=adapt,onCheckedChange={adapt=it;preferences.edit().putBoolean("adapt",it).apply()});Text(label("Filtrer le dé et proposer selon l’importance","Filter the die and suggest by importance"))}
+                        Row {Switch(checked=adapt,onCheckedChange={adapt=it;preferences.edit().putBoolean("adapt",it).apply()});Text(label("Filtrer les tâches mélangées au dé et les propositions du widget","Filter tasks shuffled by the die and widget suggestions"))}
                         Row {Switch(checked=lowEnergy,onCheckedChange={lowEnergy=it;preferences.edit().putBoolean("low_energy",it).apply()});Text(label("Mode basse énergie","Low-energy mode"))}
                         OutlinedTextField(value=availableMinutes,onValueChange={availableMinutes=it},label={Text(label("Minutes disponibles (0 = sans limite)","Available minutes (0 = unlimited)"))})
                         OutlinedTextField(value=currentContext,onValueChange={currentContext=it},label={Text(label("Contexte actuel (vide = tous)","Current context (blank = all)"))})
