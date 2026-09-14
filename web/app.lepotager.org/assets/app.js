@@ -109,3 +109,26 @@ document.querySelectorAll('[data-year]').forEach((el) => {
   cleanUrl.searchParams.delete('research');
   history.replaceState(null, '', cleanUrl.pathname + cleanUrl.search + cleanUrl.hash);
 })();
+
+// Keep the voluntary support page visible from the French site without duplicating
+// payment details or secrets in the navigation markup.
+(() => {
+  if (currentLanguage !== 'fr') return;
+
+  const supportHref = '/soutenir/';
+  if (nav && !nav.querySelector(`a[href="${supportHref}"]`)) {
+    const supportLink = document.createElement('a');
+    supportLink.href = supportHref;
+    supportLink.textContent = 'Soutenir';
+    supportLink.addEventListener('click', closeMenu);
+    nav.appendChild(supportLink);
+  }
+
+  const footerLinks = document.querySelector('.footer-links');
+  if (footerLinks && !footerLinks.querySelector(`a[href="${supportHref}"]`)) {
+    const supportLink = document.createElement('a');
+    supportLink.href = supportHref;
+    supportLink.textContent = 'Soutenir';
+    footerLinks.prepend(supportLink);
+  }
+})();
