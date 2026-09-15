@@ -9,16 +9,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -176,10 +171,10 @@ class MainActivity : ComponentActivity() {
                     }
                     if(showCheckIn) androidx.compose.material3.AlertDialog(
                         onDismissRequest={showCheckIn=false},
-                        title={Text(getString(R.string.check_in_title))},
-                        text={Text(getString(R.string.check_in_body))},
-                        confirmButton={TextButton(onClick={showCheckIn=false;startActivity(Intent(this@MainActivity,JournalActivity::class.java).putExtra("section","state"))}) {Text(getString(R.string.check_in_answer))}},
-                        dismissButton={TextButton(onClick={showCheckIn=false}) {Text(getString(R.string.not_now))}},
+                        title={androidx.compose.material3.Text(getString(R.string.check_in_title))},
+                        text={androidx.compose.material3.Text(getString(R.string.check_in_body))},
+                        confirmButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false;startActivity(Intent(this@MainActivity,JournalActivity::class.java).putExtra("section","state"))}) {androidx.compose.material3.Text(getString(R.string.check_in_answer))}},
+                        dismissButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false}) {androidx.compose.material3.Text(getString(R.string.not_now))}},
                     )
 
                     LaunchedEffect(snapshot.activeFocus?.session?.status) {
@@ -191,22 +186,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                    val homeVisible = !snapshot.loading && snapshot.activeFocus == null
-                    Scaffold(
-                        modifier = Modifier.fillMaxSize(),
-                        topBar = {
-                            if (homeVisible) {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.End,
-                                ) {
-                                    TextButton(onClick = { showCheckIn=false; showIntro=true }) {
-                                        Text(getString(R.string.help_how_it_works))
-                                    }
-                                }
-                            }
-                        },
-                    ) { padding ->
+                    Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
                         Box(
                             modifier = Modifier.fillMaxSize().padding(padding),
                         ) {
@@ -244,6 +224,7 @@ class MainActivity : ComponentActivity() {
                                     onApplySuggestedOrder = viewModel::applySuggestedOrder,
                                     eligibleDrawIds = snapshot.eligibleDrawIds,
                                     suggestedTaskId = snapshot.suggestedTaskId,
+                                    onHelp = { showCheckIn=false; showIntro=true },
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
