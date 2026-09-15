@@ -43,7 +43,7 @@ data class FocusSession(
     val interruptionNote: String?,
     val createdAt: Long,
     val updatedAt: Long,
-    /** Suggested countdown learned locally from earlier completed occurrences. */
+    /** Persisted timer choice: null for stopwatch, positive duration for countdown. */
     val targetDurationMs: Long? = null,
 )
 

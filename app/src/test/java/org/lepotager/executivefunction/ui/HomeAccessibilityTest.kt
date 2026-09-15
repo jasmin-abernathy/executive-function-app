@@ -24,6 +24,31 @@ class HomeAccessibilityTest {
     @get:Rule val compose = createComposeRule()
 
     @Test
+    fun widgetResultBecomesVisibleWithoutManualScrollInALongList() {
+        var writes = 0
+        var started: String? = null
+        val tasks = (1..40).map { TaskItem("task-$it", "Task $it", null, TaskStatus.READY, 0, 0) }
+        compose.setContent {
+            ExecutiveFunctionTheme {
+                CompositionLocalProvider(LocalCalmMode provides true) {
+                    HomeScreen(
+                        tasks = tasks, drawRequest = 1,
+                        drawEnabled = true, pauseSuggestionsEnabled = false, pauseAfterMinutes = 25,
+                        onCapture = { _, _, _, _ -> }, onStart = { started = it },
+                        onMoveTask = { _, _ -> }, onApplyTaskOrder = { _, done -> writes++; done(true) },
+                        onSetTaskColor = { _, _ -> }, onSetDrawEnabled = {},
+                        onSetPauseSuggestionsEnabled = {}, onSetPauseAfterMinutes = {},
+                    )
+                }
+            }
+        }
+        compose.waitForIdle()
+        compose.onNode(hasText("Le dé propose") and hasClickAction()).assertIsDisplayed().performClick()
+        assertTrue(started in tasks.map { it.id })
+        assertEquals(0, writes)
+    }
+
+    @Test
     fun calmWidgetDrawHasClickableResultAndAccessibleHandleWithoutReordering() {
         var writes = 0
         var started: String? = null

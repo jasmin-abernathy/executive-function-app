@@ -1,11 +1,11 @@
 package org.lepotager.executivefunction.ui
 
-import androidx.compose.foundation.clickable
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -30,6 +30,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -46,25 +47,29 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.zIndex
-import androidx.compose.ui.semantics.CustomAccessibilityAction
-import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.repeatOnLifecycle
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
 import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.domain.TaskDraw
@@ -76,6 +81,7 @@ import org.lepotager.executivefunction.model.TaskItem
 fun HomeScreen(
     tasks: List<TaskItem>,
     onJournal: () -> Unit = {},
+    onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
     suggestedTaskId: String? = null,
     drawRequest: Int = 0,
@@ -94,7 +100,8 @@ fun HomeScreen(
 ) {
     var title by remember { mutableStateOf("") }
     var firstStep by remember { mutableStateOf("") }
-    var showFirstStep by remember { mutableStateOf(false) }
+    var showCaptureOptions by remember { mutableStateOf(false) }
+    var showSupportOptions by remember { mutableStateOf(false) }
     var drawnTaskId by remember { mutableStateOf<String?>(null) }
     var pendingDrawTaskId by remember { mutableStateOf<String?>(null) }
     var drawRollKey by remember { mutableIntStateOf(0) }
@@ -103,8 +110,23 @@ fun HomeScreen(
     var organizing by remember { mutableStateOf(false) }
 
     val reorder = rememberTaskReorder(tasks, onApplyTaskOrder)
+    val drawResultRequester = remember { BringIntoViewRequester() }
     var proposalOnly by remember { mutableStateOf(false) }
     var handledDrawRequest by remember { mutableIntStateOf(0) }
+
+    // Keyed sections mirror the lazy content; do not assume an off-screen result is composed.
+    val resultKey = drawnTaskId?.let { "drawn-$it" }
+    val itemKeys = buildList {
+        addAll(listOf("home-header", "capture", "ready-heading"))
+        if (tasks.isEmpty()) add("empty") else addAll(reorder.visibleTasks.map { it.id })
+        if (drawEnabled && tasks.isNotEmpty()) {
+            add("draw-action")
+            if (!isDrawing && tasks.any { it.id == drawnTaskId }) add(requireNotNull(resultKey))
+        }
+        add("support-toggle")
+        if (showSupportOptions) add("support-options")
+    }
+
     fun beginDraw(previousTaskId: String?, onlyPropose: Boolean = false) {
         if (isDrawing || reorder.saving || reorder.dragged != null) return
         val order = TaskDraw.permute(tasks, eligibleDrawIds, previousTaskId)
@@ -126,6 +148,7 @@ fun HomeScreen(
             }
         }
     }
+
     LaunchedEffect(drawRequest, tasks, drawEnabled, reorder.saving, reorder.dragged, isDrawing) {
         if (drawRequest > handledDrawRequest && drawEnabled && tasks.isNotEmpty() &&
             !reorder.saving && !isDrawing && reorder.dragged == null) {
@@ -135,9 +158,12 @@ fun HomeScreen(
     }
     LaunchedEffect(drawnTaskId, isDrawing) {
         if (!isDrawing && drawEnabled && tasks.any { it.id == drawnTaskId }) {
-            // Header, capture, list title, tasks, then the explicit draw button.
-            // Reveal the result without adding motion in calm mode.
-            reorder.listState.scrollToItem(tasks.size + 4)
+            val index = itemKeys.indexOf(resultKey)
+            if (index < 0) return@LaunchedEffect
+            snapshotFlow { reorder.listState.layoutInfo.totalItemsCount }.first { it == itemKeys.size }
+            reorder.listState.scrollToItem(index)
+            snapshotFlow { reorder.listState.layoutInfo.visibleItemsInfo.any { it.key == resultKey } }.first { it }
+            drawResultRequester.bringIntoView()
         }
     }
 
@@ -149,15 +175,26 @@ fun HomeScreen(
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            item {
-                TextButton(onClick = onJournal) {
+            item(key = "home-header") {
+                TextButton(onClick = onHelp, colors = appTextButtonColors()) {
+                    UtilityGlyph(UtilityGlyphKind.HELP, Modifier.size(20.dp))
+                    Spacer(Modifier.size(8.dp))
+                    Text(stringResource(R.string.help_how_it_works))
+                }
+                TextButton(onClick = onJournal, colors = appTextButtonColors()) {
                     Text(stringResource(R.string.open_journal))
                 }
-                if(eligibleDrawIds!=null) {
+                if (eligibleDrawIds != null) {
                     Text(stringResource(R.string.adaptation_rule))
-                    tasks.firstOrNull { it.id==suggestedTaskId }?.let { Text(stringResource(R.string.adaptation_suggestion,it.title)) }
-                    if(eligibleDrawIds.isEmpty()) Text(stringResource(R.string.adaptation_empty))
-                    if(eligibleDrawIds.isNotEmpty()) TextButton(onClick=onApplySuggestedOrder) {Text(stringResource(R.string.apply_suggested_order))}
+                    tasks.firstOrNull { it.id == suggestedTaskId }?.let {
+                        Text(stringResource(R.string.adaptation_suggestion, it.title))
+                    }
+                    if (eligibleDrawIds.isEmpty()) Text(stringResource(R.string.adaptation_empty))
+                    if (eligibleDrawIds.isNotEmpty()) {
+                        TextButton(onClick = onApplySuggestedOrder, colors = appTextButtonColors()) {
+                            Text(stringResource(R.string.apply_suggested_order))
+                        }
+                    }
                 }
                 Text(
                     text = stringResource(R.string.home_title),
@@ -171,7 +208,7 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            item {
+            item(key = "capture") {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = appCardColors(),
@@ -196,7 +233,18 @@ fun HomeScreen(
                             singleLine = true,
                             colors = appTextFieldColors(),
                         )
-                        if (showFirstStep) {
+                        TextButton(
+                            onClick = { showCaptureOptions = !showCaptureOptions },
+                            colors = appTextButtonColors(),
+                        ) {
+                            Text(
+                                stringResource(
+                                    if (showCaptureOptions) R.string.capture_options_hide
+                                    else R.string.capture_options_show,
+                                ),
+                            )
+                        }
+                        if (showCaptureOptions) {
                             OutlinedTextField(
                                 value = firstStep,
                                 onValueChange = { firstStep = it },
@@ -205,42 +253,31 @@ fun HomeScreen(
                                 singleLine = true,
                                 colors = appTextFieldColors(),
                             )
-                        } else {
-                            TextButton(
-                                onClick = { showFirstStep = true },
-                                colors = appTextButtonColors(),
-                            ) {
-                                ToolGlyph(ToolGlyphKind.CAPTURE)
-                                Spacer(Modifier.size(8.dp))
-                                Text(stringResource(R.string.add_first_step))
-                            }
+                            Text(
+                                text = stringResource(R.string.task_color_optional),
+                                style = MaterialTheme.typography.labelLarge,
+                            )
+                            TaskColorPicker(selected = selectedColor, onSelect = { selectedColor = it })
                         }
-                        Text(
-                            text = stringResource(R.string.task_color_optional),
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                        TaskColorPicker(selected = selectedColor, onSelect = { selectedColor = it })
                         Button(
                             onClick = {
                                 onCapture(title, firstStep, selectedColor) {
                                     title = ""
                                     firstStep = ""
-                                    showFirstStep = false
+                                    showCaptureOptions = false
                                     selectedColor = TaskColor.NEUTRAL
                                 }
                             },
                             enabled = title.isNotBlank(),
                             colors = appButtonColors(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .sizeIn(minHeight = 48.dp),
+                            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                         ) {
                             Text(stringResource(R.string.capture_action))
                         }
                     }
                 }
             }
-            item {
+            item(key = "ready-heading") {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
@@ -268,9 +305,7 @@ fun HomeScreen(
                 }
             }
             if (tasks.isEmpty()) {
-                item {
-                    EmptyTasksPanel()
-                }
+                item(key = "empty") { EmptyTasksPanel() }
             } else {
                 itemsIndexed(reorder.visibleTasks, key = { _, task -> task.id }) { index, task ->
                     TaskCard(
@@ -287,16 +322,15 @@ fun HomeScreen(
                 }
             }
             if (drawEnabled && tasks.isNotEmpty()) {
-                item {
+                item(key = "draw-action") {
                     FilledTonalButton(
                         onClick = { beginDraw(drawnTaskId) },
                         enabled = !isDrawing && !reorder.saving && reorder.dragged == null && tasks.any {
-                            it.status == org.lepotager.executivefunction.model.TaskStatus.READY && (eligibleDrawIds == null || it.id in eligibleDrawIds)
+                            it.status == org.lepotager.executivefunction.model.TaskStatus.READY &&
+                                (eligibleDrawIds == null || it.id in eligibleDrawIds)
                         },
                         colors = appTonalButtonColors(),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .sizeIn(minHeight = 48.dp),
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) {
                         ToolGlyph(ToolGlyphKind.DRAW)
                         Spacer(Modifier.size(8.dp))
@@ -305,24 +339,42 @@ fun HomeScreen(
                 }
                 if (!isDrawing) tasks.firstOrNull { it.id == drawnTaskId }?.let { task ->
                     item(key = "drawn-${task.id}") {
-                        TaskDrawPanel(
-                            task = task,
-                            proposalOnly = proposalOnly,
-                            onRedraw = { beginDraw(task.id, proposalOnly) },
-                            onStart = { onStart(task.id) },
-                        )
+                        Box(Modifier.bringIntoViewRequester(drawResultRequester)) {
+                            TaskDrawPanel(
+                                task = task,
+                                proposalOnly = proposalOnly,
+                                onRedraw = { beginDraw(task.id, proposalOnly) },
+                                onStart = { onStart(task.id) },
+                            )
+                        }
                     }
                 }
             }
-            item {
-                SupportOptionsCard(
-                    drawEnabled = drawEnabled,
-                    pauseSuggestionsEnabled = pauseSuggestionsEnabled,
-                    pauseAfterMinutes = pauseAfterMinutes,
-                    onSetDrawEnabled = onSetDrawEnabled,
-                    onSetPauseSuggestionsEnabled = onSetPauseSuggestionsEnabled,
-                    onSetPauseAfterMinutes = onSetPauseAfterMinutes,
-                )
+            item(key = "support-toggle") {
+                TextButton(
+                    onClick = { showSupportOptions = !showSupportOptions },
+                    colors = appTextButtonColors(),
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                ) {
+                    Text(
+                        stringResource(
+                            if (showSupportOptions) R.string.support_options_hide
+                            else R.string.support_options_show,
+                        ),
+                    )
+                }
+            }
+            if (showSupportOptions) {
+                item(key = "support-options") {
+                    SupportOptionsCard(
+                        drawEnabled = drawEnabled,
+                        pauseSuggestionsEnabled = pauseSuggestionsEnabled,
+                        pauseAfterMinutes = pauseAfterMinutes,
+                        onSetDrawEnabled = onSetDrawEnabled,
+                        onSetPauseSuggestionsEnabled = onSetPauseSuggestionsEnabled,
+                        onSetPauseAfterMinutes = onSetPauseAfterMinutes,
+                    )
+                }
             }
         }
         if (isDrawing) Box(
@@ -435,7 +487,7 @@ private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) 
                 Surface(
                     onClick = { onSelect(color) },
                     modifier = Modifier
-                        .size(42.dp)
+                        .size(48.dp)
                         .semantics { contentDescription = name },
                     shape = CircleShape,
                     color = palette.container,
@@ -558,9 +610,7 @@ private fun TaskDrawPanel(
                     onClick = onRedraw,
                     colors = appOutlinedButtonColors(),
                     border = appBorder(),
-                    modifier = Modifier
-                        .weight(1f)
-                        .sizeIn(minHeight = 48.dp),
+                    modifier = Modifier.weight(1f).sizeIn(minHeight = 48.dp),
                 ) {
                     ToolGlyph(ToolGlyphKind.DRAW, dieFace = stableDieFace(task.id))
                     Spacer(Modifier.size(8.dp))
@@ -569,9 +619,7 @@ private fun TaskDrawPanel(
                 Button(
                     onClick = onStart,
                     colors = appButtonColors(),
-                    modifier = Modifier
-                        .weight(1f)
-                        .sizeIn(minHeight = 48.dp),
+                    modifier = Modifier.weight(1f).sizeIn(minHeight = 48.dp),
                 ) {
                     ToolGlyph(ToolGlyphKind.START)
                     Spacer(Modifier.size(8.dp))
@@ -613,17 +661,23 @@ private fun TaskCard(
             val upLabel = stringResource(R.string.move_task_up)
             val downLabel = stringResource(R.string.move_task_down)
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                Text(task.title, modifier = Modifier.weight(1f), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
+                Text(
+                    task.title,
+                    modifier = Modifier.weight(1f),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium,
+                )
                 Box(
-                    Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).then(handleModifier).semantics(mergeDescendants = true) {
-                        contentDescription = handleLabel
-                        customActions = buildList {
-                            if (canMoveUp) add(CustomAccessibilityAction(upLabel) { onMoveUp(); true })
-                            if (canMoveDown) add(CustomAccessibilityAction(downLabel) { onMoveDown(); true })
-                        }
-                    },
+                    Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp).then(handleModifier)
+                        .semantics(mergeDescendants = true) {
+                            contentDescription = handleLabel
+                            customActions = buildList {
+                                if (canMoveUp) add(CustomAccessibilityAction(upLabel) { onMoveUp(); true })
+                                if (canMoveDown) add(CustomAccessibilityAction(downLabel) { onMoveDown(); true })
+                            }
+                        },
                     contentAlignment = Alignment.Center,
-                ) { Text("⋮", fontSize = 28.sp) }
+                ) { DragHandleGlyph() }
             }
             task.firstStep?.let {
                 Text(
@@ -645,18 +699,14 @@ private fun TaskCard(
                         colors = appOutlinedButtonColors(),
                         border = appBorder(),
                         modifier = Modifier.weight(1f),
-                    ) {
-                        Text(stringResource(R.string.move_task_up))
-                    }
+                    ) { Text(stringResource(R.string.move_task_up)) }
                     OutlinedButton(
                         onClick = onMoveDown,
                         enabled = canMoveDown,
                         colors = appOutlinedButtonColors(),
                         border = appBorder(),
                         modifier = Modifier.weight(1f),
-                    ) {
-                        Text(stringResource(R.string.move_task_down))
-                    }
+                    ) { Text(stringResource(R.string.move_task_down)) }
                 }
             }
             Button(
@@ -688,6 +738,7 @@ fun FocusScreen(
 ) {
     var showCapture by remember { mutableStateOf(false) }
     var showInterrupt by remember { mutableStateOf(false) }
+    var showMoreTools by remember { mutableStateOf(false) }
     var showPauseSuggestion by remember(activeFocus.session.id) { mutableStateOf(false) }
     var now by remember(activeFocus.session.id) { mutableLongStateOf(System.currentTimeMillis()) }
     val context = androidx.compose.ui.platform.LocalContext.current
@@ -736,12 +787,10 @@ fun FocusScreen(
         (displayedSeconds % 3_600) / 60,
         displayedSeconds % 60,
     )
+    val captureDescription = stringResource(R.string.focus_tool_capture)
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
     ) {
@@ -790,9 +839,7 @@ fun FocusScreen(
                 text = (if (overtime > 0) "+" else "") + formatElapsed(displayedTime),
                 fontSize = 54.sp,
                 fontWeight = FontWeight.Light,
-                modifier = Modifier.semantics {
-                    contentDescription = accessibleElapsed
-                },
+                modifier = Modifier.semantics { contentDescription = accessibleElapsed },
             )
         }
 
@@ -800,58 +847,80 @@ fun FocusScreen(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            TextButton(onClick = onJournal) { Text(stringResource(R.string.open_journal)) }
-            TextButton(onClick = onMini) { Text(stringResource(R.string.mini_timer)) }
-            TextButton(onClick = onNote) { Text(stringResource(R.string.open_notes)) }
-            FilledTonalButton(
-                onClick = onToggleOverlay,
-                colors = appTonalButtonColors(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .sizeIn(minHeight = 48.dp),
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                ToolGlyph(ToolGlyphKind.CLOCK)
-                Spacer(Modifier.size(8.dp))
-                Text(
-                    stringResource(
-                        if (overlayEnabled) R.string.hide_floating_timer
-                        else R.string.show_floating_timer,
-                    ),
+                UtilityIconButton(
+                    UtilityGlyphKind.NOTE,
+                    stringResource(R.string.focus_tool_note),
+                    onNote,
+                )
+                IconButton(
+                    onClick = { showCapture = true },
+                    modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
+                        .semantics { contentDescription = captureDescription },
+                ) { ToolGlyph(ToolGlyphKind.CAPTURE) }
+                UtilityIconButton(
+                    UtilityGlyphKind.MINI_WINDOW,
+                    stringResource(R.string.focus_tool_mini_window),
+                    onMini,
+                )
+                UtilityIconButton(
+                    UtilityGlyphKind.MORE,
+                    stringResource(if (showMoreTools) R.string.focus_tools_less else R.string.focus_tools_more),
+                    { showMoreTools = !showMoreTools },
                 )
             }
-            FilledTonalButton(
-                onClick = { showCapture = true },
-                colors = appTonalButtonColors(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .sizeIn(minHeight = 48.dp),
-            ) {
-                ToolGlyph(ToolGlyphKind.CAPTURE)
-                Spacer(Modifier.size(8.dp))
-                Text(stringResource(R.string.quick_capture_action))
+            if (showMoreTools) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = appCardColors(),
+                    border = appBorder(),
+                ) {
+                    Column(
+                        modifier = Modifier.padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        TextButton(onClick = onJournal, colors = appTextButtonColors()) {
+                            Text(stringResource(R.string.open_journal))
+                        }
+                        FilledTonalButton(
+                            onClick = onToggleOverlay,
+                            colors = appTonalButtonColors(),
+                            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                        ) {
+                            ToolGlyph(ToolGlyphKind.CLOCK)
+                            Spacer(Modifier.size(8.dp))
+                            Text(
+                                stringResource(
+                                    if (overlayEnabled) R.string.hide_floating_timer
+                                    else R.string.show_floating_timer,
+                                ),
+                            )
+                        }
+                    }
+                }
             }
             OutlinedButton(
                 onClick = { showInterrupt = true },
                 colors = appOutlinedButtonColors(),
                 border = appBorder(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .sizeIn(minHeight = 48.dp),
+                modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
             ) {
                 ToolGlyph(ToolGlyphKind.PAUSE)
                 Spacer(Modifier.size(8.dp))
-                Text(stringResource(R.string.interrupt_action))
+                Text(stringResource(R.string.focus_pause_short))
             }
             Button(
                 onClick = onComplete,
                 colors = appButtonColors(),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .sizeIn(minHeight = 48.dp),
+                modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
             ) {
                 ToolGlyph(ToolGlyphKind.COMPLETE)
                 Spacer(Modifier.size(8.dp))
-                Text(stringResource(R.string.complete_action))
+                Text(stringResource(R.string.focus_finish_short))
             }
         }
     }
@@ -876,7 +945,11 @@ fun FocusScreen(
             minutes = pauseAfterMinutes,
             onPause = {
                 showPauseSuggestion = false
-                org.lepotager.executivefunction.PauseSchedule.set(context, activeFocus, elapsed + pauseAfterMinutes * 60_000L)
+                org.lepotager.executivefunction.PauseSchedule.set(
+                    context,
+                    activeFocus,
+                    elapsed + pauseAfterMinutes * 60_000L,
+                )
                 onInterrupt(null)
             },
             onContinue = {
@@ -901,10 +974,7 @@ fun ResumeScreen(
 ) {
     var showSmaller by remember { mutableStateOf(false) }
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(24.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
     ) {
@@ -942,9 +1012,7 @@ fun ResumeScreen(
         Button(
             onClick = { onResume(null) },
             colors = appButtonColors(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .sizeIn(minHeight = 48.dp),
+            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
         ) {
             ToolGlyph(ToolGlyphKind.START)
             Spacer(Modifier.size(8.dp))
@@ -953,9 +1021,7 @@ fun ResumeScreen(
         FilledTonalButton(
             onClick = { showSmaller = true },
             colors = appTonalButtonColors(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .sizeIn(minHeight = 48.dp),
+            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
         ) {
             ToolGlyph(ToolGlyphKind.REDUCE)
             Spacer(Modifier.size(8.dp))
@@ -965,9 +1031,7 @@ fun ResumeScreen(
             onClick = onPostpone,
             colors = appOutlinedButtonColors(),
             border = appBorder(),
-            modifier = Modifier
-                .fillMaxWidth()
-                .sizeIn(minHeight = 48.dp),
+            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
         ) {
             ToolGlyph(ToolGlyphKind.POSTPONE)
             Spacer(Modifier.size(8.dp))

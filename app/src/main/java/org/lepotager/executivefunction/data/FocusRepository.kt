@@ -52,16 +52,39 @@ class FocusRepository internal constructor(
         refresh()
     }
 
+    suspend fun addQuickNote(text: String) = mutate {
+        LearningJournal(database).note(text)
+        refresh()
+    }
+
+    /** Legacy start path: keep the learned reference when no explicit timer choice is supplied. */
     suspend fun start(taskId: String) = mutate {
+        startLocked(taskId, database.suggestedDurationMs(taskId))
+    }
+
+    /** Explicit start path. A null target is a stopwatch; a positive target is a countdown. */
+    suspend fun start(taskId: String, targetDurationMs: Long?) = mutate {
+        require(targetDurationMs == null || targetDurationMs > 0)
+        startLocked(taskId, targetDurationMs)
+    }
+
+    suspend fun suggestedDurationMs(taskId: String): Long? = withContext(ioDispatcher) {
+        mutex.withLock {
+            requireNotNull(database.taskById(taskId))
+            database.suggestedDurationMs(taskId)
+        }
+    }
+
+    private fun startLocked(taskId: String, targetDurationMs: Long?) {
         requireNotNull(database.taskById(taskId))
         val timestamp = now()
-        val learnedTargetDurationMs = database.suggestedDurationMs(taskId)
         val previous = database.activeFocus()
-        if (previous?.task?.id == taskId && previous.session.status == FocusStatus.RUNNING) return@mutate
+        if (previous?.task?.id == taskId && previous.session.status == FocusStatus.RUNNING) return
         if (previous?.task?.id == taskId && previous.session.status == FocusStatus.INTERRUPTED) {
+            // Resume preserves the existing persisted session target and mode.
             database.resumeFocus(FocusTransitions.resume(previous.session, timestamp), previous.task.firstStep)
             refresh()
-            return@mutate
+            return
         }
         val carried = database.postponedElapsedMs(taskId)
         database.startFocus(
@@ -75,7 +98,7 @@ class FocusRepository internal constructor(
                 interruptionNote = null,
                 createdAt = timestamp,
                 updatedAt = timestamp,
-                targetDurationMs = learnedTargetDurationMs,
+                targetDurationMs = targetDurationMs,
             ),
         )
         refresh()

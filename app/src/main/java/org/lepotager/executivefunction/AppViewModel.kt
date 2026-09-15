@@ -14,6 +14,12 @@ import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.model.TaskColor
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
+    data class PendingStart(
+        val taskId: String,
+        val title: String,
+        val learnedTargetDurationMs: Long?,
+    )
+
     private val repository = FocusRepository(AppDatabase(application))
     val snapshot = repository.snapshot
 
@@ -21,6 +27,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     val error: StateFlow<Throwable?> = mutableError.asStateFlow()
     private val mutableCompletionLeadMinutes = MutableStateFlow<Long?>(null)
     val completionLeadMinutes: StateFlow<Long?> = mutableCompletionLeadMinutes.asStateFlow()
+    private val mutablePendingStart = MutableStateFlow<PendingStart?>(null)
+    val pendingStart: StateFlow<PendingStart?> = mutablePendingStart.asStateFlow()
+    private var requestedStartTaskId: String? = null
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         mutableError.value = throwable
@@ -37,7 +46,38 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         after: () -> Unit = {},
     ) = launch(after) { repository.capture(title, firstStep, color) }
 
+    fun addQuickNote(text: String, after: () -> Unit = {}) =
+        launch(after) { repository.addQuickNote(text) }
+
+    /** Kept for non-interactive/internal callers. Normal UI starts go through requestStart(). */
     fun start(taskId: String) = launch { repository.start(taskId) }
+
+    fun requestStart(taskId: String) {
+        val task = snapshot.value.tasks.firstOrNull { it.id == taskId } ?: return
+        requestedStartTaskId = taskId
+        viewModelScope.launch(exceptionHandler) {
+            val learnedTarget = repository.suggestedDurationMs(taskId)
+            if (requestedStartTaskId == taskId) {
+                mutablePendingStart.value = PendingStart(taskId, task.title, learnedTarget)
+            }
+        }
+    }
+
+    fun cancelStart() {
+        requestedStartTaskId = null
+        mutablePendingStart.value = null
+    }
+
+    fun confirmStart(targetDurationMs: Long?) {
+        val request = mutablePendingStart.value ?: return
+        launch(
+            after = {
+                requestedStartTaskId = null
+                mutablePendingStart.value = null
+            },
+        ) { repository.start(request.taskId, targetDurationMs) }
+    }
+
     fun reload() = launch { repository.load() }
 
     fun moveTask(taskId: String, offset: Int) = launch { repository.moveTask(taskId, offset) }
