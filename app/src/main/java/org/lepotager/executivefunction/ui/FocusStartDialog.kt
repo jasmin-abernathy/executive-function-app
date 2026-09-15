@@ -29,6 +29,7 @@ internal fun FocusStartDialog(
     taskTitle: String,
     learnedTargetDurationMs: Long?,
     initialMode: FocusTimerMode,
+    willPostponeExisting: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: (FocusTimerMode, Long?) -> Unit,
 ) {
@@ -46,6 +47,7 @@ internal fun FocusStartDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(taskTitle)
+                if (willPostponeExisting) Text(stringResource(R.string.start_switch_warning))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),

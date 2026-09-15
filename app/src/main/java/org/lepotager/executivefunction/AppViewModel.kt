@@ -46,6 +46,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         after: () -> Unit = {},
     ) = launch(after) { repository.capture(title, firstStep, color) }
 
+    fun addQuickNote(text: String, after: () -> Unit = {}) =
+        launch(after) { repository.addQuickNote(text) }
+
     /** Kept for non-interactive/internal callers. Normal UI starts go through requestStart(). */
     fun start(taskId: String) = launch { repository.start(taskId) }
 
