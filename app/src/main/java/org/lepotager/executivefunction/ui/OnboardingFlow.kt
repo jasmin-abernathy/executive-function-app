@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -51,9 +53,12 @@ internal fun LocalAlgorithmIntro(
 
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(28.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween,
+            verticalArrangement = Arrangement.spacedBy(24.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -100,6 +105,7 @@ internal fun LocalAlgorithmIntro(
                 }
             }
 
+            Spacer(Modifier.height(4.dp))
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -124,8 +130,6 @@ internal fun LocalAlgorithmIntro(
                         onClick = { page -= 1 },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.intro_back)) }
-                } else {
-                    Spacer(Modifier.height(48.dp))
                 }
             }
         }
