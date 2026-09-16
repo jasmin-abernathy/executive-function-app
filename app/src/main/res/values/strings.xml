@@ -87,10 +87,54 @@
     <string name="not_now">Pas maintenant</string>
     <string name="mini_timer">Mini-fenêtre Android</string>
     <string name="open_notes">Garder une note</string>
+    <string name="pip_pause">Mettre en pause</string>
+    <string name="pip_resume">Reprendre</string>
+    <string name="pip_add_note">Ajouter une note</string>
+    <string name="quick_note_title">Note rapide</string>
+    <string name="quick_note_label">À garder pendant le focus</string>
+    <string name="save_note">Enregistrer la note</string>
     <string name="task_reminder">Une tâche, quand tu veux</string>
     <string name="start_requested_task">Commencer cette tâche ? Une autre session en cours sera conservée comme reportée.</string>
     <string name="widget_draw">Proposer une tâche au dé</string>
     <string name="apply_suggested_order">Placer les tâches compatibles en premier, par importance</string>
     <string name="draw_order_result_support">L’ordre a été mélangé. Rien ne démarre automatiquement : tu peux relancer ou réorganiser les tâches.</string>
     <string name="reorder_handle">Réordonner %1$s. Appui long puis glisser, ou utiliser Monter et Descendre.</string>
+
+    <string name="capture_options_show">Ajouter des options</string>
+    <string name="capture_options_hide">Masquer les options</string>
+    <string name="help_how_it_works">Comment ça fonctionne</string>
+    <string name="support_options_show">Afficher les aides facultatives</string>
+    <string name="support_options_hide">Masquer les aides facultatives</string>
+    <string name="focus_tools_more">Plus d’outils</string>
+    <string name="focus_tools_less">Masquer les autres outils</string>
+    <string name="focus_tool_note">Ajouter une note</string>
+    <string name="focus_tool_capture">Noter une nouvelle tâche</string>
+    <string name="focus_tool_mini_window">Ouvrir la petite fenêtre</string>
+    <string name="focus_pause_short">Pause</string>
+    <string name="focus_finish_short">Terminer</string>
+
+    <string name="focus_start_title">Comment veux-tu mesurer ce moment ?</string>
+    <string name="timer_mode_stopwatch">Chronomètre</string>
+    <string name="timer_mode_countdown">Minuteur</string>
+    <string name="stopwatch_mode_support">Le temps part de zéro. Une durée apprise reste disponible pour plus tard, sans modifier ce chronomètre.</string>
+    <string name="countdown_mode_support">Choisis une durée. Arriver à zéro ne termine jamais la tâche automatiquement : tu peux continuer ou terminer quand tu veux.</string>
+    <string name="learned_duration_reference">Repère actuel : %1$d min</string>
+    <string name="countdown_minutes_label">Durée en minutes</string>
+    <string name="countdown_minutes_error">Entre une durée positive.</string>
+    <string name="countdown_zero_support">Après zéro, le temps supplémentaire reste compté et rien n’est perdu.</string>
+
+    <string name="intro_step">%1$d / %2$d</string>
+    <string name="intro_skip">Passer</string>
+    <string name="intro_next">Suivant</string>
+    <string name="intro_back">Retour</string>
+    <string name="intro_control_title">Tu gardes la main</string>
+    <string name="intro_control_body">Note une tâche, choisis un premier pas et commence à ton rythme. Tu peux faire une pause et reprendre plus tard. Les suggestions sont calculées sur ton téléphone, et tu décides quoi en faire.</string>
+    <string name="intro_duration_title">Des repères à partir de tes durées</string>
+    <string name="intro_duration_body">L’application mesure le temps actif passé sur tes tâches, sans compter les pauses. Après trois réalisations mesurées, elle peut proposer une durée de référence. Tu peux corriger ce repère ou écarter une mesure inhabituelle.</string>
+    <string name="intro_duration_example">8, 11 et 13 minutes → un repère de 14 minutes.</string>
+    <string name="intro_duration_rule">La règle retient la plus longue durée active admissible, l’arrondit à la minute supérieure puis ajoute une minute. Une référence manuelle reste prioritaire.</string>
+    <string name="intro_context_title">Des suggestions selon ton moment</string>
+    <string name="intro_context_body">Si tu l’actives, l’application peut tenir compte de ton énergie, du temps disponible et du contexte. Le dé utilise les tâches admissibles seulement quand tu le demandes. Tu gardes la main sur leur ordre.</string>
+    <string name="intro_enable_suggestions">Activer les suggestions</string>
+    <string name="intro_later">Plus tard</string>
 </resources>
