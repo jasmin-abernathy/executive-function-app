@@ -87,10 +87,54 @@
     <string name="not_now">Not now</string>
     <string name="mini_timer">Android mini window</string>
     <string name="open_notes">Keep a note</string>
+    <string name="pip_pause">Pause</string>
+    <string name="pip_resume">Resume</string>
+    <string name="pip_add_note">Add a note</string>
+    <string name="quick_note_title">Quick note</string>
+    <string name="quick_note_label">Keep this during focus</string>
+    <string name="save_note">Save note</string>
     <string name="task_reminder">A task, when you are ready</string>
     <string name="start_requested_task">Start this task? Another active session will be preserved as postponed.</string>
     <string name="widget_draw">Suggest a task with the die</string>
     <string name="apply_suggested_order">Put matching tasks first, by importance</string>
     <string name="draw_order_result_support">The order has been shuffled. Nothing starts automatically: you can roll again or arrange the tasks.</string>
     <string name="reorder_handle">Reorder %1$s. Hold and drag, or use Move up and Move down.</string>
+
+    <string name="capture_options_show">Add options</string>
+    <string name="capture_options_hide">Hide options</string>
+    <string name="help_how_it_works">How it works</string>
+    <string name="support_options_show">Show optional supports</string>
+    <string name="support_options_hide">Hide optional supports</string>
+    <string name="focus_tools_more">More tools</string>
+    <string name="focus_tools_less">Hide other tools</string>
+    <string name="focus_tool_note">Add a note</string>
+    <string name="focus_tool_capture">Note a new task</string>
+    <string name="focus_tool_mini_window">Open the mini window</string>
+    <string name="focus_pause_short">Pause</string>
+    <string name="focus_finish_short">Finish</string>
+
+    <string name="focus_start_title">How do you want to measure this moment?</string>
+    <string name="timer_mode_stopwatch">Stopwatch</string>
+    <string name="timer_mode_countdown">Countdown</string>
+    <string name="stopwatch_mode_support">Time starts from zero. A learned reference stays available for later without changing this stopwatch.</string>
+    <string name="countdown_mode_support">Choose a duration. Reaching zero never ends the task automatically: you can keep going or finish when you want.</string>
+    <string name="learned_duration_reference">Current reference: %1$d min</string>
+    <string name="countdown_minutes_label">Duration in minutes</string>
+    <string name="countdown_minutes_error">Enter a positive duration.</string>
+    <string name="countdown_zero_support">After zero, extra time is still counted and nothing is lost.</string>
+
+    <string name="intro_step">%1$d / %2$d</string>
+    <string name="intro_skip">Skip</string>
+    <string name="intro_next">Next</string>
+    <string name="intro_back">Back</string>
+    <string name="intro_control_title">You stay in control</string>
+    <string name="intro_control_body">Write down a task, choose a first step and start at your own pace. You can pause and return later. Suggestions are calculated on your phone, and you decide what to do with them.</string>
+    <string name="intro_duration_title">Reference points from your own durations</string>
+    <string name="intro_duration_body">The app measures active time spent on your tasks without counting pauses. After three measured completions, it can suggest a reference duration. You can correct that reference or exclude an unusual measurement.</string>
+    <string name="intro_duration_example">8, 11 and 13 minutes → a 14-minute reference.</string>
+    <string name="intro_duration_rule">The rule keeps the longest eligible active duration, rounds it up to the next minute, then adds one minute. A manual reference stays in priority.</string>
+    <string name="intro_context_title">Suggestions that fit the moment</string>
+    <string name="intro_context_body">If you enable it, the app can take your energy, available time and context into account. The die uses eligible tasks only when you ask it to. You stay in control of their order.</string>
+    <string name="intro_enable_suggestions">Enable suggestions</string>
+    <string name="intro_later">Later</string>
 </resources>

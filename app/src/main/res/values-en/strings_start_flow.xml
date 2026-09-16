@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="start_switch_warning">The current session will be kept as postponed.</string>
+</resources>
