@@ -445,3 +445,17 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .research-status.is-visible {
     display: block;
 }
+
+
+/* Contribution libre / Stancer */
+.contribution-form{display:grid;gap:16px;margin-top:24px}
+.contribution-amounts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.contribution-amounts button{min-height:58px;border:1px solid #cbd0c7;border-radius:16px;background:#fff;color:var(--green);font:inherit;font-size:1.05rem;font-weight:800;cursor:pointer}
+.contribution-amounts button:hover,.contribution-amounts button:focus-visible{border-color:var(--green);outline:3px solid rgba(23,61,43,.16);outline-offset:2px}
+.contribution-custom{display:grid;gap:7px;color:#36453c;font-weight:750}
+.contribution-custom input{width:100%;min-height:50px;border:1px solid #cbd0c7;border-radius:12px;background:#fff;color:#14251b;padding:0 14px;font:inherit}
+.contribution-custom small{color:#778078;font-weight:500}
+.contribution-submit{justify-self:start;border:0;cursor:pointer}
+.contribution-alt{margin-top:18px!important;font-size:.9rem}
+.contribution-honeypot{position:absolute!important;left:-10000px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+@media(max-width:560px){.contribution-amounts{grid-template-columns:1fr}}

@@ -33,15 +33,25 @@
     </div>
   </header>
   <main id="contenu">
-    <section class="legal-hero"><div class="shell legal-hero-inner"><p class="eyebrow">Soutien libre</p><h1>Aider les projets du Verger à pousser.</h1><p>Les outils présentés ici sont développés avec une priorité donnée à l’ouverture du code, à la sobriété et au respect de la vie privée. Si tu veux contribuer aux frais et au temps de développement, tu peux envoyer un soutien ponctuel du montant de ton choix.</p></div></section>
+    <section class="legal-hero"><div class="shell legal-hero-inner"><p class="eyebrow">Contribution libre</p><h1>Aider les projets du Verger à pousser.</h1><p>Les outils présentés ici sont développés dans le cadre de l’activité Le Potager du Web, avec une priorité donnée à l’ouverture du code, à la sobriété et au respect de la vie privée. Si tu veux contribuer aux frais et au temps de développement, tu peux verser une contribution ponctuelle du montant de ton choix.</p></div></section>
     <section class="legal-content">
       <div class="shell legal-sections" style="max-width:900px">
         <article class="legal-card">
-          <p class="legal-number">01 · SOUTENIR</p>
-          <h2>Un montant libre, sans abonnement.</h2>
-          <p>Le paiement se fait directement sur l’interface sécurisée de Revolut. Aucune coordonnée bancaire ni clé de paiement n’est stockée sur app.lepotager.org.</p>
-          <p style="margin-top:26px"><a class="button button-primary" href="https://revolut.me/jasumino" rel="noopener noreferrer">Soutenir via Revolut.me</a></p>
-          <p class="legal-note">Le soutien est volontaire et ne débloque aucune fonctionnalité, aucun statut particulier et aucune priorité de développement. Il ne donne pas droit à un reçu fiscal et n’ouvre droit à aucune réduction, déduction ou exonération fiscale.</p>
+          <p class="legal-number">01 · CONTRIBUER</p>
+          <h2>Une contribution libre, sans abonnement.</h2>
+          <p>Choisis 5 €, 10 €, 15 € ou un montant libre. La carte est saisie sur l’interface sécurisée de Stancer : app.lepotager.org ne reçoit ni le numéro complet de la carte ni son cryptogramme.</p>
+          <form class="contribution-form" action="/soutenir/paiement.php" method="post">
+            <div class="contribution-amounts" aria-label="Montants rapides">
+              <button type="submit" name="amount" value="5">5 €</button>
+              <button type="submit" name="amount" value="10">10 €</button>
+              <button type="submit" name="amount" value="15">15 €</button>
+            </div>
+            <label class="contribution-custom" for="contribution-custom-amount"><span>Montant libre en euros</span><input id="contribution-custom-amount" name="custom_amount" inputmode="decimal" autocomplete="off" placeholder="1"><small>Minimum 1 €. Contribution ponctuelle, sans abonnement.</small></label>
+            <label class="contribution-honeypot" aria-hidden="true">Site web<input name="website" tabindex="-1" autocomplete="off"></label>
+            <button class="button button-primary contribution-submit" type="submit">Continuer avec Stancer</button>
+          </form>
+          <p class="contribution-alt">Tu préfères ? <a href="https://revolut.me/jasumino" rel="noopener noreferrer">Contribuer via Revolut.me</a>.</p>
+          <p class="legal-note"><strong>Les projets du Verger sont développés dans le cadre de l’activité Le Potager du Web.</strong> La contribution est facultative, sans contrepartie fonctionnelle, et est comptabilisée dans les recettes de cette activité. Elle ne donne pas droit à un reçu fiscal ni à un avantage fiscal.</p>
         </article>
         <article class="legal-card"><p class="legal-number">02 · À QUOI ÇA SERT ?</p><h2>Du temps de développement et des frais concrets.</h2><p>Les contributions peuvent aider à couvrir une partie du développement, des tests sur appareils réels, de la documentation, de l’hébergement et de la maintenance des projets du Verger.</p><p>Ne pas contribuer financièrement ne limite pas l’accès aux projets libres. Tester, documenter ou signaler un problème reste tout aussi utile.</p><p style="margin-top:26px"><a class="button button-ghost" href="/#projets">Voir les projets</a></p></article>
       </div>

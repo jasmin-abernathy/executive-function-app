@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
@@ -36,3 +36,12 @@ jobs:
             -name '*.php' \
             -print0 \
             | xargs -0 -n1 php -l
+
+      - name: Shared Stancer contribution contract
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -Fq "/home/sc1leja3715/stancer-private/private/stancer-config.php" web/app.lepotager.org/soutenir/stancer-contribution.php
+          grep -Fq "payment.stancer.com" web/app.lepotager.org/soutenir/paiement.php
+          grep -Fq 'placeholder="1"' web/app.lepotager.org/soutenir/index.html
+          ! grep -RInE 's(test|prod)_[A-Za-z0-9]{20,}' web/app.lepotager.org/soutenir
