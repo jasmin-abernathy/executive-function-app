@@ -13,7 +13,7 @@
   <link rel="canonical" href="https://app.lepotager.org/soutenir/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="/assets/style.css?v=20260918-stancer-ui2">
   <link rel="stylesheet" href="/accessibility.css">
   <script defer src="/accessibility.js"></script>
 </head>
@@ -47,7 +47,7 @@
               <button type="submit" name="amount" value="15">15 €</button>
             </div>
             <label class="contribution-custom" for="contribution-custom-amount"><span>Montant libre en euros</span><input id="contribution-custom-amount" name="custom_amount" inputmode="decimal" autocomplete="off" placeholder="1"><small>Minimum 1 €. Contribution ponctuelle, sans abonnement.</small></label>
-            <label class="contribution-honeypot" aria-hidden="true">Site web<input name="website" tabindex="-1" autocomplete="off"></label>
+            <label class="contribution-honeypot" aria-hidden="true" style="position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none">Site web<input name="website" tabindex="-1" autocomplete="off"></label>
             <button class="button button-primary contribution-submit" type="submit">Continuer avec Stancer</button>
           </form>
           <p class="contribution-alt">Tu préfères ? <a href="https://revolut.me/jasumino" rel="noopener noreferrer">Contribuer via Revolut.me</a>.</p>
