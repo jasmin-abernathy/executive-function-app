@@ -1,5 +1,6 @@
 package org.lepotager.executivefunction
 
+import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -46,6 +48,8 @@ class MainActivity : ComponentActivity() {
     private var showCheckIn by mutableStateOf(false)
     private var miniWindow by mutableStateOf(false)
     private var requestedTask by mutableStateOf<String?>(null)
+    private var showQuickNote by mutableStateOf(false)
+    private var returnToMiniWindow = false
     private var externalCapture by mutableStateOf(false)
     private var drawRequest by mutableStateOf(0)
     private var introSeen by mutableStateOf(false)
@@ -72,6 +76,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        savedInstanceState?.let {
+            requestedTask = it.getString("pending_task")
+            externalCapture = it.getBoolean("external_capture")
+            showQuickNote = it.getBoolean("quick_note")
+            returnToMiniWindow = it.getBoolean("return_to_pip")
+            showIntro = it.getBoolean("show_intro")
+            showCheckIn = it.getBoolean("show_check_in")
+            drawRequest = it.getInt("draw_request")
+            waitingForOverlayPermission = it.getBoolean("waiting_overlay")
+        }
+        miniWindow = isInPictureInPictureMode
         consumeIntent(intent)
         overlayEnabled = overlayPreference() && Settings.canDrawOverlays(this)
         val preferences = appPreferences()
@@ -92,24 +107,29 @@ class MainActivity : ComponentActivity() {
 
                 LaunchedEffect(requestedTask, snapshot.loading) {
                     val taskId = requestedTask ?: return@LaunchedEffect
-                    if (snapshot.loading) return@LaunchedEffect
+                    if (snapshot.loading || pendingStart?.taskId == taskId) return@LaunchedEffect
                     if (snapshot.tasks.any { it.id == taskId }) viewModel.requestStart(taskId)
                     else requestedTask = null
                 }
-                LaunchedEffect(pendingStart?.taskId) {
+                LaunchedEffect(pendingStart?.taskId, requestedTask) {
                     if (pendingStart?.taskId != null && pendingStart?.taskId == requestedTask) requestedTask = null
+                }
+                LaunchedEffect(error) {
+                    if (error != null) requestedTask = null
                 }
                 LaunchedEffect(
                     snapshot.loading,
                     snapshot.activeFocus?.session?.id,
                     externalCapture,
+                    showQuickNote,
+                    miniWindow,
                     requestedTask,
                     pendingStart,
                     introSeen,
                 ) {
                     if (
                         !snapshot.loading && !introSeen && snapshot.activeFocus == null &&
-                        !externalCapture && requestedTask == null && pendingStart == null
+                        !externalCapture && !showQuickNote && !miniWindow && requestedTask == null && pendingStart == null
                     ) {
                         showCheckIn = false
                         showIntro = true
@@ -121,6 +141,8 @@ class MainActivity : ComponentActivity() {
                     showIntro,
                     introSeen,
                     externalCapture,
+                    showQuickNote,
+                    miniWindow,
                     requestedTask,
                     pendingStart,
                 ) {
@@ -128,7 +150,7 @@ class MainActivity : ComponentActivity() {
                     val now=System.currentTimeMillis()
                     if(
                         !snapshot.loading && introSeen && !showIntro && snapshot.activeFocus==null &&
-                        !externalCapture && requestedTask==null && pendingStart==null &&
+                        !externalCapture && !showQuickNote && !miniWindow && requestedTask==null && pendingStart==null &&
                         prefs.getBoolean("enabled",true) && now-prefs.getLong("last_prompt",0L)>=14_400_000L
                     ) {
                         prefs.edit().putLong("last_prompt",now).apply()
@@ -137,7 +159,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 if (
-                    showIntro && snapshot.activeFocus == null && !externalCapture &&
+                    showIntro && !snapshot.loading && snapshot.activeFocus == null && !externalCapture && !showQuickNote && !miniWindow &&
                     requestedTask == null && pendingStart == null
                 ) {
                     FirstRunSetupFlow(
@@ -146,31 +168,41 @@ class MainActivity : ComponentActivity() {
                         onSkip = ::markIntroSeen,
                     )
                 } else {
-                    if(externalCapture) {
+                    if(externalCapture && !miniWindow) {
                         org.lepotager.executivefunction.ui.ExternalCaptureDialog(
                             onDismiss={externalCapture=false},
                             onCapture={title->viewModel.capture(title,null,TaskColor.NEUTRAL){externalCapture=false}},
                         )
                     }
-                    pendingStart?.let { request ->
-                        FocusStartDialog(
-                            taskTitle = request.title,
-                            learnedTargetDurationMs = request.learnedTargetDurationMs,
-                            initialMode = lastTimerMode ?: if (request.learnedTargetDurationMs == null) {
-                                FocusTimerMode.STOPWATCH
-                            } else {
-                                FocusTimerMode.COUNTDOWN
-                            },
-                            willPostponeExisting = snapshot.activeFocus?.task?.id?.let { it != request.taskId } == true,
-                            onDismiss = viewModel::cancelStart,
-                            onConfirm = { mode, targetDurationMs ->
-                                saveTimerMode(mode)
-                                requestNotificationPermissionIfNeeded()
-                                viewModel.confirmStart(targetDurationMs)
-                            },
+                    if (showQuickNote && !externalCapture && !miniWindow) {
+                        org.lepotager.executivefunction.ui.QuickNoteDialog(
+                            onDismiss = ::closeQuickNote,
+                            onSave = { text -> viewModel.addQuickNote(text, ::closeQuickNote) },
                         )
                     }
-                    if(showCheckIn) androidx.compose.material3.AlertDialog(
+                    if (!externalCapture && !showQuickNote && !miniWindow) pendingStart?.let { request ->
+                        key(request.taskId) {
+                            FocusStartDialog(
+                                taskTitle = request.title,
+                                learnedTargetDurationMs = request.learnedTargetDurationMs,
+                                initialMode = lastTimerMode ?: if (request.learnedTargetDurationMs == null) {
+                                    FocusTimerMode.STOPWATCH
+                                } else {
+                                    FocusTimerMode.COUNTDOWN
+                                },
+                                willPostponeExisting = snapshot.activeFocus?.task?.id?.let { it != request.taskId } == true,
+                                onDismiss = viewModel::cancelStart,
+                                onConfirm = { mode, targetDurationMs ->
+                                    saveTimerMode(mode)
+                                    requestNotificationPermissionIfNeeded()
+                                    viewModel.confirmStart(targetDurationMs)
+                                },
+                            )
+                        }
+                    }
+                    if(showCheckIn && !snapshot.loading && snapshot.activeFocus == null &&
+                        !externalCapture && !showQuickNote && !miniWindow && requestedTask == null && pendingStart == null
+                    ) androidx.compose.material3.AlertDialog(
                         onDismissRequest={showCheckIn=false},
                         title={androidx.compose.material3.Text(getString(R.string.check_in_title))},
                         text={androidx.compose.material3.Text(getString(R.string.check_in_body))},
@@ -178,7 +210,13 @@ class MainActivity : ComponentActivity() {
                         dismissButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false}) {androidx.compose.material3.Text(getString(R.string.not_now))}},
                     )
 
-                    LaunchedEffect(snapshot.activeFocus?.session?.status) {
+                    LaunchedEffect(snapshot.loading, snapshot.activeFocus, miniWindow) {
+                        if (snapshot.loading) return@LaunchedEffect
+                        if (miniWindow) {
+                            val active = snapshot.activeFocus
+                            if (active != null) setPictureInPictureParams(pipParams(active))
+                            else setPictureInPictureParams(android.app.PictureInPictureParams.Builder().setActions(emptyList()).build())
+                        }
                         if(snapshot.activeFocus!=null) drawRequest=0
                         if(snapshot.activeFocus?.session?.status == FocusStatus.RUNNING && appPreferences().getBoolean("keep_screen_on",false)) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                         else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -199,8 +237,9 @@ class MainActivity : ComponentActivity() {
 
                                 snapshot.activeFocus?.session?.status == FocusStatus.RUNNING -> FocusScreen(
                                     activeFocus = requireNotNull(snapshot.activeFocus),
+                                    modalBlocked = externalCapture || showQuickNote || pendingStart != null,
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("task",snapshot.activeFocus?.task?.id)) },
-                                    onNote = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("section","notes")) },
+                                    onNote = { showQuickNote = true },
                                     onMini = ::enterMiniWindow,
                                     overlayEnabled = overlayEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
@@ -225,7 +264,7 @@ class MainActivity : ComponentActivity() {
                                     onApplySuggestedOrder = viewModel::applySuggestedOrder,
                                     eligibleDrawIds = snapshot.eligibleDrawIds,
                                     suggestedTaskId = snapshot.suggestedTaskId,
-                                    onHelp = { showCheckIn=false; showIntro=true },
+                                    onHelp = { refreshPreferences(); showCheckIn=false; showIntro=true },
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
@@ -260,13 +299,15 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.reload()
+        refreshPreferences()
+        miniWindow = isInPictureInPictureMode
         if (appPreferences().getBoolean("keep_screen_on", false) && viewModel.snapshot.value.activeFocus?.session?.status==FocusStatus.RUNNING) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (waitingForOverlayPermission) {
             waitingForOverlayPermission = false
-            if (Settings.canDrawOverlays(this)) updateOverlayEnabled(true)
+            if (!miniWindow && Settings.canDrawOverlays(this)) updateOverlayEnabled(true)
         } else {
-            val shouldBeEnabled = overlayPreference() && Settings.canDrawOverlays(this)
+            val shouldBeEnabled = !miniWindow && overlayPreference() && Settings.canDrawOverlays(this)
             overlayEnabled = shouldBeEnabled
             if (shouldBeEnabled) FocusOverlayService.start(this)
             else FocusOverlayService.stop(this)
@@ -276,19 +317,59 @@ class MainActivity : ComponentActivity() {
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode,newConfig)
         miniWindow=isInPictureInPictureMode
+        if (isInPictureInPictureMode) {
+            if (overlayEnabled) updateOverlayEnabled(false)
+            viewModel.snapshot.value.activeFocus?.let { setPictureInPictureParams(pipParams(it)) }
+        }
     }
 
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
-        if(appPreferences().getBoolean("auto_pip",false)) enterMiniWindow()
+        if(!waitingForOverlayPermission && !showQuickNote && !externalCapture &&
+            !showIntro && viewModel.pendingStart.value == null && requestedTask == null &&
+            appPreferences().getBoolean("auto_pip",false)) enterMiniWindow()
     }
 
+    private fun pipParams(active: org.lepotager.executivefunction.model.ActiveFocus) =
+        PipFocusSurface.params(
+            this,
+            active,
+            PendingIntent.getActivity(
+                this, 3109,
+                Intent(this, MainActivity::class.java)
+                    .addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    .putExtra("quick_action", "pip_note"),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            ),
+        )
+
     private fun enterMiniWindow() {
-        val active=viewModel.snapshot.value.activeFocus ?: return
-        if(active.session.status!=FocusStatus.RUNNING || !packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE)) return
-        val pause=android.app.RemoteAction(android.graphics.drawable.Icon.createWithResource(this,R.drawable.ic_timer_notification),getString(R.string.interrupt_action),getString(R.string.interrupt_action),FocusPresence.action(this,active,"pause"))
-        if(overlayEnabled) updateOverlayEnabled(false)
-        enterPictureInPictureMode(android.app.PictureInPictureParams.Builder().setAspectRatio(android.util.Rational(4,3)).setActions(listOf(pause)).build())
+        val active = viewModel.snapshot.value.activeFocus ?: return
+        if (active.session.status !in listOf(FocusStatus.RUNNING, FocusStatus.INTERRUPTED) ||
+            !packageManager.hasSystemFeature(android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE)
+        ) return
+        // PiP may be disabled in system settings even on a capable device.
+        val entered = runCatching { enterPictureInPictureMode(pipParams(active)) }.getOrDefault(false)
+        if (entered && overlayEnabled) updateOverlayEnabled(false)
+    }
+
+    private fun closeQuickNote() {
+        showQuickNote = false
+        val returnToPip = returnToMiniWindow
+        returnToMiniWindow = false
+        if (returnToPip) enterMiniWindow()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putString("pending_task", requestedTask ?: viewModel.pendingStart.value?.taskId)
+        outState.putBoolean("external_capture", externalCapture)
+        outState.putBoolean("quick_note", showQuickNote)
+        outState.putBoolean("return_to_pip", returnToMiniWindow)
+        outState.putBoolean("show_intro", showIntro)
+        outState.putBoolean("show_check_in", showCheckIn)
+        outState.putInt("draw_request", drawRequest)
+        outState.putBoolean("waiting_overlay", waitingForOverlayPermission)
+        super.onSaveInstanceState(outState)
     }
 
     private fun toggleOverlay() {
@@ -315,9 +396,10 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun consumeIntent(intent: Intent?) {
-        requestedTask=intent?.getStringExtra("requested_task")
+        intent?.getStringExtra("requested_task")?.let { requestedTask = it; showCheckIn = false }
         when(intent?.getStringExtra("quick_action")) {
-            "capture" -> externalCapture=true
+            "capture" -> { externalCapture=true; showCheckIn=false }
+            "pip_note" -> { showQuickNote=true; returnToMiniWindow=true; showCheckIn=false }
             "draw" -> drawRequest+=1
         }
         intent?.removeExtra("requested_task")
@@ -356,6 +438,16 @@ class MainActivity : ComponentActivity() {
         introSeen = true
         showIntro = false
         appPreferences().edit().putBoolean(KEY_INTRO_SEEN, true).apply()
+    }
+
+    private fun refreshPreferences() {
+        val prefs = appPreferences()
+        drawEnabled = prefs.getBoolean(KEY_DRAW_ENABLED, true)
+        pauseSuggestionsEnabled = prefs.getBoolean(KEY_PAUSE_ENABLED, true)
+        pauseAfterMinutes = prefs.getInt(KEY_PAUSE_MINUTES, 25).coerceIn(5, 120)
+        lastTimerMode = prefs.getString(KEY_TIMER_MODE, null)?.let {
+            runCatching { FocusTimerMode.valueOf(it) }.getOrNull()
+        }
     }
 
     private fun currentSetupConfig(): FirstRunSetupConfig {

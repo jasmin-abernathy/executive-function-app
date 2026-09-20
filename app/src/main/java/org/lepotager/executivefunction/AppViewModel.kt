@@ -30,6 +30,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val mutablePendingStart = MutableStateFlow<PendingStart?>(null)
     val pendingStart: StateFlow<PendingStart?> = mutablePendingStart.asStateFlow()
     private var requestedStartTaskId: String? = null
+    private var confirmingStart = false
 
     private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
         mutableError.value = throwable
@@ -53,12 +54,19 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun start(taskId: String) = launch { repository.start(taskId) }
 
     fun requestStart(taskId: String) {
+        if (requestedStartTaskId == taskId) return
         val task = snapshot.value.tasks.firstOrNull { it.id == taskId } ?: return
         requestedStartTaskId = taskId
+        mutablePendingStart.value = null
         viewModelScope.launch(exceptionHandler) {
-            val learnedTarget = repository.suggestedDurationMs(taskId)
-            if (requestedStartTaskId == taskId) {
-                mutablePendingStart.value = PendingStart(taskId, task.title, learnedTarget)
+            try {
+                val learnedTarget = repository.suggestedDurationMs(taskId)
+                if (requestedStartTaskId == taskId) {
+                    mutablePendingStart.value = PendingStart(taskId, task.title, learnedTarget)
+                }
+            } catch (error: Exception) {
+                if (requestedStartTaskId == taskId) requestedStartTaskId = null
+                throw error
             }
         }
     }
@@ -70,12 +78,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun confirmStart(targetDurationMs: Long?) {
         val request = mutablePendingStart.value ?: return
-        launch(
-            after = {
-                requestedStartTaskId = null
-                mutablePendingStart.value = null
-            },
-        ) { repository.start(request.taskId, targetDurationMs) }
+        if (confirmingStart) return
+        confirmingStart = true
+        viewModelScope.launch(exceptionHandler) {
+            try {
+                repository.start(request.taskId, targetDurationMs)
+                try { FocusPresence.sync(getApplication(), snapshot.value.activeFocus) } catch (_: Exception) { }
+                if (mutablePendingStart.value == request) cancelStart()
+            } finally {
+                confirmingStart = false
+            }
+        }
     }
 
     fun reload() = launch { repository.load() }

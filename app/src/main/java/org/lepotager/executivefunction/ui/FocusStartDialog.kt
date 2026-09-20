@@ -1,5 +1,7 @@
 package org.lepotager.executivefunction.ui
 
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +15,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -35,8 +37,8 @@ internal fun FocusStartDialog(
     onConfirm: (FocusTimerMode, Long?) -> Unit,
 ) {
     val suggestedMinutes = FocusTimerChoice.suggestedMinutes(learnedTargetDurationMs)
-    var mode by remember(taskTitle) { mutableStateOf(initialMode) }
-    var minutesText by remember(taskTitle, learnedTargetDurationMs) {
+    var mode by rememberSaveable(taskTitle) { mutableStateOf(initialMode) }
+    var minutesText by rememberSaveable(taskTitle, learnedTargetDurationMs) {
         mutableStateOf(suggestedMinutes?.toString().orEmpty())
     }
     val minutes = minutesText.toIntOrNull()
@@ -46,7 +48,7 @@ internal fun FocusStartDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.focus_start_title)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(modifier = Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(taskTitle)
                 if (willPostponeExisting) Text(stringResource(R.string.start_switch_warning))
                 Row(

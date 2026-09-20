@@ -2,12 +2,13 @@ package org.lepotager.executivefunction.ui
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.res.stringResource
 import org.lepotager.executivefunction.R
 
 @Composable
 fun ExternalCaptureDialog(onDismiss: () -> Unit, onCapture: (String) -> Unit) {
-    var text by remember { mutableStateOf("") }
+    var text by rememberSaveable { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.capture_label)) },
@@ -31,7 +32,7 @@ fun ExternalCaptureDialog(onDismiss: () -> Unit, onCapture: (String) -> Unit) {
 
 @Composable
 fun QuickNoteDialog(onDismiss: () -> Unit, onSave: (String) -> Unit) {
-    var text by remember { mutableStateOf("") }
+    var text by rememberSaveable { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.quick_note_title)) },
