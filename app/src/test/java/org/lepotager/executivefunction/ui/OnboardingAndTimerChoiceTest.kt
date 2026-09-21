@@ -2,6 +2,7 @@ package org.lepotager.executivefunction.ui
 
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Rule
@@ -200,5 +201,36 @@ class OnboardingAndTimerChoiceTest {
             assertEquals(FocusTimerMode.COUNTDOWN, chosenMode)
             assertEquals(12 * 60_000L, target)
         }
+    }
+    @Test
+    fun countdownDraftSurvivesSavedStateRestoration() {
+        val restoration = StateRestorationTester(compose)
+        var target: Long? = null
+        restoration.setContent {
+            ExecutiveFunctionTheme {
+                FocusStartDialog("Lire", null, FocusTimerMode.STOPWATCH,
+                    onDismiss = {}, onConfirm = { _, value -> target = value })
+            }
+        }
+        compose.onNodeWithText("Minuteur").performClick()
+        compose.onNodeWithTag("countdown-minutes").performTextInput("17")
+        restoration.emulateSavedInstanceStateRestore()
+        compose.onNodeWithTag("countdown-minutes").assertTextContains("17")
+        compose.onNodeWithText("Commencer").performClick()
+        compose.runOnIdle { assertEquals(1_020_000L, target) }
+    }
+
+    @Test
+    fun quickNoteDraftSurvivesSavedStateRestoration() {
+        val restoration = StateRestorationTester(compose)
+        var saved: String? = null
+        restoration.setContent {
+            ExecutiveFunctionTheme { QuickNoteDialog({}, { saved = it }) }
+        }
+        compose.onNode(hasSetTextAction()).performTextInput("Reprendre au paragraphe 3")
+        restoration.emulateSavedInstanceStateRestore()
+        compose.onNode(hasSetTextAction()).assertTextContains("Reprendre au paragraphe 3")
+        compose.onNodeWithText("Enregistrer la note").performClick()
+        compose.runOnIdle { assertEquals("Reprendre au paragraphe 3", saved) }
     }
 }

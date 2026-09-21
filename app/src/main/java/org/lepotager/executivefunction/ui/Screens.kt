@@ -706,6 +706,7 @@ private fun TaskCard(
 @Composable
 fun FocusScreen(
     activeFocus: ActiveFocus,
+    modalBlocked: Boolean = false,
     onJournal: () -> Unit = {},
     onMini: () -> Unit = {},
     onNote: () -> Unit = {},
@@ -906,13 +907,13 @@ fun FocusScreen(
         }
     }
 
-    if (showCapture) {
+    if (showCapture && !modalBlocked) {
         CaptureDialog(
             onDismiss = { showCapture = false },
             onCapture = { title -> onQuickCapture(title, null) { showCapture = false } },
         )
     }
-    if (showInterrupt) {
+    if (showInterrupt && !showCapture && !modalBlocked) {
         InterruptDialog(
             onDismiss = { showInterrupt = false },
             onConfirm = { note ->
@@ -921,7 +922,7 @@ fun FocusScreen(
             },
         )
     }
-    if (showPauseSuggestion) {
+    if (showPauseSuggestion && !showCapture && !showInterrupt && !modalBlocked) {
         PauseSuggestionDialog(
             minutes = pauseAfterMinutes,
             onPause = {
