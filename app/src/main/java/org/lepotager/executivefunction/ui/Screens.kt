@@ -44,8 +44,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -82,29 +84,35 @@ fun HomeScreen(
     onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
     suggestedTaskId: String? = null,
+    resumableTaskIds: Set<String> = emptySet(),
     drawRequest: Int = 0,
     onApplySuggestedOrder: () -> Unit = {},
     drawEnabled: Boolean,
     pauseSuggestionsEnabled: Boolean,
     pauseAfterMinutes: Int,
-    onCapture: (String, String?, TaskColor, () -> Unit) -> Unit,
+    pauseDurationMinutes: Int,
+    onCapture: (String, List<String>, TaskColor?, () -> Unit) -> Unit,
     onStart: (String) -> Unit,
+    onContinue: (String) -> Unit,
+    onEditTask: (String) -> Unit,
     onMoveTask: (String, Int) -> Unit,
     onApplyTaskOrder: (List<String>, (Boolean) -> Unit) -> Unit,
     onSetTaskColor: (String, TaskColor) -> Unit,
     onSetDrawEnabled: (Boolean) -> Unit,
     onSetPauseSuggestionsEnabled: (Boolean) -> Unit,
     onSetPauseAfterMinutes: (Int) -> Unit,
+    onSetPauseDurationMinutes: (Int) -> Unit,
 ) {
     var title by remember { mutableStateOf("") }
-    var firstStep by remember { mutableStateOf("") }
+    var subtaskDraft by remember { mutableStateOf("") }
+    val subtasks = remember { mutableStateListOf<String>() }
     var showCaptureOptions by remember { mutableStateOf(false) }
     var showSupportOptions by remember { mutableStateOf(false) }
     var drawnTaskId by remember { mutableStateOf<String?>(null) }
     var pendingDrawTaskId by remember { mutableStateOf<String?>(null) }
     var drawRollKey by remember { mutableIntStateOf(0) }
     var isDrawing by remember { mutableStateOf(false) }
-    var selectedColor by remember { mutableStateOf(TaskColor.NEUTRAL) }
+    var selectedColor by remember { mutableStateOf<TaskColor?>(null) }
     var organizing by remember { mutableStateOf(false) }
 
     val reorder = rememberTaskReorder(tasks, onApplyTaskOrder)
@@ -226,14 +234,57 @@ fun HomeScreen(
                             )
                         }
                         if (showCaptureOptions) {
-                            OutlinedTextField(
-                                value = firstStep,
-                                onValueChange = { firstStep = it },
-                                modifier = Modifier.fillMaxWidth(),
-                                label = { Text(stringResource(R.string.first_step_optional)) },
-                                singleLine = true,
-                                colors = appTextFieldColors(),
+                            Text(
+                                text = stringResource(R.string.subtasks_optional),
+                                style = MaterialTheme.typography.labelLarge,
                             )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                OutlinedTextField(
+                                    value = subtaskDraft,
+                                    onValueChange = { subtaskDraft = it },
+                                    modifier = Modifier.weight(1f),
+                                    label = { Text(stringResource(R.string.subtask_draft_label)) },
+                                    singleLine = true,
+                                    colors = appTextFieldColors(),
+                                )
+                                FilledTonalButton(
+                                    onClick = {
+                                        val clean = subtaskDraft.trim()
+                                        if (clean.isNotEmpty()) {
+                                            subtasks.add(clean)
+                                            subtaskDraft = ""
+                                        }
+                                    },
+                                    enabled = subtaskDraft.isNotBlank(),
+                                    colors = appTonalButtonColors(),
+                                    modifier = Modifier.sizeIn(minHeight = 48.dp),
+                                ) {
+                                    Text(stringResource(R.string.add_subtask_action))
+                                }
+                            }
+                            subtasks.forEachIndexed { index, step ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        stringResource(R.string.subtask_numbered, index + 1, step),
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                    TextButton(
+                                        onClick = { subtasks.removeAt(index) },
+                                        colors = appTextButtonColors(),
+                                        modifier = Modifier.sizeIn(minHeight = 48.dp),
+                                    ) {
+                                        Text(stringResource(R.string.remove_subtask_action))
+                                    }
+                                }
+                            }
                             Text(
                                 text = stringResource(R.string.task_color_optional),
                                 style = MaterialTheme.typography.labelLarge,
@@ -242,11 +293,16 @@ fun HomeScreen(
                         }
                         Button(
                             onClick = {
-                                onCapture(title, firstStep, selectedColor) {
+                                val pendingSteps = buildList {
+                                    addAll(subtasks)
+                                    subtaskDraft.trim().takeIf { it.isNotEmpty() }?.let { add(it) }
+                                }
+                                onCapture(title, pendingSteps, selectedColor) {
                                     title = ""
-                                    firstStep = ""
+                                    subtaskDraft = ""
+                                    subtasks.clear()
                                     showCaptureOptions = false
-                                    selectedColor = TaskColor.NEUTRAL
+                                    selectedColor = null
                                 }
                             },
                             enabled = title.isNotBlank(),
@@ -289,16 +345,23 @@ fun HomeScreen(
                 item { EmptyTasksPanel() }
             } else {
                 itemsIndexed(reorder.visibleTasks, key = { _, task -> task.id }) { index, task ->
+                    val resumable = task.id in resumableTaskIds
                     TaskCard(
                         task = task,
+                        cardDragModifier = reorder.handle(task.id, !isDrawing && !reorder.saving),
                         handleModifier = reorder.handle(task.id, !isDrawing && !reorder.saving),
+                        isDragged = reorder.dragged == task.id,
                         organizing = organizing,
                         canMoveUp = index > 0 && !reorder.saving && reorder.dragged == null && !isDrawing,
                         canMoveDown = index < tasks.lastIndex && !reorder.saving && reorder.dragged == null && !isDrawing,
                         onMoveUp = { onMoveTask(task.id, -1) },
                         onMoveDown = { onMoveTask(task.id, 1) },
                         onSetColor = { onSetTaskColor(task.id, it) },
-                        onStart = { onStart(task.id) },
+                        onEdit = { onEditTask(task.id) },
+                        resumable = resumable,
+                        onStart = {
+                            if (resumable) onContinue(task.id) else onStart(task.id)
+                        },
                     )
                 }
             }
@@ -325,7 +388,10 @@ fun HomeScreen(
                                 task = task,
                                 proposalOnly = proposalOnly,
                                 onRedraw = { beginDraw(task.id, proposalOnly) },
-                                onStart = { onStart(task.id) },
+                                resumable = task.id in resumableTaskIds,
+                                onStart = {
+                                    if (task.id in resumableTaskIds) onContinue(task.id) else onStart(task.id)
+                                },
                             )
                         }
                     }
@@ -351,9 +417,11 @@ fun HomeScreen(
                         drawEnabled = drawEnabled,
                         pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                         pauseAfterMinutes = pauseAfterMinutes,
+                        pauseDurationMinutes = pauseDurationMinutes,
                         onSetDrawEnabled = onSetDrawEnabled,
                         onSetPauseSuggestionsEnabled = onSetPauseSuggestionsEnabled,
                         onSetPauseAfterMinutes = onSetPauseAfterMinutes,
+                        onSetPauseDurationMinutes = onSetPauseDurationMinutes,
                     )
                 }
             }
@@ -377,14 +445,25 @@ fun HomeScreen(
 }
 
 @Composable
-private fun SupportOptionsCard(
+internal fun SupportOptionsCard(
     drawEnabled: Boolean,
     pauseSuggestionsEnabled: Boolean,
     pauseAfterMinutes: Int,
+    pauseDurationMinutes: Int,
     onSetDrawEnabled: (Boolean) -> Unit,
     onSetPauseSuggestionsEnabled: (Boolean) -> Unit,
     onSetPauseAfterMinutes: (Int) -> Unit,
+    onSetPauseDurationMinutes: (Int) -> Unit,
 ) {
+    val pausePresets = listOf(15, 25, 45, 60)
+    val breakPresets = listOf(5, 10, 15, 20)
+    // Keep the editing buffer independent of preferences updated after each valid digit.
+    var customPauseText by rememberSaveable {
+        mutableStateOf(if (pauseAfterMinutes !in pausePresets) pauseAfterMinutes.toString() else "")
+    }
+    var customBreakText by rememberSaveable {
+        mutableStateOf(if (pauseDurationMinutes !in breakPresets) pauseDurationMinutes.toString() else "")
+    }
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = appCardColors(),
@@ -441,22 +520,80 @@ private fun SupportOptionsCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    listOf(15, 25, 45, 60).forEach { minutes ->
+                    pausePresets.forEach { minutes ->
                         FilterChip(
                             selected = pauseAfterMinutes == minutes,
-                            onClick = { onSetPauseAfterMinutes(minutes) },
-                            label = { Text(stringResource(R.string.minutes_short, minutes)) },
+                            onClick = {
+                                customPauseText = ""
+                                onSetPauseAfterMinutes(minutes)
+                            },
+                            label = { Text(DurationText.minutes(minutes)) },
                             modifier = Modifier.weight(1f),
                         )
                     }
                 }
+                OutlinedTextField(
+                    value = customPauseText,
+                    onValueChange = { raw ->
+                        customPauseText = raw.filter(Char::isDigit).take(3)
+                        customPauseText.toIntOrNull()?.takeIf { it in 5..120 }?.let(onSetPauseAfterMinutes)
+                    },
+                    modifier = Modifier.fillMaxWidth().testTag("home-custom-pause-minutes"),
+                    label = { Text(stringResource(R.string.setup_pause_custom_label)) },
+                    supportingText = {
+                        val custom = customPauseText.toIntOrNull()
+                        when {
+                            customPauseText.isNotBlank() && (custom == null || custom !in 5..120) ->
+                                Text(stringResource(R.string.setup_pause_custom_error))
+                            custom != null && custom >= 60 ->
+                                Text(stringResource(R.string.duration_equivalent, DurationText.minutes(custom)))
+                            else -> Text(stringResource(R.string.setup_pause_custom_help))
+                        }
+                    },
+                    isError = customPauseText.isNotBlank() &&
+                        customPauseText.toIntOrNull()?.let { it !in 5..120 } != false,
+                    singleLine = true,
+                )
             }
+            Text(
+                text = stringResource(R.string.break_duration_label),
+                style = MaterialTheme.typography.labelLarge,
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                breakPresets.forEach { minutes ->
+                    FilterChip(
+                        selected = pauseDurationMinutes == minutes,
+                        onClick = {
+                            customBreakText = ""
+                            onSetPauseDurationMinutes(minutes)
+                        },
+                        label = { Text(DurationText.minutes(minutes)) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+            OutlinedTextField(
+                value = customBreakText,
+                onValueChange = { raw ->
+                    customBreakText = raw.filter(Char::isDigit).take(2)
+                    customBreakText.toIntOrNull()?.takeIf { it in 1..60 }?.let(onSetPauseDurationMinutes)
+                },
+                modifier = Modifier.fillMaxWidth().testTag("home-custom-break-minutes"),
+                label = { Text(stringResource(R.string.break_duration_custom_label)) },
+                supportingText = { Text(stringResource(R.string.break_duration_custom_help)) },
+                isError = customBreakText.isNotBlank() &&
+                    customBreakText.toIntOrNull()?.let { it !in 1..60 } != false,
+                singleLine = true,
+            )
         }
     }
 }
 
 @Composable
-private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) {
+private fun TaskColorPicker(selected: TaskColor?, onSelect: (TaskColor) -> Unit) {
     TaskColor.entries.chunked(3).forEach { rowColors ->
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -500,16 +637,26 @@ private fun taskPalette(color: TaskColor): TaskPalette {
             MaterialTheme.colorScheme.surface,
             MaterialTheme.colorScheme.outline,
         )
-        TaskColor.SAGE -> if (dark) TaskPalette(Color(0xFF28342C), Color(0xFF71917A))
-            else TaskPalette(Color(0xFFEDF6EF), Color(0xFFA9CBB2))
-        TaskColor.BLUE -> if (dark) TaskPalette(Color(0xFF27313A), Color(0xFF7189A0))
-            else TaskPalette(Color(0xFFEEF4FA), Color(0xFFA8C4DD))
-        TaskColor.TERRACOTTA -> if (dark) TaskPalette(Color(0xFF392D29), Color(0xFFA57B6C))
-            else TaskPalette(Color(0xFFF9F0EC), Color(0xFFD6AD9D))
-        TaskColor.LAVENDER -> if (dark) TaskPalette(Color(0xFF322B39), Color(0xFF8E79A0))
-            else TaskPalette(Color(0xFFF4EFF9), Color(0xFFC4ADD8))
-        TaskColor.SAND -> if (dark) TaskPalette(Color(0xFF393428), Color(0xFF9C8B61))
-            else TaskPalette(Color(0xFFFAF5E8), Color(0xFFD9C493))
+        TaskColor.SAGE -> if (dark) TaskPalette(Color(0xFF27322B), Color(0xFF789782))
+            else TaskPalette(Color(0xFFF4FAF5), Color(0xFFC7DDCD))
+        TaskColor.BLUE -> if (dark) TaskPalette(Color(0xFF27313A), Color(0xFF7890A5))
+            else TaskPalette(Color(0xFFF3F8FC), Color(0xFFC9DCEC))
+        TaskColor.TERRACOTTA -> if (dark) TaskPalette(Color(0xFF382E2A), Color(0xFFA88376))
+            else TaskPalette(Color(0xFFFCF6F3), Color(0xFFE6CFC6))
+        TaskColor.LAVENDER -> if (dark) TaskPalette(Color(0xFF312C38), Color(0xFF927EA4))
+            else TaskPalette(Color(0xFFF8F5FC), Color(0xFFD8CAE7))
+        TaskColor.SAND -> if (dark) TaskPalette(Color(0xFF363328), Color(0xFF9D906B))
+            else TaskPalette(Color(0xFFFCFAF2), Color(0xFFE5D9B9))
+        TaskColor.RED -> if (dark) TaskPalette(Color(0xFF3A292C), Color(0xFFAA747D))
+            else TaskPalette(Color(0xFFFCF3F4), Color(0xFFE8C2C7))
+        TaskColor.VIOLET -> if (dark) TaskPalette(Color(0xFF302B3A), Color(0xFF8877A4))
+            else TaskPalette(Color(0xFFF5F2FB), Color(0xFFCDBFE4))
+        TaskColor.NAVY -> if (dark) TaskPalette(Color(0xFF222B38), Color(0xFF6E86A5))
+            else TaskPalette(Color(0xFFEEF2F7), Color(0xFFAAB9CD))
+        TaskColor.MINT -> if (dark) TaskPalette(Color(0xFF24352F), Color(0xFF70A08F))
+            else TaskPalette(Color(0xFFF1FAF7), Color(0xFFBFE0D3))
+        TaskColor.PEACH -> if (dark) TaskPalette(Color(0xFF3B2F2A), Color(0xFFA98270))
+            else TaskPalette(Color(0xFFFFF5F0), Color(0xFFEBCDBE))
     }
 }
 
@@ -522,6 +669,11 @@ private fun taskColorName(color: TaskColor): String = stringResource(
         TaskColor.TERRACOTTA -> R.string.task_color_terracotta
         TaskColor.LAVENDER -> R.string.task_color_lavender
         TaskColor.SAND -> R.string.task_color_sand
+        TaskColor.RED -> R.string.task_color_red
+        TaskColor.VIOLET -> R.string.task_color_violet
+        TaskColor.NAVY -> R.string.task_color_navy
+        TaskColor.MINT -> R.string.task_color_mint
+        TaskColor.PEACH -> R.string.task_color_peach
     },
 )
 
@@ -538,10 +690,11 @@ private fun taskBorder(color: TaskColor) = BorderStroke(1.dp, taskPalette(color)
 private fun TaskDrawPanel(
     task: TaskItem,
     proposalOnly: Boolean,
+    resumable: Boolean,
     onRedraw: () -> Unit,
     onStart: () -> Unit,
 ) {
-    val startLabel = stringResource(R.string.start_action)
+    val startLabel = stringResource(if (resumable) R.string.continue_task_action else R.string.start_action)
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = taskCardColors(task.color),
@@ -604,7 +757,7 @@ private fun TaskDrawPanel(
                 ) {
                     ToolGlyph(ToolGlyphKind.START)
                     Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.start_action))
+                    Text(stringResource(if (resumable) R.string.continue_task_action else R.string.start_action))
                 }
             }
         }
@@ -614,19 +767,33 @@ private fun TaskDrawPanel(
 @Composable
 private fun TaskCard(
     task: TaskItem,
+    cardDragModifier: Modifier = Modifier,
     handleModifier: Modifier = Modifier,
+    isDragged: Boolean,
     organizing: Boolean,
     canMoveUp: Boolean,
     canMoveDown: Boolean,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
     onSetColor: (TaskColor) -> Unit,
+    onEdit: () -> Unit,
+    resumable: Boolean,
     onStart: () -> Unit,
 ) {
+    val editLabel = stringResource(R.string.edit_task_action)
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .zIndex(if (isDragged) 2f else 0f)
+            .clickable(onClickLabel = editLabel, onClick = onEdit)
+            .then(cardDragModifier),
         colors = taskCardColors(task.color),
-        border = taskBorder(task.color),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (isDragged) 10.dp else 0.dp),
+        border = if (isDragged) {
+            BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+        } else {
+            taskBorder(task.color)
+        },
         shape = RoundedCornerShape(
             topStart = 22.dp,
             topEnd = 14.dp,
@@ -697,7 +864,7 @@ private fun TaskCard(
             ) {
                 ToolGlyph(ToolGlyphKind.START)
                 Spacer(Modifier.size(8.dp))
-                Text(stringResource(R.string.start_action))
+                Text(stringResource(if (resumable) R.string.continue_task_action else R.string.start_action))
             }
         }
     }
@@ -713,6 +880,7 @@ fun FocusScreen(
     overlayEnabled: Boolean,
     pauseSuggestionsEnabled: Boolean,
     pauseAfterMinutes: Int,
+    pauseDurationMinutes: Int,
     onToggleOverlay: () -> Unit,
     onQuickCapture: (String, String?, () -> Unit) -> Unit,
     onInterrupt: (String?) -> Unit,
@@ -818,7 +986,7 @@ fun FocusScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = (if (overtime > 0) "+" else "") + formatElapsed(displayedTime),
+                text = (if (overtime > 0) "+" else "") + FocusClockText.format(displayedTime),
                 fontSize = 54.sp,
                 fontWeight = FontWeight.Light,
                 modifier = Modifier.semantics { contentDescription = accessibleElapsed },
@@ -918,6 +1086,7 @@ fun FocusScreen(
             onDismiss = { showInterrupt = false },
             onConfirm = { note ->
                 showInterrupt = false
+                org.lepotager.executivefunction.BreakSchedule.start(context, activeFocus, pauseDurationMinutes)
                 onInterrupt(note)
             },
         )
@@ -925,6 +1094,7 @@ fun FocusScreen(
     if (showPauseSuggestion && !showCapture && !showInterrupt && !modalBlocked) {
         PauseSuggestionDialog(
             minutes = pauseAfterMinutes,
+            breakMinutes = pauseDurationMinutes,
             onPause = {
                 showPauseSuggestion = false
                 org.lepotager.executivefunction.PauseSchedule.set(
@@ -932,6 +1102,7 @@ fun FocusScreen(
                     activeFocus,
                     elapsed + pauseAfterMinutes * 60_000L,
                 )
+                org.lepotager.executivefunction.BreakSchedule.start(context, activeFocus, pauseDurationMinutes)
                 onInterrupt(null)
             },
             onContinue = {
@@ -1134,6 +1305,7 @@ private fun InterruptDialog(onDismiss: () -> Unit, onConfirm: (String?) -> Unit)
 @Composable
 private fun PauseSuggestionDialog(
     minutes: Int,
+    breakMinutes: Int,
     onPause: () -> Unit,
     onContinue: () -> Unit,
     onRemindLater: () -> Unit,
@@ -1144,7 +1316,7 @@ private fun PauseSuggestionDialog(
         text = { Text(stringResource(R.string.pause_suggestion_message, minutes)) },
         confirmButton = {
             TextButton(onClick = onPause, colors = appTextButtonColors()) {
-                Text(stringResource(R.string.take_a_pause))
+                Text(stringResource(R.string.take_a_pause_for, DurationText.minutes(breakMinutes)))
             }
         },
         dismissButton = {
@@ -1281,10 +1453,3 @@ private fun appTextFieldColors() = OutlinedTextFieldDefaults.colors(
 @Composable
 private fun appBorder() = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
 
-private fun formatElapsed(milliseconds: Long): String {
-    val totalSeconds = milliseconds / 1_000
-    val hours = totalSeconds / 3_600
-    val minutes = (totalSeconds % 3_600) / 60
-    val seconds = totalSeconds % 60
-    return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, seconds) else "%02d:%02d".format(minutes, seconds)
-}

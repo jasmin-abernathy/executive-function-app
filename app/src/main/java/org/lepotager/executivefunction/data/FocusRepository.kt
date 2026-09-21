@@ -22,6 +22,9 @@ class FocusRepository internal constructor(
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val now: () -> Long = System::currentTimeMillis,
     private val newId: () -> String = { UUID.randomUUID().toString() },
+    private val automaticTaskColor: () -> TaskColor = {
+        TaskColor.entries.filterNot { it == TaskColor.NEUTRAL }.random()
+    },
 ) {
     private val mutex = Mutex()
     private val mutableSnapshot = MutableStateFlow(AppSnapshot())
@@ -32,23 +35,38 @@ class FocusRepository internal constructor(
     suspend fun capture(
         title: String,
         firstStep: String? = null,
-        color: TaskColor = TaskColor.NEUTRAL,
+        color: TaskColor? = null,
+        steps: List<String> = emptyList(),
     ) = mutate {
         val cleanTitle = title.trim()
         require(cleanTitle.isNotEmpty())
+        val cleanSteps = steps.map { it.trim() }.filter { it.isNotEmpty() }
         val timestamp = now()
-        database.insertTask(
-            TaskItem(
-                id = newId(),
-                title = cleanTitle,
-                firstStep = firstStep.normalizedOrNull(),
-                status = TaskStatus.READY,
-                createdAt = timestamp,
-                updatedAt = timestamp,
-                color = color,
-                sortPosition = database.nextTaskPosition(),
-            ),
-        )
+        val taskId = newId()
+        val resolvedColor = color ?: automaticTaskColor()
+        val db = database.writableDatabase
+        db.beginTransaction()
+        try {
+            database.insertTask(
+                TaskItem(
+                    id = taskId,
+                    title = cleanTitle,
+                    firstStep = cleanSteps.firstOrNull() ?: firstStep.normalizedOrNull(),
+                    status = TaskStatus.READY,
+                    createdAt = timestamp,
+                    updatedAt = timestamp,
+                    color = resolvedColor,
+                    sortPosition = database.nextTaskPosition(),
+                ),
+            )
+            if (cleanSteps.isNotEmpty()) {
+                val journal = LearningJournal(database)
+                cleanSteps.forEach { journal.addStep(taskId, it) }
+            }
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
         refresh()
     }
 
@@ -101,6 +119,13 @@ class FocusRepository internal constructor(
                 targetDurationMs = targetDurationMs,
             ),
         )
+        refresh()
+    }
+
+    suspend fun continuePostponed(taskId: String) = mutate {
+        val postponed = requireNotNull(database.latestPostponedFocus(taskId))
+        val continued = FocusTransitions.continuePostponed(postponed.session, now())
+        database.resumePostponedFocus(continued, postponed.task.firstStep)
         refresh()
     }
 
@@ -174,6 +199,7 @@ class FocusRepository internal constructor(
             loading = false,
             eligibleDrawIds = eligible,
             suggestedTaskId = if(eligible==null) null else tasks.filter { it.id in eligible && it.status==TaskStatus.READY }.maxByOrNull { journal.planning(it.id).importance }?.id,
+            resumableTaskIds = database.postponedTaskIds(),
         )
     }
 
