@@ -25,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.lepotager.executivefunction.domain.FocusTimerMode
 import org.lepotager.executivefunction.model.FocusStatus
-import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.ui.ErrorDialog
 import org.lepotager.executivefunction.ui.FirstRunSetupConfig
 import org.lepotager.executivefunction.ui.FirstRunSetupFlow
@@ -44,6 +43,7 @@ class MainActivity : ComponentActivity() {
     private var drawEnabled by mutableStateOf(true)
     private var pauseSuggestionsEnabled by mutableStateOf(true)
     private var pauseAfterMinutes by mutableStateOf(25)
+    private var pauseDurationMinutes by mutableStateOf(10)
     private var waitingForOverlayPermission = false
     private var showCheckIn by mutableStateOf(false)
     private var miniWindow by mutableStateOf(false)
@@ -87,12 +87,14 @@ class MainActivity : ComponentActivity() {
             waitingForOverlayPermission = it.getBoolean("waiting_overlay")
         }
         miniWindow = isInPictureInPictureMode
+        setPipWindowAlpha(miniWindow)
         consumeIntent(intent)
         overlayEnabled = overlayPreference() && Settings.canDrawOverlays(this)
         val preferences = appPreferences()
         drawEnabled = preferences.getBoolean(KEY_DRAW_ENABLED, true)
         pauseSuggestionsEnabled = preferences.getBoolean(KEY_PAUSE_ENABLED, true)
         pauseAfterMinutes = preferences.getInt(KEY_PAUSE_MINUTES, 25)
+        pauseDurationMinutes = preferences.getInt(KEY_PAUSE_DURATION_MINUTES, 10).coerceIn(1, 60)
         introSeen = preferences.getBoolean(KEY_INTRO_SEEN, false)
         lastTimerMode = preferences.getString(KEY_TIMER_MODE, null)?.let { value ->
             runCatching { FocusTimerMode.valueOf(value) }.getOrNull()
@@ -108,8 +110,14 @@ class MainActivity : ComponentActivity() {
                 LaunchedEffect(requestedTask, snapshot.loading) {
                     val taskId = requestedTask ?: return@LaunchedEffect
                     if (snapshot.loading || pendingStart?.taskId == taskId) return@LaunchedEffect
-                    if (snapshot.tasks.any { it.id == taskId }) viewModel.requestStart(taskId)
-                    else requestedTask = null
+                    if (snapshot.tasks.none { it.id == taskId }) {
+                        requestedTask = null
+                    } else if (snapshot.activeFocus == null && taskId in snapshot.resumableTaskIds) {
+                        requestedTask = null
+                        viewModel.continueTask(taskId)
+                    } else {
+                        viewModel.requestStart(taskId)
+                    }
                 }
                 LaunchedEffect(pendingStart?.taskId, requestedTask) {
                     if (pendingStart?.taskId != null && pendingStart?.taskId == requestedTask) requestedTask = null
@@ -171,7 +179,7 @@ class MainActivity : ComponentActivity() {
                     if(externalCapture && !miniWindow) {
                         org.lepotager.executivefunction.ui.ExternalCaptureDialog(
                             onDismiss={externalCapture=false},
-                            onCapture={title->viewModel.capture(title,null,TaskColor.NEUTRAL){externalCapture=false}},
+                            onCapture={title->viewModel.capture(title,null,null){externalCapture=false}},
                         )
                     }
                     if (showQuickNote && !externalCapture && !miniWindow) {
@@ -217,12 +225,18 @@ class MainActivity : ComponentActivity() {
                             if (active != null) setPictureInPictureParams(pipParams(active))
                             else setPictureInPictureParams(android.app.PictureInPictureParams.Builder().setActions(emptyList()).build())
                         }
-                        if(snapshot.activeFocus!=null) drawRequest=0
-                        if(snapshot.activeFocus?.session?.status == FocusStatus.RUNNING && appPreferences().getBoolean("keep_screen_on",false)) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                        else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-                        if (snapshot.activeFocus?.session?.status != FocusStatus.RUNNING && overlayEnabled) {
-                            updateOverlayEnabled(false)
+                        val activeFocus = snapshot.activeFocus
+                        if (activeFocus != null) {
+                            drawRequest = 0
+                            FocusOverlayService.start(this@MainActivity)
+                            overlayEnabled =
+                                !miniWindow && overlayPreference() && Settings.canDrawOverlays(this@MainActivity)
+                        } else {
+                            overlayEnabled = false
+                            FocusOverlayService.stop(this@MainActivity)
                         }
+                        if(activeFocus?.session?.status == FocusStatus.RUNNING && appPreferences().getBoolean("keep_screen_on",false)) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     }
 
                     Scaffold(modifier = Modifier.fillMaxSize()) { padding ->
@@ -244,9 +258,10 @@ class MainActivity : ComponentActivity() {
                                     overlayEnabled = overlayEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                     pauseAfterMinutes = pauseAfterMinutes,
+                                    pauseDurationMinutes = pauseDurationMinutes,
                                     onToggleOverlay = ::toggleOverlay,
                                     onQuickCapture = { title, firstStep, after ->
-                                        viewModel.capture(title, firstStep, TaskColor.NEUTRAL, after)
+                                        viewModel.capture(title, firstStep, null, after = after)
                                     },
                                     onInterrupt = viewModel::interrupt,
                                     onComplete = viewModel::complete,
@@ -264,19 +279,31 @@ class MainActivity : ComponentActivity() {
                                     onApplySuggestedOrder = viewModel::applySuggestedOrder,
                                     eligibleDrawIds = snapshot.eligibleDrawIds,
                                     suggestedTaskId = snapshot.suggestedTaskId,
+                                    resumableTaskIds = snapshot.resumableTaskIds,
                                     onHelp = { refreshPreferences(); showCheckIn=false; showIntro=true },
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                     pauseAfterMinutes = pauseAfterMinutes,
-                                    onCapture = viewModel::capture,
+                                    pauseDurationMinutes = pauseDurationMinutes,
+                                    onCapture = { title, steps, color, after ->
+                                        viewModel.capture(title, null, color, steps, after)
+                                    },
                                     onStart = viewModel::requestStart,
+                                    onContinue = viewModel::continueTask,
+                                    onEditTask = { taskId ->
+                                        startActivity(
+                                            Intent(this@MainActivity, JournalActivity::class.java)
+                                                .putExtra("task", taskId),
+                                        )
+                                    },
                                     onMoveTask = viewModel::moveTask,
                                     onApplyTaskOrder = viewModel::applyTaskOrder,
                                     onSetTaskColor = viewModel::setTaskColor,
                                     onSetDrawEnabled = ::saveDrawPreference,
                                     onSetPauseSuggestionsEnabled = ::savePausePreference,
                                     onSetPauseAfterMinutes = ::savePauseInterval,
+                                    onSetPauseDurationMinutes = ::savePauseDuration,
                                 )
                             }
                         }
@@ -301,15 +328,15 @@ class MainActivity : ComponentActivity() {
         viewModel.reload()
         refreshPreferences()
         miniWindow = isInPictureInPictureMode
+        setPipWindowAlpha(miniWindow)
         if (appPreferences().getBoolean("keep_screen_on", false) && viewModel.snapshot.value.activeFocus?.session?.status==FocusStatus.RUNNING) window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (waitingForOverlayPermission) {
             waitingForOverlayPermission = false
             if (!miniWindow && Settings.canDrawOverlays(this)) updateOverlayEnabled(true)
         } else {
-            val shouldBeEnabled = !miniWindow && overlayPreference() && Settings.canDrawOverlays(this)
-            overlayEnabled = shouldBeEnabled
-            if (shouldBeEnabled) FocusOverlayService.start(this)
+            overlayEnabled = !miniWindow && overlayPreference() && Settings.canDrawOverlays(this)
+            if (viewModel.snapshot.value.activeFocus != null) FocusOverlayService.start(this)
             else FocusOverlayService.stop(this)
         }
     }
@@ -317,6 +344,7 @@ class MainActivity : ComponentActivity() {
     override fun onPictureInPictureModeChanged(isInPictureInPictureMode: Boolean, newConfig: android.content.res.Configuration) {
         super.onPictureInPictureModeChanged(isInPictureInPictureMode,newConfig)
         miniWindow=isInPictureInPictureMode
+        setPipWindowAlpha(isInPictureInPictureMode)
         if (isInPictureInPictureMode) {
             if (overlayEnabled) updateOverlayEnabled(false)
             viewModel.snapshot.value.activeFocus?.let { setPictureInPictureParams(pipParams(it)) }
@@ -328,6 +356,18 @@ class MainActivity : ComponentActivity() {
         if(!waitingForOverlayPermission && !showQuickNote && !externalCapture &&
             !showIntro && viewModel.pendingStart.value == null && requestedTask == null &&
             appPreferences().getBoolean("auto_pip",false)) enterMiniWindow()
+    }
+
+    private fun setPipWindowAlpha(inPip: Boolean) {
+        // PiP taps are owned by SystemUI, so only the passive transparency is controlled here.
+        // Device validation decides whether a future app-controlled floating surface should handle
+        // the exact "tap -> opaque" behaviour instead.
+        val attributes = window.attributes
+        val wanted = if (inPip) 0.5f else 1f
+        if (attributes.alpha != wanted) {
+            attributes.alpha = wanted
+            window.attributes = attributes
+        }
     }
 
     private fun pipParams(active: org.lepotager.executivefunction.model.ActiveFocus) =
@@ -400,6 +440,7 @@ class MainActivity : ComponentActivity() {
         when(intent?.getStringExtra("quick_action")) {
             "capture" -> { externalCapture=true; showCheckIn=false }
             "pip_note" -> { showQuickNote=true; returnToMiniWindow=true; showCheckIn=false }
+            "overlay_note" -> { showQuickNote=true; returnToMiniWindow=false; showCheckIn=false }
             "draw" -> drawRequest+=1
         }
         intent?.removeExtra("requested_task")
@@ -412,7 +453,12 @@ class MainActivity : ComponentActivity() {
             .edit()
             .putBoolean(FocusOverlayService.KEY_ENABLED, enabled)
             .apply()
-        if (enabled) FocusOverlayService.start(this) else FocusOverlayService.stop(this)
+        if (viewModel.snapshot.value.activeFocus != null) {
+            // Restart/update the combined service so it creates or removes only the overlay.
+            FocusOverlayService.start(this)
+        } else {
+            FocusOverlayService.stop(this)
+        }
     }
 
     private fun overlayPreference(): Boolean =
@@ -434,6 +480,11 @@ class MainActivity : ComponentActivity() {
         appPreferences().edit().putInt(KEY_PAUSE_MINUTES, pauseAfterMinutes).apply()
     }
 
+    private fun savePauseDuration(minutes: Int) {
+        pauseDurationMinutes = minutes.coerceIn(1, 60)
+        appPreferences().edit().putInt(KEY_PAUSE_DURATION_MINUTES, pauseDurationMinutes).apply()
+    }
+
     private fun markIntroSeen() {
         introSeen = true
         showIntro = false
@@ -445,6 +496,7 @@ class MainActivity : ComponentActivity() {
         drawEnabled = prefs.getBoolean(KEY_DRAW_ENABLED, true)
         pauseSuggestionsEnabled = prefs.getBoolean(KEY_PAUSE_ENABLED, true)
         pauseAfterMinutes = prefs.getInt(KEY_PAUSE_MINUTES, 25).coerceIn(5, 120)
+        pauseDurationMinutes = prefs.getInt(KEY_PAUSE_DURATION_MINUTES, 10).coerceIn(1, 60)
         lastTimerMode = prefs.getString(KEY_TIMER_MODE, null)?.let {
             runCatching { FocusTimerMode.valueOf(it) }.getOrNull()
         }
@@ -462,6 +514,7 @@ class MainActivity : ComponentActivity() {
             adaptationEnabled = wellbeing.getBoolean("adapt", false),
             calmMode = app.getBoolean("calm", false),
             autoMiniWindow = app.getBoolean("auto_pip", false),
+            pauseDurationMinutes = pauseDurationMinutes,
         )
     }
 
@@ -469,11 +522,13 @@ class MainActivity : ComponentActivity() {
         drawEnabled = config.drawEnabled
         pauseSuggestionsEnabled = config.pauseSuggestionsEnabled
         pauseAfterMinutes = config.pauseAfterMinutes.coerceIn(5, 120)
+        pauseDurationMinutes = config.pauseDurationMinutes.coerceIn(1, 60)
         lastTimerMode = config.timerMode
         appPreferences().edit()
             .putBoolean(KEY_DRAW_ENABLED, drawEnabled)
             .putBoolean(KEY_PAUSE_ENABLED, pauseSuggestionsEnabled)
             .putInt(KEY_PAUSE_MINUTES, pauseAfterMinutes)
+            .putInt(KEY_PAUSE_DURATION_MINUTES, pauseDurationMinutes)
             .putString(KEY_TIMER_MODE, config.timerMode.name)
             .putBoolean("calm", config.calmMode)
             .putBoolean("auto_pip", config.autoMiniWindow)
@@ -514,6 +569,7 @@ class MainActivity : ComponentActivity() {
         const val KEY_DRAW_ENABLED = "draw_enabled"
         const val KEY_PAUSE_ENABLED = "pause_suggestions_enabled"
         const val KEY_PAUSE_MINUTES = "pause_after_minutes"
+        const val KEY_PAUSE_DURATION_MINUTES = "pause_duration_minutes"
         const val KEY_INTRO_SEEN = "local_algorithm_intro_seen"
         const val KEY_TIMER_MODE = "focus_timer_mode"
     }

@@ -24,6 +24,15 @@ object FocusTransitions {
         )
     }
 
+    fun continuePostponed(session: FocusSession, now: Long): FocusSession {
+        require(session.status == FocusStatus.POSTPONED)
+        return session.copy(
+            status = FocusStatus.RUNNING,
+            segmentStartedAt = now,
+            updatedAt = now,
+        )
+    }
+
     fun finish(session: FocusSession, now: Long, status: FocusStatus): FocusSession {
         require(status == FocusStatus.COMPLETED || status == FocusStatus.POSTPONED)
         require(session.status == FocusStatus.RUNNING || session.status == FocusStatus.INTERRUPTED)

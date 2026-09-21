@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="setup_intro_eyebrow">Starting setup</string>
-    <string name="setup_intro_title">Let’s shape the app around you</string>
-    <string name="setup_intro_body">A few short questions, one at a time. They only choose starting settings and which supports to put forward. You can change everything later.</string>
-    <string name="setup_intro_privacy">Everything stays on your phone. No account, no diagnosis question, and no answers sent elsewhere.</string>
+    <string name="setup_intro_title">Hi 👋 Want to set this up together?</string>
+    <string name="setup_intro_body">A few quick choices, one at a time. I’ll only show what may be useful, and you can change everything later.</string>
+    <string name="setup_intro_privacy">Skip whenever you want. Everything stays on your phone: no account, no diagnosis, nothing sent elsewhere.</string>
+    <string name="setup_chat_start">Let’s go</string>
+    <string name="setup_chat_confirm">Looks good</string>
+    <string name="setup_chat_pause_on">Pause suggested after %1$s · %2$s break</string>
+    <string name="setup_chat_pause_off">No pause suggestions</string>
+    <string name="setup_chat_no_automatic">No automatic support for now</string>
 
     <string name="setup_difficulty_eyebrow">A recent situation</string>
-    <string name="setup_difficulty_title">Without thinking about your worst day, when something gets stuck, which part is most often difficult?</string>
-    <string name="setup_difficulty_help">Choose what fits best. This only decides which relevant settings to show next.</string>
+    <string name="setup_difficulty_title">When a task gets stuck, where does it usually happen?</string>
+    <string name="setup_difficulty_help">Pick what fits best today. This is not a diagnosis; it only keeps irrelevant settings out of your way.</string>
     <string name="setup_difficulty_starting">Starting the activity</string>
     <string name="setup_difficulty_choosing">Deciding what to do first</string>
     <string name="setup_difficulty_focusing">Staying with the activity</string>
@@ -18,7 +23,7 @@
     <string name="setup_difficulty_other">Something else / it depends</string>
 
     <string name="setup_support_eyebrow">What may help</string>
-    <string name="setup_support_help">Choose up to 2. The app will not hide other tools; this only prepares sensible starting settings.</string>
+    <string name="setup_support_help">Choose up to two. The other tools will still be available later.</string>
     <string name="setup_support_starting_title">You know what you need to do, but you are not starting. What would help most?</string>
     <string name="setup_support_choosing_title">When choosing becomes difficult, what would help most?</string>
     <string name="setup_support_focus_title">When focus, time or switching is difficult, what would help most?</string>
@@ -39,18 +44,23 @@
     <string name="setup_support_minimal">Intervene as little as possible</string>
 
     <string name="setup_focus_eyebrow">Focus sessions</string>
-    <string name="setup_focus_title">How should sessions start by default?</string>
-    <string name="setup_focus_help">You can still change this before every session. After three measured completions, the app can suggest a local reference: it keeps the longest eligible active duration, rounds it up to the next minute, then adds one minute of margin. That reference is never forced.</string>
+    <string name="setup_focus_title">How do you want time to work?</string>
+    <string name="setup_focus_help">You can change this before every session. After 3 completions, the app can suggest a local reference based on your longest active duration, rounded up plus one minute. Never forced.</string>
     <string name="setup_timer_stopwatch_default">Stopwatch by default — time starts from zero</string>
     <string name="setup_timer_countdown_default">Countdown by default — I choose a duration</string>
     <string name="setup_pause_custom">Custom duration</string>
     <string name="setup_pause_custom_label">Time before a pause suggestion</string>
     <string name="setup_pause_custom_help">Between 5 and 120 minutes.</string>
     <string name="setup_pause_custom_error">Choose a duration between 5 and 120 minutes.</string>
+    <string name="setup_break_duration_label">And how long should the pause itself be?</string>
+    <string name="setup_break_custom">Other pause duration</string>
+    <string name="setup_break_custom_label">Pause duration</string>
+    <string name="setup_break_custom_help">Between 1 and 60 minutes. The app reminds you afterwards without resuming for you.</string>
+    <string name="setup_break_custom_error">Choose a duration between 1 and 60 minutes.</string>
 
     <string name="setup_behaviour_eyebrow">Automatic supports</string>
-    <string name="setup_behaviour_title">What may the app do without making you think about it?</string>
-    <string name="setup_behaviour_help">Only local, explicit and reversible behaviours. Adaptation uses visible rules — energy, available time and context — not a hidden profile. Turn off anything that would get in your way.</string>
+    <string name="setup_behaviour_title">And what can I do automatically to help?</string>
+    <string name="setup_behaviour_help">Everything stays local and reversible. If you enable adaptation, it only uses your energy, available time and context.</string>
     <string name="setup_checkin_title">Mood / motivation / energy check-ins</string>
     <string name="setup_checkin_support">At most every four hours, and always optional.</string>
     <string name="setup_adaptation_title">Suggestions based on my state and context</string>
@@ -61,12 +71,13 @@
     <string name="setup_auto_mini_support">Enter the mini window when I leave a focus session.</string>
 
     <string name="setup_review_eyebrow">Summary</string>
-    <string name="setup_review_title">Your starting settings</string>
+    <string name="setup_review_title">Does this feel like a good starting point?</string>
     <string name="setup_review_help">Just check that this feels right. Use Back to change an answer.</string>
     <string name="setup_review_main_difficulty">Main difficulty</string>
     <string name="setup_review_timer">Timer mode</string>
     <string name="setup_review_pauses">Pause suggestions</string>
-    <string name="setup_review_enabled_minutes">Yes · %1$d min</string>
+    <string name="setup_review_break_duration">Pause duration</string>
+    <string name="setup_review_enabled_minutes">Yes · %1$s</string>
     <string name="setup_review_disabled">No</string>
     <string name="setup_review_note">These choices do not disable manual features. They mostly configure what the app suggests or does automatically. You can run this setup again later.</string>
     <string name="setup_yes">Yes</string>

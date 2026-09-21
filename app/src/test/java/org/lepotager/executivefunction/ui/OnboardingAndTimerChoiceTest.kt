@@ -27,6 +27,7 @@ class OnboardingAndTimerChoiceTest {
         adaptationEnabled = false,
         calmMode = false,
         autoMiniWindow = false,
+        pauseDurationMinutes = 10,
     )
 
     private fun clickText(text: String) {
@@ -59,9 +60,8 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Suivant")
+        clickText("On y va")
         clickText("Décider quoi faire en premier")
-        clickText("Suivant")
 
         compose.onNodeWithText("Utiliser le dé quand choisir devient difficile")
             .performScrollTo()
@@ -78,15 +78,14 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Suivant")
+        clickText("On y va")
         clickText("Rester sur l’activité")
-        clickText("Suivant")
         clickText("Me proposer une pause après un moment")
         clickText("Garder une petite fenêtre quand je quitte le focus")
         clickText("Le moins d’interventions possible")
-        clickText("Suivant") // support -> focus defaults
-        clickText("Suivant") // focus defaults -> automatic supports
-        clickText("Suivant") // automatic supports -> review
+        clickText("Ça me va") // support -> focus defaults
+        clickText("Ça me va") // focus defaults -> automatic supports
+        clickText("Ça me va") // automatic supports -> review
         clickText("Appliquer ces réglages")
 
         compose.runOnIdle {
@@ -106,21 +105,21 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Suivant")
+        clickText("On y va")
         clickText("Garder la notion du temps")
-        clickText("Suivant")
         clickText("Me proposer une pause après un moment")
-        clickText("Suivant")
+        clickText("Ça me va")
         clickText("Minuteur par défaut — je choisis une durée")
         clickText("45 min")
-        clickText("Suivant")
-        clickText("Suivant")
+        clickText("Ça me va")
+        clickText("Ça me va")
         clickText("Appliquer ces réglages")
 
         compose.runOnIdle {
             assertEquals(FocusTimerMode.COUNTDOWN, applied?.timerMode)
             assertEquals(true, applied?.pauseSuggestionsEnabled)
             assertEquals(45, applied?.pauseAfterMinutes)
+            assertEquals(10, applied?.pauseDurationMinutes)
         }
     }
 
@@ -133,24 +132,51 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Suivant")
+        clickText("On y va")
         clickText("Garder la notion du temps")
-        clickText("Suivant")
         clickText("Me proposer une pause après un moment")
-        clickText("Suivant")
+        clickText("Ça me va")
         clickText("Autre durée")
         compose.onNodeWithTag("setup-custom-pause-minutes")
             .performScrollTo()
             .performTextReplacement("37")
         compose.waitForIdle()
-        compose.onNodeWithText("Suivant").performScrollTo().assertIsEnabled().performClick()
+        compose.onNodeWithText("Ça me va").performScrollTo().assertIsEnabled().performClick()
         compose.waitForIdle()
-        clickText("Suivant")
+        clickText("Ça me va")
         clickText("Appliquer ces réglages")
 
         compose.runOnIdle {
             assertEquals(true, applied?.pauseSuggestionsEnabled)
             assertEquals(37, applied?.pauseAfterMinutes)
+        }
+    }
+
+    @Test
+    fun setupAcceptsCustomBreakDuration() {
+        var applied: FirstRunSetupConfig? = null
+        compose.setContent {
+            ExecutiveFunctionTheme {
+                FirstRunSetupFlow(baseline(), { applied = it }, {})
+            }
+        }
+
+        clickText("On y va")
+        clickText("Garder la notion du temps")
+        clickText("Me proposer une pause après un moment")
+        clickText("Ça me va")
+        clickText("Autre durée de pause")
+        compose.onNodeWithTag("setup-custom-break-minutes")
+            .performScrollTo()
+            .performTextReplacement("12")
+        compose.waitForIdle()
+        compose.onNodeWithText("Ça me va").performScrollTo().assertIsEnabled().performClick()
+        compose.waitForIdle()
+        clickText("Ça me va")
+        clickText("Appliquer ces réglages")
+
+        compose.runOnIdle {
+            assertEquals(12, applied?.pauseDurationMinutes)
         }
     }
 

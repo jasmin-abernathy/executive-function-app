@@ -38,7 +38,7 @@
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
-                android:value="User-enabled floating timer for an active focus session" />
+                android:value="Active focus timer notification with an optional user-enabled floating timer" />
         </service>
     </application>
 </manifest>
