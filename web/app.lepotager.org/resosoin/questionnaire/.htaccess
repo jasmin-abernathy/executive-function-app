@@ -1,7 +1,7 @@
 Options -Indexes
 DirectoryIndex index.php
 
-<FilesMatch "^(?:_common\.php|schema\.sql|install\.php|cleanup\.php|validate\.php|README\.md)$">
+<FilesMatch "^(?:_common\.php|_professional_verification\.php|schema\.sql|install\.php|cleanup\.php|validate\.php|README\.md)$">
   Require all denied
 </FilesMatch>
 

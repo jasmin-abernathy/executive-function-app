@@ -42,9 +42,10 @@ if ($ready) {
         "SELECT COUNT(*)
          FROM resosoin_survey_sessions
          WHERE audience = ?
-           AND status = 'submitted'"
+           AND status = 'submitted'
+           AND (? <> 'doctor' OR professional_verified = 1)"
     );
-    $stmt->execute([$audience]);
+    $stmt->execute([$audience, $audience]);
     $total = (int) $stmt->fetchColumn();
 
     if ($total >= RESOSOIN_RESULTS_THRESHOLD) {
@@ -55,6 +56,7 @@ if ($ready) {
                ON s.id = a.session_id
              WHERE s.audience = ?
                AND s.status = 'submitted'
+               AND (? <> 'doctor' OR s.professional_verified = 1)
                AND a.question_id = ?"
         );
 
@@ -64,7 +66,7 @@ if ($ready) {
                 continue;
             }
 
-            $stmt->execute([$audience, $questionId]);
+            $stmt->execute([$audience, $audience, $questionId]);
             $rows = $stmt->fetchAll(PDO::FETCH_COLUMN);
             $respondents = count($rows);
             $counts = [];

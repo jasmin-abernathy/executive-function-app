@@ -5,13 +5,13 @@ on:
     paths:
       - 'web/app.lepotager.org/**/*.php'
       - 'web/app.lepotager.org/resosoin/**'
-      - 'tests/resosoin-survey-core.test.js'
+      - 'tests/resosoin-*.test.*'
       - '.github/workflows/php-lint.yml'
   pull_request:
     paths:
       - 'web/app.lepotager.org/**/*.php'
       - 'web/app.lepotager.org/resosoin/**'
-      - 'tests/resosoin-survey-core.test.js'
+      - 'tests/resosoin-*.test.*'
       - '.github/workflows/php-lint.yml'
 
 permissions:
@@ -51,6 +51,7 @@ jobs:
           node --check web/app.lepotager.org/resosoin/questionnaire/assets/survey-core.js
           node --check web/app.lepotager.org/resosoin/questionnaire/assets/survey.js
           node tests/resosoin-survey-core.test.js
+          php tests/resosoin-rpps-verification.test.php
 
       - name: Shared Stancer contribution contract
         shell: bash

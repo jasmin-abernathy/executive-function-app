@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS resosoin_survey_sessions (
   current_step VARCHAR(100) NULL,
   survey_version VARCHAR(40) NOT NULL DEFAULT '2026-09-23-v2',
   recruitment_source VARCHAR(32) NOT NULL DEFAULT 'direct',
+  professional_verified TINYINT(1) NOT NULL DEFAULT 0,
+  professional_verification_method VARCHAR(64) NULL,
   consent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

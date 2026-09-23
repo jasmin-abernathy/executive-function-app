@@ -87,3 +87,47 @@ Le GitHub SHA et le live doivent rester distingués. Après fusion/déploiement 
 8. vérifier le seuil des résultats agrégés ;
 9. confirmer que `schema.sql`, `_common.php`, `install.php`, `cleanup.php`, `validate.php` et les fichiers de documentation sont inaccessibles par HTTP ;
 10. vérifier que la CI valide PHP, le catalogue JSON, la syntaxe JavaScript et les tests du cœur du survey ;\n11. tester deux brouillons simultanés sur un même navigateur, retour arrière avec modification, branche sans Doctolib, refus de l’app, panne réseau au démarrage et suppression après envoi.
+
+
+## Vérification des professionnels de santé
+
+Le questionnaire professionnel utilise l’API officielle **Annuaire Santé FHIR v2** de l’ANS.
+
+Parcours :
+
+1. le professionnel renseigne son **nom d’exercice** et son **numéro RPPS** ;
+2. il certifie être la personne correspondante ;
+3. le serveur interroge l’Annuaire Santé par RPPS ;
+4. le nom est comparé localement avec l’identité renvoyée ;
+5. la profession doit appartenir à la nomenclature officielle **TRE_G15-ProfessionSante** et la fiche doit être active ;
+6. un jeton de vérification signé, valable 10 minutes, autorise la création de la session professionnelle.
+
+Le filtre accepte les professions de santé de TRE_G15 : médecins, sages-femmes et professions paramédicales/réglementées présentes dans cette nomenclature. Les simples usages de titre relevant d’autres nomenclatures ne passent pas ce filtre.
+
+### Minimisation
+
+Le nom et le RPPS **ne sont pas enregistrés dans les tables du questionnaire**, ni en clair ni sous forme de hash.
+
+La session conserve seulement :
+
+- `professional_verified = 1` ;
+- `professional_verification_method = annuaire_sante_tre_g15`.
+
+Le numéro RPPS est envoyé ponctuellement à l’API ANS ; le nom est comparé localement.
+
+## Clé API Annuaire Santé
+
+Après déploiement, la clé peut être ajoutée sans SSH via :
+
+`https://app.lepotager.org/resosoin/admin/`
+
+Le formulaire privé :
+
+- réutilise le compte administrateur existant ;
+- teste la clé auprès de l’ANS avant sauvegarde ;
+- n’affiche jamais la clé enregistrée ;
+- l’écrit hors webroot dans `~/private/executive-function-app/resosoin-annuaire-sante.json` ;
+- applique des permissions restrictives ;
+- permet de retester ou supprimer la clé.
+
+La clé ne doit jamais être ajoutée à Git.

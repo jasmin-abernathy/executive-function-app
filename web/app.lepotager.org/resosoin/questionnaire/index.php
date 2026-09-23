@@ -57,7 +57,7 @@ if (!in_array($source, ['direct', 'home', 'resosoin_page', 'neutral_invite'], tr
           <h1>Avant de construire davantage, on veut vérifier le besoin.</h1>
           <p class="lead">Questionnaire court, dont la durée réelle est encore en cours de mesure. Les premières questions portent sur vos habitudes actuelles ; le concept RésoSoin arrive ensuite afin de limiter le biais de présentation. Les résultats resteront exploratoires et auto-sélectionnés.</p>
           <div class="soft">
-            <strong>Vie privée :</strong> pas de nom, pas de diagnostic, pas de traitement, pas de texte libre médical. Votre navigateur conserve seulement un jeton pseudonyme pour pouvoir reprendre plus tard. Vous pouvez supprimer vos réponses depuis cette page.
+            <strong>Vie privée :</strong> pas de nom enregistré dans les réponses, pas de diagnostic, pas de traitement, pas de texte libre médical. Votre navigateur conserve seulement un jeton pseudonyme pour pouvoir reprendre plus tard. Vous pouvez supprimer vos réponses depuis cette page.
           </div>
           <label class="consent-line">
             <input id="adult-check" type="checkbox">
@@ -70,10 +70,26 @@ if (!in_array($source, ['direct', 'home', 'resosoin_page', 'neutral_invite'], tr
           <div class="status" id="landing-status" role="status" aria-live="polite"></div>
           <div class="audiences">
             <article class="audience">
-              <p class="eyebrow">Professionnels</p>
+              <p class="eyebrow">Professionnels de santé</p>
               <h2>Je suis professionnel·le de santé</h2>
-              <p>Organisation du cabinet, outils actuels, coûts, automatisation, IA, souveraineté et MVP.</p>
-              <button class="btn primary" type="button" data-start="doctor">Commencer</button>
+              <p>Médecins, sages-femmes et professions de santé réglementées référencées dans l’Annuaire Santé.</p>
+              <div class="professional-verification">
+                <label>
+                  <span>Nom d’exercice</span>
+                  <input id="professional-family-name" type="text" autocomplete="family-name" maxlength="120" placeholder="Nom figurant dans l’Annuaire Santé">
+                </label>
+                <label>
+                  <span>Numéro RPPS</span>
+                  <input id="professional-rpps" type="text" inputmode="numeric" autocomplete="off" maxlength="11" pattern="[0-9]{11}" placeholder="11 chiffres">
+                </label>
+                <label class="consent-line">
+                  <input id="professional-certification" type="checkbox">
+                  <span>Je certifie être la personne correspondant à ce nom et à ce numéro RPPS.</span>
+                </label>
+                <button class="btn primary" type="button" id="professional-verify-button">Vérifier et commencer</button>
+                <div class="status" id="professional-verification-status" role="status" aria-live="polite"></div>
+                <p class="small">Le nom et le RPPS servent uniquement à vérifier votre statut dans l’Annuaire Santé de l’ANS. Ils ne sont pas enregistrés avec vos réponses. Les titres qui ne relèvent pas d’une profession de santé active de la nomenclature TRE_G15 ne sont pas acceptés.</p>
+              </div>
             </article>
             <article class="audience">
               <p class="eyebrow">Patients</p>

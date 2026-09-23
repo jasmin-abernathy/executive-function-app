@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require __DIR__ . '/_common.php';
+require __DIR__ . '/_professional_verification.php';
 
 header('Cache-Control: no-store');
 resosoin_require_same_origin();
@@ -55,6 +56,31 @@ try {
             );
         }
 
+        $professionalVerified = false;
+        $professionalVerificationMethod = null;
+
+        if ($audience === 'doctor') {
+            $proof = clean_text(
+                $input['professional_verification'] ?? '',
+                4096
+            );
+            $verification =
+                resosoin_validate_professional_verification_token(
+                    $proof,
+                    app_key_bytes()
+                );
+
+            if (!is_array($verification)) {
+                throw new DomainException(
+                    'Vérifiez votre statut de professionnel de santé avant de commencer ce questionnaire.'
+                );
+            }
+
+            $professionalVerified = true;
+            $professionalVerificationMethod =
+                'annuaire_sante_tre_g15';
+        }
+
         $source = (string) ($input['source'] ?? 'direct');
         $allowedSources = [
             'direct',
@@ -81,8 +107,10 @@ try {
                 current_step,
                 survey_version,
                 recruitment_source,
+                professional_verified,
+                professional_verification_method,
                 consent_at
-             ) VALUES(?, ?, ?, ?, ?, ?, NOW())'
+             ) VALUES(?, ?, ?, ?, ?, ?, ?, ?, NOW())'
         );
         $stmt->execute([
             $sessionId,
@@ -91,6 +119,8 @@ try {
             $firstQuestion,
             RESOSOIN_SURVEY_VERSION,
             $source,
+            $professionalVerified ? 1 : 0,
+            $professionalVerificationMethod,
         ]);
 
         resosoin_set_start_guard();
@@ -120,6 +150,21 @@ try {
     }
 
     $audience = (string) $session['audience'];
+
+    if (
+        $audience === 'doctor'
+        && $action !== 'delete'
+        && (int) ($session['professional_verified'] ?? 0) !== 1
+    ) {
+        json_response(
+            [
+                'ok' => false,
+                'error' => 'Cette ancienne session professionnelle n’a pas de vérification RPPS valide. Supprimez-la et démarrez un nouveau questionnaire.',
+            ],
+            403
+        );
+    }
+
     $questions = resosoin_question_map($audience);
 
     if ($action === 'resume') {

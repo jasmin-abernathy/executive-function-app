@@ -93,6 +93,35 @@ if (
     !resosoin_column_exists(
         $pdo,
         'resosoin_survey_sessions',
+        'professional_verified'
+    )
+) {
+    $pdo->exec(
+        "ALTER TABLE resosoin_survey_sessions
+         ADD professional_verified TINYINT(1) NOT NULL
+         DEFAULT 0
+         AFTER recruitment_source"
+    );
+}
+
+if (
+    !resosoin_column_exists(
+        $pdo,
+        'resosoin_survey_sessions',
+        'professional_verification_method'
+    )
+) {
+    $pdo->exec(
+        "ALTER TABLE resosoin_survey_sessions
+         ADD professional_verification_method VARCHAR(64) NULL
+         AFTER professional_verified"
+    );
+}
+
+if (
+    !resosoin_column_exists(
+        $pdo,
+        'resosoin_survey_sessions',
         'consent_at'
     )
 ) {
@@ -100,7 +129,7 @@ if (
         "ALTER TABLE resosoin_survey_sessions
          ADD consent_at DATETIME NOT NULL
          DEFAULT CURRENT_TIMESTAMP
-         AFTER recruitment_source"
+         AFTER professional_verification_method"
     );
 }
 

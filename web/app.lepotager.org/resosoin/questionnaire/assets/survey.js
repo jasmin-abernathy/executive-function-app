@@ -38,6 +38,11 @@
   const consentCheck = document.getElementById("consent-check");
   const landingStatus = document.getElementById("landing-status");
   const doneDeleteButton = document.getElementById("done-delete-button");
+  const professionalFamilyName = document.getElementById("professional-family-name");
+  const professionalRpps = document.getElementById("professional-rpps");
+  const professionalCertification = document.getElementById("professional-certification");
+  const professionalVerifyButton = document.getElementById("professional-verify-button");
+  const professionalVerificationStatus = document.getElementById("professional-verification-status");
   const startButtons = [...document.querySelectorAll("[data-start]")];
 
   let catalog = null;
@@ -48,6 +53,7 @@
   let index = 0;
   let busy = false;
   let dirty = false;
+  let verifyingProfessional = false;
 
   function now() {
     return Date.now();
@@ -160,6 +166,10 @@
     startButtons.forEach((button) => {
       button.disabled = value;
     });
+    if (professionalVerifyButton) {
+      professionalVerifyButton.disabled =
+        value || verifyingProfessional;
+    }
   }
 
   function setStatus(message, isError = false) {
@@ -170,6 +180,16 @@
   function setLandingStatus(message, isError = false) {
     landingStatus.textContent = message;
     landingStatus.style.color = isError ? "#7a3535" : "";
+  }
+
+  function setProfessionalVerificationStatus(
+    message,
+    isError = false
+  ) {
+    if (!professionalVerificationStatus) return;
+    professionalVerificationStatus.textContent = message;
+    professionalVerificationStatus.style.color =
+      isError ? "#7a3535" : "";
   }
 
   function refreshQuestions() {
@@ -542,7 +562,103 @@
     renderQuestion(session.current_step);
   }
 
-  async function start(audience) {
+  async function verifyProfessionalAndStart() {
+    if (busy || verifyingProfessional) return;
+
+    if (!adultCheck?.checked) {
+      setLandingStatus(
+        "Cette étude est réservée aux personnes de 18 ans ou plus.",
+        true
+      );
+      adultCheck?.focus();
+      return;
+    }
+
+    if (!consentCheck?.checked) {
+      setLandingStatus(
+        "Votre accord est nécessaire pour commencer.",
+        true
+      );
+      consentCheck?.focus();
+      return;
+    }
+
+    const familyName =
+      professionalFamilyName?.value.trim() || "";
+    const rpps =
+      (professionalRpps?.value || "").replace(/\D/g, "");
+
+    if (familyName.length < 2) {
+      setProfessionalVerificationStatus(
+        "Renseignez votre nom d’exercice.",
+        true
+      );
+      professionalFamilyName?.focus();
+      return;
+    }
+
+    if (!/^\d{11}$/.test(rpps)) {
+      setProfessionalVerificationStatus(
+        "Le numéro RPPS doit contenir 11 chiffres.",
+        true
+      );
+      professionalRpps?.focus();
+      return;
+    }
+
+    if (!professionalCertification?.checked) {
+      setProfessionalVerificationStatus(
+        "Cochez la certification pour continuer.",
+        true
+      );
+      professionalCertification?.focus();
+      return;
+    }
+
+    verifyingProfessional = true;
+    setLandingBusy(true);
+    setProfessionalVerificationStatus(
+      "Vérification ponctuelle dans l’Annuaire Santé…"
+    );
+
+    try {
+      const data = await jsonFetch(
+        "verify-professional.php",
+        {
+          family_name: familyName,
+          rpps,
+          certification: true,
+        },
+        ""
+      );
+
+      setProfessionalVerificationStatus(
+        (data.message || "Professionnel de santé vérifié.")
+        + " Le nom et le RPPS ne sont pas enregistrés avec vos réponses."
+      );
+
+      verifyingProfessional = false;
+      setLandingBusy(false);
+
+      await start(
+        "doctor",
+        data.verification_token || ""
+      );
+    } catch (error) {
+      setProfessionalVerificationStatus(
+        error.message,
+        true
+      );
+    } finally {
+      verifyingProfessional = false;
+      setLandingBusy(false);
+    }
+  }
+
+  async function start(
+    audience,
+    professionalVerification = ""
+  ) {
     if (busy) return;
 
     if (!adultCheck?.checked) {
@@ -574,6 +690,8 @@
           adult: true,
           consent: true,
           source: recruitmentSource,
+          professional_verification:
+            professionalVerification,
         },
         ""
       );
@@ -730,6 +848,11 @@
         );
       });
 
+      professionalVerifyButton?.addEventListener(
+        "click",
+        verifyProfessionalAndStart
+      );
+
       form.addEventListener("submit", next);
       backButton.addEventListener("click", goBack);
       deleteButton.addEventListener("click", deleteAnswers);
@@ -742,9 +865,11 @@
         prefillAudience
         && ["doctor", "patient"].includes(prefillAudience)
       ) {
-        const target = document.querySelector(
-          '[data-start="' + prefillAudience + '"]'
-        );
+        const target = prefillAudience === "doctor"
+          ? professionalVerifyButton
+          : document.querySelector(
+              '[data-start="' + prefillAudience + '"]'
+            );
         target?.focus();
       }
     } catch (error) {
