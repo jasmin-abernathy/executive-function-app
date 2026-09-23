@@ -49,6 +49,15 @@ $audience = ($_GET['audience'] ?? '') === 'doctor' ? 'doctor' : (($_GET['audienc
           <div class="soft">
             <strong>Vie privée :</strong> pas de nom, pas de diagnostic, pas de traitement, pas de texte libre médical. Votre navigateur conserve seulement un jeton pseudonyme pour pouvoir reprendre plus tard. Vous pouvez supprimer vos réponses depuis cette page.
           </div>
+          <label class="consent-line">
+            <input id="adult-check" type="checkbox">
+            <span>J’ai 18 ans ou plus.</span>
+          </label>
+          <label class="consent-line">
+            <input id="consent-check" type="checkbox">
+            <span>J’accepte que mes réponses pseudonymes soient utilisées pour cette étude produit pendant la durée indiquée dans la <a href="confidentialite.php">page de confidentialité</a>.</span>
+          </label>
+          <div class="status" id="landing-status" role="status" aria-live="polite"></div>
           <div class="audiences">
             <article class="audience">
               <p class="eyebrow">Professionnels</p>
@@ -100,6 +109,9 @@ $audience = ($_GET['audience'] ?? '') === 'doctor' ? 'doctor' : (($_GET['audienc
               <a class="btn primary" id="pilot-link" href="mailto:contact@lepotager.org?subject=Pilote%20RésoSoin">Proposer ma participation</a>
               <a class="btn secondary" href="resultats.php">Voir les résultats agrégés</a>
               <a class="btn secondary" href="/resosoin/">Retour à la présentation</a>
+            </div>
+            <div class="actions">
+              <button type="button" class="btn quiet" id="done-delete-button">Supprimer aussi cette réponse envoyée</button>
             </div>
           </div>
         </section>

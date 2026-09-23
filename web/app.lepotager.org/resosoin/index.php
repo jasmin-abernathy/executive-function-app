@@ -36,7 +36,7 @@
         <div>
           <p class="eyebrow">Projet en étude · santé numérique</p>
           <h1>Et si le cabinet gardait vraiment la main&nbsp;?</h1>
-          <p class="lede">RésoSoin explore une alternative française et indépendante aux grandes plateformes de rendez-vous&nbsp;: un site propre au cabinet, un agenda simple, des automatisations utiles, aucune IA imposée et un objectif de tarif nettement plus accessible.</p>
+          <p class="lede">RésoSoin, développé à Metz, explore une alternative française et indépendante aux grandes plateformes de rendez-vous&nbsp;: un site propre au cabinet, un agenda simple, des automatisations utiles, aucune IA imposée et un objectif de tarif nettement plus accessible.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor">Je suis professionnel·le de santé</a>
             <a class="button button-secondary" href="/resosoin/questionnaire/?audience=patient">Je suis patient·e</a>
@@ -74,7 +74,7 @@
           <article class="card">
             <div class="card-icon" aria-hidden="true">1</div>
             <h3>Un CMS maison léger</h3>
-            <p>RésoSoin n’est plus prévu sur Translucide&nbsp;: le socle actuel utilise un CMS maison minimal, pensé pour les sites de cabinets, les équipes multi-praticiens et la réversibilité.</p>
+            <p>Le socle actuel utilise un CMS maison minimal, conçu spécifiquement pour les sites de cabinets, les équipes multi-praticiens et la réversibilité.</p>
           </article>
           <article class="card">
             <div class="card-icon" aria-hidden="true">2</div>
@@ -128,7 +128,7 @@
         <div class="section-heading">
           <p class="eyebrow">Données & souveraineté</p>
           <h2>Le lieu du serveur ne suffit pas&nbsp;: la juridiction du prestataire compte aussi.</h2>
-          <p>Doctolib indique stocker les données en France et en Allemagne et utiliser notamment AWS certifié HDS. La question étudiée par RésoSoin est différente&nbsp;: pour les données les plus sensibles, privilégier si possible un prestataire soumis au droit européen afin de limiter le risque de demandes d’accès fondées sur un droit extra-européen.</p>
+          <p>Doctolib indique stocker les données en France et en Allemagne, recourir à Amazon Web Services et disposer d’un hébergement certifié HDS en France. La question étudiée par RésoSoin est différente&nbsp;: pour les données les plus sensibles, privilégier si possible un prestataire soumis exclusivement au droit européen afin de réduire l’exposition à des demandes d’accès fondées sur un droit extra-européen.</p>
         </div>
         <div class="compare">
           <article class="card">
@@ -143,7 +143,7 @@
           </article>
           <article class="card">
             <h3>Ce qu’on ne prétend pas encore</h3>
-            <p>RésoSoin n’est pas présenté comme « plus sécurisé que Doctolib » tant que l’infrastructure n’a pas été finalisée et auditée. Le projet vise une architecture plus petite, plus lisible et juridiquement plus souveraine — ce sont des choix à vérifier, pas un slogan de sécurité magique.</p>
+            <p>RésoSoin n’est pas présenté comme « plus sécurisé que Doctolib » tant que l’infrastructure n’a pas été finalisée et auditée. Doctolib indique chiffrer les données, conserver ses clés en France et n’avoir reçu, à sa connaissance, aucune demande Cloud Act concernant les données hébergées sur AWS. Le différenciateur testé ici est donc la réduction de l’exposition juridique extra-européenne, pas l’affirmation d’un transfert connu vers les autorités américaines.</p>
           </article>
         </div>
       </div>
@@ -222,6 +222,10 @@
           <article class="source-card">
             <a href="https://info.doctolib.fr/securite/">Doctolib — sécurité et hébergement</a>
             <small>Doctolib indique un stockage en France et en Allemagne et explique son recours à Amazon Web Services.</small>
+          </article>
+          <article class="source-card">
+            <a href="https://community.doctolib.fr/t/on-repond-a-vos-questions-sur-la-securite-des-donnees/107903">Doctolib Communauté — AWS et Cloud Act</a>
+            <small>Doctolib indique qu’aucune demande de ce type n’avait été reçue et précise que les clés de chiffrement sont conservées en France.</small>
           </article>
           <article class="source-card">
             <a href="https://www.cnil.fr/fr/cloud-les-risques-dune-certification-europeenne-permettant-lacces-des-autorites-etrangeres">CNIL — cloud et accès d’autorités étrangères</a>

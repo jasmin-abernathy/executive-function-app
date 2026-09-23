@@ -24,6 +24,10 @@
   const resumeButton = document.getElementById('resume-button');
   const resumeLabel = document.getElementById('resume-label');
   const pilotLink = document.getElementById('pilot-link');
+  const adultCheck = document.getElementById('adult-check');
+  const consentCheck = document.getElementById('consent-check');
+  const landingStatus = document.getElementById('landing-status');
+  const doneDeleteButton = document.getElementById('done-delete-button');
 
   let catalog = null;
   let token = localStorage.getItem(storageKey) || '';
@@ -130,7 +134,11 @@
     audienceLabel.textContent = audienceName(session.audience);
     count.textContent = `${index + 1} / ${questions.length}`;
     progress.style.width = `${((index + 1) / questions.length) * 100}%`;
-    conceptCard.hidden = question.phase !== 'concept';
+    const previousQuestion = index > 0 ? questions[index - 1] : null;
+    conceptCard.hidden = !(
+      question.phase === 'concept'
+      && (!previousQuestion || previousQuestion.phase !== 'concept')
+    );
     title.textContent = question.title;
     help.textContent = question.help || '';
     help.hidden = !question.help;
@@ -162,6 +170,17 @@
               if (exclusive.includes(input.value)) input.checked = false;
             });
           }
+          const selected = checkboxes.filter((input) => input.checked);
+          const maxChoices = Number(question.max || checkboxes.length);
+          if (selected.length > maxChoices) {
+            changed.checked = false;
+            setStatus(
+              `Sélectionnez au maximum ${maxChoices} réponses.`,
+              true
+            );
+          } else if (saveStatus.textContent.startsWith('Sélectionnez au maximum')) {
+            setStatus('');
+          }
         });
       }
       optionsHost.append(list);
@@ -184,7 +203,11 @@
 
   function validAnswer(question, answer) {
     if (!question.required) return true;
-    if (question.type === 'multi') return Array.isArray(answer) && answer.length > 0;
+    if (question.type === 'multi') {
+      return Array.isArray(answer)
+        && answer.length > 0
+        && answer.length <= Number(question.max || answer.length);
+    }
     return answer !== null && answer !== undefined && answer !== '';
   }
 
@@ -215,18 +238,23 @@
     }
   }
 
+  function showDone() {
+    landing.hidden = true;
+    questionnaire.hidden = true;
+    done.hidden = false;
+    const role = session.audience === 'doctor'
+      ? 'professionnel de santé'
+      : 'patient';
+    pilotLink.href = `mailto:contact@lepotager.org?subject=${encodeURIComponent(`Pilote RésoSoin — ${role}`)}`;
+  }
+
   async function submitSurvey() {
     setBusy(true);
     setStatus('Envoi…');
     try {
       await jsonFetch('api.php', {action: 'submit'});
       session.status = 'submitted';
-      localStorage.removeItem(storageKey);
-      localStorage.removeItem(audienceKey);
-      questionnaire.hidden = true;
-      done.hidden = false;
-      const role = session.audience === 'doctor' ? 'professionnel de santé' : 'patient';
-      pilotLink.href = `mailto:contact@lepotager.org?subject=${encodeURIComponent(`Pilote RésoSoin — ${role}`)}`;
+      showDone();
     } catch (error) {
       if (error.data?.missing?.length) {
         const missingIndex = questions.findIndex((q) => error.data.missing.includes(q.id));
@@ -257,7 +285,25 @@
 
   async function start(audience) {
     if (busy) return;
-    const data = await jsonFetch('api.php', {action: 'start', audience}, '');
+    if (!adultCheck?.checked) {
+      landingStatus.textContent =
+        'Cette étude est réservée aux personnes de 18 ans ou plus.';
+      landingStatus.style.color = '#7a3535';
+      return;
+    }
+    if (!consentCheck?.checked) {
+      landingStatus.textContent =
+        'Votre accord est nécessaire pour commencer.';
+      landingStatus.style.color = '#7a3535';
+      return;
+    }
+    landingStatus.textContent = '';
+    landingStatus.style.color = '';
+    const data = await jsonFetch(
+      'api.php',
+      {action: 'start', audience, adult: true, consent: true},
+      ''
+    );
     token = data.token;
     session = data.session;
     localStorage.setItem(storageKey, token);
@@ -274,9 +320,8 @@
       session = data.session;
       chooseQuestions(session.audience);
       if (session.status === 'submitted') {
-        localStorage.removeItem(storageKey);
-        localStorage.removeItem(audienceKey);
-        return false;
+        showDone();
+        return true;
       }
       index = findStep(session.current_step);
       resumeLabel.textContent = ` ${audienceName(session.audience)}.`;
@@ -328,6 +373,7 @@
         }
       });
       deleteButton.addEventListener('click', deleteAnswers);
+      doneDeleteButton?.addEventListener('click', deleteAnswers);
       resumeButton.addEventListener('click', () => renderQuestion());
 
       const hasResume = await resume();

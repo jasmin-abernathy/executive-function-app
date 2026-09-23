@@ -17,6 +17,17 @@ $action = (string) ($input['action'] ?? '');
 
 try {
     if ($action === 'start') {
+        if (($input['adult'] ?? false) !== true) {
+            throw new DomainException(
+                'Cette étude est réservée aux personnes de 18 ans ou plus.'
+            );
+        }
+        if (($input['consent'] ?? false) !== true) {
+            throw new DomainException(
+                'Votre accord est nécessaire pour commencer.'
+            );
+        }
+
         $audience = (string) ($input['audience'] ?? '');
         if (!in_array($audience, ['doctor', 'patient'], true)) {
             throw new DomainException('Profil de questionnaire invalide.');
@@ -28,14 +39,21 @@ try {
         $firstQuestion = (string) (array_key_first($questions) ?? '');
 
         $stmt = $pdo->prepare(
-            'INSERT INTO resosoin_survey_sessions(id, audience, resume_token_hash, current_step)
-             VALUES(?, ?, ?, ?)'
+            'INSERT INTO resosoin_survey_sessions(
+                id,
+                audience,
+                resume_token_hash,
+                current_step,
+                survey_version,
+                consent_at
+             ) VALUES(?, ?, ?, ?, ?, NOW())'
         );
         $stmt->execute([
             $sessionId,
             $audience,
             resosoin_token_hash($token),
             $firstQuestion,
+            RESOSOIN_SURVEY_VERSION,
         ]);
 
         json_response([

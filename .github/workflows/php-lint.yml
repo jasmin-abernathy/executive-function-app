@@ -4,10 +4,12 @@ on:
   push:
     paths:
       - 'web/app.lepotager.org/**/*.php'
+      - 'web/app.lepotager.org/resosoin/**'
       - '.github/workflows/php-lint.yml'
   pull_request:
     paths:
       - 'web/app.lepotager.org/**/*.php'
+      - 'web/app.lepotager.org/resosoin/**'
       - '.github/workflows/php-lint.yml'
 
 permissions:
@@ -36,6 +38,14 @@ jobs:
             -name '*.php' \
             -print0 \
             | xargs -0 -n1 php -l
+
+      - name: Validate RésoSoin survey
+        shell: bash
+        run: |
+          set -euo pipefail
+          php web/app.lepotager.org/resosoin/questionnaire/validate.php
+          php -r 'json_decode(file_get_contents("web/app.lepotager.org/resosoin/questionnaire/questions.json"), true, 512, JSON_THROW_ON_ERROR);'
+          node --check web/app.lepotager.org/resosoin/questionnaire/assets/survey.js
 
       - name: Shared Stancer contribution contract
         shell: bash

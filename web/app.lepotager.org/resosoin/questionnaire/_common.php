@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/adhd-app/includes/bootstrap.php';
 
+const RESOSOIN_SURVEY_VERSION = '2026-09-23-v1';
+
 function resosoin_questions(): array
 {
     static $questions = null;
@@ -39,8 +41,10 @@ function resosoin_question_map(string $audience): array
 function resosoin_tables_ready(PDO $pdo): bool
 {
     try {
-        $stmt = $pdo->query("SHOW TABLES LIKE 'resosoin_survey_sessions'");
-        return (bool) $stmt->fetchColumn();
+        $sessions = $pdo->query("SHOW TABLES LIKE 'resosoin_survey_sessions'");
+        $answers = $pdo->query("SHOW TABLES LIKE 'resosoin_survey_answers'");
+        return (bool) $sessions->fetchColumn()
+            && (bool) $answers->fetchColumn();
     } catch (Throwable) {
         return false;
     }
@@ -104,6 +108,12 @@ function resosoin_validate_answer(array $question, mixed $answer): mixed
             $normalized[$value] = true;
         }
         $values = array_keys($normalized);
+        $maxChoices = (int) ($question['max'] ?? count($options));
+        if ($maxChoices > 0 && count($values) > $maxChoices) {
+            throw new DomainException(
+                "Sélectionnez au maximum {$maxChoices} réponses."
+            );
+        }
         foreach (['none', 'nothing'] as $exclusive) {
             if (in_array($exclusive, $values, true) && count($values) > 1) {
                 throw new DomainException('« Aucun / rien » doit être sélectionné seul.');

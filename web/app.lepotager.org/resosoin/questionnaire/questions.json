@@ -31,7 +31,8 @@
           "website": "Site du cabinet",
           "email": "E-mail",
           "walk_in": "Sans rendez-vous / accueil direct"
-        }
+        },
+        "max": 4
       },
       {
         "id": "doctor_doctolib_status",
@@ -88,7 +89,8 @@
           "patient_habits": "Les habitudes déjà prises par les patients",
           "visibility": "La visibilité en ligne du cabinet",
           "none": "Aucun irritant important"
-        }
+        },
+        "max": 3
       },
       {
         "id": "doctor_website_control",
@@ -146,7 +148,8 @@
           "documents": "Notifications lorsqu’un document est disponible",
           "reports": "Rapports et statistiques simples",
           "none": "Je préfère tout gérer manuellement"
-        }
+        },
+        "max": 5
       },
       {
         "id": "doctor_essential_features",
@@ -166,7 +169,8 @@
           "payment": "Paiement en ligne",
           "messaging": "Messagerie sécurisée",
           "export": "Export et réversibilité des données"
-        }
+        },
+        "max": 5
       },
       {
         "id": "doctor_migration_blockers",
@@ -184,7 +188,8 @@
           "support": "Besoin d’un support très réactif",
           "contract": "Engagement contractuel actuel",
           "nothing": "Rien de particulier"
-        }
+        },
+        "max": 4
       },
       {
         "id": "doctor_concept_interest",
@@ -216,7 +221,8 @@
           "local_support": "Interlocuteur français / local",
           "simple": "Une offre recentrée sur le site et l’agenda",
           "none": "Aucun en particulier"
-        }
+        },
+        "max": 4
       },
       {
         "id": "doctor_price",
@@ -276,7 +282,8 @@
           "phone": "Téléphone",
           "email": "E-mail",
           "walk_in": "Accueil direct / sans rendez-vous"
-        }
+        },
+        "max": 4
       },
       {
         "id": "patient_doctolib_frequency",
@@ -355,7 +362,8 @@
           "cancellation": "Annulation / déplacement simplifiés",
           "document_notice": "Notification lorsqu’un document est disponible",
           "none": "Aucune"
-        }
+        },
+        "max": 4
       },
       {
         "id": "patient_structure_preference",
@@ -399,7 +407,8 @@
           "independent": "Cabinets plus indépendants des grandes plateformes",
           "opensource": "Code ouvert et fonctionnement vérifiable",
           "none": "Aucun en particulier"
-        }
+        },
+        "max": 4
       },
       {
         "id": "patient_app_preference",
@@ -429,7 +438,8 @@
           "documents": "Documents reçus",
           "reference": "Professionnel favori / référent choisi par moi",
           "none": "Je n’utiliserais pas l’application"
-        }
+        },
+        "max": 5
       },
       {
         "id": "patient_pilot",

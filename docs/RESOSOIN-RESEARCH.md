@@ -23,6 +23,8 @@ Le site ne présente pas RésoSoin comme « plus sécurisé que Doctolib » tant
 
 ## Méthode reprise du survey TDAH
 
+- confirmation 18+ et consentement explicite avant création de session ;
+- version du questionnaire et date de consentement enregistrées ;
 - session pseudonyme ;
 - jeton de reprise stocké côté navigateur, empreinte seulement côté serveur ;
 - progression question par question ;
@@ -30,7 +32,7 @@ Le site ne présente pas RésoSoin comme « plus sécurisé que Doctolib » tant
 - reprise après interruption ;
 - questions fermées et échelles, sans texte libre médical ;
 - présentation du concept seulement après les questions d’usage ;
-- suppression de la session par le participant ;
+- suppression de la session par le participant, y compris après envoi tant que le jeton est présent dans le navigateur ;
 - page de confidentialité ;
 - résultats publics agrégés uniquement après un seuil de 10 réponses envoyées par audience ;
 - contact volontaire pour un pilote séparé techniquement des réponses.
@@ -83,4 +85,5 @@ Le GitHub SHA et le live doivent rester distingués. Après fusion/déploiement 
 6. envoyer ;
 7. supprimer une session test ;
 8. vérifier le seuil des résultats agrégés ;
-9. confirmer que `schema.sql`, `_common.php`, `install.php` et `cleanup.php` sont inaccessibles par HTTP.
+9. confirmer que `schema.sql`, `_common.php`, `install.php`, `cleanup.php`, `validate.php` et les fichiers de documentation sont inaccessibles par HTTP ;
+10. vérifier que la CI valide PHP, le catalogue JSON et la syntaxe JavaScript du survey.
