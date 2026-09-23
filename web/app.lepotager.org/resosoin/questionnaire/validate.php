@@ -7,9 +7,36 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
-require __DIR__ . '/_common.php';
+$path = __DIR__ . '/questions.json';
+$catalog = json_decode(
+    (string) file_get_contents($path),
+    true,
+    512,
+    JSON_THROW_ON_ERROR
+);
 
-$catalog = resosoin_questions();
+if (!is_array($catalog)) {
+    throw new RuntimeException('Invalid questionnaire catalog.');
+}
+
+$questionMap = static function (string $audience) use ($catalog): array {
+    $items = $catalog[$audience]['questions'] ?? null;
+    if (!is_array($items)) {
+        return [];
+    }
+
+    $map = [];
+    foreach ($items as $question) {
+        if (!is_array($question)) {
+            continue;
+        }
+        $id = (string) ($question['id'] ?? '');
+        if ($id !== '') {
+            $map[$id] = $question;
+        }
+    }
+    return $map;
+};
 
 foreach (['doctor' => 12, 'patient' => 9] as $audience => $minimumUsage) {
     $questions = $catalog[$audience]['questions'] ?? null;
@@ -86,24 +113,25 @@ foreach (['doctor' => 12, 'patient' => 9] as $audience => $minimumUsage) {
     }
 }
 
-$doctorAutomation = resosoin_question_map('doctor')['doctor_automation'] ?? null;
-$patientAutomation = resosoin_question_map('patient')['patient_automation'] ?? null;
-
-foreach ([$doctorAutomation, $patientAutomation] as $question) {
+foreach (
+    [
+        $questionMap('doctor')['doctor_automation'] ?? null,
+        $questionMap('patient')['patient_automation'] ?? null,
+    ] as $question
+) {
     if (!is_array($question)) {
         throw new RuntimeException('Automation question missing.');
     }
-    $wording = mb_strtolower(
+
+    $wording = strtolower(
         (string) ($question['title'] ?? '')
         . ' '
         . (string) ($question['help'] ?? '')
     );
+
     if (
         !str_contains($wording, 'sans ia')
-        || (
-            !str_contains($wording, 'automatisation')
-            && !str_contains($wording, 'automatis')
-        )
+        || !str_contains($wording, 'automatis')
     ) {
         throw new RuntimeException(
             'The no-AI versus automation distinction is missing.'
