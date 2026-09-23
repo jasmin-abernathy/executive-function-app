@@ -1,0 +1,6 @@
+Options -Indexes
+DirectoryIndex index.php
+
+<FilesMatch "^(?:_common\.php|schema\.sql|install\.php|cleanup\.php)$">
+  Require all denied
+</FilesMatch>
