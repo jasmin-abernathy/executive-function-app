@@ -32,7 +32,7 @@
           "email": "E-mail",
           "walk_in": "Sans rendez-vous / accueil direct"
         },
-        "max": 4
+        "max": 7
       },
       {
         "id": "doctor_doctolib_status",
@@ -59,7 +59,8 @@
           "70_99": "70 à 99 €",
           "100_149": "100 à 149 €",
           "150_plus": "150 € ou plus",
-          "unknown": "Je ne sais pas"
+          "unknown": "Je ne sais pas",
+          "not_applicable": "Non concerné — pas de coût calculable par praticien"
         }
       },
       {
@@ -71,7 +72,9 @@
         "min": 0,
         "max": 10,
         "min_label": "Pas du tout",
-        "max_label": "Tout à fait"
+        "max_label": "Tout à fait",
+        "allow_na": true,
+        "na_label": "Non concerné — je n’utilise pas de solution comparable"
       },
       {
         "id": "doctor_pain_points",
@@ -88,9 +91,10 @@
           "migration": "La difficulté à changer de solution",
           "patient_habits": "Les habitudes déjà prises par les patients",
           "visibility": "La visibilité en ligne du cabinet",
-          "none": "Aucun irritant important"
+          "none": "Aucun irritant important",
+          "other": "Autre irritant non listé"
         },
-        "max": 3
+        "max": 4
       },
       {
         "id": "doctor_website_control",
@@ -147,9 +151,14 @@
           "recurring": "Horaires et indisponibilités récurrents",
           "documents": "Notifications lorsqu’un document est disponible",
           "reports": "Rapports et statistiques simples",
-          "none": "Je préfère tout gérer manuellement"
+          "none": "Aucune de ces automatisations ne m’intéresse",
+          "unknown": "Je ne sais pas encore"
         },
-        "max": 5
+        "max": 5,
+        "exclusive": [
+          "none",
+          "unknown"
+        ]
       },
       {
         "id": "doctor_essential_features",
@@ -243,7 +252,7 @@
         "id": "doctor_pilot",
         "phase": "concept",
         "type": "single",
-        "required": true,
+        "required": false,
         "title": "Seriez-vous intéressé·e par un pilote gratuit ou à tarif préférentiel quand le socle sera testable ?",
         "options": {
           "yes": "Oui",
@@ -283,7 +292,7 @@
           "email": "E-mail",
           "walk_in": "Accueil direct / sans rendez-vous"
         },
-        "max": 4
+        "max": 6
       },
       {
         "id": "patient_doctolib_frequency",
@@ -296,6 +305,11 @@
           "sometimes": "Parfois",
           "rarely": "Rarement",
           "never": "Jamais"
+        },
+        "show_if": {
+          "question": "patient_booking_now",
+          "op": "contains",
+          "value": "doctolib"
         }
       },
       {
@@ -439,13 +453,21 @@
           "reference": "Professionnel favori / référent choisi par moi",
           "none": "Je n’utiliserais pas l’application"
         },
-        "max": 5
+        "max": 5,
+        "show_if": {
+          "question": "patient_app_preference",
+          "op": "in",
+          "values": [
+            "yes",
+            "optional"
+          ]
+        }
       },
       {
         "id": "patient_pilot",
         "phase": "concept",
         "type": "single",
-        "required": true,
+        "required": false,
         "title": "Accepteriez-vous de tester une première version quand elle sera disponible ?",
         "options": {
           "yes": "Oui",

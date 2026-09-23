@@ -3,7 +3,7 @@
 ## Emplacement public
 
 - Présentation : `https://app.lepotager.org/resosoin/`
-- Questionnaire : `https://app.lepotager.org/resosoin/questionnaire/`
+- Questionnaire : `https://app.lepotager.org/resosoin/questionnaire/`\n- Invitation neutre : `https://app.lepotager.org/resosoin/questionnaire/invitation.php`
 - Confidentialité : `https://app.lepotager.org/resosoin/questionnaire/confidentialite.php`
 - Résultats agrégés : `https://app.lepotager.org/resosoin/questionnaire/resultats.php`
 
@@ -26,16 +26,16 @@ Le site ne présente pas RésoSoin comme « plus sécurisé que Doctolib » tant
 - confirmation 18+ et consentement explicite avant création de session ;
 - version du questionnaire et date de consentement enregistrées ;
 - session pseudonyme ;
-- jeton de reprise stocké côté navigateur, empreinte seulement côté serveur ;
+- plusieurs brouillons peuvent coexister sur un même navigateur ; chaque jeton de reprise reste côté navigateur et seule son empreinte est stockée côté serveur ;
 - progression question par question ;
-- sauvegarde au fil du parcours ;
+- sauvegarde après chaque étape validée, y compris avant un retour arrière ; avertissement navigateur si une sélection visible n’est pas encore enregistrée ;
 - reprise après interruption ;
 - questions fermées et échelles, sans texte libre médical ;
 - présentation du concept seulement après les questions d’usage ;
 - suppression de la session par le participant, y compris après envoi tant que le jeton est présent dans le navigateur ;
 - page de confidentialité ;
-- résultats publics agrégés uniquement après un seuil de 10 réponses envoyées par audience ;
-- contact volontaire pour un pilote séparé techniquement des réponses.
+- résultats publics exploratoires seulement à partir de 20 réponses envoyées par audience, avec dénominateur par question et regroupement des cellules rares ;
+- contact volontaire pour un pilote séparé techniquement des réponses ;\n- canal de recrutement limité à quelques catégories non identifiantes (`home`, `resosoin_page`, `neutral_invite`, `direct`) ;\n- page d’invitation neutre disponible pour recruter sans exposer d’abord le positionnement du produit.
 
 ## Données volontairement exclues
 
@@ -86,4 +86,4 @@ Le GitHub SHA et le live doivent rester distingués. Après fusion/déploiement 
 7. supprimer une session test ;
 8. vérifier le seuil des résultats agrégés ;
 9. confirmer que `schema.sql`, `_common.php`, `install.php`, `cleanup.php`, `validate.php` et les fichiers de documentation sont inaccessibles par HTTP ;
-10. vérifier que la CI valide PHP, le catalogue JSON et la syntaxe JavaScript du survey.
+10. vérifier que la CI valide PHP, le catalogue JSON, la syntaxe JavaScript et les tests du cœur du survey ;\n11. tester deux brouillons simultanés sur un même navigateur, retour arrière avec modification, branche sans Doctolib, refus de l’app, panne réseau au démarrage et suppression après envoi.

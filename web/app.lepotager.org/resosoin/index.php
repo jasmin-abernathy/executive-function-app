@@ -38,8 +38,8 @@
           <h1>Et si le cabinet gardait vraiment la main&nbsp;?</h1>
           <p class="lede">RésoSoin, développé à Metz, explore une alternative française et indépendante aux grandes plateformes de rendez-vous&nbsp;: un site propre au cabinet, un agenda simple, des automatisations utiles, aucune IA imposée et un objectif de tarif nettement plus accessible.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor">Je suis professionnel·le de santé</a>
-            <a class="button button-secondary" href="/resosoin/questionnaire/?audience=patient">Je suis patient·e</a>
+            <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Je suis professionnel·le de santé</a>
+            <a class="button button-secondary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Je suis patient·e</a>
           </div>
           <div class="tag-row" aria-label="Principes de RésoSoin">
             <span class="tag">CMS maison</span>
@@ -173,8 +173,8 @@
       <div class="shell">
         <div class="section-heading">
           <p class="eyebrow">Étude RésoSoin</p>
-          <h2>Deux questionnaires, environ 5 minutes chacun.</h2>
-          <p>Les premières questions portent sur vos usages réels. Le concept RésoSoin n’est présenté qu’ensuite afin d’éviter d’orienter artificiellement les réponses.</p>
+          <h2>Deux questionnaires courts, avec une durée réelle encore en cours de mesure.</h2>
+          <p>Les premières questions portent sur vos usages réels. Le concept RésoSoin n’est présenté qu’ensuite afin de réduire l’effet de présentation. Les résultats resteront exploratoires et auto-sélectionnés.</p>
         </div>
         <div class="audience-grid">
           <article class="audience-card">
@@ -186,7 +186,7 @@
               <li>IA, automatisation et souveraineté des données.</li>
               <li>Fonctions indispensables au MVP.</li>
             </ul>
-            <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor">Répondre côté professionnel</a>
+            <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Répondre côté professionnel</a>
           </article>
           <article class="audience-card">
             <p class="eyebrow">Patients</p>
@@ -197,13 +197,14 @@
               <li>IA, automatisation et hébergement européen.</li>
               <li>Utilité réelle d’une application facultative.</li>
             </ul>
-            <a class="button button-primary" href="/resosoin/questionnaire/?audience=patient">Répondre côté patient</a>
+            <a class="button button-primary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Répondre côté patient</a>
           </article>
         </div>
         <div class="notice" style="margin-top:1rem;color:#202622">
           <strong>Vie privée de l’étude</strong>
           <span>18 ans et plus. Pas de nom, pas de diagnostic, pas de traitement, pas de texte libre médical. Les réponses sont pseudonymes, peuvent être reprises sur le même navigateur et supprimées depuis le questionnaire.</span>
         </div>
+        <p style="margin-top:1rem"><a href="/resosoin/questionnaire/invitation.php">Lien d’invitation neutre pour partager l’étude sans présenter RésoSoin auparavant →</a></p>
       </div>
     </section>
 

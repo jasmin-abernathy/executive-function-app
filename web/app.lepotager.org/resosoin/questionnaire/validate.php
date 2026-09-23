@@ -7,9 +7,8 @@ if (PHP_SAPI !== 'cli') {
     exit;
 }
 
-$path = __DIR__ . '/questions.json';
 $catalog = json_decode(
-    (string) file_get_contents($path),
+    (string) file_get_contents(__DIR__ . '/questions.json'),
     true,
     512,
     JSON_THROW_ON_ERROR
@@ -19,24 +18,7 @@ if (!is_array($catalog)) {
     throw new RuntimeException('Invalid questionnaire catalog.');
 }
 
-$questionMap = static function (string $audience) use ($catalog): array {
-    $items = $catalog[$audience]['questions'] ?? null;
-    if (!is_array($items)) {
-        return [];
-    }
-
-    $map = [];
-    foreach ($items as $question) {
-        if (!is_array($question)) {
-            continue;
-        }
-        $id = (string) ($question['id'] ?? '');
-        if ($id !== '') {
-            $map[$id] = $question;
-        }
-    }
-    return $map;
-};
+$maps = [];
 
 foreach (['doctor' => 12, 'patient' => 9] as $audience => $minimumUsage) {
     $questions = $catalog[$audience]['questions'] ?? null;
@@ -58,7 +40,6 @@ foreach (['doctor' => 12, 'patient' => 9] as $audience => $minimumUsage) {
         if ($id === '' || isset($seen[$id])) {
             throw new RuntimeException("Duplicate or empty question id: {$id}");
         }
-        $seen[$id] = true;
 
         $phase = (string) ($question['phase'] ?? '');
         if ($phase === 'concept') {
@@ -88,22 +69,49 @@ foreach (['doctor' => 12, 'patient' => 9] as $audience => $minimumUsage) {
             if ($max <= $min) {
                 throw new RuntimeException("Invalid scale for {$id}");
             }
-            continue;
-        }
+        } else {
+            $options = $question['options'] ?? null;
+            if (!is_array($options) || count($options) < 2) {
+                throw new RuntimeException("Not enough options for {$id}");
+            }
 
-        $options = $question['options'] ?? null;
-        if (!is_array($options) || count($options) < 2) {
-            throw new RuntimeException("Not enough options for {$id}");
-        }
+            if ($type === 'multi') {
+                $maxChoices = (int) ($question['max'] ?? 0);
+                if ($maxChoices < 1 || $maxChoices > count($options)) {
+                    throw new RuntimeException(
+                        "Missing or invalid max choices for {$id}"
+                    );
+                }
 
-        if ($type === 'multi') {
-            $maxChoices = (int) ($question['max'] ?? 0);
-            if ($maxChoices < 1 || $maxChoices > count($options)) {
-                throw new RuntimeException(
-                    "Missing or invalid max choices for {$id}"
-                );
+                $exclusive = $question['exclusive'] ?? [];
+                if ($exclusive !== [] && !is_array($exclusive)) {
+                    throw new RuntimeException(
+                        "Invalid exclusive choices for {$id}"
+                    );
+                }
             }
         }
+
+        $condition = $question['show_if'] ?? null;
+        if ($condition !== null) {
+            if (!is_array($condition)) {
+                throw new RuntimeException("Invalid show_if for {$id}");
+            }
+
+            $parent = (string) ($condition['question'] ?? '');
+            if ($parent === '' || !isset($seen[$parent])) {
+                throw new RuntimeException(
+                    "show_if must reference an earlier question for {$id}"
+                );
+            }
+
+            $op = (string) ($condition['op'] ?? '');
+            if (!in_array($op, ['contains', 'in', 'equals', 'not_equals'], true)) {
+                throw new RuntimeException("Invalid show_if operator for {$id}");
+            }
+        }
+
+        $seen[$id] = $question;
     }
 
     if ($usageCount < $minimumUsage || $conceptCount < 3) {
@@ -111,12 +119,14 @@ foreach (['doctor' => 12, 'patient' => 9] as $audience => $minimumUsage) {
             "Concept is introduced too early for {$audience}"
         );
     }
+
+    $maps[$audience] = $seen;
 }
 
 foreach (
     [
-        $questionMap('doctor')['doctor_automation'] ?? null,
-        $questionMap('patient')['patient_automation'] ?? null,
+        $maps['doctor']['doctor_automation'] ?? null,
+        $maps['patient']['patient_automation'] ?? null,
     ] as $question
 ) {
     if (!is_array($question)) {
@@ -137,6 +147,20 @@ foreach (
             'The no-AI versus automation distinction is missing.'
         );
     }
+}
+
+if (($maps['doctor']['doctor_satisfaction']['allow_na'] ?? false) !== true) {
+    throw new RuntimeException(
+        'Doctor satisfaction must offer a non-applicable answer.'
+    );
+}
+
+if (($maps['doctor']['doctor_pilot']['required'] ?? true) !== false) {
+    throw new RuntimeException('Doctor pilot interest must be optional.');
+}
+
+if (($maps['patient']['patient_pilot']['required'] ?? true) !== false) {
+    throw new RuntimeException('Patient pilot interest must be optional.');
 }
 
 fwrite(

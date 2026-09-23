@@ -9,8 +9,11 @@ if (PHP_SAPI !== 'cli') {
 
 require __DIR__ . '/_common.php';
 
-function resosoin_column_exists(PDO $pdo, string $table, string $column): bool
-{
+function resosoin_column_exists(
+    PDO $pdo,
+    string $table,
+    string $column
+): bool {
     $stmt = $pdo->prepare(
         'SELECT COUNT(*)
          FROM information_schema.COLUMNS
@@ -19,11 +22,31 @@ function resosoin_column_exists(PDO $pdo, string $table, string $column): bool
            AND COLUMN_NAME = ?'
     );
     $stmt->execute([$table, $column]);
+
+    return (int) $stmt->fetchColumn() > 0;
+}
+
+function resosoin_index_exists(
+    PDO $pdo,
+    string $table,
+    string $index
+): bool {
+    $stmt = $pdo->prepare(
+        'SELECT COUNT(*)
+         FROM information_schema.STATISTICS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME = ?
+           AND INDEX_NAME = ?'
+    );
+    $stmt->execute([$table, $index]);
+
     return (int) $stmt->fetchColumn() > 0;
 }
 
 $pdo = db();
-$sql = (string) file_get_contents(__DIR__ . '/schema.sql');
+$sql = (string) file_get_contents(
+    __DIR__ . '/schema.sql'
+);
 
 foreach (
     array_filter(
@@ -46,8 +69,23 @@ if (
     $pdo->exec(
         "ALTER TABLE resosoin_survey_sessions
          ADD survey_version VARCHAR(40) NOT NULL
-         DEFAULT '2026-09-23-v1'
+         DEFAULT '2026-09-23-v2'
          AFTER current_step"
+    );
+}
+
+if (
+    !resosoin_column_exists(
+        $pdo,
+        'resosoin_survey_sessions',
+        'recruitment_source'
+    )
+) {
+    $pdo->exec(
+        "ALTER TABLE resosoin_survey_sessions
+         ADD recruitment_source VARCHAR(32) NOT NULL
+         DEFAULT 'direct'
+         AFTER survey_version"
     );
 }
 
@@ -62,8 +100,24 @@ if (
         "ALTER TABLE resosoin_survey_sessions
          ADD consent_at DATETIME NOT NULL
          DEFAULT CURRENT_TIMESTAMP
-         AFTER survey_version"
+         AFTER recruitment_source"
     );
 }
 
-fwrite(STDOUT, "RésoSoin survey tables ready.\n");
+if (
+    !resosoin_index_exists(
+        $pdo,
+        'resosoin_survey_sessions',
+        'idx_resosoin_source'
+    )
+) {
+    $pdo->exec(
+        'ALTER TABLE resosoin_survey_sessions
+         ADD INDEX idx_resosoin_source (recruitment_source)'
+    );
+}
+
+fwrite(
+    STDOUT,
+    "RésoSoin survey tables ready.\n"
+);

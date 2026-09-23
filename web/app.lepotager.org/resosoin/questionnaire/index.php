@@ -9,7 +9,13 @@ try {
 } catch (Throwable) {
     $ready = false;
 }
-$audience = ($_GET['audience'] ?? '') === 'doctor' ? 'doctor' : (($_GET['audience'] ?? '') === 'patient' ? 'patient' : '');
+$audience = ($_GET['audience'] ?? '') === 'doctor'
+    ? 'doctor'
+    : (($_GET['audience'] ?? '') === 'patient' ? 'patient' : '');
+$source = (string) ($_GET['source'] ?? 'direct');
+if (!in_array($source, ['direct', 'home', 'resosoin_page', 'neutral_invite'], true)) {
+    $source = 'direct';
+}
 ?><!doctype html>
 <html lang="fr">
 <head>
@@ -21,7 +27,11 @@ $audience = ($_GET['audience'] ?? '') === 'doctor' ? 'doctor' : (($_GET['audienc
   <link rel="canonical" href="https://app.lepotager.org/resosoin/questionnaire/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/resosoin/questionnaire/assets/style.css">
-  <script>window.RESOSOIN_PREFILL_AUDIENCE = <?= json_encode($audience, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;</script>
+  <script>
+    window.RESOSOIN_PREFILL_AUDIENCE = <?= json_encode($audience, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+    window.RESOSOIN_RECRUITMENT_SOURCE = <?= json_encode($source, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
+  </script>
+  <script defer src="/resosoin/questionnaire/assets/survey-core.js"></script>
   <script defer src="/resosoin/questionnaire/assets/survey.js"></script>
 </head>
 <body>
@@ -45,7 +55,7 @@ $audience = ($_GET['audience'] ?? '') === 'doctor' ? 'doctor' : (($_GET['audienc
         <section id="landing">
           <p class="eyebrow">Étude produit · 18 ans et plus</p>
           <h1>Avant de construire davantage, on veut vérifier le besoin.</h1>
-          <p class="lead">Environ 5 minutes. Les premières questions portent sur vos habitudes actuelles. RésoSoin n’est présenté qu’ensuite pour éviter de biaiser artificiellement les réponses.</p>
+          <p class="lead">Questionnaire court, dont la durée réelle est encore en cours de mesure. Les premières questions portent sur vos habitudes actuelles ; le concept RésoSoin arrive ensuite afin de limiter le biais de présentation. Les résultats resteront exploratoires et auto-sélectionnés.</p>
           <div class="soft">
             <strong>Vie privée :</strong> pas de nom, pas de diagnostic, pas de traitement, pas de texte libre médical. Votre navigateur conserve seulement un jeton pseudonyme pour pouvoir reprendre plus tard. Vous pouvez supprimer vos réponses depuis cette page.
           </div>
@@ -72,21 +82,22 @@ $audience = ($_GET['audience'] ?? '') === 'doctor' ? 'doctor' : (($_GET['audienc
               <button class="btn primary" type="button" data-start="patient">Commencer</button>
             </article>
           </div>
-          <div id="resume-box" class="notice resume" hidden>
-            <div><strong>Une réponse en cours a été trouvée sur ce navigateur.</strong><span id="resume-label"></span></div>
-            <button type="button" class="btn secondary" id="resume-button">Reprendre</button>
+          <div id="resume-box" class="notice" hidden>
+            <strong>Réponses enregistrées sur ce navigateur</strong>
+            <span>Plusieurs brouillons peuvent coexister. Sur un appareil partagé, vérifiez bien le profil avant de reprendre ou supprimer une réponse.</span>
+            <div id="resume-list" class="resume-list"></div>
           </div>
         </section>
 
         <section id="questionnaire" hidden>
-          <div class="progress-row"><span class="eyebrow" id="audience-label"></span><span class="question-count" id="question-count"></span></div>
+          <div class="progress-row"><span class="eyebrow" id="audience-label"></span><span class="question-count" id="question-count" aria-live="polite"></span></div>
           <div class="progress" aria-hidden="true"><span id="progress-bar" style="width:0"></span></div>
           <div id="concept-card" class="concept" hidden>
             <strong>Voici le concept testé.</strong>
             <span>RésoSoin vise un site indépendant pour chaque cabinet, un agenda simple, des automatisations explicites, aucune IA imposée, un hébergement européen privilégiant la souveraineté juridique et un prix nettement inférieur aux grandes plateformes. Sans IA ne veut pas dire sans automatisation&nbsp;: rappels, confirmations, listes d’attente, créneaux et synchronisations peuvent fonctionner avec des règles déterministes.</span>
           </div>
           <form id="question-form">
-            <h1 id="question-title"></h1>
+            <h1 id="question-title" tabindex="-1"></h1>
             <p class="lead" id="question-help" hidden></p>
             <div id="question-options"></div>
             <div class="status" id="save-status" role="status" aria-live="polite"></div>

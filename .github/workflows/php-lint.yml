@@ -5,11 +5,13 @@ on:
     paths:
       - 'web/app.lepotager.org/**/*.php'
       - 'web/app.lepotager.org/resosoin/**'
+      - 'tests/resosoin-survey-core.test.js'
       - '.github/workflows/php-lint.yml'
   pull_request:
     paths:
       - 'web/app.lepotager.org/**/*.php'
       - 'web/app.lepotager.org/resosoin/**'
+      - 'tests/resosoin-survey-core.test.js'
       - '.github/workflows/php-lint.yml'
 
 permissions:
@@ -18,6 +20,7 @@ permissions:
 jobs:
   php-lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
 
     steps:
       - name: Checkout
@@ -45,7 +48,9 @@ jobs:
           set -euo pipefail
           php web/app.lepotager.org/resosoin/questionnaire/validate.php
           php -r 'json_decode(file_get_contents("web/app.lepotager.org/resosoin/questionnaire/questions.json"), true, 512, JSON_THROW_ON_ERROR);'
+          node --check web/app.lepotager.org/resosoin/questionnaire/assets/survey-core.js
           node --check web/app.lepotager.org/resosoin/questionnaire/assets/survey.js
+          node tests/resosoin-survey-core.test.js
 
       - name: Shared Stancer contribution contract
         shell: bash

@@ -4,13 +4,15 @@ CREATE TABLE IF NOT EXISTS resosoin_survey_sessions (
   resume_token_hash CHAR(64) NOT NULL UNIQUE,
   status VARCHAR(20) NOT NULL DEFAULT 'active',
   current_step VARCHAR(100) NULL,
-  survey_version VARCHAR(40) NOT NULL DEFAULT '2026-09-23-v1',
+  survey_version VARCHAR(40) NOT NULL DEFAULT '2026-09-23-v2',
+  recruitment_source VARCHAR(32) NOT NULL DEFAULT 'direct',
   consent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   submitted_at DATETIME NULL,
   INDEX idx_resosoin_audience_status (audience, status),
-  INDEX idx_resosoin_updated (updated_at)
+  INDEX idx_resosoin_updated (updated_at),
+  INDEX idx_resosoin_source (recruitment_source)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS resosoin_survey_answers (

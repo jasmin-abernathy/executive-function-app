@@ -30,3 +30,16 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid rgba(
 [hidden]{display:none!important}
 @media(max-width:680px){body{padding:10px}.audiences{grid-template-columns:1fr}.actions>*{flex:1 1 100%}.card{border-radius:20px}.header{align-items:flex-start;flex-direction:column}.scale{gap:4px}.scale span{min-height:40px;font-size:.9rem}}
 @media(prefers-reduced-motion:reduce){.progress>span{transition:none}}
+
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.question-fieldset{border:0;padding:0;margin:0;min-width:0}
+#question-title{scroll-margin-top:18px}
+.resume-list{display:grid;gap:10px;margin-top:12px}
+.resume-item{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:10px}
+.resume-item:first-child{border-top:0;padding-top:0}
+.resume-item strong,.resume-item small{display:block}
+.resume-item small{color:var(--muted);margin-top:.2rem}
+.resume-actions{display:flex;gap:8px;flex-wrap:wrap}
+.result-section{border-top:1px solid var(--line);padding-top:20px;margin-top:24px}
+.result-option{cursor:default}
+@media(max-width:680px){.resume-item{align-items:stretch;flex-direction:column}.resume-actions{display:grid}.resume-actions .btn{width:100%}}
