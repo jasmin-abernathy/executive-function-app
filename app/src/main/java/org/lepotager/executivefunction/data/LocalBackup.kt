@@ -6,7 +6,7 @@ import org.json.JSONObject
 
 /** Explicit plaintext export. Import is atomic and checks schema and foreign keys. */
 internal class LocalBackup(private val database: AppDatabase) {
-    private companion object {
+    companion object {
         // Keep one symmetric ceiling: this app must never create a backup that its own
         // importer rejects purely because of size. 32 MiB leaves headroom above the
         // historical 10,000,000-character cap while still bounding JSONObject memory use.
