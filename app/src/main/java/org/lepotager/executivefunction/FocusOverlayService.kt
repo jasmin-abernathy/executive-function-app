@@ -24,6 +24,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.domain.FocusTimeFormat
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.FocusStatus
 import kotlin.math.abs
@@ -130,6 +131,9 @@ class FocusOverlayService : Service() {
             gravity = Gravity.TOP or Gravity.END
             x = dp(12)
             y = dp(96)
+            // Android's PiP has no window-opacity setting. The separate floating
+            // timer is a real overlay and can be translucent.
+            alpha = 0.80f
         }
         installDragAndOpen(row, params)
         windowManager.addView(row, params)
@@ -236,12 +240,7 @@ class FocusOverlayService : Service() {
     }
 
     private fun formatTime(milliseconds: Long): String {
-        val seconds = milliseconds / 1_000
-        val hours = seconds / 3_600
-        val minutes = (seconds % 3_600) / 60
-        val remainder = seconds % 60
-        return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, remainder)
-        else "%02d:%02d".format(minutes, remainder)
+        return FocusTimeFormat.format(milliseconds)
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).roundToInt()

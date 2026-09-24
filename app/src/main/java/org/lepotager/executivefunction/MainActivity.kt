@@ -178,6 +178,10 @@ class MainActivity : ComponentActivity() {
                         org.lepotager.executivefunction.ui.QuickNoteDialog(
                             onDismiss = ::closeQuickNote,
                             onSave = { text -> viewModel.addQuickNote(text, ::closeQuickNote) },
+                            onViewNotes = {
+                                closeQuickNote()
+                                startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("section", "notes"))
+                            },
                         )
                     }
                     if (!externalCapture && !showQuickNote && !miniWindow) pendingStart?.let { request ->
@@ -239,6 +243,7 @@ class MainActivity : ComponentActivity() {
                                     activeFocus = requireNotNull(snapshot.activeFocus),
                                     modalBlocked = externalCapture || showQuickNote || pendingStart != null,
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("task",snapshot.activeFocus?.task?.id)) },
+                                    onNotes = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("section", "notes")) },
                                     onNote = { showQuickNote = true },
                                     onMini = ::enterMiniWindow,
                                     overlayEnabled = overlayEnabled,
@@ -260,6 +265,7 @@ class MainActivity : ComponentActivity() {
 
                                 else -> HomeScreen(
                                     tasks = snapshot.tasks,
+                                    resumableTaskElapsedMs = snapshot.resumableTaskElapsedMs,
                                     drawRequest = drawRequest,
                                     onApplySuggestedOrder = viewModel::applySuggestedOrder,
                                     eligibleDrawIds = snapshot.eligibleDrawIds,
@@ -271,6 +277,7 @@ class MainActivity : ComponentActivity() {
                                     pauseAfterMinutes = pauseAfterMinutes,
                                     onCapture = viewModel::capture,
                                     onStart = viewModel::requestStart,
+                                    onResumeTask = viewModel::resumePostponed,
                                     onMoveTask = viewModel::moveTask,
                                     onApplyTaskOrder = viewModel::applyTaskOrder,
                                     onSetTaskColor = viewModel::setTaskColor,

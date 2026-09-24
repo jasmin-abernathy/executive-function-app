@@ -19,7 +19,9 @@ import java.util.concurrent.Executors
 internal object FocusPresence {
     const val ID=3107
     const val CHANGED="org.lepotager.executivefunction.FOCUS_CHANGED"
-    private const val CHANNEL="active_focus"
+    // The previous channel was created with LOW importance. Android keeps that level
+    // across app updates, so a new ID is needed for a visible lock-screen timer.
+    private const val CHANNEL="focus_timer_visible_v2"
     fun sync(context: Context,active: ActiveFocus?) {
         val manager=context.getSystemService(NotificationManager::class.java)
         if(active==null) {manager.cancel(ID);PauseSchedule.cancel(context);return}
@@ -29,7 +31,10 @@ internal object FocusPresence {
     }
     fun build(context: Context,active: ActiveFocus): Notification {
         val manager=context.getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(NotificationChannel(CHANNEL,context.getString(R.string.focus_notification_channel),NotificationManager.IMPORTANCE_LOW))
+        manager.createNotificationChannel(NotificationChannel(CHANNEL,context.getString(R.string.focus_notification_channel),NotificationManager.IMPORTANCE_DEFAULT).apply {
+            setSound(null,null)
+            enableVibration(false)
+        })
         val running=active.session.status==FocusStatus.RUNNING
         val elapsed=SessionClock.elapsedMs(active.session,System.currentTimeMillis())
         val target=active.session.targetDurationMs
@@ -39,7 +44,8 @@ internal object FocusPresence {
             .setContentTitle(context.getString(R.string.focus_notification_channel))
             .setContentText(context.getString(if(running) R.string.floating_timer_running else R.string.resume_action))
             .setContentIntent(open).setOngoing(running).setSilent(true).setOnlyAlertOnce(true)
-            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            // No task title or note is placed in this public lock-screen notification.
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setUsesChronometer(running)
             .setWhen(System.currentTimeMillis() - elapsed + (target ?: 0L))
             .setChronometerCountDown(running && target!=null && target>elapsed)
@@ -52,7 +58,8 @@ internal object FocusPresence {
 }
 
 internal object PauseSchedule {
-    private const val CHANNEL="pause_reminders"
+    // Existing pause_reminders was DEFAULT; its importance cannot be raised in place.
+    private const val CHANNEL="pause_reminders_visible_v2"
     private fun prefs(context: Context)=context.getSharedPreferences("pause_schedule",Context.MODE_PRIVATE)
     fun deadline(context: Context,active: ActiveFocus,minutes: Int): Long {
         val p=prefs(context)
@@ -71,21 +78,28 @@ internal object PauseSchedule {
         return saved
     }
     fun set(context: Context,active: ActiveFocus,value: Long) {
-        prefs(context).edit().putLong(active.session.id,value).apply()
+        prefs(context).edit().putLong(active.session.id,value).remove("shown:"+active.session.id).apply()
         context.getSystemService(NotificationManager::class.java).cancel(3108)
         sync(context,active)
     }
     private fun pending(context: Context)=PendingIntent.getBroadcast(context,3108,Intent(context,FocusActionReceiver::class.java).setAction("pause_prompt"),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
     fun cancel(context: Context) {
-        context.getSystemService(AlarmManager::class.java).cancel(pending(context))
+        cancelAlarm(context)
+        prefs(context).edit().clear().apply()
         context.getSystemService(NotificationManager::class.java).cancel(3108)
     }
+    private fun cancelAlarm(context: Context) {
+        context.getSystemService(AlarmManager::class.java).cancel(pending(context))
+    }
     fun sync(context: Context,active: ActiveFocus) {
-        cancel(context)
+        cancelAlarm(context)
         val settings=context.getSharedPreferences("app_preferences",Context.MODE_PRIVATE)
-        if(active.session.status!=FocusStatus.RUNNING || !settings.getBoolean("pause_suggestions_enabled",true)) return
+        if(active.session.status!=FocusStatus.RUNNING || !settings.getBoolean("pause_suggestions_enabled",true)) {
+            context.getSystemService(NotificationManager::class.java).cancel(3108)
+            return
+        }
         val due=deadline(context,active,settings.getInt("pause_after_minutes",25))
-        if(due==Long.MAX_VALUE) return
+        if(prefs(context).getLong("shown:"+active.session.id,Long.MIN_VALUE)==due) return
         val left=due-SessionClock.elapsedMs(active.session,System.currentTimeMillis())
         // Inexact, user-requested reminder: no exact-alarm permission, no polling.
         context.getSystemService(AlarmManager::class.java).setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,System.currentTimeMillis()+left.coerceAtLeast(1000),pending(context))
@@ -94,21 +108,27 @@ internal object PauseSchedule {
         if(active.session.status!=FocusStatus.RUNNING) return
         val settings=context.getSharedPreferences("app_preferences",Context.MODE_PRIVATE)
         if(!settings.getBoolean("pause_suggestions_enabled",true)) return
-        if(deadline(context,active,settings.getInt("pause_after_minutes",25))>SessionClock.elapsedMs(active.session,System.currentTimeMillis())) return
+        val due=deadline(context,active,settings.getInt("pause_after_minutes",25))
+        if(due>SessionClock.elapsedMs(active.session,System.currentTimeMillis())) return
+        if(prefs(context).getLong("shown:"+active.session.id,Long.MIN_VALUE)==due) return
         if(Build.VERSION.SDK_INT>=33 && ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return
         val base=FocusPresence.build(context,active)
         context.getSystemService(NotificationManager::class.java).createNotificationChannel(
-            NotificationChannel(CHANNEL,context.getString(R.string.pause_suggestion_title),NotificationManager.IMPORTANCE_DEFAULT)
+            NotificationChannel(CHANNEL,context.getString(R.string.pause_suggestion_title),NotificationManager.IMPORTANCE_HIGH)
         )
         val notification=NotificationCompat.Builder(context,CHANNEL)
             .setSmallIcon(R.drawable.ic_timer_notification).setContentTitle(context.getString(R.string.pause_suggestion_title))
             .setContentText(context.getString(R.string.pause_suggestion_message,settings.getInt("pause_after_minutes",25)))
-            .setContentIntent(base.contentIntent).setAutoCancel(true)
+            .setContentIntent(base.contentIntent).setAutoCancel(false)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .addAction(0,context.getString(R.string.take_a_pause),FocusPresence.action(context,active,"pause"))
             .addAction(0,context.getString(R.string.remind_pause_later),FocusPresence.action(context,active,"later"))
             .addAction(0,context.getString(R.string.continue_without_pause),FocusPresence.action(context,active,"continue"))
             .build()
         context.getSystemService(NotificationManager::class.java).notify(3108,notification)
+        prefs(context).edit().putLong("shown:"+active.session.id,due).apply()
     }
 }
 

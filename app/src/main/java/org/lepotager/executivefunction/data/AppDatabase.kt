@@ -138,6 +138,25 @@ internal class AppDatabase(private val context: Context) :
         arrayOf(taskId),
     ).use { if (it.moveToFirst()) it.getLong(0) else 0L }
 
+    /** Only the latest occurrence of a task can be resumed. Completed newer work wins. */
+    fun latestPostponedSession(taskId: String): FocusSession? = readableDatabase.query(
+        "focus_sessions", SESSION_COLUMNS, "task_id = ?", arrayOf(taskId),
+        null, null, "updated_at DESC, rowid DESC", "1",
+    ).use { cursor ->
+        if (cursor.moveToFirst()) cursor.toSession().takeIf { it.status == FocusStatus.POSTPONED }
+        else null
+    }
+
+    fun resumePostponedFocus(session: FocusSession, firstStep: String?) = transaction { db ->
+        require(session.status == FocusStatus.RUNNING)
+        require(latestPostponedSession(session.taskId)?.id == session.id)
+        deactivateExistingFocus(db, session.updatedAt)
+        updateTaskStatus(db, session.taskId, TaskStatus.IN_PROGRESS, session.updatedAt)
+        val values = ContentValues().apply { putNullableString("first_step", firstStep) }
+        require(db.update("tasks", values, "id = ?", arrayOf(session.taskId)) == 1)
+        updateSession(db, session, isActive = true)
+    }
+
     fun nextTaskPosition(): Long = readableDatabase.rawQuery(
         "SELECT COALESCE(MAX(sort_position), -1) + 1 FROM tasks",
         null,

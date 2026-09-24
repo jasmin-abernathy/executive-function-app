@@ -31,17 +31,21 @@ fun ExternalCaptureDialog(onDismiss: () -> Unit, onCapture: (String) -> Unit) {
 }
 
 @Composable
-fun QuickNoteDialog(onDismiss: () -> Unit, onSave: (String) -> Unit) {
+fun QuickNoteDialog(onDismiss: () -> Unit, onSave: (String) -> Unit, onViewNotes: () -> Unit = {}) {
     var text by rememberSaveable { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.quick_note_title)) },
         text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                label = { Text(stringResource(R.string.quick_note_label)) },
-            )
+            androidx.compose.foundation.layout.Column {
+                Text(stringResource(R.string.quick_note_explanation))
+                OutlinedTextField(
+                    value = text,
+                    onValueChange = { text = it },
+                    label = { Text(stringResource(R.string.quick_note_label)) },
+                )
+                TextButton(onClick = onViewNotes) { Text(stringResource(R.string.view_saved_notes)) }
+            }
         },
         confirmButton = {
             TextButton(enabled = text.isNotBlank(), onClick = { onSave(text) }) {

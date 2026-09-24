@@ -91,6 +91,8 @@ internal fun FirstRunSetupFlow(
     onSkip: () -> Unit,
 ) {
     var page by rememberSaveable { mutableIntStateOf(0) }
+    var showMoreDifficulties by rememberSaveable { mutableStateOf(false) }
+    var showReviewDetails by rememberSaveable { mutableStateOf(false) }
     var difficultyName by rememberSaveable { mutableStateOf("") }
     var supportNames by rememberSaveable { mutableStateOf("") }
     var timerModeName by rememberSaveable { mutableStateOf(initial.timerMode.name) }
@@ -189,6 +191,8 @@ internal fun FirstRunSetupFlow(
                 0 -> SetupIntro()
                 1 -> DifficultyQuestion(
                     selected = difficulty,
+                    expanded = showMoreDifficulties,
+                    onExpand = { showMoreDifficulties = true },
                     onSelect = {
                         difficultyName = it.name
                         supportNames = ""
@@ -235,6 +239,8 @@ internal fun FirstRunSetupFlow(
                 )
                 5 -> SetupReview(
                     difficulty = requireNotNull(difficulty),
+                    showDetails = showReviewDetails,
+                    onToggleDetails = { showReviewDetails = !showReviewDetails },
                     timerMode = timerMode,
                     drawEnabled = drawEnabled,
                     pauseEnabled = pauseEnabled,
@@ -269,6 +275,17 @@ internal fun FirstRunSetupFlow(
                         },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.setup_apply)) }
+                } else if (page == 2) {
+                    Button(
+                        enabled = canContinue,
+                        onClick = { applyBranchDefaults(); page = 5 },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_quick_start)) }
+                    TextButton(
+                        enabled = canContinue,
+                        onClick = { applyBranchDefaults(); page = 3 },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_advanced_options)) }
                 } else {
                     Button(
                         enabled = canContinue,
@@ -322,16 +339,31 @@ private fun SetupIntro() {
 @Composable
 private fun DifficultyQuestion(
     selected: FirstRunDifficulty?,
+    expanded: Boolean,
+    onExpand: () -> Unit,
     onSelect: (FirstRunDifficulty) -> Unit,
 ) {
     QuestionHeader(R.string.setup_difficulty_eyebrow, R.string.setup_difficulty_title, R.string.setup_difficulty_help)
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        difficultyOptions().forEach { (value, label) ->
-            ChoiceButton(
-                text = stringResource(label),
-                selected = selected == value,
-                onClick = { onSelect(value) },
-            )
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        val choices = difficultyOptions().let { if (expanded) it else it.take(4) }
+        choices.chunked(2).forEach { pair ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                pair.forEach { (value, label) ->
+                    val chosen = selected == value
+                    if (chosen) FilledTonalButton(
+                        onClick = { onSelect(value) },
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 96.dp),
+                    ) { Text(stringResource(label), textAlign = TextAlign.Center) }
+                    else OutlinedButton(
+                        onClick = { onSelect(value) },
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 96.dp),
+                    ) { Text(stringResource(label), textAlign = TextAlign.Center) }
+                }
+                if (pair.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+        if (!expanded) TextButton(onClick = onExpand) {
+            Text(stringResource(R.string.setup_more_situations))
         }
     }
 }
@@ -486,6 +518,8 @@ private fun LocalBehaviourQuestion(
 @Composable
 private fun SetupReview(
     difficulty: FirstRunDifficulty,
+    showDetails: Boolean,
+    onToggleDetails: () -> Unit,
     timerMode: FocusTimerMode,
     drawEnabled: Boolean,
     pauseEnabled: Boolean,
@@ -507,11 +541,16 @@ private fun SetupReview(
             if (pauseEnabled) stringResource(R.string.setup_review_enabled_minutes, pauseMinutes)
             else stringResource(R.string.setup_review_disabled),
         )
-        ReviewLine(stringResource(R.string.random_draw_option), yesNo(drawEnabled))
-        ReviewLine(stringResource(R.string.setup_checkin_title), yesNo(checkInEnabled))
-        ReviewLine(stringResource(R.string.setup_adaptation_title), yesNo(adaptationEnabled))
-        ReviewLine(stringResource(R.string.setup_calm_title), yesNo(calmMode))
-        ReviewLine(stringResource(R.string.setup_auto_mini_title), yesNo(autoMini))
+        if (showDetails) {
+            ReviewLine(stringResource(R.string.random_draw_option), yesNo(drawEnabled))
+            ReviewLine(stringResource(R.string.setup_checkin_title), yesNo(checkInEnabled))
+            ReviewLine(stringResource(R.string.setup_adaptation_title), yesNo(adaptationEnabled))
+            ReviewLine(stringResource(R.string.setup_calm_title), yesNo(calmMode))
+            ReviewLine(stringResource(R.string.setup_auto_mini_title), yesNo(autoMini))
+        }
+        TextButton(onClick = onToggleDetails) {
+            Text(stringResource(if (showDetails) R.string.setup_hide_details else R.string.setup_show_details))
+        }
         Text(
             stringResource(R.string.setup_review_note),
             style = MaterialTheme.typography.bodySmall,

@@ -70,6 +70,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.delay
 import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.domain.FocusTimeFormat
 import org.lepotager.executivefunction.domain.TaskDraw
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.TaskColor
@@ -78,6 +79,7 @@ import org.lepotager.executivefunction.model.TaskItem
 @Composable
 fun HomeScreen(
     tasks: List<TaskItem>,
+    resumableTaskElapsedMs: Map<String, Long> = emptyMap(),
     onJournal: () -> Unit = {},
     onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
@@ -89,6 +91,7 @@ fun HomeScreen(
     pauseAfterMinutes: Int,
     onCapture: (String, String?, TaskColor, () -> Unit) -> Unit,
     onStart: (String) -> Unit,
+    onResumeTask: (String) -> Unit = {},
     onMoveTask: (String, Int) -> Unit,
     onApplyTaskOrder: (List<String>, (Boolean) -> Unit) -> Unit,
     onSetTaskColor: (String, TaskColor) -> Unit,
@@ -291,6 +294,7 @@ fun HomeScreen(
                 itemsIndexed(reorder.visibleTasks, key = { _, task -> task.id }) { index, task ->
                     TaskCard(
                         task = task,
+                        resumableElapsedMs = resumableTaskElapsedMs[task.id],
                         handleModifier = reorder.handle(task.id, !isDrawing && !reorder.saving),
                         organizing = organizing,
                         canMoveUp = index > 0 && !reorder.saving && reorder.dragged == null && !isDrawing,
@@ -299,6 +303,7 @@ fun HomeScreen(
                         onMoveDown = { onMoveTask(task.id, 1) },
                         onSetColor = { onSetTaskColor(task.id, it) },
                         onStart = { onStart(task.id) },
+                        onResume = { onResumeTask(task.id) },
                     )
                 }
             }
@@ -614,6 +619,7 @@ private fun TaskDrawPanel(
 @Composable
 private fun TaskCard(
     task: TaskItem,
+    resumableElapsedMs: Long? = null,
     handleModifier: Modifier = Modifier,
     organizing: Boolean,
     canMoveUp: Boolean,
@@ -622,6 +628,7 @@ private fun TaskCard(
     onMoveDown: () -> Unit,
     onSetColor: (TaskColor) -> Unit,
     onStart: () -> Unit,
+    onResume: () -> Unit = {},
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -667,6 +674,13 @@ private fun TaskCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+            if (resumableElapsedMs != null) {
+                Text(
+                    stringResource(R.string.resume_saved_time, formatElapsed(resumableElapsedMs)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
             if (organizing) {
                 Text(
                     text = stringResource(R.string.choose_task_color),
@@ -691,13 +705,13 @@ private fun TaskCard(
                 }
             }
             Button(
-                onClick = onStart,
+                onClick = if (resumableElapsedMs != null) onResume else onStart,
                 colors = appButtonColors(),
                 modifier = Modifier.sizeIn(minHeight = 48.dp),
             ) {
                 ToolGlyph(ToolGlyphKind.START)
                 Spacer(Modifier.size(8.dp))
-                Text(stringResource(R.string.start_action))
+                Text(stringResource(if (resumableElapsedMs != null) R.string.resume_action else R.string.start_action))
             }
         }
     }
@@ -708,6 +722,7 @@ fun FocusScreen(
     activeFocus: ActiveFocus,
     modalBlocked: Boolean = false,
     onJournal: () -> Unit = {},
+    onNotes: () -> Unit = {},
     onMini: () -> Unit = {},
     onNote: () -> Unit = {},
     overlayEnabled: Boolean,
@@ -769,7 +784,6 @@ fun FocusScreen(
         (displayedSeconds % 3_600) / 60,
         displayedSeconds % 60,
     )
-    val captureDescription = stringResource(R.string.focus_tool_capture)
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -834,16 +848,20 @@ fun FocusScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                UtilityIconButton(
-                    UtilityGlyphKind.NOTE,
-                    stringResource(R.string.focus_tool_note),
-                    onNote,
-                )
-                IconButton(
-                    onClick = { showCapture = true },
-                    modifier = Modifier.sizeIn(minWidth = 48.dp, minHeight = 48.dp)
-                        .semantics { contentDescription = captureDescription },
-                ) { ToolGlyph(ToolGlyphKind.CAPTURE) }
+                OutlinedButton(onClick = onNote, modifier = Modifier.weight(1f).sizeIn(minHeight = 48.dp)) {
+                    Text(stringResource(R.string.focus_tool_note))
+                }
+                Spacer(Modifier.size(8.dp))
+                OutlinedButton(onClick = { showCapture = true }, modifier = Modifier.weight(1f).sizeIn(minHeight = 48.dp)) {
+                    Text(stringResource(R.string.create_task_action))
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = onNotes) { Text(stringResource(R.string.view_saved_notes)) }
                 UtilityIconButton(
                     UtilityGlyphKind.MINI_WINDOW,
                     stringResource(R.string.focus_tool_mini_window),
@@ -868,6 +886,16 @@ fun FocusScreen(
                         TextButton(onClick = onJournal, colors = appTextButtonColors()) {
                             Text(stringResource(R.string.open_journal))
                         }
+                        val context = androidx.compose.ui.platform.LocalContext.current
+                        TextButton(
+                            onClick = {
+                                context.startActivity(
+                                    android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                        .putExtra(android.provider.Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                )
+                            },
+                            colors = appTextButtonColors(),
+                        ) { Text(stringResource(R.string.lock_screen_notifications_settings)) }
                         FilledTonalButton(
                             onClick = onToggleOverlay,
                             colors = appTonalButtonColors(),
@@ -1074,15 +1102,18 @@ private fun CaptureDialog(onDismiss: () -> Unit, onCapture: (String) -> Unit) {
     var value by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.quick_capture_title)) },
+        title = { Text(stringResource(R.string.create_task_action)) },
         text = {
-            OutlinedTextField(
-                value = value,
-                onValueChange = { value = it },
-                label = { Text(stringResource(R.string.capture_label)) },
-                singleLine = true,
-                colors = appTextFieldColors(),
-            )
+            Column {
+                Text(stringResource(R.string.create_task_explanation))
+                OutlinedTextField(
+                    value = value,
+                    onValueChange = { value = it },
+                    label = { Text(stringResource(R.string.capture_label)) },
+                    singleLine = true,
+                    colors = appTextFieldColors(),
+                )
+            }
         },
         confirmButton = {
             TextButton(
@@ -1282,9 +1313,5 @@ private fun appTextFieldColors() = OutlinedTextFieldDefaults.colors(
 private fun appBorder() = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
 
 private fun formatElapsed(milliseconds: Long): String {
-    val totalSeconds = milliseconds / 1_000
-    val hours = totalSeconds / 3_600
-    val minutes = (totalSeconds % 3_600) / 60
-    val seconds = totalSeconds % 60
-    return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, seconds) else "%02d:%02d".format(minutes, seconds)
+    return FocusTimeFormat.format(milliseconds)
 }

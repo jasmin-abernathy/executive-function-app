@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.domain.FocusTimeFormat
 import kotlinx.coroutines.delay
 import androidx.lifecycle.repeatOnLifecycle
 
@@ -22,7 +23,7 @@ fun MiniTimer(active: ActiveFocus) {
     Surface(Modifier.fillMaxSize()) {
         Column(Modifier.padding(8.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center) {
             Text(active.task.title,maxLines=2)
-            Text((if(target!=null&&elapsed>target) "+" else "")+"${duration/60000}:${((duration/1000)%60).toString().padStart(2,'0')}",style=MaterialTheme.typography.headlineMedium)
+            Text((if(target!=null&&elapsed>target) "+" else "")+FocusTimeFormat.format(duration),style=MaterialTheme.typography.headlineMedium)
         }
     }
 }

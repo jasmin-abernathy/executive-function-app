@@ -55,6 +55,7 @@ data class ActiveFocus(
 data class AppSnapshot(
     val tasks: List<TaskItem> = emptyList(),
     val activeFocus: ActiveFocus? = null,
+    val resumableTaskElapsedMs: Map<String, Long> = emptyMap(),
     val loading: Boolean = true,
     val eligibleDrawIds: Set<String>? = null,
     val suggestedTaskId: String? = null,
