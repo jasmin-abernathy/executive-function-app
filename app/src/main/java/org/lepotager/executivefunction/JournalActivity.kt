@@ -130,7 +130,7 @@ class JournalActivity : ComponentActivity() {
                             while(true) {
                                 val count=input.read(buffer)
                                 if(count<0) break
-                                require(output.size()+count<=10_000_000)
+                                require(output.size()+count<=LocalBackup.MAX_BACKUP_BYTES)
                                 output.write(buffer,0,count)
                             }
                             output.toString("UTF-8")
