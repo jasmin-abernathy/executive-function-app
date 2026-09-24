@@ -9,6 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.domain.FocusTransitions
+import org.lepotager.executivefunction.domain.PauseReminderTimes
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.FocusStatus
@@ -55,8 +56,18 @@ internal object PauseSchedule {
     fun deadline(context: Context,active: ActiveFocus,minutes: Int): Long {
         val p=prefs(context)
         val key=active.session.id
-        if(!p.contains(key)) p.edit().putLong(key,SessionClock.elapsedMs(active.session,System.currentTimeMillis())+minutes*60_000L).apply()
-        return p.getLong(key,Long.MAX_VALUE)
+        // The first prompt is measured from the beginning of the session, even if the
+        // activity is reopened much later. Resumed sessions get an explicit new deadline.
+        if(!p.contains(key)) p.edit().putLong(key,PauseReminderTimes.first(minutes)).apply()
+        val saved=p.getLong(key,Long.MAX_VALUE)
+        // Earlier builds wrote MAX_VALUE when the user chose "Continue". Recover that
+        // state so existing long-running sessions receive reminders again.
+        if(saved==Long.MAX_VALUE) {
+            val next=PauseReminderTimes.afterContinue(SessionClock.elapsedMs(active.session,System.currentTimeMillis()),minutes)
+            p.edit().putLong(key,next).apply()
+            return next
+        }
+        return saved
     }
     fun set(context: Context,active: ActiveFocus,value: Long) {
         prefs(context).edit().putLong(active.session.id,value).apply()
@@ -115,8 +126,11 @@ class FocusActionReceiver : BroadcastReceiver() {
                         PauseSchedule.set(context,updated,SessionClock.elapsedMs(updated.session,System.currentTimeMillis())+minutes*60_000L)
                     }
                     "complete" -> db.closeFocus(FocusTransitions.finish(active.session,System.currentTimeMillis(),FocusStatus.COMPLETED),TaskStatus.COMPLETED)
-                    "later" -> PauseSchedule.set(context,active,SessionClock.elapsedMs(active.session,System.currentTimeMillis())+600_000)
-                    "continue" -> PauseSchedule.set(context,active,Long.MAX_VALUE)
+                    "later" -> PauseSchedule.set(context,active,PauseReminderTimes.afterSnooze(SessionClock.elapsedMs(active.session,System.currentTimeMillis())))
+                    "continue" -> {
+                        val minutes=context.getSharedPreferences("app_preferences",Context.MODE_PRIVATE).getInt("pause_after_minutes",25).coerceIn(5,120)
+                        PauseSchedule.set(context,active,PauseReminderTimes.afterContinue(SessionClock.elapsedMs(active.session,System.currentTimeMillis()),minutes))
+                    }
                 }
                 FocusPresence.sync(context,db.activeFocus())
             } catch (_: Exception) {

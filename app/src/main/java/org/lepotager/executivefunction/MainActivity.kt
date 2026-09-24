@@ -427,11 +427,22 @@ class MainActivity : ComponentActivity() {
     private fun savePausePreference(enabled: Boolean) {
         pauseSuggestionsEnabled = enabled
         appPreferences().edit().putBoolean(KEY_PAUSE_ENABLED, enabled).apply()
+        viewModel.snapshot.value.activeFocus?.let { FocusPresence.sync(this, it) }
     }
 
     private fun savePauseInterval(minutes: Int) {
         pauseAfterMinutes = minutes.coerceIn(5, 120)
         appPreferences().edit().putInt(KEY_PAUSE_MINUTES, pauseAfterMinutes).apply()
+        viewModel.snapshot.value.activeFocus?.let { active ->
+            PauseSchedule.set(
+                this,
+                active,
+                org.lepotager.executivefunction.domain.PauseReminderTimes.afterContinue(
+                    org.lepotager.executivefunction.domain.SessionClock.elapsedMs(active.session, System.currentTimeMillis()),
+                    pauseAfterMinutes,
+                ),
+            )
+        }
     }
 
     private fun markIntroSeen() {
