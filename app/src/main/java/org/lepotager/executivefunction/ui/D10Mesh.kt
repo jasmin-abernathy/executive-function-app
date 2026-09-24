@@ -34,13 +34,16 @@ internal fun D10Mesh(progress: Float, face: Int, modifier: Modifier = Modifier) 
         }
         val belt = (0..9).map {
             val angle = it * PI / 5
-            rotate(Vertex(cos(angle).toFloat(), if (it % 2 == 0) -.28f else .28f, sin(angle).toFloat()))
+            rotate(Vertex((1.12 * cos(angle)).toFloat(), if (it % 2 == 0) -.24f else .24f,
+                (1.12 * sin(angle)).toFloat()))
         }
-        val top = rotate(Vertex(0f, -1.35f, 0f))
-        val bottom = rotate(Vertex(0f, 1.35f, 0f))
+        // A broad equator and shorter poles read as a ten-sided die rather than spikes.
+        val top = rotate(Vertex(0f, -.98f, 0f))
+        val bottom = rotate(Vertex(0f, .98f, 0f))
         val faces = (0..9).map { i ->
             i to listOf(if (i % 2 == 0) top else bottom, belt[i], belt[(i + 1) % 10], belt[(i + 2) % 10])
-        }.sortedBy { (_, vertices) -> vertices.sumOf { it.z.toDouble() } }
+        }.filter { (_, vertices) -> vertices.sumOf { it.z.toDouble() } / 4 >= -.08 }
+            .sortedBy { (_, vertices) -> vertices.sumOf { it.z.toDouble() } }
         fun project(v: Vertex): Offset {
             val scale = size.minDimension * .30f * 4f / (4f - v.z)
             return Offset(center.x + v.x * scale, center.y + v.y * scale)

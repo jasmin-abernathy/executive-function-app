@@ -193,11 +193,10 @@ internal fun AnimatedDieBadge(
         modifier = modifier
             .semantics { contentDescription = description }
             .graphicsLayer {
-                rotationZ = if (rolling) 720f * fraction else 0f
-                rotationX = if (rolling) 24f * sin(PI * fraction * 2).toFloat() else 0f
-                rotationY = if (rolling) 18f * sin(PI * fraction * 3).toFloat() else 0f
-                translationY = -32.dp.toPx() * jump
-                val scale = 1f + 0.12f * jump
+                // The mesh already rotates in 3D; spinning its entire silhouette makes
+                // the poles look like moving spikes.
+                translationY = -18.dp.toPx() * jump
+                val scale = 1f + 0.06f * jump
                 scaleX = scale
                 scaleY = scale
                 shadowElevation = (4.dp + 10.dp * jump).toPx()
