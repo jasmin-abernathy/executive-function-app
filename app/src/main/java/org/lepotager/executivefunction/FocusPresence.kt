@@ -52,6 +52,7 @@ internal object FocusPresence {
 }
 
 internal object PauseSchedule {
+    private const val CHANNEL="pause_reminders"
     private fun prefs(context: Context)=context.getSharedPreferences("pause_schedule",Context.MODE_PRIVATE)
     fun deadline(context: Context,active: ActiveFocus,minutes: Int): Long {
         val p=prefs(context)
@@ -96,7 +97,10 @@ internal object PauseSchedule {
         if(deadline(context,active,settings.getInt("pause_after_minutes",25))>SessionClock.elapsedMs(active.session,System.currentTimeMillis())) return
         if(Build.VERSION.SDK_INT>=33 && ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return
         val base=FocusPresence.build(context,active)
-        val notification=NotificationCompat.Builder(context,"active_focus")
+        context.getSystemService(NotificationManager::class.java).createNotificationChannel(
+            NotificationChannel(CHANNEL,context.getString(R.string.pause_suggestion_title),NotificationManager.IMPORTANCE_DEFAULT)
+        )
+        val notification=NotificationCompat.Builder(context,CHANNEL)
             .setSmallIcon(R.drawable.ic_timer_notification).setContentTitle(context.getString(R.string.pause_suggestion_title))
             .setContentText(context.getString(R.string.pause_suggestion_message,settings.getInt("pause_after_minutes",25)))
             .setContentIntent(base.contentIntent).setAutoCancel(true)
