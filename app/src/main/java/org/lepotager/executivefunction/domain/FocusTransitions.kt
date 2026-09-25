@@ -16,7 +16,7 @@ object FocusTransitions {
     }
 
     fun resume(session: FocusSession, now: Long): FocusSession {
-        require(session.status == FocusStatus.INTERRUPTED)
+        require(session.status == FocusStatus.INTERRUPTED || session.status == FocusStatus.POSTPONED)
         return session.copy(
             status = FocusStatus.RUNNING,
             segmentStartedAt = now,

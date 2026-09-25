@@ -118,6 +118,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun postpone() = launch { repository.postpone() }
 
+    fun resumePostponed(taskId: String) = launch { repository.resumePostponed(taskId) }
+
     fun complete() {
         val active = snapshot.value.activeFocus
         val remainingMs = active?.session?.targetDurationMs?.let { target ->

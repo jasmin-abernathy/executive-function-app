@@ -30,7 +30,11 @@ class OnboardingAndTimerChoiceTest {
     )
 
     private fun clickText(text: String) {
-        compose.onNodeWithText(text).performScrollTo().performClick()
+        try {
+            compose.onNodeWithText(text).performScrollTo().performClick()
+        } catch (failure: AssertionError) {
+            throw AssertionError("Impossible de cliquer sur « $text »", failure)
+        }
         compose.waitForIdle()
     }
 
@@ -70,6 +74,49 @@ class OnboardingAndTimerChoiceTest {
     }
 
     @Test
+    fun quickStartSkipsDenseSettingsAndShowsShortReview() {
+        var applied: FirstRunSetupConfig? = null
+        compose.setContent {
+            ExecutiveFunctionTheme { FirstRunSetupFlow(baseline(), { applied = it }, {}) }
+        }
+        clickText("Suivant")
+        clickText("Rester sur l’activité")
+        clickText("Suivant")
+        clickText("Me proposer une pause après un moment")
+        clickText("Commencer avec ces aides")
+        compose.onNodeWithText("Adaptation facultative").assertDoesNotExist()
+        clickText("Appliquer ces réglages")
+        compose.runOnIdle { assertEquals(true, applied?.pauseSuggestionsEnabled) }
+    }
+
+    @Test
+    fun quickStartKeepsExplicitDieAndPauseChoicesAndPreviewDoesNotSelectTask() {
+        var applied: FirstRunSetupConfig? = null
+        compose.setContent {
+            ExecutiveFunctionTheme { FirstRunSetupFlow(baseline(), { applied = it }, {}) }
+        }
+        clickText("Suivant")
+        clickText("Décider quoi faire en premier")
+        clickText("Suivant")
+        clickText("Utiliser le dé quand choisir devient difficile")
+        compose.onNodeWithTag("setup-die-enabled").performScrollTo().performClick()
+        clickText("Essayer le dé")
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasText("Tu es revenu au choix des aides.", substring = true))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+        compose.onNodeWithText("Tirage au dé").performScrollTo().assertExists()
+        compose.onNodeWithText("Propositions de pause").performScrollTo().assertExists()
+        clickText("Commencer avec ces aides")
+        compose.onNodeWithText("Tirage au dé").assertExists()
+        clickText("Appliquer ces réglages")
+        compose.runOnIdle {
+            assertEquals(false, applied?.drawEnabled)
+            assertEquals(false, applied?.pauseSuggestionsEnabled)
+        }
+    }
+
+    @Test
     fun minimalInterventionReplacesContradictorySupportChoices() {
         var applied: FirstRunSetupConfig? = null
         compose.setContent {
@@ -84,7 +131,7 @@ class OnboardingAndTimerChoiceTest {
         clickText("Me proposer une pause après un moment")
         clickText("Garder une petite fenêtre quand je quitte le focus")
         clickText("Le moins d’interventions possible")
-        clickText("Suivant") // support -> focus defaults
+        clickText("Personnaliser davantage") // support -> focus defaults
         clickText("Suivant") // focus defaults -> automatic supports
         clickText("Suivant") // automatic supports -> review
         clickText("Appliquer ces réglages")
@@ -110,7 +157,7 @@ class OnboardingAndTimerChoiceTest {
         clickText("Garder la notion du temps")
         clickText("Suivant")
         clickText("Me proposer une pause après un moment")
-        clickText("Suivant")
+        clickText("Personnaliser davantage")
         clickText("Minuteur par défaut — je choisis une durée")
         clickText("45 min")
         clickText("Suivant")
@@ -137,7 +184,7 @@ class OnboardingAndTimerChoiceTest {
         clickText("Garder la notion du temps")
         clickText("Suivant")
         clickText("Me proposer une pause après un moment")
-        clickText("Suivant")
+        clickText("Personnaliser davantage")
         clickText("Autre durée")
         compose.onNodeWithTag("setup-custom-pause-minutes")
             .performScrollTo()

@@ -143,6 +143,14 @@ class FocusRepository internal constructor(
 
     suspend fun postpone() = close(FocusStatus.POSTPONED, TaskStatus.READY)
 
+    suspend fun resumePostponed(taskId: String) = mutate {
+        val task = requireNotNull(database.taskById(taskId))
+        require(task.status == TaskStatus.READY)
+        val previous = requireNotNull(database.latestPostponedSession(taskId))
+        database.resumePostponedFocus(FocusTransitions.resume(previous, now()), task.firstStep)
+        refresh()
+    }
+
     suspend fun complete() = close(FocusStatus.COMPLETED, TaskStatus.COMPLETED)
 
     private suspend fun close(focusStatus: FocusStatus, taskStatus: TaskStatus) = mutate {
@@ -171,6 +179,9 @@ class FocusRepository internal constructor(
         mutableSnapshot.value = AppSnapshot(
             tasks = tasks,
             activeFocus = database.activeFocus(),
+            resumableTaskElapsedMs = tasks.mapNotNull { task ->
+                database.latestPostponedSession(task.id)?.let { task.id to it.elapsedBeforeSegmentMs }
+            }.toMap(),
             loading = false,
             eligibleDrawIds = eligible,
             suggestedTaskId = if(eligible==null) null else tasks.filter { it.id in eligible && it.status==TaskStatus.READY }.maxByOrNull { journal.planning(it.id).importance }?.id,

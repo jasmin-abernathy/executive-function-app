@@ -18,6 +18,13 @@
     <string name="task_color_sand">Sand yellow</string>
     <string name="support_options_title">Optional supports</string>
     <string name="random_draw_option">Task die</string>
+    <string name="setup_try_die">Try the die</string>
+    <string name="setup_die_preview_description">Die preview, without choosing a task</string>
+    <string name="setup_demo_explanation">Try with three sample tasks. None will be added.</string>
+    <string name="setup_demo_task_one">Tidy one corner of the desk</string>
+    <string name="setup_demo_task_two">Drink a glass of water</string>
+    <string name="setup_demo_task_three">Reply to a message</string>
+    <string name="setup_demo_result">Tryout: %1$s. Back to choosing your supports.</string>
     <string name="random_draw_option_support">Use it only when choosing feels difficult.</string>
     <string name="pause_suggestions_option">Pause suggestions</string>
     <string name="pause_suggestions_support">The timer keeps running until you choose to pause.</string>
@@ -46,7 +53,7 @@
     <string name="take_a_pause">Take a pause</string>
     <string name="remind_pause_later">Remind me in 10 min</string>
     <string name="continue_without_pause">Keep going</string>
-    <string name="show_floating_timer">Keep the timer on screen</string>
+    <string name="show_floating_timer">Translucent floating timer</string>
     <string name="hide_floating_timer">Hide the floating timer</string>
     <string name="floating_timer_running">Focus session in progress</string>
     <string name="focus_notification_channel">Active focus session</string>
@@ -60,6 +67,11 @@
         <item quantity="other">Finished about %1$d minutes early. This is not a score: the margin is there to support you.</item>
     </plurals>
     <string name="quick_capture_title">Keep the thought for later</string>
+    <string name="create_task_action">New task</string>
+    <string name="create_task_explanation">This idea becomes a task in your list. It does not start the timer.</string>
+    <string name="quick_note_explanation">This note does not create a task. Find it in Journal → Notes.</string>
+    <string name="view_saved_notes">View my notes</string>
+    <string name="lock_screen_notifications_settings">Lock screen display: Android settings</string>
     <string name="interrupt_title">Keep your place</string>
     <string name="interrupt_explanation">You can return right here. A note may help, but it is optional.</string>
     <string name="interrupt_note_optional">Where were you? (optional)</string>
@@ -68,6 +80,12 @@
     <string name="resume_subtitle">There is nothing to catch up on. Just choose what helps now.</string>
     <string name="resume_context">You were here: %1$s</string>
     <string name="resume_action">Resume</string>
+    <string name="resume_saved_time">Time already spent: %1$s. Pick up where you left off.</string>
+    <string name="setup_quick_start">Start with these supports</string>
+    <string name="setup_advanced_options">Customize further</string>
+    <string name="setup_more_situations">More situations</string>
+    <string name="setup_show_details">Show all settings</string>
+    <string name="setup_hide_details">Hide details</string>
     <string name="make_smaller_action">Make the first step smaller</string>
     <string name="choose_another_action">Postpone and choose something else</string>
     <string name="make_smaller_title">What is the smallest possible step?</string>
@@ -109,7 +127,8 @@
     <string name="focus_tools_less">Hide other tools</string>
     <string name="focus_tool_note">Add a note</string>
     <string name="focus_tool_capture">Note a new task</string>
-    <string name="focus_tool_mini_window">Open the mini window</string>
+    <string name="focus_tool_mini_window">Open the translucent floating timer</string>
+    <string name="focus_tool_pip">Open Android mini window (opaque)</string>
     <string name="focus_pause_short">Pause</string>
     <string name="focus_finish_short">Finish</string>
 

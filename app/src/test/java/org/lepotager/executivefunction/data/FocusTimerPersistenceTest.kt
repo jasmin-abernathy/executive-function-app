@@ -19,6 +19,37 @@ class FocusTimerPersistenceTest {
     @Test fun stopwatchSurvivesPauseResumeAndDatabaseReopen() = verifyPersistence(null)
     @Test fun countdownSurvivesPauseResumeAndDatabaseReopen() = verifyPersistence(300_000L)
 
+    @Test fun postponedTaskResumesSameSessionAndKeepsContext() = runBlocking {
+        val context: Context = RuntimeEnvironment.getApplication()
+        val database = AppDatabase(context)
+        context.deleteDatabase(database.databaseName)
+        var now = 1_000_000L
+        try {
+            val repository = FocusRepository(database, Dispatchers.Unconfined, now = { now })
+            repository.capture("Lire", "Page 3")
+            val taskId = repository.snapshot.value.tasks.single().id
+            repository.start(taskId, 600_000L)
+            val originalId = database.activeFocus()!!.session.id
+            now += 120_000L
+            repository.interrupt("Paragraphe du milieu")
+            repository.postpone()
+            assertEquals(120_000L, repository.snapshot.value.resumableTaskElapsedMs[taskId])
+            now += 900_000L
+            repository.resumePostponed(taskId)
+            val resumed = database.activeFocus()!!
+            assertEquals(originalId, resumed.session.id)
+            assertEquals(600_000L, resumed.session.targetDurationMs)
+            assertEquals(120_000L, SessionClock.elapsedMs(resumed.session, now))
+            assertEquals("Paragraphe du milieu", resumed.session.interruptionNote)
+            assertEquals("Page 3", resumed.task.firstStep)
+            repository.addQuickNote("Idée à garder")
+            assertEquals("Idée à garder", LearningJournal(database).notes().single().text)
+        } finally {
+            database.close()
+            context.deleteDatabase(database.databaseName)
+        }
+    }
+
     private fun verifyPersistence(target: Long?) = runBlocking {
         val context: Context = RuntimeEnvironment.getApplication()
         var database = AppDatabase(context)

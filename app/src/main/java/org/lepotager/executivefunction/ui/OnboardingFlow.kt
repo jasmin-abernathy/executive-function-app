@@ -91,6 +91,15 @@ internal fun FirstRunSetupFlow(
     onSkip: () -> Unit,
 ) {
     var page by rememberSaveable { mutableIntStateOf(0) }
+    var showMoreDifficulties by rememberSaveable { mutableStateOf(false) }
+    var showReviewDetails by rememberSaveable { mutableStateOf(false) }
+    var quickRoute by rememberSaveable { mutableStateOf(false) }
+    var drawCustomized by rememberSaveable { mutableStateOf(false) }
+    var pauseCustomized by rememberSaveable { mutableStateOf(false) }
+    var diePreviewRoll by rememberSaveable { mutableIntStateOf(0) }
+    var diePreviewing by rememberSaveable { mutableStateOf(false) }
+    var diePreviewIndex by rememberSaveable { mutableIntStateOf(0) }
+    var lastPreviewIndex by rememberSaveable { mutableIntStateOf(-1) }
     var difficultyName by rememberSaveable { mutableStateOf("") }
     var supportNames by rememberSaveable { mutableStateOf("") }
     var timerModeName by rememberSaveable { mutableStateOf(initial.timerMode.name) }
@@ -113,6 +122,13 @@ internal fun FirstRunSetupFlow(
         .filter { it.isNotBlank() }
         .map { FirstRunSupport.valueOf(it) }
         .toSet()
+    val proposedDraw = if (drawCustomized) drawEnabled else FirstRunSupport.TASK_DIE in supports
+    val proposedPause = if (pauseCustomized) pauseEnabled else FirstRunSupport.PAUSE in supports
+    val previewTasks = listOf(
+        stringResource(R.string.setup_demo_task_one),
+        stringResource(R.string.setup_demo_task_two),
+        stringResource(R.string.setup_demo_task_three),
+    )
     val timerMode = FocusTimerMode.valueOf(timerModeName)
     val customPauseValue = customPauseText.toIntOrNull()
     val customPauseValid = !pauseEnabled || !customPauseSelected ||
@@ -141,14 +157,14 @@ internal fun FirstRunSetupFlow(
 
     fun applyBranchDefaults() {
         if (FirstRunSupport.MINIMAL in supports) {
-            pauseEnabled = false
+            if (!pauseCustomized) pauseEnabled = false
             checkInEnabled = false
             autoMini = false
             calmMode = true
             return
         }
-        if (FirstRunSupport.TASK_DIE in supports) drawEnabled = true
-        if (FirstRunSupport.PAUSE in supports) pauseEnabled = true
+        if (!drawCustomized) drawEnabled = FirstRunSupport.TASK_DIE in supports
+        if (!pauseCustomized) pauseEnabled = FirstRunSupport.PAUSE in supports
         if (FirstRunSupport.MINI_WINDOW in supports) autoMini = true
         if (FirstRunSupport.CHECK_IN in supports) checkInEnabled = true
         if (FirstRunSupport.CALM in supports) calmMode = true
@@ -189,16 +205,58 @@ internal fun FirstRunSetupFlow(
                 0 -> SetupIntro()
                 1 -> DifficultyQuestion(
                     selected = difficulty,
+                    expanded = showMoreDifficulties,
+                    onExpand = { showMoreDifficulties = true },
                     onSelect = {
                         difficultyName = it.name
                         supportNames = ""
                     },
                 )
-                2 -> SupportQuestion(
-                    difficulty = requireNotNull(difficulty),
-                    selected = supports,
-                    onToggle = ::toggleSupport,
-                )
+                2 -> {
+                    if (diePreviewing) {
+                        Text(stringResource(R.string.setup_demo_explanation))
+                        previewTasks.forEach { Text("• $it") }
+                        AnimatedDieBadge(
+                            rollKey = diePreviewRoll,
+                            finalFace = diePreviewIndex,
+                            description = stringResource(R.string.setup_die_preview_description),
+                            onRollFinished = {
+                                lastPreviewIndex = diePreviewIndex
+                                diePreviewing = false
+                            },
+                        )
+                    } else {
+                    SupportQuestion(
+                        difficulty = requireNotNull(difficulty),
+                        selected = supports,
+                        onToggle = ::toggleSupport,
+                    )
+                    SettingSwitch(
+                        title = stringResource(R.string.random_draw_option),
+                        support = stringResource(R.string.random_draw_option_support),
+                        checked = proposedDraw,
+                        onCheckedChange = { drawEnabled = it; drawCustomized = true },
+                        testTag = "setup-die-enabled",
+                    )
+                    TextButton(onClick = {
+                        diePreviewIndex = kotlin.random.Random.nextInt(previewTasks.size)
+                        diePreviewRoll++
+                        diePreviewing = true
+                    }) {
+                        Text(stringResource(R.string.setup_try_die))
+                    }
+                    if (lastPreviewIndex >= 0) {
+                        Text(stringResource(R.string.setup_demo_result, previewTasks[lastPreviewIndex]))
+                    }
+                    SettingSwitch(
+                        title = stringResource(R.string.pause_suggestions_option),
+                        support = stringResource(R.string.pause_suggestions_support),
+                        checked = proposedPause,
+                        onCheckedChange = { pauseEnabled = it; pauseCustomized = true },
+                        testTag = "setup-pause-enabled",
+                    )
+                    }
+                }
                 3 -> FocusDefaultsQuestion(
                     timerMode = timerMode,
                     onTimerMode = { timerModeName = it.name },
@@ -235,6 +293,8 @@ internal fun FirstRunSetupFlow(
                 )
                 5 -> SetupReview(
                     difficulty = requireNotNull(difficulty),
+                    showDetails = showReviewDetails,
+                    onToggleDetails = { showReviewDetails = !showReviewDetails },
                     timerMode = timerMode,
                     drawEnabled = drawEnabled,
                     pauseEnabled = pauseEnabled,
@@ -269,6 +329,19 @@ internal fun FirstRunSetupFlow(
                         },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.setup_apply)) }
+                } else if (page == 2 && diePreviewing) {
+                    // The demonstration returns to the selection automatically.
+                } else if (page == 2) {
+                    Button(
+                        enabled = canContinue,
+                        onClick = { applyBranchDefaults(); quickRoute = true; page = 5 },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_quick_start)) }
+                    TextButton(
+                        enabled = canContinue,
+                        onClick = { applyBranchDefaults(); quickRoute = false; page = 3 },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_advanced_options)) }
                 } else {
                     Button(
                         enabled = canContinue,
@@ -281,7 +354,10 @@ internal fun FirstRunSetupFlow(
                 }
                 if (page > 0) {
                     TextButton(
-                        onClick = { page -= 1 },
+                        onClick = {
+                            if (diePreviewing) diePreviewing = false
+                            else page = if (page == 5 && quickRoute) 2 else page - 1
+                        },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.intro_back)) }
                 }
@@ -322,16 +398,31 @@ private fun SetupIntro() {
 @Composable
 private fun DifficultyQuestion(
     selected: FirstRunDifficulty?,
+    expanded: Boolean,
+    onExpand: () -> Unit,
     onSelect: (FirstRunDifficulty) -> Unit,
 ) {
     QuestionHeader(R.string.setup_difficulty_eyebrow, R.string.setup_difficulty_title, R.string.setup_difficulty_help)
-    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        difficultyOptions().forEach { (value, label) ->
-            ChoiceButton(
-                text = stringResource(label),
-                selected = selected == value,
-                onClick = { onSelect(value) },
-            )
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        val choices = difficultyOptions().let { if (expanded) it else it.take(4) }
+        choices.chunked(2).forEach { pair ->
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                pair.forEach { (value, label) ->
+                    val chosen = selected == value
+                    if (chosen) FilledTonalButton(
+                        onClick = { onSelect(value) },
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 96.dp),
+                    ) { Text(stringResource(label), textAlign = TextAlign.Center) }
+                    else OutlinedButton(
+                        onClick = { onSelect(value) },
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 96.dp),
+                    ) { Text(stringResource(label), textAlign = TextAlign.Center) }
+                }
+                if (pair.size == 1) Spacer(Modifier.weight(1f))
+            }
+        }
+        if (!expanded) TextButton(onClick = onExpand) {
+            Text(stringResource(R.string.setup_more_situations))
         }
     }
 }
@@ -486,6 +577,8 @@ private fun LocalBehaviourQuestion(
 @Composable
 private fun SetupReview(
     difficulty: FirstRunDifficulty,
+    showDetails: Boolean,
+    onToggleDetails: () -> Unit,
     timerMode: FocusTimerMode,
     drawEnabled: Boolean,
     pauseEnabled: Boolean,
@@ -508,10 +601,15 @@ private fun SetupReview(
             else stringResource(R.string.setup_review_disabled),
         )
         ReviewLine(stringResource(R.string.random_draw_option), yesNo(drawEnabled))
-        ReviewLine(stringResource(R.string.setup_checkin_title), yesNo(checkInEnabled))
-        ReviewLine(stringResource(R.string.setup_adaptation_title), yesNo(adaptationEnabled))
-        ReviewLine(stringResource(R.string.setup_calm_title), yesNo(calmMode))
-        ReviewLine(stringResource(R.string.setup_auto_mini_title), yesNo(autoMini))
+        if (showDetails) {
+            ReviewLine(stringResource(R.string.setup_checkin_title), yesNo(checkInEnabled))
+            ReviewLine(stringResource(R.string.setup_adaptation_title), yesNo(adaptationEnabled))
+            ReviewLine(stringResource(R.string.setup_calm_title), yesNo(calmMode))
+            ReviewLine(stringResource(R.string.setup_auto_mini_title), yesNo(autoMini))
+        }
+        TextButton(onClick = onToggleDetails) {
+            Text(stringResource(if (showDetails) R.string.setup_hide_details else R.string.setup_show_details))
+        }
         Text(
             stringResource(R.string.setup_review_note),
             style = MaterialTheme.typography.bodySmall,
@@ -541,6 +639,7 @@ private fun SettingSwitch(
     support: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    testTag: String? = null,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 56.dp),
@@ -551,7 +650,11 @@ private fun SettingSwitch(
             Text(title, style = MaterialTheme.typography.titleSmall)
             Text(support, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = if (testTag == null) Modifier else Modifier.testTag(testTag),
+        )
     }
 }
 
