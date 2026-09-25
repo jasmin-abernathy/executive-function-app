@@ -97,6 +97,9 @@ internal fun FirstRunSetupFlow(
     var drawCustomized by rememberSaveable { mutableStateOf(false) }
     var pauseCustomized by rememberSaveable { mutableStateOf(false) }
     var diePreviewRoll by rememberSaveable { mutableIntStateOf(0) }
+    var diePreviewing by rememberSaveable { mutableStateOf(false) }
+    var diePreviewIndex by rememberSaveable { mutableIntStateOf(0) }
+    var lastPreviewIndex by rememberSaveable { mutableIntStateOf(-1) }
     var difficultyName by rememberSaveable { mutableStateOf("") }
     var supportNames by rememberSaveable { mutableStateOf("") }
     var timerModeName by rememberSaveable { mutableStateOf(initial.timerMode.name) }
@@ -121,6 +124,11 @@ internal fun FirstRunSetupFlow(
         .toSet()
     val proposedDraw = if (drawCustomized) drawEnabled else FirstRunSupport.TASK_DIE in supports
     val proposedPause = if (pauseCustomized) pauseEnabled else FirstRunSupport.PAUSE in supports
+    val previewTasks = listOf(
+        stringResource(R.string.setup_demo_task_one),
+        stringResource(R.string.setup_demo_task_two),
+        stringResource(R.string.setup_demo_task_three),
+    )
     val timerMode = FocusTimerMode.valueOf(timerModeName)
     val customPauseValue = customPauseText.toIntOrNull()
     val customPauseValid = !pauseEnabled || !customPauseSelected ||
@@ -205,6 +213,19 @@ internal fun FirstRunSetupFlow(
                     },
                 )
                 2 -> {
+                    if (diePreviewing) {
+                        Text(stringResource(R.string.setup_demo_explanation))
+                        previewTasks.forEach { Text("• $it") }
+                        AnimatedDieBadge(
+                            rollKey = diePreviewRoll,
+                            finalFace = diePreviewIndex,
+                            description = stringResource(R.string.setup_die_preview_description),
+                            onRollFinished = {
+                                lastPreviewIndex = diePreviewIndex
+                                diePreviewing = false
+                            },
+                        )
+                    } else {
                     SupportQuestion(
                         difficulty = requireNotNull(difficulty),
                         selected = supports,
@@ -216,16 +237,15 @@ internal fun FirstRunSetupFlow(
                         checked = proposedDraw,
                         onCheckedChange = { drawEnabled = it; drawCustomized = true },
                     )
-                    TextButton(onClick = { diePreviewRoll++ }) {
+                    TextButton(onClick = {
+                        diePreviewIndex = kotlin.random.Random.nextInt(previewTasks.size)
+                        diePreviewRoll++
+                        diePreviewing = true
+                    }) {
                         Text(stringResource(R.string.setup_try_die))
                     }
-                    if (diePreviewRoll > 0) {
-                        AnimatedDieBadge(
-                            rollKey = diePreviewRoll,
-                            finalFace = diePreviewRoll % 10,
-                            description = stringResource(R.string.setup_die_preview_description),
-                            onRollFinished = {},
-                        )
+                    if (lastPreviewIndex >= 0) {
+                        Text(stringResource(R.string.setup_demo_result, previewTasks[lastPreviewIndex]))
                     }
                     SettingSwitch(
                         title = stringResource(R.string.pause_suggestions_option),
@@ -233,6 +253,7 @@ internal fun FirstRunSetupFlow(
                         checked = proposedPause,
                         onCheckedChange = { pauseEnabled = it; pauseCustomized = true },
                     )
+                    }
                 }
                 3 -> FocusDefaultsQuestion(
                     timerMode = timerMode,
@@ -306,6 +327,8 @@ internal fun FirstRunSetupFlow(
                         },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.setup_apply)) }
+                } else if (page == 2 && diePreviewing) {
+                    // The demonstration returns to the selection automatically.
                 } else if (page == 2) {
                     Button(
                         enabled = canContinue,
@@ -329,7 +352,10 @@ internal fun FirstRunSetupFlow(
                 }
                 if (page > 0) {
                     TextButton(
-                        onClick = { page = if (page == 5 && quickRoute) 2 else page - 1 },
+                        onClick = {
+                            if (diePreviewing) diePreviewing = false
+                            else page = if (page == 5 && quickRoute) 2 else page - 1
+                        },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.intro_back)) }
                 }

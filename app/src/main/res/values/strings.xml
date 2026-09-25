@@ -20,6 +20,11 @@
     <string name="random_draw_option">Tirage au dé</string>
     <string name="setup_try_die">Essayer le dé</string>
     <string name="setup_die_preview_description">Aperçu du dé, sans sélectionner de tâche</string>
+    <string name="setup_demo_explanation">Essai avec trois tâches fictives. Aucune ne sera ajoutée.</string>
+    <string name="setup_demo_task_one">Ranger un coin du bureau</string>
+    <string name="setup_demo_task_two">Boire un verre d’eau</string>
+    <string name="setup_demo_task_three">Répondre à un message</string>
+    <string name="setup_demo_result">Essai : %1$s. Tu es revenu au choix des aides.</string>
     <string name="random_draw_option_support">À utiliser seulement quand choisir devient difficile.</string>
     <string name="pause_suggestions_option">Propositions de pause</string>
     <string name="pause_suggestions_support">Le timer continue tant que tu ne choisis pas de faire une pause.</string>

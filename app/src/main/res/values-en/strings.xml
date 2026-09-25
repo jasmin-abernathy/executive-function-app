@@ -20,6 +20,11 @@
     <string name="random_draw_option">Task die</string>
     <string name="setup_try_die">Try the die</string>
     <string name="setup_die_preview_description">Die preview, without choosing a task</string>
+    <string name="setup_demo_explanation">Try with three sample tasks. None will be added.</string>
+    <string name="setup_demo_task_one">Tidy one corner of the desk</string>
+    <string name="setup_demo_task_two">Drink a glass of water</string>
+    <string name="setup_demo_task_three">Reply to a message</string>
+    <string name="setup_demo_result">Tryout: %1$s. Back to choosing your supports.</string>
     <string name="random_draw_option_support">Use it only when choosing feels difficult.</string>
     <string name="pause_suggestions_option">Pause suggestions</string>
     <string name="pause_suggestions_support">The timer keeps running until you choose to pause.</string>

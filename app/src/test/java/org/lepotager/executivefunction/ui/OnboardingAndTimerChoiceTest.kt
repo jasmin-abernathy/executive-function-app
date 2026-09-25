@@ -95,7 +95,10 @@ class OnboardingAndTimerChoiceTest {
         clickText("Décider quoi faire en premier")
         clickText("Suivant")
         clickText("Essayer le dé")
-        compose.onNodeWithContentDescription("Aperçu du dé, sans sélectionner de tâche").assertExists()
+        compose.waitUntil(5_000) {
+            compose.onAllNodes(hasText("Tu es revenu au choix des aides.", substring = true))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText("Tirage au dé").performScrollTo().assertExists()
         compose.onNodeWithText("Propositions de pause").performScrollTo().assertExists()
         clickText("Commencer avec ces aides")
