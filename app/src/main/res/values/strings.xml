@@ -18,6 +18,8 @@
     <string name="task_color_sand">Jaune sable</string>
     <string name="support_options_title">Aides facultatives</string>
     <string name="random_draw_option">Tirage au dé</string>
+    <string name="setup_try_die">Essayer le dé</string>
+    <string name="setup_die_preview_description">Aperçu du dé, sans sélectionner de tâche</string>
     <string name="random_draw_option_support">À utiliser seulement quand choisir devient difficile.</string>
     <string name="pause_suggestions_option">Propositions de pause</string>
     <string name="pause_suggestions_support">Le timer continue tant que tu ne choisis pas de faire une pause.</string>
@@ -120,7 +122,8 @@
     <string name="focus_tools_less">Masquer les autres outils</string>
     <string name="focus_tool_note">Ajouter une note</string>
     <string name="focus_tool_capture">Noter une nouvelle tâche</string>
-    <string name="focus_tool_mini_window">Ouvrir la petite fenêtre</string>
+    <string name="focus_tool_mini_window">Ouvrir le minuteur flottant semi-transparent</string>
+    <string name="focus_tool_pip">Ouvrir la mini-fenêtre Android (opaque)</string>
     <string name="focus_pause_short">Pause</string>
     <string name="focus_finish_short">Terminer</string>
 

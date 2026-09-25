@@ -93,6 +93,10 @@ internal fun FirstRunSetupFlow(
     var page by rememberSaveable { mutableIntStateOf(0) }
     var showMoreDifficulties by rememberSaveable { mutableStateOf(false) }
     var showReviewDetails by rememberSaveable { mutableStateOf(false) }
+    var quickRoute by rememberSaveable { mutableStateOf(false) }
+    var drawCustomized by rememberSaveable { mutableStateOf(false) }
+    var pauseCustomized by rememberSaveable { mutableStateOf(false) }
+    var diePreviewRoll by rememberSaveable { mutableIntStateOf(0) }
     var difficultyName by rememberSaveable { mutableStateOf("") }
     var supportNames by rememberSaveable { mutableStateOf("") }
     var timerModeName by rememberSaveable { mutableStateOf(initial.timerMode.name) }
@@ -115,6 +119,8 @@ internal fun FirstRunSetupFlow(
         .filter { it.isNotBlank() }
         .map { FirstRunSupport.valueOf(it) }
         .toSet()
+    val proposedDraw = if (drawCustomized) drawEnabled else FirstRunSupport.TASK_DIE in supports
+    val proposedPause = if (pauseCustomized) pauseEnabled else FirstRunSupport.PAUSE in supports
     val timerMode = FocusTimerMode.valueOf(timerModeName)
     val customPauseValue = customPauseText.toIntOrNull()
     val customPauseValid = !pauseEnabled || !customPauseSelected ||
@@ -143,14 +149,14 @@ internal fun FirstRunSetupFlow(
 
     fun applyBranchDefaults() {
         if (FirstRunSupport.MINIMAL in supports) {
-            pauseEnabled = false
+            if (!pauseCustomized) pauseEnabled = false
             checkInEnabled = false
             autoMini = false
             calmMode = true
             return
         }
-        if (FirstRunSupport.TASK_DIE in supports) drawEnabled = true
-        if (FirstRunSupport.PAUSE in supports) pauseEnabled = true
+        if (!drawCustomized) drawEnabled = FirstRunSupport.TASK_DIE in supports
+        if (!pauseCustomized) pauseEnabled = FirstRunSupport.PAUSE in supports
         if (FirstRunSupport.MINI_WINDOW in supports) autoMini = true
         if (FirstRunSupport.CHECK_IN in supports) checkInEnabled = true
         if (FirstRunSupport.CALM in supports) calmMode = true
@@ -198,11 +204,36 @@ internal fun FirstRunSetupFlow(
                         supportNames = ""
                     },
                 )
-                2 -> SupportQuestion(
-                    difficulty = requireNotNull(difficulty),
-                    selected = supports,
-                    onToggle = ::toggleSupport,
-                )
+                2 -> {
+                    SupportQuestion(
+                        difficulty = requireNotNull(difficulty),
+                        selected = supports,
+                        onToggle = ::toggleSupport,
+                    )
+                    SettingSwitch(
+                        title = stringResource(R.string.random_draw_option),
+                        support = stringResource(R.string.random_draw_option_support),
+                        checked = proposedDraw,
+                        onCheckedChange = { drawEnabled = it; drawCustomized = true },
+                    )
+                    TextButton(onClick = { diePreviewRoll++ }) {
+                        Text(stringResource(R.string.setup_try_die))
+                    }
+                    if (diePreviewRoll > 0) {
+                        AnimatedDieBadge(
+                            rollKey = diePreviewRoll,
+                            finalFace = diePreviewRoll % 10,
+                            description = stringResource(R.string.setup_die_preview_description),
+                            onRollFinished = {},
+                        )
+                    }
+                    SettingSwitch(
+                        title = stringResource(R.string.pause_suggestions_option),
+                        support = stringResource(R.string.pause_suggestions_support),
+                        checked = proposedPause,
+                        onCheckedChange = { pauseEnabled = it; pauseCustomized = true },
+                    )
+                }
                 3 -> FocusDefaultsQuestion(
                     timerMode = timerMode,
                     onTimerMode = { timerModeName = it.name },
@@ -278,12 +309,12 @@ internal fun FirstRunSetupFlow(
                 } else if (page == 2) {
                     Button(
                         enabled = canContinue,
-                        onClick = { applyBranchDefaults(); page = 5 },
+                        onClick = { applyBranchDefaults(); quickRoute = true; page = 5 },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.setup_quick_start)) }
                     TextButton(
                         enabled = canContinue,
-                        onClick = { applyBranchDefaults(); page = 3 },
+                        onClick = { applyBranchDefaults(); quickRoute = false; page = 3 },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.setup_advanced_options)) }
                 } else {
@@ -298,7 +329,7 @@ internal fun FirstRunSetupFlow(
                 }
                 if (page > 0) {
                     TextButton(
-                        onClick = { page -= 1 },
+                        onClick = { page = if (page == 5 && quickRoute) 2 else page - 1 },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.intro_back)) }
                 }
@@ -541,8 +572,8 @@ private fun SetupReview(
             if (pauseEnabled) stringResource(R.string.setup_review_enabled_minutes, pauseMinutes)
             else stringResource(R.string.setup_review_disabled),
         )
+        ReviewLine(stringResource(R.string.random_draw_option), yesNo(drawEnabled))
         if (showDetails) {
-            ReviewLine(stringResource(R.string.random_draw_option), yesNo(drawEnabled))
             ReviewLine(stringResource(R.string.setup_checkin_title), yesNo(checkInEnabled))
             ReviewLine(stringResource(R.string.setup_adaptation_title), yesNo(adaptationEnabled))
             ReviewLine(stringResource(R.string.setup_calm_title), yesNo(calmMode))

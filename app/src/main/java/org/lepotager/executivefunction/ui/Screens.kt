@@ -724,6 +724,7 @@ fun FocusScreen(
     onJournal: () -> Unit = {},
     onNotes: () -> Unit = {},
     onMini: () -> Unit = {},
+    onPip: () -> Unit = {},
     onNote: () -> Unit = {},
     overlayEnabled: Boolean,
     pauseSuggestionsEnabled: Boolean,
@@ -885,6 +886,9 @@ fun FocusScreen(
                     ) {
                         TextButton(onClick = onJournal, colors = appTextButtonColors()) {
                             Text(stringResource(R.string.open_journal))
+                        }
+                        TextButton(onClick = onPip, colors = appTextButtonColors()) {
+                            Text(stringResource(R.string.focus_tool_pip))
                         }
                         val context = androidx.compose.ui.platform.LocalContext.current
                         TextButton(

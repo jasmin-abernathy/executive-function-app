@@ -245,7 +245,8 @@ class MainActivity : ComponentActivity() {
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("task",snapshot.activeFocus?.task?.id)) },
                                     onNotes = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("section", "notes")) },
                                     onNote = { showQuickNote = true },
-                                    onMini = ::enterMiniWindow,
+                                    onMini = ::openFloatingTimer,
+                                    onPip = ::enterMiniWindow,
                                     overlayEnabled = overlayEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                     pauseAfterMinutes = pauseAfterMinutes,
@@ -312,7 +313,10 @@ class MainActivity : ComponentActivity() {
         else window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         if (waitingForOverlayPermission) {
             waitingForOverlayPermission = false
-            if (!miniWindow && Settings.canDrawOverlays(this)) updateOverlayEnabled(true)
+            if (!miniWindow && Settings.canDrawOverlays(this)) {
+                updateOverlayEnabled(true)
+                moveTaskToBack(true)
+            }
         } else {
             val shouldBeEnabled = !miniWindow && overlayPreference() && Settings.canDrawOverlays(this)
             overlayEnabled = shouldBeEnabled
@@ -334,7 +338,7 @@ class MainActivity : ComponentActivity() {
         super.onUserLeaveHint()
         if(!waitingForOverlayPermission && !showQuickNote && !externalCapture &&
             !showIntro && viewModel.pendingStart.value == null && requestedTask == null &&
-            appPreferences().getBoolean("auto_pip",false)) enterMiniWindow()
+            appPreferences().getBoolean("auto_pip",false) && !overlayPreference()) enterMiniWindow()
     }
 
     private fun pipParams(active: org.lepotager.executivefunction.model.ActiveFocus) =
@@ -392,6 +396,17 @@ class MainActivity : ComponentActivity() {
                     Uri.parse("package:$packageName"),
                 ),
             )
+        }
+    }
+
+    private fun openFloatingTimer() {
+        if (viewModel.snapshot.value.activeFocus?.session?.status != FocusStatus.RUNNING) return
+        if (Settings.canDrawOverlays(this)) {
+            updateOverlayEnabled(true)
+            moveTaskToBack(true)
+        } else {
+            waitingForOverlayPermission = true
+            startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:$packageName")))
         }
     }
 

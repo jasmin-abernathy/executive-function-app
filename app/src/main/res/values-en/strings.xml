@@ -18,6 +18,8 @@
     <string name="task_color_sand">Sand yellow</string>
     <string name="support_options_title">Optional supports</string>
     <string name="random_draw_option">Task die</string>
+    <string name="setup_try_die">Try the die</string>
+    <string name="setup_die_preview_description">Die preview, without choosing a task</string>
     <string name="random_draw_option_support">Use it only when choosing feels difficult.</string>
     <string name="pause_suggestions_option">Pause suggestions</string>
     <string name="pause_suggestions_support">The timer keeps running until you choose to pause.</string>
@@ -120,7 +122,8 @@
     <string name="focus_tools_less">Hide other tools</string>
     <string name="focus_tool_note">Add a note</string>
     <string name="focus_tool_capture">Note a new task</string>
-    <string name="focus_tool_mini_window">Open the mini window</string>
+    <string name="focus_tool_mini_window">Open the translucent floating timer</string>
+    <string name="focus_tool_pip">Open Android mini window (opaque)</string>
     <string name="focus_pause_short">Pause</string>
     <string name="focus_finish_short">Finish</string>
 

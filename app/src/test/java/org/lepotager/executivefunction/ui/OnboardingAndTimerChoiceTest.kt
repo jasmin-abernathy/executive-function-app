@@ -86,6 +86,28 @@ class OnboardingAndTimerChoiceTest {
     }
 
     @Test
+    fun quickStartKeepsExplicitDieAndPauseChoicesAndPreviewDoesNotSelectTask() {
+        var applied: FirstRunSetupConfig? = null
+        compose.setContent {
+            ExecutiveFunctionTheme { FirstRunSetupFlow(baseline(), { applied = it }, {}) }
+        }
+        clickText("Suivant")
+        clickText("Décider quoi faire en premier")
+        clickText("Suivant")
+        clickText("Essayer le dé")
+        compose.onNodeWithContentDescription("Aperçu du dé, sans sélectionner de tâche").assertExists()
+        compose.onNodeWithText("Tirage au dé").performScrollTo().assertExists()
+        compose.onNodeWithText("Propositions de pause").performScrollTo().assertExists()
+        clickText("Commencer avec ces aides")
+        compose.onNodeWithText("Tirage au dé").assertExists()
+        clickText("Appliquer ces réglages")
+        compose.runOnIdle {
+            assertEquals(false, applied?.drawEnabled)
+            assertEquals(false, applied?.pauseSuggestionsEnabled)
+        }
+    }
+
+    @Test
     fun minimalInterventionReplacesContradictorySupportChoices() {
         var applied: FirstRunSetupConfig? = null
         compose.setContent {
