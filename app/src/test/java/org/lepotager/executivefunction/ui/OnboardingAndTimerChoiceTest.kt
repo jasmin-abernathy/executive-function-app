@@ -98,6 +98,8 @@ class OnboardingAndTimerChoiceTest {
         clickText("Suivant")
         clickText("Décider quoi faire en premier")
         clickText("Suivant")
+        clickText("Utiliser le dé quand choisir devient difficile")
+        compose.onNodeWithTag("setup-die-enabled").performScrollTo().performClick()
         clickText("Essayer le dé")
         compose.waitUntil(5_000) {
             compose.onAllNodes(hasText("Tu es revenu au choix des aides.", substring = true))

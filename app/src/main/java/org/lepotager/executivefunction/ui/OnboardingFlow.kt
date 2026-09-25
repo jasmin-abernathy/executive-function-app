@@ -236,6 +236,7 @@ internal fun FirstRunSetupFlow(
                         support = stringResource(R.string.random_draw_option_support),
                         checked = proposedDraw,
                         onCheckedChange = { drawEnabled = it; drawCustomized = true },
+                        testTag = "setup-die-enabled",
                     )
                     TextButton(onClick = {
                         diePreviewIndex = kotlin.random.Random.nextInt(previewTasks.size)
@@ -252,6 +253,7 @@ internal fun FirstRunSetupFlow(
                         support = stringResource(R.string.pause_suggestions_support),
                         checked = proposedPause,
                         onCheckedChange = { pauseEnabled = it; pauseCustomized = true },
+                        testTag = "setup-pause-enabled",
                     )
                     }
                 }
@@ -637,6 +639,7 @@ private fun SettingSwitch(
     support: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
+    testTag: String? = null,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 56.dp),
@@ -647,7 +650,11 @@ private fun SettingSwitch(
             Text(title, style = MaterialTheme.typography.titleSmall)
             Text(support, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            modifier = if (testTag == null) Modifier else Modifier.testTag(testTag),
+        )
     }
 }
 
