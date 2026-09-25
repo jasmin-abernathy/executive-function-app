@@ -30,7 +30,11 @@ class OnboardingAndTimerChoiceTest {
     )
 
     private fun clickText(text: String) {
-        compose.onNodeWithText(text).performScrollTo().performClick()
+        try {
+            compose.onNodeWithText(text).performScrollTo().performClick()
+        } catch (failure: AssertionError) {
+            throw AssertionError("Impossible de cliquer sur « $text »", failure)
+        }
         compose.waitForIdle()
     }
 

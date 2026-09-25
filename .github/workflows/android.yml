@@ -40,6 +40,11 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
       - name: Test and lint (no APK)
         run: ./gradlew :app:testDebugUnitTest :app:lintDebug --stacktrace
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: test-failure-report
+          path: app/build/test-results/testDebugUnitTest/
       - name: Assemble APK on explicit request only
         if: (github.event_name == 'workflow_dispatch' && inputs.build_apk) || (github.event_name == 'pull_request' && github.head_ref == 'work/adhd-lockscreen-pip-20260924')
         run: ./gradlew :app:assembleDebug --stacktrace
