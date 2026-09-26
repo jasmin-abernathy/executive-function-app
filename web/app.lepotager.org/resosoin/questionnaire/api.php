@@ -162,7 +162,6 @@ try {
 
     if (
         $action !== 'delete'
-        && (string) ($session['status'] ?? '') === 'active'
         && (string) ($session['survey_version'] ?? '')
             !== RESOSOIN_SURVEY_VERSION
     ) {
@@ -170,7 +169,7 @@ try {
             [
                 'ok' => false,
                 'code' => 'survey_version_changed',
-                'error' => 'Le questionnaire a été mis à jour depuis la création de ce brouillon. Vos anciennes réponses ne sont pas réécrites : supprimez ce brouillon puis démarrez une nouvelle réponse.',
+                'error' => 'Cette session appartient à une ancienne version du questionnaire. Ses réponses ne sont pas réécrites : vous pouvez la supprimer depuis la liste des réponses enregistrées ou démarrer une nouvelle réponse.',
             ],
             409
         );
