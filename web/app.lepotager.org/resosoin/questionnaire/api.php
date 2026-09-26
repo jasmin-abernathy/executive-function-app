@@ -60,25 +60,34 @@ try {
         $professionalVerificationMethod = null;
 
         if ($audience === 'doctor') {
+            if (($input['professional_declaration'] ?? false) !== true) {
+                throw new DomainException(
+                    'Déclarez exercer une profession de santé réglementée pour commencer.'
+                );
+            }
+
+            $professionalVerificationMethod = 'self_declared';
             $proof = clean_text(
                 $input['professional_verification'] ?? '',
                 4096
             );
-            $verification =
-                resosoin_validate_professional_verification_token(
-                    $proof,
-                    app_key_bytes()
-                );
 
-            if (!is_array($verification)) {
-                throw new DomainException(
-                    'Vérifiez votre statut de professionnel de santé avant de commencer ce questionnaire.'
-                );
+            if ($proof !== '') {
+                $verification =
+                    resosoin_validate_professional_verification_token(
+                        $proof,
+                        app_key_bytes()
+                    );
+
+                if (!is_array($verification)) {
+                    throw new DomainException(
+                        'La concordance Annuaire Santé n’est plus valide. Vous pouvez recommencer cette vérification facultative ou commencer sur déclaration.'
+                    );
+                }
+
+                $professionalVerificationMethod =
+                    'directory_record_matched';
             }
-
-            $professionalVerified = true;
-            $professionalVerificationMethod =
-                'annuaire_sante_tre_g15';
         }
 
         $source = (string) ($input['source'] ?? 'direct');
@@ -152,16 +161,18 @@ try {
     $audience = (string) $session['audience'];
 
     if (
-        $audience === 'doctor'
-        && $action !== 'delete'
-        && (int) ($session['professional_verified'] ?? 0) !== 1
+        $action !== 'delete'
+        && (string) ($session['status'] ?? '') === 'active'
+        && (string) ($session['survey_version'] ?? '')
+            !== RESOSOIN_SURVEY_VERSION
     ) {
         json_response(
             [
                 'ok' => false,
-                'error' => 'Cette ancienne session professionnelle n’a pas de vérification RPPS valide. Supprimez-la et démarrez un nouveau questionnaire.',
+                'code' => 'survey_version_changed',
+                'error' => 'Le questionnaire a été mis à jour depuis la création de ce brouillon. Vos anciennes réponses ne sont pas réécrites : supprimez ce brouillon puis démarrez une nouvelle réponse.',
             ],
-            403
+            409
         );
     }
 
