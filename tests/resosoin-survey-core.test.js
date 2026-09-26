@@ -21,6 +21,80 @@ const surveyJs = fs.readFileSync(
   'utf8'
 );
 
+const questionnaireIndex = fs.readFileSync(
+  path.join(
+    __dirname,
+    '../web/app.lepotager.org/resosoin/questionnaire/index.php'
+  ),
+  'utf8'
+);
+const apiPhp = fs.readFileSync(
+  path.join(
+    __dirname,
+    '../web/app.lepotager.org/resosoin/questionnaire/api.php'
+  ),
+  'utf8'
+);
+
+assert.equal(
+  doctor[0]?.id,
+  'doctor_profession',
+  'Professional survey must begin with the declared regulated profession'
+);
+assert.ok(
+  doctor.findIndex((q) => q.id === 'doctor_automation')
+    < doctor.findIndex((q) => q.id === 'doctor_ai_preference'),
+  'Automation usefulness must be asked before AI preference'
+);
+assert.ok(
+  doctor.some((q) => q.id === 'doctor_concept_blocker'),
+  'Professional concept must measure the primary adoption blocker'
+);
+assert.equal(
+  patient[0]?.id,
+  'patient_booking_now',
+  'Patient survey must begin with current booking channels'
+);
+assert.ok(
+  patient.some((q) => q.id === 'patient_availability_difficulty'),
+  'Patient survey must measure difficulty finding an available professional'
+);
+assert.ok(
+  patient.some((q) => q.id === 'patient_concept_blocker'),
+  'Patient concept must measure the primary blocker'
+);
+const patientAge = patient.find((q) => q.id === 'patient_age');
+assert.equal(
+  patientAge?.required,
+  false,
+  'Patient age band must be optional'
+);
+assert.match(
+  questionnaireIndex,
+  /data-start="doctor"/,
+  'Professionals must be able to start without directory lookup'
+);
+assert.match(
+  questionnaireIndex,
+  /déclaration n’authentifie pas votre identité/i,
+  'Self-declaration limitation must be visible'
+);
+assert.match(
+  apiPhp,
+  /professionalVerificationMethod = 'self_declared'/,
+  'API must record self-declared professional sessions explicitly'
+);
+assert.doesNotMatch(
+  apiPhp,
+  /\$professionalVerified\s*=\s*true/,
+  'Self-declaration or directory matching must never set identity verified'
+);
+assert.match(
+  apiPhp,
+  /survey_version_changed/,
+  'Old active drafts must be rejected without silent rewriting'
+);
+
 let visible = core.visibleQuestions(patient, {
   patient_booking_now: ['phone'],
 });
