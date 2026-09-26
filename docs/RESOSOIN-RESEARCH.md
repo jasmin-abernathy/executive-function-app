@@ -86,48 +86,67 @@ Le GitHub SHA et le live doivent rester distingués. Après fusion/déploiement 
 7. supprimer une session test ;
 8. vérifier le seuil des résultats agrégés ;
 9. confirmer que `schema.sql`, `_common.php`, `install.php`, `cleanup.php`, `validate.php` et les fichiers de documentation sont inaccessibles par HTTP ;
-10. vérifier que la CI valide PHP, le catalogue JSON, la syntaxe JavaScript et les tests du cœur du survey ;\n11. tester deux brouillons simultanés sur un même navigateur, retour arrière avec modification, branche sans Doctolib, refus de l’app, panne réseau au démarrage et suppression après envoi.
+10. avec le budget GitHub Actions indisponible, valider localement PHP, le catalogue JSON, la syntaxe JavaScript et les tests RésoSoin avant tout push ;\n11. tester deux brouillons simultanés sur un même navigateur, retour arrière avec modification, branche sans Doctolib, refus de l’app, panne réseau au démarrage et suppression après envoi.
 
 
-## Vérification des professionnels de santé
+## Parcours des professionnels de santé
 
-Le questionnaire professionnel utilise l’API officielle **Annuaire Santé FHIR v2** de l’ANS.
+La version `2026-09-26-v3` n’exige aucune habilitation Pro Santé Connect, Datapass, FINESS ou statut d’établissement de santé.
 
-Parcours :
+Parcours principal :
 
-1. le professionnel renseigne son **nom d’exercice** et son **numéro RPPS** ;
-2. il certifie être la personne correspondante ;
-3. le serveur interroge l’Annuaire Santé par RPPS ;
-4. le nom est comparé localement avec l’identité renvoyée ;
-5. la profession doit appartenir à la nomenclature officielle **TRE_G15-ProfessionSante** et la fiche doit être active ;
-6. un jeton de vérification signé, valable 10 minutes, autorise la création de la session professionnelle.
+1. le répondant déclare exercer une profession de santé réglementée ;
+2. il choisit sa profession dans une liste fermée ;
+3. le questionnaire enregistre uniquement cette déclaration et les réponses d’usage ;
+4. la session utilise `professional_verification_method = self_declared` ;
+5. `professional_verified` reste à `0` : une déclaration n’est jamais transformée en identité « vérifiée ».
 
-Le filtre accepte les professions de santé de TRE_G15 : médecins, sages-femmes et professions paramédicales/réglementées présentes dans cette nomenclature. Les simples usages de titre relevant d’autres nomenclatures ne passent pas ce filtre.
+La page indique explicitement que ce mécanisme n’empêche pas une fausse déclaration et que les résultats professionnels doivent être lus comme déclaratifs.
 
-### Minimisation
+### Consultation facultative de l’Annuaire Santé
 
-Le nom et le RPPS **ne sont pas enregistrés dans les tables du questionnaire**, ni en clair ni sous forme de hash.
+Si une clé `ESANTE-API-KEY` est configurée, le répondant peut facultativement rechercher sa fiche publique RPPS avant de commencer.
 
-La session conserve seulement :
+- le numéro RPPS est envoyé ponctuellement à l’API Annuaire Santé ;
+- le nom d’exercice est comparé localement ;
+- aucune concordance n’est nécessaire pour répondre ;
+- une concordance signifie seulement qu’une fiche publique active correspond aux informations saisies ;
+- elle ne prouve pas que le répondant est titulaire de la fiche ;
+- le nom et le RPPS ne sont pas enregistrés dans les tables du questionnaire ni intégrés au jeton remis au navigateur ;
+- la session utilise alors `professional_verification_method = directory_record_matched`, tout en conservant `professional_verified = 0`.
 
-- `professional_verified = 1` ;
-- `professional_verification_method = annuaire_sante_tre_g15`.
-
-Le numéro RPPS est envoyé ponctuellement à l’API ANS ; le nom est comparé localement.
-
-## Clé API Annuaire Santé
-
-Après déploiement, la clé peut être ajoutée sans SSH via :
+Le panneau privé reste disponible à :
 
 `https://app.lepotager.org/resosoin/admin/`
 
-Le formulaire privé :
+Il permet de tester et stocker la clé hors webroot. L’absence de clé ne bloque jamais l’étude.
 
-- réutilise le compte administrateur existant ;
-- teste la clé auprès de l’ANS avant sauvegarde ;
-- n’affiche jamais la clé enregistrée ;
-- l’écrit hors webroot dans `~/private/executive-function-app/resosoin-annuaire-sante.json` ;
-- applique des permissions restrictives ;
-- permet de retester ou supprimer la clé.
+## Versions et anciens brouillons
 
-La clé ne doit jamais être ajoutée à Git.
+Les nouvelles réponses utilisent `2026-09-26-v3`. Les brouillons actifs d’une ancienne version ne sont pas réécrits silencieusement : l’API demande de les supprimer puis de recommencer. Les réponses déjà envoyées restent intactes en base.
+
+La page de résultats agrège uniquement la version courante afin de ne pas mélanger des questions dont le sens ou les options ont changé. Pour les professionnels, elle distingue la déclaration simple d’une éventuelle concordance de fiche Annuaire Santé.
+
+## Ordre des questionnaires v3
+
+### Professionnels
+
+- profession réglementée déclarée et contexte d’exercice ;
+- taille de la structure et canaux de rendez-vous ;
+- irritants spontanés avant les questions sur Doctolib ;
+- coût facultatif et satisfaction ;
+- automatisations utiles avant l’avis sur l’IA ;
+- critère de choix prioritaire ;
+- concept RésoSoin ;
+- fonctions prioritaires, frein principal, ordre de grandeur de prix et pilote facultatif.
+
+### Patients
+
+- canaux de rendez-vous ;
+- difficulté à trouver un professionnel disponible et étape la plus pénible ;
+- fréquence Doctolib seulement si Doctolib est utilisé ;
+- préférence de compte et moyens d’accès (téléphone, proche, accessibilité) ;
+- automatisations puis critère prioritaire et avis sur l’IA ;
+- utilité potentielle d’une recherche commune, explicitement présentée comme un projet ;
+- concept, avantages, frein principal et application facultative ;
+- tranche d’âge déplacée en fin de parcours et rendue facultative.
