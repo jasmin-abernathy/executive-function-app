@@ -11,6 +11,8 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/"/>
   </url>
   <url><loc>https://app.lepotager.org/adhd-app/v2/</loc></url>
+  <url><loc>https://app.lepotager.org/resosoin/</loc></url>
+  <url><loc>https://app.lepotager.org/resosoin/questionnaire/</loc></url>
   <url><loc>https://app.lepotager.org/soutenir/</loc></url>
   <url>
     <loc>https://app.lepotager.org/mentions-legales.html</loc>

@@ -1,0 +1,580 @@
+{
+  "doctor": {
+    "label": "Professionnel·le de santé",
+    "questions": [
+      {
+        "id": "doctor_profession",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Quelle profession de santé réglementée exercez-vous ?",
+        "help": "Cette réponse est déclarative. Elle ne constitue pas une authentification de votre identité.",
+        "options": {
+          "doctor": "Médecin",
+          "dentist": "Chirurgien-dentiste",
+          "midwife": "Sage-femme",
+          "pharmacist": "Pharmacien·ne",
+          "nurse": "Infirmier·ère",
+          "physiotherapist": "Masseur-kinésithérapeute",
+          "paramedical_other": "Autre profession paramédicale réglementée",
+          "health_other": "Autre profession de santé réglementée"
+        }
+      },
+      {
+        "id": "doctor_setting",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Dans quel cadre exercez-vous principalement ?",
+        "options": {
+          "solo": "Seul·e",
+          "group": "Cabinet de groupe",
+          "msp": "Maison de santé / MSP",
+          "centre": "Centre de santé",
+          "other": "Autre organisation"
+        }
+      },
+      {
+        "id": "doctor_practitioner_count",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Combien de praticiens ou d’agendas sont généralement gérés dans votre structure ?",
+        "options": {
+          "one": "1",
+          "two_three": "2 à 3",
+          "four_nine": "4 à 9",
+          "ten_plus": "10 ou plus",
+          "unknown": "Je ne sais pas"
+        }
+      },
+      {
+        "id": "doctor_booking_now",
+        "phase": "usage",
+        "type": "multi",
+        "required": true,
+        "title": "Comment les patients prennent-ils rendez-vous aujourd’hui ?",
+        "help": "Plusieurs réponses possibles.",
+        "options": {
+          "phone": "Téléphone",
+          "secretary": "Secrétariat",
+          "doctolib": "Doctolib",
+          "other_platform": "Autre plateforme",
+          "website": "Site du cabinet",
+          "email": "E-mail",
+          "walk_in": "Sans rendez-vous / accueil direct"
+        },
+        "max": 7
+      },
+      {
+        "id": "doctor_pain_points",
+        "phase": "usage",
+        "type": "multi",
+        "required": true,
+        "title": "Quels sont aujourd’hui vos principaux irritants dans la gestion des rendez-vous et du site du cabinet ?",
+        "options": {
+          "price": "Le coût total",
+          "cancellations": "Les annulations et créneaux libérés",
+          "workload": "Le temps administratif / secrétariat",
+          "complexity": "La complexité de l’outil",
+          "support": "Le support ou la relation fournisseur",
+          "migration": "La difficulté à changer de solution",
+          "patient_habits": "Les habitudes déjà prises par les patients",
+          "visibility": "La visibilité en ligne du cabinet",
+          "interoperability": "Le manque d’intégration avec les autres outils",
+          "none": "Aucun irritant important",
+          "other": "Autre irritant non listé"
+        },
+        "max": 4,
+        "exclusive": [
+          "none"
+        ]
+      },
+      {
+        "id": "doctor_current_cost",
+        "phase": "usage",
+        "type": "single",
+        "required": false,
+        "title": "Si vous utilisez une solution payante de rendez-vous, combien vous coûte-t-elle environ par mois et par praticien ?",
+        "help": "Question facultative si ce coût n’est pas calculable ou si vous n’avez pas de solution payante.",
+        "options": {
+          "none": "0 € / pas d’abonnement",
+          "lt30": "Moins de 30 €",
+          "30_69": "30 à 69 €",
+          "70_99": "70 à 99 €",
+          "100_149": "100 à 149 €",
+          "150_plus": "150 € ou plus",
+          "unknown": "Je ne sais pas",
+          "not_applicable": "Non concerné — pas de coût calculable par praticien"
+        }
+      },
+      {
+        "id": "doctor_satisfaction",
+        "phase": "usage",
+        "type": "scale",
+        "required": true,
+        "title": "À quel point êtes-vous satisfait·e de votre solution actuelle ?",
+        "min": 0,
+        "max": 10,
+        "min_label": "Pas du tout",
+        "max_label": "Tout à fait",
+        "allow_na": true,
+        "na_label": "Non concerné — je n’utilise pas de solution comparable"
+      },
+      {
+        "id": "doctor_doctolib_status",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Quelle est votre situation vis-à-vis de Doctolib ?",
+        "options": {
+          "current": "Je l’utilise actuellement",
+          "former": "Je l’ai utilisé puis quitté",
+          "never": "Je ne l’ai jamais utilisé"
+        }
+      },
+      {
+        "id": "doctor_automation",
+        "phase": "usage",
+        "type": "multi",
+        "required": true,
+        "title": "Qu’aimeriez-vous automatiser, même sans IA ?",
+        "help": "Une automatisation peut reposer sur des règles explicites et prévisibles, sans modèle d’IA.",
+        "options": {
+          "confirmations": "Confirmations de rendez-vous",
+          "reminders": "Rappels SMS / e-mail",
+          "waitlist": "Liste d’attente et proposition d’un créneau libéré",
+          "cancellations": "Gestion des annulations",
+          "availability": "Ouverture / fermeture automatique de créneaux selon des règles",
+          "calendar": "Synchronisation d’agenda",
+          "recurring": "Horaires et indisponibilités récurrents",
+          "documents": "Notifications lorsqu’un document est disponible",
+          "reports": "Rapports et statistiques simples",
+          "none": "Aucune de ces automatisations ne m’intéresse",
+          "unknown": "Je ne sais pas encore"
+        },
+        "max": 5,
+        "exclusive": [
+          "none",
+          "unknown"
+        ]
+      },
+      {
+        "id": "doctor_priority_criterion",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Si vous deviez choisir un seul critère prioritaire pour une solution de cabinet, lequel compterait le plus ?",
+        "options": {
+          "reliability": "Fiabilité et continuité de service",
+          "simplicity": "Simplicité d’utilisation",
+          "total_cost": "Coût total",
+          "support": "Qualité du support",
+          "visibility": "Visibilité auprès des patients",
+          "migration": "Facilité de migration et de réversibilité",
+          "accessibility": "Accessibilité numérique",
+          "secretariat": "Intégration avec le secrétariat et les autres outils",
+          "data_jurisdiction": "Lieu et juridiction applicables aux données",
+          "unknown": "Je ne sais pas"
+        }
+      },
+      {
+        "id": "doctor_ai_preference",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Quelle place souhaitez-vous donner à l’IA dans vos outils de cabinet ?",
+        "options": {
+          "want": "Je souhaite des fonctions d’IA intégrées",
+          "optional": "Pourquoi pas, mais uniquement si elles sont clairement optionnelles",
+          "indifferent": "Cela m’est indifférent",
+          "prefer_none": "Je préfère un outil sans IA",
+          "refuse": "Je ne veux pas d’IA dans ce type d’outil"
+        }
+      },
+      {
+        "id": "doctor_website_control",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Votre cabinet dispose-t-il d’un site et d’un nom de domaine indépendants de sa plateforme de rendez-vous ?",
+        "options": {
+          "owned": "Oui, site et domaine indépendants",
+          "platform": "J’ai surtout une page sur une plateforme",
+          "none": "Non",
+          "unknown": "Je ne sais pas"
+        }
+      },
+      {
+        "id": "doctor_concept_interest",
+        "phase": "concept",
+        "type": "single",
+        "required": true,
+        "title": "Après cette présentation, pourriez-vous envisager RésoSoin pour votre cabinet ?",
+        "options": {
+          "definitely": "Oui, clairement",
+          "probably": "Probablement",
+          "maybe": "Peut-être",
+          "probably_not": "Probablement pas",
+          "no": "Non"
+        }
+      },
+      {
+        "id": "doctor_essential_features",
+        "phase": "concept",
+        "type": "multi",
+        "required": true,
+        "title": "Quelles fonctions devraient être prioritaires dans une première version réellement utilisable ?",
+        "options": {
+          "independent_site": "Site et domaine indépendants du cabinet",
+          "appointments": "Agenda et prise de rendez-vous",
+          "multi": "Gestion de plusieurs praticiens",
+          "reminders": "Rappels et confirmations",
+          "waitlist": "Liste d’attente",
+          "patient_app": "Application patient facultative",
+          "documents": "Échange de documents",
+          "teleconsult": "Téléconsultation",
+          "payment": "Paiement en ligne",
+          "messaging": "Messagerie sécurisée",
+          "export": "Export et réversibilité des données"
+        },
+        "max": 5
+      },
+      {
+        "id": "doctor_concept_blocker",
+        "phase": "concept",
+        "type": "single",
+        "required": true,
+        "title": "Quel serait votre principal frein à l’adoption d’un projet comme RésoSoin ?",
+        "options": {
+          "reliability": "Doute sur la fiabilité ou la continuité de service",
+          "migration": "Migration des données et des rendez-vous",
+          "visibility": "Risque de perdre en visibilité auprès des patients",
+          "price": "Coût total",
+          "support": "Qualité ou disponibilité du support",
+          "privacy": "Confidentialité et sécurité des données",
+          "interoperability": "Compatibilité avec le secrétariat ou les logiciels existants",
+          "training": "Temps de formation de l’équipe",
+          "none": "Aucun frein majeur à ce stade",
+          "other": "Autre frein non listé"
+        }
+      },
+      {
+        "id": "doctor_price",
+        "phase": "concept",
+        "type": "single",
+        "required": true,
+        "title": "Pour un socle site + agenda + multi-praticiens + automatisations courantes, quel prix mensuel par praticien vous semblerait raisonnable ?",
+        "help": "Hors éventuels coûts variables de SMS et hors prestation de mise en service. Il s’agit d’un ordre de grandeur, pas d’un tarif annoncé.",
+        "options": {
+          "lt30": "Moins de 30 €",
+          "30_49": "30 à 49 €",
+          "50_69": "50 à 69 €",
+          "70_99": "70 à 99 €",
+          "100_149": "100 à 149 €",
+          "150_plus": "150 € ou plus",
+          "unknown": "Impossible à estimer à ce stade"
+        }
+      },
+      {
+        "id": "doctor_pilot",
+        "phase": "concept",
+        "type": "single",
+        "required": false,
+        "title": "Seriez-vous intéressé·e par un pilote gratuit ou à tarif préférentiel quand le socle sera testable ?",
+        "options": {
+          "yes": "Oui",
+          "maybe": "Peut-être",
+          "no": "Non"
+        }
+      }
+    ]
+  },
+  "patient": {
+    "label": "Patient·e",
+    "questions": [
+      {
+        "id": "patient_booking_now",
+        "phase": "usage",
+        "type": "multi",
+        "required": true,
+        "title": "Comment prenez-vous habituellement vos rendez-vous de santé ?",
+        "options": {
+          "doctolib": "Doctolib",
+          "other_platform": "Autre plateforme",
+          "doctor_site": "Site du professionnel / cabinet",
+          "phone": "Téléphone",
+          "email": "E-mail",
+          "walk_in": "Accueil direct / sans rendez-vous"
+        },
+        "max": 6
+      },
+      {
+        "id": "patient_availability_difficulty",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "À quelle fréquence avez-vous du mal à trouver un professionnel disponible dans un délai qui vous convient ?",
+        "options": {
+          "often": "Souvent",
+          "sometimes": "Parfois",
+          "rarely": "Rarement",
+          "never": "Jamais",
+          "unknown": "Je ne sais pas"
+        }
+      },
+      {
+        "id": "patient_booking_pain",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Quelle étape vous pose le plus souvent problème pour prendre ou modifier un rendez-vous ?",
+        "options": {
+          "find": "Trouver un professionnel disponible",
+          "compare": "Comparer les possibilités",
+          "booking": "Obtenir le rendez-vous",
+          "change": "Déplacer ou annuler un rendez-vous",
+          "contact": "Joindre le cabinet",
+          "access": "Utiliser le site ou l’application",
+          "none": "Aucune difficulté particulière"
+        }
+      },
+      {
+        "id": "patient_doctolib_frequency",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "À quelle fréquence utilisez-vous Doctolib ?",
+        "options": {
+          "often": "Souvent",
+          "sometimes": "Parfois",
+          "rarely": "Rarement",
+          "never": "Jamais"
+        },
+        "show_if": {
+          "question": "patient_booking_now",
+          "op": "contains",
+          "value": "doctolib"
+        }
+      },
+      {
+        "id": "patient_account_preference",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Pour prendre vos rendez-vous, quelle organisation de compte préférez-vous ?",
+        "options": {
+          "no_account": "Pouvoir prendre rendez-vous sans créer de compte",
+          "optional": "Avoir le choix selon le cabinet",
+          "account": "Un compte unique centralisé me convient mieux",
+          "indifferent": "Cela m’est indifférent"
+        }
+      },
+      {
+        "id": "patient_access_options",
+        "phase": "usage",
+        "type": "multi",
+        "required": true,
+        "title": "Quels moyens d’accès devraient rester possibles pour qu’un service de rendez-vous soit réellement utilisable par tous ?",
+        "help": "Choisissez jusqu’à trois éléments.",
+        "options": {
+          "phone": "Pouvoir toujours joindre le cabinet par téléphone",
+          "trusted_person": "Pouvoir être aidé·e par un proche",
+          "accessible_web": "Un site accessible au clavier et aux aides techniques",
+          "no_account": "Ne pas imposer de compte pour les démarches simples",
+          "simple_mobile": "Un parcours mobile simple",
+          "central_account": "Un compte central pour les personnes qui le souhaitent",
+          "none": "Aucun de ces éléments n’est important pour moi"
+        },
+        "max": 3,
+        "exclusive": [
+          "none"
+        ]
+      },
+      {
+        "id": "patient_automation",
+        "phase": "usage",
+        "type": "multi",
+        "required": true,
+        "title": "Quelles automatisations vous seraient utiles, même sans IA ?",
+        "help": "Une automatisation peut être une règle simple et prévisible : elle n’a pas besoin d’analyser vos conversations ou vos données avec un modèle d’IA.",
+        "options": {
+          "confirmations": "Confirmation de rendez-vous",
+          "reminders": "Rappels avant rendez-vous",
+          "waitlist": "Proposition automatique d’un créneau libéré",
+          "calendar": "Ajout automatique au calendrier",
+          "cancellation": "Annulation / déplacement simplifiés",
+          "document_notice": "Notification lorsqu’un document est disponible",
+          "none": "Aucune"
+        },
+        "max": 4,
+        "exclusive": [
+          "none"
+        ]
+      },
+      {
+        "id": "patient_priority_criterion",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Pour un service numérique de rendez-vous de santé, quel critère compte le plus pour vous ?",
+        "options": {
+          "reliability": "Fiabilité du service",
+          "simplicity": "Simplicité d’utilisation",
+          "availability": "Facilité à trouver un professionnel disponible",
+          "accessibility": "Accessibilité pour tous",
+          "privacy": "Confidentialité des données",
+          "data_jurisdiction": "Lieu et juridiction applicables aux données",
+          "account_choice": "Liberté de créer ou non un compte",
+          "unknown": "Je ne sais pas"
+        }
+      },
+      {
+        "id": "patient_ai_preference",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Quelle place souhaitez-vous donner à l’IA dans les services numériques liés à votre santé ?",
+        "options": {
+          "want": "Je suis intéressé·e par des fonctions d’IA",
+          "optional": "Pourquoi pas si elles sont clairement optionnelles",
+          "indifferent": "Cela m’est indifférent",
+          "prefer_none": "Je préfère des services sans IA",
+          "refuse": "Je ne veux pas d’IA dans ce type de service"
+        }
+      },
+      {
+        "id": "patient_shared_search_value",
+        "phase": "usage",
+        "type": "single",
+        "required": true,
+        "title": "Si plusieurs cabinets indépendants pouvaient être recherchés depuis un même point d’entrée, cela vous serait-il utile ?",
+        "help": "Cette fonction est étudiée ; elle n’est pas présentée comme déjà disponible.",
+        "options": {
+          "very": "Oui, beaucoup",
+          "somewhat": "Oui, un peu",
+          "neutral": "Cela m’est indifférent",
+          "little": "Peu utile",
+          "none": "Pas utile"
+        }
+      },
+      {
+        "id": "patient_concept_interest",
+        "phase": "concept",
+        "type": "single",
+        "required": true,
+        "title": "Après cette présentation, RésoSoin vous semblerait-il utilisable au quotidien ?",
+        "options": {
+          "prefer": "Je préférerais probablement ce modèle",
+          "equivalent": "Cela me paraît équivalent",
+          "maybe": "Je voudrais tester avant de me prononcer",
+          "less": "Cela me paraît moins pratique",
+          "no": "Je ne l’utiliserais probablement pas"
+        }
+      },
+      {
+        "id": "patient_concept_reasons",
+        "phase": "concept",
+        "type": "multi",
+        "required": true,
+        "title": "Quel(s) avantage(s) du concept vous paraissent les plus utiles ?",
+        "options": {
+          "direct": "Rendez-vous directement avec le cabinet",
+          "no_account": "Pas de compte central obligatoire",
+          "shared_search": "Possibilité future de rechercher plusieurs cabinets depuis un même point d’entrée",
+          "eu_hosting": "Choix du lieu et de la juridiction d’hébergement",
+          "automation": "Automatisations utiles sans IA",
+          "independent": "Cabinets qui gardent leur site et leur domaine",
+          "opensource": "Code ouvert et fonctionnement vérifiable",
+          "none": "Aucun en particulier"
+        },
+        "max": 4,
+        "exclusive": [
+          "none"
+        ]
+      },
+      {
+        "id": "patient_concept_blocker",
+        "phase": "concept",
+        "type": "single",
+        "required": true,
+        "title": "Quel serait votre principal frein à l’utilisation de RésoSoin ?",
+        "options": {
+          "reliability": "Doute sur la fiabilité ou la continuité de service",
+          "discovery": "Difficulté à trouver les cabinets disponibles",
+          "habits": "Habitude d’une autre plateforme",
+          "complexity": "Parcours moins simple",
+          "account": "Organisation des comptes",
+          "privacy": "Confidentialité ou sécurité des données",
+          "accessibility": "Accessibilité insuffisante",
+          "none": "Aucun frein majeur à ce stade",
+          "other": "Autre frein non listé"
+        }
+      },
+      {
+        "id": "patient_app_preference",
+        "phase": "concept",
+        "type": "single",
+        "required": true,
+        "title": "Une application RésoSoin facultative pour regrouper vos rendez-vous vous intéresserait-elle ?",
+        "options": {
+          "yes": "Oui",
+          "optional": "Oui, si elle reste totalement facultative",
+          "site_only": "Je préfère utiliser uniquement les sites des cabinets",
+          "no": "Non"
+        }
+      },
+      {
+        "id": "patient_features",
+        "phase": "concept",
+        "type": "multi",
+        "required": true,
+        "title": "Qu’aimeriez-vous retrouver dans cette application facultative ?",
+        "options": {
+          "appointments": "Rendez-vous à venir et passés",
+          "reminders": "Rappels",
+          "calendar": "Ajout au calendrier",
+          "waitlist": "Liste d’attente",
+          "professionals": "Professionnels déjà consultés",
+          "documents": "Documents reçus",
+          "reference": "Professionnel favori / référent choisi par moi",
+          "none": "Je n’utiliserais pas l’application"
+        },
+        "max": 5,
+        "show_if": {
+          "question": "patient_app_preference",
+          "op": "in",
+          "values": [
+            "yes",
+            "optional"
+          ]
+        }
+      },
+      {
+        "id": "patient_age",
+        "phase": "concept",
+        "type": "single",
+        "required": false,
+        "title": "Facultatif : dans quelle tranche d’âge vous situez-vous ?",
+        "options": {
+          "18_29": "18–29 ans",
+          "30_44": "30–44 ans",
+          "45_59": "45–59 ans",
+          "60_plus": "60 ans ou plus"
+        }
+      },
+      {
+        "id": "patient_pilot",
+        "phase": "concept",
+        "type": "single",
+        "required": false,
+        "title": "Accepteriez-vous de tester une première version quand elle sera disponible ?",
+        "options": {
+          "yes": "Oui",
+          "maybe": "Peut-être",
+          "no": "Non"
+        }
+      }
+    ]
+  }
+}
