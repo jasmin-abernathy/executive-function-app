@@ -17,25 +17,27 @@ $questions = resosoin_question_map($audience);
 $displayIds = $audience === 'doctor'
     ? [
         'doctor_pain_points',
-        'doctor_eu_jurisdiction',
-        'doctor_ai_preference',
         'doctor_automation',
+        'doctor_priority_criterion',
+        'doctor_ai_preference',
         'doctor_concept_interest',
-        'doctor_concept_reasons',
+        'doctor_concept_blocker',
         'doctor_price',
     ]
     : [
-        'patient_direct_site',
-        'patient_eu_jurisdiction',
-        'patient_ai_preference',
+        'patient_availability_difficulty',
+        'patient_booking_pain',
         'patient_automation',
-        'patient_structure_preference',
+        'patient_priority_criterion',
+        'patient_shared_search_value',
         'patient_concept_interest',
+        'patient_concept_blocker',
         'patient_app_preference',
     ];
 
 $total = 0;
 $results = [];
+$professionalMethods = [];
 
 if ($ready) {
     $stmt = $pdo->prepare(
@@ -43,10 +45,27 @@ if ($ready) {
          FROM resosoin_survey_sessions
          WHERE audience = ?
            AND status = 'submitted'
-           AND (? <> 'doctor' OR professional_verified = 1)"
+           AND survey_version = ?"
     );
-    $stmt->execute([$audience, $audience]);
+    $stmt->execute([$audience, RESOSOIN_SURVEY_VERSION]);
     $total = (int) $stmt->fetchColumn();
+
+    if ($audience === 'doctor') {
+        $methodStmt = $pdo->prepare(
+            "SELECT COALESCE(professional_verification_method, 'self_declared') AS method,
+                    COUNT(*) AS total
+             FROM resosoin_survey_sessions
+             WHERE audience = 'doctor'
+               AND status = 'submitted'
+               AND survey_version = ?
+             GROUP BY COALESCE(professional_verification_method, 'self_declared')"
+        );
+        $methodStmt->execute([RESOSOIN_SURVEY_VERSION]);
+        foreach ($methodStmt->fetchAll() as $row) {
+            $professionalMethods[(string) $row['method']] =
+                (int) $row['total'];
+        }
+    }
 
     if ($total >= RESOSOIN_RESULTS_THRESHOLD) {
         $stmt = $pdo->prepare(
@@ -56,7 +75,7 @@ if ($ready) {
                ON s.id = a.session_id
              WHERE s.audience = ?
                AND s.status = 'submitted'
-               AND (? <> 'doctor' OR s.professional_verified = 1)
+               AND s.survey_version = ?
                AND a.question_id = ?"
         );
 
@@ -66,7 +85,11 @@ if ($ready) {
                 continue;
             }
 
-            $stmt->execute([$audience, $audience, $questionId]);
+            $stmt->execute([
+                $audience,
+                RESOSOIN_SURVEY_VERSION,
+                $questionId,
+            ]);
             $rows = $stmt->fetchAll(PDO::FETCH_COLUMN);
             $respondents = count($rows);
             $counts = [];
@@ -127,12 +150,26 @@ if ($ready) {
 
   <div class="notice">
     <strong>Étude exploratoire et auto-sélectionnée.</strong>
-    <span>Ces répartitions décrivent les répondants à cette étude ; elles ne sont pas représentatives de l’ensemble des médecins ou patients.</span>
+    <span>Ces répartitions décrivent uniquement les répondants à la version actuelle du questionnaire ; elles ne sont pas représentatives de l’ensemble des professionnels de santé ou des patients.</span>
   </div>
+
+  <?php if ($audience === 'doctor'): ?>
+    <div class="notice">
+      <strong>Réponses professionnelles déclaratives.</strong>
+      <span>Le parcours ne prétend pas authentifier l’identité du répondant. Une concordance facultative avec une fiche RPPS publique peut être enregistrée séparément, sans transformer la réponse en identité certifiée.</span>
+      <?php if ($total > 0): ?>
+        <span class="small">
+          <?= (int) ($professionalMethods['self_declared'] ?? 0) ?> sur déclaration seule ·
+          <?= (int) ($professionalMethods['directory_record_matched'] ?? 0) ?> avec fiche Annuaire Santé concordante.
+        </span>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
 
   <p class="lead">
     Les répartitions détaillées ne sont publiées qu’à partir de
-    <?= RESOSOIN_RESULTS_THRESHOLD ?> questionnaires envoyés par profil.
+    <?= RESOSOIN_RESULTS_THRESHOLD ?> questionnaires envoyés par profil
+    pour la version <?= resosoin_h(RESOSOIN_SURVEY_VERSION) ?>.
     Les cellules de moins de <?= RESOSOIN_CELL_THRESHOLD ?> sélections sont
     regroupées afin de limiter l’exposition de catégories rares.
   </p>
