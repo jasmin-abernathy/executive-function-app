@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS resosoin_survey_sessions (
   resume_token_hash CHAR(64) NOT NULL UNIQUE,
   status VARCHAR(20) NOT NULL DEFAULT 'active',
   current_step VARCHAR(100) NULL,
-  survey_version VARCHAR(40) NOT NULL DEFAULT '2026-09-23-v2',
+  survey_version VARCHAR(40) NOT NULL DEFAULT '2026-09-26-v3',
   recruitment_source VARCHAR(32) NOT NULL DEFAULT 'direct',
   professional_verified TINYINT(1) NOT NULL DEFAULT 0,
   professional_verification_method VARCHAR(64) NULL,
