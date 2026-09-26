@@ -22,6 +22,7 @@
       </a>
       <nav class="nav" aria-label="Navigation RésoSoin">
         <a href="#principe">Principe</a>
+        <a href="#parcours">Parcours</a>
         <a href="#automatisation">Automatisation</a>
         <a href="#donnees">Données</a>
         <a href="#etude">Questionnaires</a>
