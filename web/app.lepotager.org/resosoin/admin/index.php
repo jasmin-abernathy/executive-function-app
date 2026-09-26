@@ -194,6 +194,7 @@ $updatedAt = (string) (
   <main class="card">
     <p class="eyebrow">RésoSoin · administration privée</p>
     <h1>Clé API Annuaire Santé</h1>
+    <p class="lead">Cette clé active uniquement la recherche facultative d’une fiche RPPS publique. RésoSoin reste utilisable sans clé : le questionnaire professionnel repose d’abord sur une déclaration, et une fiche concordante n’authentifie pas l’identité du répondant.</p>
 
     <?php if (!$authenticated): ?>
       <p class="lead">Utilisez le même compte administrateur que pour le tableau de bord de recherche.</p>

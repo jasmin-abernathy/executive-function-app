@@ -72,8 +72,17 @@ if (!in_array($source, ['direct', 'home', 'resosoin_page', 'neutral_invite'], tr
             <article class="audience">
               <p class="eyebrow">Professionnels de santé</p>
               <h2>Je suis professionnel·le de santé</h2>
-              <p>Médecins, sages-femmes et professions de santé réglementées référencées dans l’Annuaire Santé.</p>
-              <div class="professional-verification">
+              <p>Médecins, sages-femmes et autres professions de santé réglementées peuvent répondre. Le parcours principal repose sur une déclaration explicite et ne nécessite aucune habilitation particulière.</p>
+              <label class="consent-line">
+                <input id="professional-declaration" type="checkbox">
+                <span>Je déclare exercer une profession de santé réglementée.</span>
+              </label>
+              <p class="small"><strong>Important :</strong> cette déclaration n’authentifie pas votre identité. Les résultats professionnels seront analysés comme des réponses déclaratives.</p>
+              <button class="btn primary" type="button" data-start="doctor">Commencer sur déclaration</button>
+
+              <details class="professional-verification">
+                <summary>Facultatif : rechercher ma fiche RPPS dans l’Annuaire Santé</summary>
+                <p class="small">Cette étape peut confirmer qu’une fiche publique concorde avec les informations saisies. Elle ne prouve pas que la personne qui répond est titulaire de cette fiche et elle n’est jamais nécessaire pour accéder au questionnaire.</p>
                 <label>
                   <span>Nom d’exercice</span>
                   <input id="professional-family-name" type="text" autocomplete="family-name" maxlength="120" placeholder="Nom figurant dans l’Annuaire Santé">
@@ -84,12 +93,12 @@ if (!in_array($source, ['direct', 'home', 'resosoin_page', 'neutral_invite'], tr
                 </label>
                 <label class="consent-line">
                   <input id="professional-certification" type="checkbox">
-                  <span>Je certifie être la personne correspondant à ce nom et à ce numéro RPPS.</span>
+                  <span>Je confirme que ces informations correspondent à ma fiche professionnelle.</span>
                 </label>
-                <button class="btn primary" type="button" id="professional-verify-button">Vérifier et commencer</button>
+                <button class="btn secondary" type="button" id="professional-verify-button">Rechercher la fiche et commencer</button>
                 <div class="status" id="professional-verification-status" role="status" aria-live="polite"></div>
-                <p class="small">Le nom et le RPPS servent uniquement à vérifier votre statut dans l’Annuaire Santé de l’ANS. Ils ne sont pas enregistrés avec vos réponses. Les titres qui ne relèvent pas d’une profession de santé active de la nomenclature TRE_G15 ne sont pas acceptés.</p>
-              </div>
+                <p class="small">Le nom et le RPPS sont utilisés uniquement pour cette consultation ponctuelle. Ils ne sont pas enregistrés dans les tables du questionnaire ni intégrés au jeton remis au navigateur.</p>
+              </details>
             </article>
             <article class="audience">
               <p class="eyebrow">Patients</p>
@@ -110,7 +119,7 @@ if (!in_array($source, ['direct', 'home', 'resosoin_page', 'neutral_invite'], tr
           <div class="progress" aria-hidden="true"><span id="progress-bar" style="width:0"></span></div>
           <div id="concept-card" class="concept" hidden>
             <strong>Voici le concept testé.</strong>
-            <span>RésoSoin vise un site indépendant pour chaque cabinet, un agenda simple, des automatisations explicites, aucune IA imposée, un hébergement européen privilégiant la souveraineté juridique et un prix nettement inférieur aux grandes plateformes. Sans IA ne veut pas dire sans automatisation&nbsp;: rappels, confirmations, listes d’attente, créneaux et synchronisations peuvent fonctionner avec des règles déterministes.</span>
+            <span>RésoSoin étudie un site et un domaine propres au cabinet, un agenda simple, des automatisations explicites, aucune IA imposée et la possibilité de relier plusieurs cabinets sans leur retirer leur autonomie. Certaines fonctions — notamment une recherche commune entre cabinets — restent au stade de projet et doivent encore être testées. Sans IA ne veut pas dire sans automatisation&nbsp;: rappels, confirmations, listes d’attente, créneaux et synchronisations peuvent fonctionner avec des règles déterministes.</span>
           </div>
           <form id="question-form">
             <h1 id="question-title" tabindex="-1"></h1>

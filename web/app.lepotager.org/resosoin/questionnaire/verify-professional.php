@@ -22,7 +22,7 @@ if (($input['certification'] ?? false) !== true) {
     json_response(
         [
             'ok' => false,
-            'error' => 'Vous devez certifier être le professionnel de santé correspondant au numéro RPPS saisi.',
+            'error' => 'Pour vérifier facultativement la fiche, confirmez que ces informations correspondent à votre fiche professionnelle.',
         ],
         422
     );
@@ -66,7 +66,7 @@ if ($apiKey === '') {
     json_response(
         [
             'ok' => false,
-            'error' => 'La vérification RPPS n’est pas encore configurée sur le serveur.',
+            'error' => 'La consultation facultative de l’Annuaire Santé n’est pas configurée. Vous pouvez continuer le questionnaire sur déclaration.',
         ],
         503
     );
@@ -83,7 +83,7 @@ if ($curl === false) {
     json_response(
         [
             'ok' => false,
-            'error' => 'Vérification RPPS indisponible.',
+            'error' => 'Consultation de l’Annuaire Santé indisponible.',
         ],
         503
     );
@@ -127,7 +127,7 @@ if ($status === 429) {
     json_response(
         [
             'ok' => false,
-            'error' => 'Le service de vérification est momentanément trop sollicité. Réessayez dans quelques instants.',
+            'error' => 'L’Annuaire Santé est momentanément trop sollicité. Vous pouvez réessayer plus tard ou continuer sur déclaration.',
         ],
         503
     );
@@ -141,7 +141,7 @@ if ($status < 200 || $status >= 300) {
     json_response(
         [
             'ok' => false,
-            'error' => 'La vérification RPPS est temporairement indisponible.',
+            'error' => 'La consultation de l’Annuaire Santé est temporairement indisponible. Vous pouvez continuer sur déclaration.',
         ],
         503
     );
@@ -169,7 +169,7 @@ if (!is_array($profession)) {
     json_response(
         [
             'ok' => false,
-            'error' => 'Le nom, le numéro RPPS ou la profession ne correspondent pas à une profession de santé active autorisée dans l’Annuaire Santé.',
+            'error' => 'Aucune fiche professionnelle active concordante n’a été trouvée pour ce nom et ce numéro RPPS.',
         ],
         422
     );
@@ -187,7 +187,7 @@ json_response([
     'verification_token' => $verificationToken,
     'profession' => $profession['label'],
     'expires_in' => RESOSOIN_PRO_VERIFICATION_TTL,
-    'message' => 'Professionnel de santé vérifié : '
+    'message' => 'Fiche Annuaire Santé concordante : '
         . $profession['label']
-        . '.',
+        . '. Cette concordance ne constitue pas une authentification de votre identité.',
 ]);

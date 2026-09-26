@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once dirname(__DIR__, 2) . '/adhd-app/includes/bootstrap.php';
 
-const RESOSOIN_SURVEY_VERSION = '2026-09-23-v2';
+const RESOSOIN_SURVEY_VERSION = '2026-09-26-v3';
 const RESOSOIN_START_GUARD_SECONDS = 3;
 
 function resosoin_questions(): array

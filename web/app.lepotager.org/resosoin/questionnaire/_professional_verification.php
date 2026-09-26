@@ -335,11 +335,6 @@ function resosoin_issue_professional_verification_token(
         'profession_code' => $professionCode,
         'iat' => $now,
         'exp' => $now + RESOSOIN_PRO_VERIFICATION_TTL,
-        'rpps_digest' => hash_hmac(
-            'sha256',
-            $rpps,
-            $appKey
-        ),
     ];
 
     $json = json_encode(

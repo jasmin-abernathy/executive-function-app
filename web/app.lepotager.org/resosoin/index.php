@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="RésoSoin : étude d’une alternative française et indépendante aux grandes plateformes de rendez-vous, sans IA imposée, avec automatisations utiles et hébergement européen visé.">
+  <meta name="description" content="RésoSoin : étude d’un réseau de cabinets indépendants avec site propre, rendez-vous interopérables, automatisations explicites et contrôle des données.">
   <meta name="theme-color" content="#315c3a">
   <title>RésoSoin — une autre façon de gérer le site et les rendez-vous d’un cabinet</title>
   <link rel="canonical" href="https://app.lepotager.org/resosoin/">
@@ -22,6 +22,7 @@
       </a>
       <nav class="nav" aria-label="Navigation RésoSoin">
         <a href="#principe">Principe</a>
+        <a href="#parcours">Parcours</a>
         <a href="#automatisation">Automatisation</a>
         <a href="#donnees">Données</a>
         <a href="#etude">Questionnaires</a>
@@ -36,7 +37,7 @@
         <div>
           <p class="eyebrow">Projet en étude · santé numérique</p>
           <h1>Et si le cabinet gardait vraiment la main&nbsp;?</h1>
-          <p class="lede">RésoSoin, développé à Metz, explore une alternative française et indépendante aux grandes plateformes de rendez-vous&nbsp;: un site propre au cabinet, un agenda simple, des automatisations utiles, aucune IA imposée et un objectif de tarif nettement plus accessible.</p>
+          <p class="lede">RésoSoin, développé à Metz, étudie une organisation différente des plateformes centralisées&nbsp;: chaque cabinet garde son site et son domaine, tandis que les services de rendez-vous et de recherche pourraient être reliés entre eux sans retirer cette autonomie. L’étude sert précisément à déterminer quelles fonctions valent la peine d’être construites.</p>
           <div class="hero-actions">
             <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Je suis professionnel·le de santé</a>
             <a class="button button-secondary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Je suis patient·e</a>
@@ -68,7 +69,7 @@
         <div class="section-heading">
           <p class="eyebrow">Le principe testé</p>
           <h2>Un réseau de cabinets indépendants, pas une plateforme qui possède toute la relation.</h2>
-          <p>Chaque cabinet conserve son propre site et son propre domaine. L’agenda et les services peuvent être reliés au réseau RésoSoin sans obliger le cabinet à devenir une simple fiche dans une plateforme centrale.</p>
+          <p>Chaque cabinet conserve son propre site et son propre domaine. «&nbsp;Décentralisé mais interopérable&nbsp;» signifie ici qu’un patient pourrait accéder à plusieurs cabinets depuis un point d’entrée commun, tandis que chaque cabinet garderait sa présence web, ses choix d’outils et la possibilité de partir avec ses données. Cette interopérabilité reste à prototyper et à tester.</p>
         </div>
         <div class="grid-3">
           <article class="card">
@@ -86,6 +87,34 @@
             <h3>Le sensible reste séparé</h3>
             <p>Le site public et son CMS ne doivent pas contenir de dossier patient. Les rendez-vous, documents et futures données de santé utilisent une couche distincte adaptée à leur niveau de sensibilité.</p>
           </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="parcours" class="section">
+      <div class="shell">
+        <div class="section-heading">
+          <p class="eyebrow">Parcours visé</p>
+          <h2>La valeur ne dépend pas d’une copie miniature de Doctolib.</h2>
+          <p>RésoSoin est étudié comme un socle pour relier des cabinets autonomes. Les éléments ci-dessous distinguent ce qui existe déjà de ce qui doit encore être construit et validé.</p>
+        </div>
+        <div class="grid">
+          <article class="card">
+            <h3>Côté patient</h3>
+            <p><span class="tag">Disponible aujourd’hui</span> découvrir le projet et répondre à l’étude.</p>
+            <p><span class="tag">À prototyper</span> trouver le site du cabinet, prendre ou modifier un rendez-vous simplement, recevoir un rappel facultatif.</p>
+            <p><span class="tag">Projet à tester</span> rechercher plusieurs cabinets indépendants depuis un point d’entrée commun sans imposer un compte central.</p>
+          </article>
+          <article class="card">
+            <h3>Côté équipe</h3>
+            <p><span class="tag">Socle existant</span> CMS léger avec site et domaine propres au cabinet.</p>
+            <p><span class="tag">À prototyper</span> gérer plusieurs agendas et automatiser confirmations, rappels ou créneaux libérés avec des règles explicites.</p>
+            <p><span class="tag">Exigence de conception</span> pouvoir exporter les données utiles et changer de solution sans perdre la présence web du cabinet.</p>
+          </article>
+        </div>
+        <div class="notice" style="margin-top:1rem;color:#202622">
+          <strong>Les objections font partie de l’étude.</strong>
+          <span>Visibilité des cabinets, migration, formation, support, continuité de service, compatibilité avec le secrétariat et coût total sont mesurés au lieu d’être présentés comme déjà résolus.</span>
         </div>
       </div>
     </section>
@@ -181,10 +210,10 @@
             <p class="eyebrow">Professionnels</p>
             <h3>Médecins et autres professionnels de santé</h3>
             <ul>
-              <li>Solutions actuelles et irritants.</li>
-              <li>Prix et freins à la migration.</li>
-              <li>IA, automatisation et souveraineté des données.</li>
-              <li>Fonctions indispensables au MVP.</li>
+              <li>Profession réglementée déclarée, sans identité demandée.</li>
+              <li>Solutions actuelles, irritants et taille de la structure.</li>
+              <li>Automatisations, critères de choix et place de l’IA.</li>
+              <li>Fonctions prioritaires, frein principal et prix indicatif.</li>
             </ul>
             <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Répondre côté professionnel</a>
           </article>
@@ -192,10 +221,10 @@
             <p class="eyebrow">Patients</p>
             <h3>Personnes qui prennent des rendez-vous de santé</h3>
             <ul>
-              <li>Habitudes de prise de rendez-vous.</li>
-              <li>Compte central ou sites de cabinets.</li>
-              <li>IA, automatisation et hébergement européen.</li>
-              <li>Utilité réelle d’une application facultative.</li>
+              <li>Habitudes de prise de rendez-vous et disponibilité.</li>
+              <li>Difficultés concrètes, compte et accessibilité.</li>
+              <li>Automatisations, critères de choix et place de l’IA.</li>
+              <li>Recherche commune, freins et application facultative.</li>
             </ul>
             <a class="button button-primary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Répondre côté patient</a>
           </article>

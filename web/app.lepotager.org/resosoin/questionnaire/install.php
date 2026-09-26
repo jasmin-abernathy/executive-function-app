@@ -69,10 +69,16 @@ if (
     $pdo->exec(
         "ALTER TABLE resosoin_survey_sessions
          ADD survey_version VARCHAR(40) NOT NULL
-         DEFAULT '2026-09-23-v2'
+         DEFAULT '2026-09-26-v3'
          AFTER current_step"
     );
 }
+
+$pdo->exec(
+    "ALTER TABLE resosoin_survey_sessions
+     MODIFY survey_version VARCHAR(40) NOT NULL
+     DEFAULT '2026-09-26-v3'"
+);
 
 if (
     !resosoin_column_exists(

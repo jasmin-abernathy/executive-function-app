@@ -45,6 +45,7 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid rgba(
 @media(max-width:680px){.resume-item{align-items:stretch;flex-direction:column}.resume-actions{display:grid}.resume-actions .btn{width:100%}}
 
 .professional-verification{display:grid;gap:12px;margin-top:14px;padding-top:14px;border-top:1px solid var(--line)}
+.professional-verification summary{cursor:pointer;font-weight:800;color:var(--green);line-height:1.4}
 .professional-verification label:not(.consent-line){display:grid;gap:6px;font-weight:700}
 .professional-verification input[type="text"]{width:100%;min-height:46px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff;color:var(--text);font:inherit}
 .professional-verification input[type="text"]:focus{outline:3px solid rgba(79,122,97,.2);border-color:var(--green)}
