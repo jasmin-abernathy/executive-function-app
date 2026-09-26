@@ -184,6 +184,11 @@ expect_true(
 );
 
 expect_true(
+    !array_key_exists('rpps_digest', $payload),
+    'Optional directory token must not retain an RPPS-derived digest.'
+);
+
+expect_true(
     resosoin_validate_professional_verification_token(
         $token,
         $appKey,
