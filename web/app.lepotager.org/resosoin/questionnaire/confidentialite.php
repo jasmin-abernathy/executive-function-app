@@ -13,15 +13,18 @@
 <p class="eyebrow">Confidentialité</p><h1>Une étude produit, pas un questionnaire médical.</h1>
 <p class="lead">L’objectif est de comprendre les usages et attentes autour des rendez-vous et services numériques de cabinet. Nous évitons volontairement de collecter des données de santé dans cette étude.</p>
 <h2>Ce qui est demandé</h2>
-<ul><li>Votre profil de réponse : professionnel·le de santé ou patient·e.</li><li>Des choix sur vos usages, préférences, attentes, prix et fonctionnalités.</li><li>Pour les patients, uniquement une tranche d’âge large à partir de 18 ans.</li></ul>
-<h2>Vérification des professionnels de santé</h2>
-<p>Pour accéder au questionnaire professionnel, le nom d’exercice et le numéro RPPS sont utilisés uniquement au moment de la vérification.</p>
+<ul><li>Votre profil de réponse : professionnel·le de santé ou patient·e.</li><li>Des choix sur vos usages, préférences, attentes, prix et fonctionnalités.</li><li>Pour les professionnels, la profession réglementée déclarée et le contexte d’exercice, sans identité.</li><li>Pour les patients, une tranche d’âge large facultative à partir de 18 ans.</li></ul>
+<h2>Parcours des professionnels de santé</h2>
+<p>L’accès au questionnaire professionnel repose sur une déclaration explicite d’exercice d’une profession de santé réglementée. Cette déclaration n’authentifie pas l’identité du répondant et les résultats professionnels sont interprétés comme des réponses déclaratives.</p>
+<p>Une consultation facultative de l’Annuaire Santé peut être proposée lorsque la clé API publique nécessaire est configurée :</p>
 <ul>
-<li>Le serveur transmet le numéro RPPS à l’API officielle Annuaire Santé de l’ANS.</li>
-<li>Le nom d’exercice est comparé localement avec l’identité renvoyée par l’Annuaire Santé.</li>
-<li>Le questionnaire ne sauvegarde ni le nom ni le numéro RPPS, ni en clair ni sous forme de hash.</li>
-<li>La session conserve seulement le fait que le statut professionnel a été vérifié et la méthode utilisée.</li>
+<li>le numéro RPPS est transmis ponctuellement à l’API officielle Annuaire Santé de l’ANS ;</li>
+<li>le nom d’exercice est comparé localement avec la fiche renvoyée ;</li>
+<li>une concordance confirme seulement l’existence d’une fiche professionnelle publique active correspondant aux informations saisies ; elle ne prouve pas que le répondant en est titulaire ;</li>
+<li>le nom et le numéro RPPS ne sont pas enregistrés dans les tables du questionnaire ni intégrés au jeton remis au navigateur ;</li>
+<li>la session conserve seulement la méthode de participation : <code>self_declared</code> ou <code>directory_record_matched</code>.</li>
 </ul>
+<p>L’absence de clé API ou l’échec de cette consultation facultative ne bloque pas le questionnaire : le professionnel peut répondre sur déclaration.</p>
 <h2>Ce qui n’est pas demandé</h2>
 <ul><li>Nom, prénom, adresse, numéro de sécurité sociale.</li><li>Diagnostic, pathologie, traitement ou motif de consultation.</li><li>Texte libre médical.</li><li>Adresse e-mail dans le questionnaire lui-même.</li></ul>
 <h2>Âge et consentement</h2><p>Cette étude est réservée aux personnes de 18 ans ou plus. Votre accord explicite est vérifié avant la création d’une session et la version du questionnaire est enregistrée avec la date de consentement.</p><h2>Sauvegarde et reprise</h2>
