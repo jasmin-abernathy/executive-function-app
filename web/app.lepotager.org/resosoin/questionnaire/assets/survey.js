@@ -38,6 +38,7 @@
   const consentCheck = document.getElementById("consent-check");
   const landingStatus = document.getElementById("landing-status");
   const doneDeleteButton = document.getElementById("done-delete-button");
+  const professionalDeclaration = document.getElementById("professional-declaration");
   const professionalFamilyName = document.getElementById("professional-family-name");
   const professionalRpps = document.getElementById("professional-rpps");
   const professionalCertification = document.getElementById("professional-certification");
@@ -606,9 +607,18 @@
       return;
     }
 
+    if (!professionalDeclaration?.checked) {
+      setProfessionalVerificationStatus(
+        "Cochez d’abord la déclaration de profession réglementée.",
+        true
+      );
+      professionalDeclaration?.focus();
+      return;
+    }
+
     if (!professionalCertification?.checked) {
       setProfessionalVerificationStatus(
-        "Cochez la certification pour continuer.",
+        "Confirmez que les informations correspondent à votre fiche professionnelle.",
         true
       );
       professionalCertification?.focus();
@@ -618,7 +628,7 @@
     verifyingProfessional = true;
     setLandingBusy(true);
     setProfessionalVerificationStatus(
-      "Vérification ponctuelle dans l’Annuaire Santé…"
+      "Recherche ponctuelle dans l’Annuaire Santé…"
     );
 
     try {
@@ -633,7 +643,7 @@
       );
 
       setProfessionalVerificationStatus(
-        (data.message || "Professionnel de santé vérifié.")
+        (data.message || "Fiche professionnelle concordante.")
         + " Le nom et le RPPS ne sont pas enregistrés avec vos réponses."
       );
 
@@ -677,6 +687,18 @@
       return;
     }
 
+    if (
+      audience === "doctor"
+      && !professionalDeclaration?.checked
+    ) {
+      setLandingStatus(
+        "Déclarez exercer une profession de santé réglementée pour commencer.",
+        true
+      );
+      professionalDeclaration?.focus();
+      return;
+    }
+
     busy = true;
     setLandingBusy(true);
     setLandingStatus("Création du questionnaire…");
@@ -690,6 +712,9 @@
           adult: true,
           consent: true,
           source: recruitmentSource,
+          professional_declaration:
+            audience === "doctor"
+            && Boolean(professionalDeclaration?.checked),
           professional_verification:
             professionalVerification,
         },
@@ -865,11 +890,9 @@
         prefillAudience
         && ["doctor", "patient"].includes(prefillAudience)
       ) {
-        const target = prefillAudience === "doctor"
-          ? professionalVerifyButton
-          : document.querySelector(
-              '[data-start="' + prefillAudience + '"]'
-            );
+        const target = document.querySelector(
+          '[data-start="' + prefillAudience + '"]'
+        );
         target?.focus();
       }
     } catch (error) {
