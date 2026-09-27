@@ -1,0 +1,125 @@
+# RésoSoin — stratégie d’interopérabilité (pré-développement)
+
+## Décision de périmètre
+
+RésoSoin ne doit pas devenir un logiciel de gestion de cabinet (LGC) bis.
+
+Le produit doit rester une couche légère autour du parcours de rendez-vous, du site public du cabinet et d’automatisations choisies, en laissant le dossier patient, la prescription, la facturation métier et la télétransmission aux logiciels déjà utilisés par les professionnels.
+
+Aucun connecteur patient réel n’est activé dans ce lot.
+
+## Architecture cible
+
+```text
+Interfaces RésoSoin
+        |
+        v
+Domaine métier RésoSoin
+        |
+        v
+Couche d’adaptateurs / ports
+   |       |       |
+ export  import   connecteurs autorisés
+        |
+        v
+LGC / services de santé
+```
+
+Le domaine ne dépend jamais directement d’un éditeur particulier. Chaque intégration propriétaire doit rester remplaçable.
+
+## Paliers
+
+### Palier 0 — maintenant
+
+Sans donnée patient réelle :
+
+- export PDF imprimable ;
+- export CSV administratif lorsque pertinent ;
+- prototype d’export structuré JSON ;
+- prototypes UX d’import et d’export ;
+- journal d’import/export fictif ;
+- mapping documenté ;
+- aucune donnée réelle envoyée à un tiers.
+
+### Palier 1 — après validation terrain
+
+Étudier les possibilités officielles, contractuelles et techniques pour les principaux logiciels rencontrés par les cabinets pilotes. Un connecteur n’est développé que si l’éditeur fournit un moyen d’intégration autorisé et suffisamment stable.
+
+### Palier 2 — interopérabilité santé
+
+Lorsque le périmètre le justifie, s’aligner sur le CI-SIS et les standards nationaux plutôt que multiplier les formats maison. La trajectoire ANS 2026 va vers FHIR pour les catégories prioritaires, tout en conservant des usages CDA/HL7v2 dans l’écosystème existant.
+
+## Règles de sécurité
+
+- données de démonstration synthétiques uniquement dans les prototypes ;
+- aucun scraping d’interface métier ;
+- aucune automatisation par identifiants utilisateur stockés ;
+- aucun reverse engineering d’API privée ;
+- aucun secret d’éditeur dans le dépôt ;
+- validation stricte des imports ;
+- prévisualisation et confirmation explicite avant import ;
+- journalisation sans recopier inutilement le contenu clinique ;
+- refus fail-closed d’un format/version inconnus ;
+- séparation nette données publiques du site / données administratives / données de santé.
+
+## Contrat interne proposé
+
+Les adaptateurs futurs doivent converger vers un petit contrat interne versionné plutôt que propager les schémas propriétaires dans l’application.
+
+Exemple conceptuel :
+
+```json
+{
+  "schema": "resosoin.exchange.v1",
+  "kind": "appointment-summary",
+  "source": "synthetic-demo",
+  "subject": {
+    "external_reference": "DEMO-001"
+  },
+  "appointment": {
+    "starts_at": "2030-01-01T10:00:00+01:00",
+    "duration_minutes": 30,
+    "status": "planned"
+  }
+}
+```
+
+Ce format n’est pas un standard médical et ne doit pas être présenté comme tel. Il sert uniquement de frontière interne/prototype avant choix d’un profil CI-SIS/FHIR pertinent.
+
+## Ce qu’il faut mesurer auprès des cabinets pilotes
+
+Pour chaque professionnel volontaire :
+
+1. logiciel métier/LGC réellement utilisé ;
+2. agenda utilisé ;
+3. MSSanté utilisée ou non ;
+4. imports/exports déjà disponibles ;
+5. double saisie la plus coûteuse ;
+6. documents réellement échangés ;
+7. besoin d’un échange automatique ou simple export/import suffisant ;
+8. interlocuteur éditeur/intégrateur disponible.
+
+Le choix des premiers connecteurs doit découler de ces usages réels, pas d’un classement théorique des éditeurs.
+
+## Sources techniques à surveiller
+
+- ANS — CI-SIS et doctrine d’interopérabilité ;
+- espace de publication CI-SIS ;
+- espace de tests d’interopérabilité ANS ;
+- documentation officielle des éditeurs de LGC concernés ;
+- documentation officielle MSSanté / services socles lorsque le périmètre y arrive.
+
+## Critère de passage à une intégration réelle
+
+Ne brancher un connecteur à de vraies données que lorsque sont connus :
+
+- API/protocole officiel ;
+- droit d’usage ;
+- modèle d’authentification ;
+- données minimales nécessaires ;
+- hébergement et responsabilités ;
+- journalisation ;
+- procédure de révocation ;
+- tests d’interopérabilité ;
+- comportement en panne ;
+- procédure de sortie/réversibilité.
