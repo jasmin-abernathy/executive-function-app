@@ -200,6 +200,6 @@ Les standards ci-dessous sont des **candidats à vérifier pour chaque flux**, p
 
 ## Premier port exécutable : simulation seulement
 
-`prototypes/exchange-contract.js` fournit `validate` et `createMockAdapter` pour un résumé de rendez-vous synthétique. Le port `ExchangeContract` valide taille, champs, version et calendrier. Le mock fait une prévisualisation, exige une confirmation explicite et détecte une clé d'idempotence déjà utilisée ou réutilisée avec un autre contenu. Son registre est uniquement en mémoire, sans persistance ni connexion réseau. Le journal clinique est absent.
+`prototypes/exchange-contract.js` fournit `validate` et `createMockAdapter` pour un résumé de rendez-vous synthétique. Le port `ExchangeContract` valide taille, champs, version et calendrier. Le mock émet un jeton de prévisualisation lié à la clé et au contenu ; une confirmation explicite avec ce jeton est requise avant l'écriture en mémoire. Il détecte une clé d'idempotence déjà utilisée ou réutilisée avec un autre contenu. Son registre est uniquement en mémoire, sans persistance ni connexion réseau. Le journal clinique est absent. Le fichier est un module Node de démonstration, pas un composant chargé par les pages publiques.
 
 Un futur `ClinicalInteropAdapter` devra sélectionner un volet officiel adapté au cas réel. Un futur `VendorAdapter` exigera documentation et autorisation de l'éditeur. Aucun des deux n'est implémenté. Ce mock ne doit pas servir à traiter des données réelles ni être exposé comme une API publique.

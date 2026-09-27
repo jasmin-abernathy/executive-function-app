@@ -12,9 +12,14 @@ reject(x => { x.subject.external_reference = '  '; }, 'subject.external_referenc
 assert.equal(validate('x'.repeat(MAX_BYTES + 1)).errors[0].code, 'too_large');
 const adapter = createMockAdapter();
 const key = 'synthetic-key-001';
-assert.equal(adapter.preview(fixture(), key).status, 'valid');
-assert.equal(adapter.commit(fixture(), key, false).status, 'rejected');
-assert.equal(adapter.commit(fixture(), key, true).status, 'accepted');
+assert.equal(adapter.commit(fixture(), key, true).status, 'rejected');
+const review = adapter.preview(fixture(), key);
+assert.equal(review.status, 'valid');
+assert.equal(adapter.commit(fixture(), key, false, review.review_token).status, 'rejected');
+assert.equal(adapter.commit(fixture(), key, true, 'invalid-token').status, 'rejected');
+const changedBeforeCommit = fixture(); changedBeforeCommit.appointment.duration_minutes = 40;
+assert.equal(adapter.commit(changedBeforeCommit, key, true, review.review_token).status, 'rejected');
+assert.equal(adapter.commit(fixture(), key, true, review.review_token).status, 'accepted');
 assert.equal(adapter.preview(fixture(), key).status, 'duplicate');
 const changed = fixture(); changed.appointment.duration_minutes = 40;
 assert.equal(adapter.preview(changed, key).errors[0].code, 'conflict');

@@ -1,5 +1,6 @@
 /* Synthetic prototype only. No patient data or vendor integration. */
 'use strict';
+const { randomUUID } = require('node:crypto');
 
 const VERSION = 'resosoin.exchange.v1';
 const MAX_BYTES = 8192;
@@ -17,7 +18,9 @@ function validate(raw) {
     try { value = JSON.parse(raw); } catch { return { valid: false, errors: [{ field: '$', code: 'invalid_json' }] }; }
   }
   if (!value || typeof value !== 'object' || Array.isArray(value)) return { valid: false, errors: [{ field: '$', code: 'invalid_object' }] };
-  if (Buffer.byteLength(JSON.stringify(value), 'utf8') > MAX_BYTES) return { valid: false, errors: [{ field: '$', code: 'too_large' }] };
+  try {
+    if (Buffer.byteLength(JSON.stringify(value), 'utf8') > MAX_BYTES) return { valid: false, errors: [{ field: '$', code: 'too_large' }] };
+  } catch { return { valid: false, errors: [{ field: '$', code: 'invalid_object' }] }; }
   const issue = (field, code) => errors.push({ field, code });
   function fields(object, prefix) {
     if (!object || typeof object !== 'object' || Array.isArray(object)) { issue(prefix, 'invalid_object'); return false; }
@@ -52,18 +55,30 @@ function validCalendarDate(s) {
 // In-memory dry-run: the caller must provide a fresh expected key at commit time.
 function createMockAdapter() {
   const records = new Map();
+  const previews = new Map();
   function preview(payload, key) {
     const result = validate(payload);
     if (!result.valid) return { status: 'rejected', errors: result.errors };
     if (typeof key !== 'string' || !/^[a-zA-Z0-9_-]{8,128}$/.test(key)) return { status: 'rejected', errors: [{ field: 'idempotency_key', code: 'invalid_value' }] };
-    if (records.has(key)) return { status: records.get(key) === JSON.stringify(result.value) ? 'duplicate' : 'rejected', errors: records.get(key) === JSON.stringify(result.value) ? undefined : [{ field: 'idempotency_key', code: 'conflict' }] };
-    return { status: 'valid', schema: VERSION, idempotency_key: key };
+    const serialized = JSON.stringify(result.value);
+    if (records.has(key)) return records.get(key) === serialized
+      ? { status: 'duplicate', schema: VERSION, idempotency_key: key }
+      : { status: 'rejected', errors: [{ field: 'idempotency_key', code: 'conflict' }] };
+    const review_token = randomUUID();
+    previews.set(key, { serialized, review_token });
+    return { status: 'valid', schema: VERSION, idempotency_key: key, review_token };
   }
-  function commit(payload, key, confirmation) {
-    const review = preview(payload, key);
-    if (review.status !== 'valid') return review;
-    if (confirmation !== true) return { status: 'rejected', errors: [{ field: 'confirmation', code: 'required' }] };
-    records.set(key, JSON.stringify(validate(payload).value));
+  function commit(payload, key, confirmation, review_token) {
+    const result = validate(payload);
+    if (!result.valid) return { status: 'rejected', errors: result.errors };
+    if (typeof key !== 'string' || !/^[a-zA-Z0-9_-]{8,128}$/.test(key)) return { status: 'rejected', errors: [{ field: 'idempotency_key', code: 'invalid_value' }] };
+    const serialized = JSON.stringify(result.value);
+    if (records.has(key)) return records.get(key) === serialized
+      ? { status: 'duplicate', schema: VERSION, idempotency_key: key }
+      : { status: 'rejected', errors: [{ field: 'idempotency_key', code: 'conflict' }] };
+    if (confirmation !== true || !previews.has(key) || previews.get(key).review_token !== review_token || previews.get(key).serialized !== serialized) return { status: 'rejected', errors: [{ field: 'confirmation', code: 'preview_required' }] };
+    previews.delete(key);
+    records.set(key, serialized);
     return { status: 'accepted', schema: VERSION, idempotency_key: key };
   }
   return { preview, commit };
