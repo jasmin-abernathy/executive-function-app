@@ -123,3 +123,64 @@ Ne brancher un connecteur à de vraies données que lorsque sont connus :
 - tests d’interopérabilité ;
 - comportement en panne ;
 - procédure de sortie/réversibilité.
+
+
+## État des intégrations éditeurs vérifié au 27 septembre 2026
+
+### Doctolib
+
+La documentation publique Doctolib confirme :
+- l'existence de connecteurs entre Doctolib et des systèmes tiers ;
+- des flux transmis via API lorsqu'un connecteur est effectivement mis en place ;
+- un mécanisme de clé secrète pour l'authentification du système tiers ;
+- un programme de partenaires logiciels/SaaS ;
+- la possibilité, selon le contrat, d'un connecteur avec un logiciel de gestion de cabinet partenaire.
+
+Conclusion RésoSoin : **intégration potentiellement réaliste, mais pas à coder comme une API publique libre-service**. La prochaine étape est une prise de contact partenariat/interopérabilité et l'obtention d'une documentation autorisée avant tout connecteur.
+
+Références publiques :
+- https://info.doctolib.fr/partenariats-doctolib/
+- https://info.doctolib.fr/dpa/
+- https://info.doctolib.fr/blog/definitions/
+
+### Weda, Médistory, HelloDoc/AxiSanté, Cegedim/Maiia, Stellair
+
+La recherche publique effectuée pour ce lot ne suffit pas à établir un contrat d'API publique stable et librement intégrable pour RésoSoin.
+
+Cela ne signifie **pas** qu'aucune interopérabilité n'existe. Il faut distinguer :
+- interfaces réservées aux partenaires ;
+- exports/imports disponibles dans le logiciel ;
+- connecteurs Ségur/CI-SIS ;
+- API contractuelles non publiques ;
+- absence réelle d'interface.
+
+Aucun connecteur propriétaire ne doit donc être développé à partir d'hypothèses ou de reverse engineering.
+
+## Décision d'architecture pour la prochaine étape
+
+GPT-6 doit conserver trois frontières distinctes :
+
+1. **ExchangeContract** : représentation interne minimale, versionnée, indépendante des éditeurs.
+2. **ClinicalInteropAdapter** : future frontière CI-SIS/FHIR/CDA lorsque des données de santé doivent réellement être échangées.
+3. **VendorAdapter** : adaptateur propriétaire uniquement lorsqu'une documentation et une autorisation d'intégration existent.
+
+Le contrat prototype `resosoin.exchange.v1` ne doit jamais devenir par inertie un format clinique propriétaire. Dès qu'un cas d'usage clinique réel est retenu, choisir le volet CI-SIS correspondant et mapper le domaine RésoSoin vers ce standard.
+
+## Points de décision à confier à GPT-6
+
+Avant tout code clinique :
+- identifier les ressources FHIR/volets CI-SIS correspondant exactement aux cas d'usage retenus ;
+- déterminer si RésoSoin manipule réellement une donnée de santé ou seulement une donnée administrative de rendez-vous ;
+- séparer identités, rendez-vous, documents et messages ;
+- définir les frontières HDS/secret management/authentification ;
+- prévoir idempotence, déduplication, reprise sur erreur et audit ;
+- définir les règles de consentement/base légale au niveau produit avec validation juridique appropriée ;
+- concevoir les tests contractuels des adaptateurs sans nécessiter de données patients réelles.
+
+## Références nationales
+
+- Doctrine d'interopérabilité ANS : https://esante.gouv.fr/doctrine/interoperabilite
+- CI-SIS : https://esante.gouv.fr/produits-services/ci-sis
+- Espace de publication CI-SIS : https://prod-convergence.esante.gouv.fr/offres-services/ci-sis/espace-publication
+
+Au 27 septembre 2026, l'ANS indique une trajectoire vers FHIR pour les catégories prioritaires et, à terme, pour l'ensemble des volets CI-SIS. Les implémentations existantes CDA et autres profils ne doivent cependant pas être supposées disparues : le choix doit suivre le cas d'usage et le volet applicable.
