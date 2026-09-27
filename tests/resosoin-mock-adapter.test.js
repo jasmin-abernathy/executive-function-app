@@ -1,0 +1,26 @@
+'use strict';
+const assert = require('node:assert/strict');
+const { validate, createMockAdapter, MAX_BYTES } = require('../web/app.lepotager.org/resosoin/prototypes/exchange-contract');
+const fixture = () => ({ schema: 'resosoin.exchange.v1', kind: 'appointment-summary', source: 'synthetic-demo', subject: { external_reference: 'DEMO-001' }, appointment: { starts_at: '2030-01-01T10:00:00+01:00', duration_minutes: 30, status: 'planned' } });
+assert.equal(validate(fixture()).valid, true);
+function reject(edit, field) { const x = fixture(); edit(x); assert.ok(validate(x).errors.some(e => e.field === field), field); }
+reject(x => { x.schema = 'resosoin.exchange.v2'; }, 'schema');
+reject(x => { x.extra = 'no'; }, 'extra');
+reject(x => { x.appointment.duration_minutes = 0; }, 'appointment.duration_minutes');
+reject(x => { x.appointment.starts_at = '2030-02-30T10:00:00Z'; }, 'appointment.starts_at');
+reject(x => { x.subject.external_reference = '  '; }, 'subject.external_reference');
+assert.equal(validate('x'.repeat(MAX_BYTES + 1)).errors[0].code, 'too_large');
+const adapter = createMockAdapter();
+const key = 'synthetic-key-001';
+assert.equal(adapter.commit(fixture(), key, true).status, 'rejected');
+const review = adapter.preview(fixture(), key);
+assert.equal(review.status, 'valid');
+assert.equal(adapter.commit(fixture(), key, false, review.review_token).status, 'rejected');
+assert.equal(adapter.commit(fixture(), key, true, 'invalid-token').status, 'rejected');
+const changedBeforeCommit = fixture(); changedBeforeCommit.appointment.duration_minutes = 40;
+assert.equal(adapter.commit(changedBeforeCommit, key, true, review.review_token).status, 'rejected');
+assert.equal(adapter.commit(fixture(), key, true, review.review_token).status, 'accepted');
+assert.equal(adapter.preview(fixture(), key).status, 'duplicate');
+const changed = fixture(); changed.appointment.duration_minutes = 40;
+assert.equal(adapter.preview(changed, key).errors[0].code, 'conflict');
+console.log('RésoSoin synthetic mock adapter checks OK.');

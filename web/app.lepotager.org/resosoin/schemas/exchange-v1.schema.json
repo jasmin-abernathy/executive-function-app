@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app.lepotager.org/resosoin/schemas/exchange-v1.schema.json",
+  "title": "RésoSoin synthetic exchange contract v1",
+  "description": "Contrat interne de prototype. Ce schéma n'est ni un standard médical ni un format CI-SIS/FHIR.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "source", "subject", "appointment"],
+  "properties": {
+    "schema": {"const": "resosoin.exchange.v1"},
+    "kind": {"enum": ["appointment-summary"]},
+    "source": {"type": "string", "minLength": 1, "maxLength": 80},
+    "subject": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["external_reference"],
+      "properties": {
+        "external_reference": {"type": "string", "minLength": 1, "maxLength": 100}
+      }
+    },
+    "appointment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["starts_at", "duration_minutes", "status"],
+      "properties": {
+        "starts_at": {"type": "string", "format": "date-time"},
+        "duration_minutes": {"type": "integer", "minimum": 5, "maximum": 1440},
+        "status": {"enum": ["planned", "confirmed", "cancelled"]}
+      }
+    }
+  }
+}
