@@ -44,11 +44,25 @@ h1,h2,h3,p{margin-top:0}h1{font-size:clamp(2.6rem,7vw,5.4rem);line-height:.98;le
 
 
 /* Cards claires imbriquées dans la section sombre : ne jamais hériter du texte clair. */
-.section-dark .audience-card{color:var(--text)}
+.section-dark .audience-card{
+  color:#202622;
+  background:#fff;
+}
 .section-dark .audience-card h3,
 .section-dark .audience-card li,
-.section-dark .audience-card p{color:var(--text)}
-.section-dark .audience-card .eyebrow{color:var(--green)}
-.section-dark .audience-card a:not(.button){color:var(--green-dark)}
-.section-dark .audience-card .button-primary{color:#fff}
-.section-dark .audience-card .button-primary:hover{color:#fff}
+.section-dark .audience-card p{
+  color:#202622;
+  opacity:1;
+}
+.section-dark .audience-card .eyebrow{color:#315c3a}
+.section-dark .audience-card a:not(.button){color:#24472c}
+.section-dark .audience-card .button-primary{
+  background:#315c3a;
+  border-color:#315c3a;
+  color:#fff;
+}
+.section-dark .audience-card .button-primary:hover{
+  background:#24472c;
+  border-color:#24472c;
+  color:#fff;
+}
