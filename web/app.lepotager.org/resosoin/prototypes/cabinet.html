@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Prototype cabinet — RésoSoin</title>
+<style>
+:root{font-family:Inter,system-ui,sans-serif;color:#202622;background:#f7f8f4;line-height:1.55}*{box-sizing:border-box}body{margin:0}.shell{width:min(1020px,calc(100% - 2rem));margin:auto;padding:2rem 0 4rem}h1{font-size:clamp(2rem,6vw,4rem);line-height:1}.muted{color:#5d685f}.bar,.card{background:#fff;border:1px solid #cfe0cf;border-radius:18px;padding:1.2rem}.bar{display:flex;gap:.7rem;justify-content:space-between;align-items:center;flex-wrap:wrap}.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:1rem;margin-top:1rem}.list{display:grid;gap:.65rem}.appt{border:1px solid #cfe0cf;border-radius:12px;padding:.85rem}.appt strong{display:block}.status{font-size:.82rem;font-weight:800;color:#315c3a}.actions{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.8rem}button{padding:.65rem .8rem;border:1px solid #315c3a;border-radius:10px;background:#fff;color:#315c3a;font-weight:800}button.primary{background:#315c3a;color:#fff}.warning{background:#fff8e9;border-color:#ddcda5}.tag{display:inline-block;border:1px solid #cfe0cf;border-radius:999px;padding:.25rem .55rem;font-weight:700;font-size:.85rem}@media(max-width:720px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main class="shell">
+<span class="tag">Prototype local · aucune donnée réelle</span>
+<h1>Une journée de cabinet sans changer de logiciel métier</h1>
+<p class="muted">RésoSoin gère ici uniquement la couche rendez-vous et les actions périphériques. Le dossier médical reste dans le logiciel métier du cabinet.</p>
+<div class="bar"><div><strong>Cabinet Démo</strong><br><span class="muted">Mardi · 6 rendez-vous fictifs</span></div><div class="actions"><button>Exporter la journée</button><button class="primary">Nouveau rendez-vous</button></div></div>
+<div class="grid">
+<section class="card"><h2>Rendez-vous</h2><div class="list">
+<div class="appt"><span class="status">CONFIRMÉ</span><strong>09:00 · Patient DEMO-A</strong><span>30 min · pris sur le site du cabinet</span></div>
+<div class="appt"><span class="status">À CONFIRMER</span><strong>09:45 · Patient DEMO-B</strong><span>30 min · demande téléphonique saisie au secrétariat</span></div>
+<div class="appt"><span class="status">CONFIRMÉ</span><strong>11:00 · Patient DEMO-C</strong><span>45 min · rendez-vous de suivi</span></div>
+</div></section>
+<aside>
+<section class="card"><h2>Automatisations choisies</h2><p>✓ rappel de rendez-vous<br>✓ confirmation simple<br>○ liste d’attente désactivée</p><p class="muted">Aucune IA n’est nécessaire pour ces règles.</p></section>
+<section class="card warning"><h2>Logiciel métier</h2><p><strong>Non connecté dans ce prototype.</strong></p><p>Une future jonction devra passer par un adaptateur autorisé ou un import/export standardisé, avec aperçu avant écriture.</p></section>
+</aside>
+</div>
+</main></body></html>
