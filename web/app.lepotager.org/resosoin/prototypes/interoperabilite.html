@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Prototype interopérabilité — RésoSoin</title>
+<style>
+:root{font-family:Inter,system-ui,sans-serif;color:#202622;background:#f7f8f4;line-height:1.5}
+*{box-sizing:border-box}body{margin:0}.shell{width:min(960px,calc(100% - 2rem));margin:auto;padding:2rem 0 4rem}
+h1{font-size:clamp(2rem,6vw,3.8rem);line-height:1}.muted{color:#5d685f}.notice,.card{background:#fff;border:1px solid #cfe0cf;border-radius:18px;padding:1.2rem;margin:1rem 0}
+.notice{background:#edf4ed}.grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}.tag{display:inline-block;border:1px solid #cfe0cf;border-radius:999px;padding:.25rem .55rem;font-weight:700;font-size:.85rem}
+label{display:block;font-weight:750;margin:.9rem 0 .3rem}select,input{width:100%;padding:.75rem;border:1px solid #8fa393;border-radius:10px;background:#fff;color:#202622}
+button{padding:.75rem 1rem;border:0;border-radius:10px;background:#315c3a;color:#fff;font-weight:800;margin-top:1rem}.preview{background:#202622;color:#f7fbf7;padding:1rem;border-radius:12px;white-space:pre-wrap;overflow:auto}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body><main class="shell">
+<p class="tag">Prototype local · données fictives</p>
+<h1>Importer ou exporter sans double saisie</h1>
+<p class="muted">Maquette de travail. Aucun connecteur externe, aucune API éditeur et aucune donnée patient réelle ne sont utilisés.</p>
+<div class="notice"><strong>Principe :</strong> RésoSoin prépare ou reçoit un échange contrôlé. Le professionnel voit toujours un aperçu avant validation.</div>
+<div class="grid">
+<section class="card">
+<h2>Exporter depuis RésoSoin</h2>
+<label for="format">Format de démonstration</label>
+<select id="format"><option>PDF récapitulatif</option><option>CSV administratif</option><option>JSON structuré prototype</option></select>
+<label for="destination">Destination</label>
+<select id="destination"><option>Téléchargement local</option><option>Logiciel métier — connecteur futur</option><option>MSSanté — intégration future</option></select>
+<button type="button" id="export">Prévisualiser l’export</button>
+</section>
+<section class="card">
+<h2>Importer vers RésoSoin</h2>
+<label for="source">Source déclarée</label>
+<select id="source"><option>Fichier de démonstration</option><option>LGC — connecteur futur</option><option>Autre agenda — connecteur futur</option></select>
+<label for="demo">Référence fictive</label>
+<input id="demo" value="DEMO-001">
+<button type="button" id="import">Prévisualiser l’import</button>
+</section>
+</div>
+<section class="card">
+<h2>Aperçu avant confirmation</h2>
+<div id="preview" class="preview" role="status">Aucune opération préparée.</div>
+<p class="muted">Dans le produit réel, cette étape devra afficher les champs reconnus, ignorés ou en conflit avant toute écriture.</p>
+</section>
+</main>
+<script>
+const out=document.getElementById('preview');
+document.getElementById('export').addEventListener('click',()=>{out.textContent=JSON.stringify({schema:'resosoin.exchange.v1',mode:'export-preview',format:document.getElementById('format').value,destination:document.getElementById('destination').value,data:'synthetic-only'},null,2)});
+document.getElementById('import').addEventListener('click',()=>{out.textContent=JSON.stringify({schema:'resosoin.exchange.v1',mode:'import-preview',source:document.getElementById('source').value,external_reference:document.getElementById('demo').value||'DEMO-001',validation:'pending-user-confirmation'},null,2)});
+</script>
+</body></html>
