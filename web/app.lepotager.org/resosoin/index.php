@@ -39,11 +39,11 @@
           <h1>Et si le cabinet gardait vraiment la main&nbsp;?</h1>
           <p class="lede">RésoSoin, développé à Metz, étudie une organisation différente des plateformes centralisées&nbsp;: chaque cabinet garde son site et son domaine, tandis que les services de rendez-vous et de recherche pourraient être reliés entre eux sans retirer cette autonomie. L’étude sert précisément à déterminer quelles fonctions valent la peine d’être construites.</p>
           <div class="hero-actions">
-            <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Je suis professionnel·le de santé</a>
-            <a class="button button-secondary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Je suis patient·e</a>
+            <a class="button button-primary" href="#parcours">Voir le fonctionnement envisagé</a>
+            <a class="button button-secondary" href="/resosoin/questionnaire/">État de l’étude</a>
           </div>
           <div class="tag-row" aria-label="Principes de RésoSoin">
-            <span class="tag">CMS maison</span>
+            <span class="tag">Site de cabinet à prototyper</span>
             <span class="tag">Site indépendant</span>
             <span class="tag">Sans IA imposée</span>
             <span class="tag">Automatisations explicites</span>
@@ -74,8 +74,8 @@
         <div class="grid-3">
           <article class="card">
             <div class="card-icon" aria-hidden="true">1</div>
-            <h3>Un CMS maison léger</h3>
-            <p>Le socle actuel utilise un CMS maison minimal, conçu spécifiquement pour les sites de cabinets, les équipes multi-praticiens et la réversibilité.</p>
+            <h3>Un site de cabinet maîtrisé</h3>
+            <p>RésoSoin étudie un socle web léger où le cabinet conserve son domaine, ses contenus publics et une sortie documentée. Le CMS multi-cabinet et ses parcours restent à prototyper et à valider.</p>
           </article>
           <article class="card">
             <div class="card-icon" aria-hidden="true">2</div>
@@ -101,13 +101,13 @@
         <div class="grid">
           <article class="card">
             <h3>Côté patient</h3>
-            <p><span class="tag">Disponible aujourd’hui</span> découvrir le projet et répondre à l’étude.</p>
+            <p><span class="tag">Disponible aujourd’hui</span> découvrir le projet et son périmètre. L’étude n’est annoncée comme ouverte qu’après recette effective du questionnaire.</p>
             <p><span class="tag">À prototyper</span> trouver le site du cabinet, prendre ou modifier un rendez-vous simplement, recevoir un rappel facultatif.</p>
             <p><span class="tag">Projet à tester</span> rechercher plusieurs cabinets indépendants depuis un point d’entrée commun sans imposer un compte central.</p>
           </article>
           <article class="card">
             <h3>Côté équipe</h3>
-            <p><span class="tag">Socle existant</span> CMS léger avec site et domaine propres au cabinet.</p>
+            <p><span class="tag">À prototyper</span> site et domaine propres au cabinet, contenus publics exportables et séparation nette avec les données de rendez-vous.</p>
             <p><span class="tag">À prototyper</span> gérer plusieurs agendas et automatiser confirmations, rappels ou créneaux libérés avec des règles explicites.</p>
             <p><span class="tag">Exigence de conception</span> pouvoir exporter les données utiles et changer de solution sans perdre la présence web du cabinet.</p>
           </article>
