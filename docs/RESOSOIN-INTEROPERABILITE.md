@@ -184,3 +184,22 @@ Avant tout code clinique :
 - Espace de publication CI-SIS : https://prod-convergence.esante.gouv.fr/offres-services/ci-sis/espace-publication
 
 Au 27 septembre 2026, l'ANS indique une trajectoire vers FHIR pour les catégories prioritaires et, à terme, pour l'ensemble des volets CI-SIS. Les implémentations existantes CDA et autres profils ne doivent cependant pas être supposées disparues : le choix doit suivre le cas d'usage et le volet applicable.
+
+## Matrice de cadrage avant intégration
+
+Les standards ci-dessous sont des **candidats à vérifier pour chaque flux**, pas une promesse de compatibilité. La qualification juridique et HDS dépend du contenu réel et des rôles des opérateurs.
+
+| Cas | Données minimales et sens | Classe pressentie | Interface candidate | Accès et prérequis | Panne / hors ligne |
+|---|---|---|---|---|---|
+| Disponibilités | Créneaux et identifiant d'agenda, éditeur → RésoSoin | Administratif, contexte de soin possible | API agenda officielle ou export autorisé | OAuth/clé par cabinet, accord éditeur, analyse HDS si hébergement de données de santé | Afficher l'horodatage et refuser de confirmer un créneau périmé |
+| Créer, modifier, annuler un RDV | Référence, créneau, statut, RésoSoin ↔ agenda | Potentiellement donnée de santé identifiable | API officielle ; profil applicable à qualifier | Droits d'écriture, contrat, idempotence, audit, analyse HDS | File locale seulement si traitement et sécurité approuvés ; réconciliation avant nouvelle écriture |
+| Identité ou référence patient | Identifiant externe minimal, LGC ↔ RésoSoin | Santé si reliée à la prise en charge | Profil identité CI-SIS/FHIR à sélectionner selon usage | Habilitation, rapprochement d'identités, contrat, HDS à qualifier | Aucun rapprochement automatique sur référence ambiguë |
+| Document transmis | Référence de document et métadonnées, patient → professionnel | Santé probable | Volet documentaire CI-SIS applicable, MSSanté si pertinent | Authentification forte, destinataire, hébergement et traçabilité qualifiés | Ne pas promettre une remise tant qu'aucun accusé n'est obtenu |
+| Messagerie | Destinataires, message et pièces jointes, bidirectionnel | Santé selon contenu | MSSanté ou solution agréée selon usage | Identités, consentement/base légale, droits et conservation à définir | État d'envoi explicite ; pas de répétition silencieuse |
+| Import/export administratif | Coordonnées et statistiques minimisées, cabinet ↔ RésoSoin | Administratif ou santé selon lien au soin | CSV documenté ou API officielle | Contrôle des colonnes, autorisation et analyse HDS selon données | Prévisualisation, rejet des lignes invalides, export réversible |
+
+## Premier port exécutable : simulation seulement
+
+`prototypes/exchange-contract.js` fournit `validate` et `createMockAdapter` pour un résumé de rendez-vous synthétique. Le port `ExchangeContract` valide taille, champs, version et calendrier. Le mock fait une prévisualisation, exige une confirmation explicite et détecte une clé d'idempotence déjà utilisée ou réutilisée avec un autre contenu. Son registre est uniquement en mémoire, sans persistance ni connexion réseau. Le journal clinique est absent.
+
+Un futur `ClinicalInteropAdapter` devra sélectionner un volet officiel adapté au cas réel. Un futur `VendorAdapter` exigera documentation et autorisation de l'éditeur. Aucun des deux n'est implémenté. Ce mock ne doit pas servir à traiter des données réelles ni être exposé comme une API publique.
