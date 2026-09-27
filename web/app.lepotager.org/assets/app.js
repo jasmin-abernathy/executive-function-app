@@ -168,3 +168,44 @@ document.querySelectorAll('[data-year]').forEach((el) => {
     footerLinks.prepend(supportLink);
   }
 })();
+
+// Project category filters — 2026-09-27
+(() => {
+  const buttons = Array.from(document.querySelectorAll('[data-project-filter]'));
+  const cards = Array.from(document.querySelectorAll('[data-project-categories]'));
+  const count = document.querySelector('[data-project-count]');
+
+  if (!buttons.length || !cards.length) return;
+
+  const lang = document.documentElement.lang === 'en' ? 'en' : 'fr';
+
+  const updateCount = (visible) => {
+    if (!count) return;
+    count.textContent = lang === 'en'
+      ? `${visible} project${visible === 1 ? '' : 's'} shown`
+      : `${visible} projet${visible === 1 ? '' : 's'} affiché${visible === 1 ? '' : 's'}`;
+  };
+
+  const applyFilter = (filter) => {
+    let visible = 0;
+
+    cards.forEach((card) => {
+      const categories = (card.dataset.projectCategories || '').split(/\s+/).filter(Boolean);
+      const show = filter === 'all' || categories.includes(filter);
+      card.hidden = !show;
+      if (show) visible += 1;
+    });
+
+    buttons.forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.dataset.projectFilter === filter));
+    });
+
+    updateCount(visible);
+  };
+
+  buttons.forEach((button) => {
+    button.addEventListener('click', () => applyFilter(button.dataset.projectFilter || 'all'));
+  });
+
+  applyFilter('all');
+})();
