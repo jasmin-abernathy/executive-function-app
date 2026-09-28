@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="RésoSoin : étude d’un réseau de cabinets indépendants avec site propre, rendez-vous interopérables, automatisations explicites et contrôle des données.">
+  <meta name="description" content="RésoSoin étudie un outil de rendez-vous et d’organisation pour des cabinets indépendants : site à leur nom, agenda adapté et automatisations utiles.">
   <meta name="theme-color" content="#315c3a">
-  <title>RésoSoin — une autre façon de gérer le site et les rendez-vous d’un cabinet</title>
+  <title>RésoSoin — le cabinet garde son site, les rendez-vous deviennent plus simples</title>
   <link rel="canonical" href="https://app.lepotager.org/resosoin/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/resosoin/assets/style.css">
@@ -14,253 +14,267 @@
 </head>
 <body>
   <a class="skip-link" href="#contenu">Aller au contenu</a>
+
   <header class="site-header">
     <div class="shell header-inner">
-      <a class="brand" href="/">
-        <span class="brand-mark" aria-hidden="true">R</span>
-        <span>RésoSoin <small>· Le Verger du Numérique</small></span>
+      <a class="brand" href="/resosoin/" aria-label="RésoSoin, revenir en haut de la page">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" role="img">
+            <circle cx="12" cy="20" r="5"></circle>
+            <circle cx="28" cy="12" r="5"></circle>
+            <circle cx="28" cy="28" r="5"></circle>
+            <path d="M16 18l7-4M16 22l7 4"></path>
+          </svg>
+        </span>
+        <span class="brand-copy">RésoSoin <small>projet en étude</small></span>
       </a>
+
       <nav class="nav" aria-label="Navigation RésoSoin">
-        <a href="#principe">Principe</a>
-        <a href="#parcours">Parcours</a>
-        <a href="#automatisation">Automatisation</a>
-        <a href="#donnees">Données</a>
-        <a href="#etude">Questionnaires</a>
-        <a href="#sources">Sources</a>
+        <a class="nav-link" href="#projet">Le projet</a>
+        <a class="nav-link" href="#pour-qui">Pour qui</a>
+        <a class="nav-link" href="#etude">L’étude</a>
+        <a class="button button-small button-primary" href="#etude">Participer</a>
       </nav>
     </div>
   </header>
 
   <main id="contenu">
-    <section class="hero">
+    <section class="hero" id="projet">
       <div class="shell hero-grid">
-        <div>
-          <p class="eyebrow">Projet en étude · santé numérique</p>
-          <h1>Et si le cabinet gardait vraiment la main&nbsp;?</h1>
-          <p class="lede">RésoSoin, développé à Metz, étudie une organisation différente des plateformes centralisées&nbsp;: chaque cabinet garde son site et son domaine, tandis que les services de rendez-vous et de recherche pourraient être reliés entre eux sans retirer cette autonomie. L’étude sert précisément à déterminer quelles fonctions valent la peine d’être construites.</p>
-          <div class="hero-actions">
-            <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Je suis professionnel·le de santé</a>
-            <a class="button button-secondary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Je suis patient·e</a>
+        <div class="hero-copy">
+          <p class="eyebrow">RésoSoin · projet en étude</p>
+          <h1>Le cabinet garde son site. Les rendez-vous deviennent plus simples.</h1>
+          <p class="lede">RésoSoin étudie un outil de rendez-vous et d’organisation pour des cabinets indépendants : une présence web à leur nom, un agenda adapté à leur équipe et des automatismes utiles. Le projet n’est pas encore un service de rendez-vous ouvert au public.</p>
+
+          <div class="hero-actions" aria-label="Participer à l'étude RésoSoin">
+            <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Je travaille dans un cabinet</a>
+            <a class="button button-secondary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Je prends des rendez-vous</a>
           </div>
-          <div class="tag-row" aria-label="Principes de RésoSoin">
-            <span class="tag">CMS maison</span>
-            <span class="tag">Site indépendant</span>
-            <span class="tag">Sans IA imposée</span>
-            <span class="tag">Automatisations explicites</span>
-            <span class="tag">Hébergement européen visé</span>
-            <span class="tag">Open source visé</span>
+
+          <div class="trust-row" aria-label="Principes du projet">
+            <span>Site indépendant</span>
+            <span>Automatisations explicites</span>
+            <span>Sans IA imposée</span>
           </div>
         </div>
-        <aside class="hero-card" aria-label="Pourquoi cette étude">
-          <strong>On ne veut pas coder la plateforme avant de savoir ce qui compte vraiment.</strong>
-          <p class="big">Les questionnaires servent à décider ce que RésoSoin doit devenir — ou ne pas devenir.</p>
-          <ul>
-            <li>Quels irritants sont réellement importants pour les médecins&nbsp;?</li>
-            <li>Quel prix paraît acceptable&nbsp;?</li>
-            <li>«&nbsp;Sans IA&nbsp;» est-il un vrai critère de choix&nbsp;?</li>
-            <li>Les patients veulent-ils une app, ou seulement un site simple&nbsp;?</li>
-          </ul>
+
+        <aside class="journey-card" aria-label="Schéma du parcours RésoSoin envisagé">
+          <div class="journey-head">
+            <p class="eyebrow">Le fil conducteur</p>
+            <p>Relier les outils sans retirer au cabinet son identité ni ses choix.</p>
+          </div>
+          <ol class="journey">
+            <li>
+              <span class="journey-number">1</span>
+              <div>
+                <strong>Le site du cabinet</strong>
+                <small class="status status-existing">Socle existant</small>
+                <p>Nom, domaine et informations publiques restent propres au cabinet.</p>
+              </div>
+            </li>
+            <li>
+              <span class="journey-number">2</span>
+              <div>
+                <strong>Agenda et outils de l’équipe</strong>
+                <small class="status status-building">En conception</small>
+                <p>Plusieurs praticiens, secrétariat et intégrations doivent encore être construits et testés.</p>
+              </div>
+            </li>
+            <li>
+              <span class="journey-number">3</span>
+              <div>
+                <strong>Un accès simple pour les patients</strong>
+                <small class="status status-testing">À tester</small>
+                <p>Prendre, déplacer ou annuler un rendez-vous sans imposer un portail unique.</p>
+              </div>
+            </li>
+          </ol>
         </aside>
       </div>
     </section>
 
-    <section id="principe" class="section section-soft">
+    <section class="section audience-section" id="pour-qui">
       <div class="shell">
         <div class="section-heading">
-          <p class="eyebrow">Le principe testé</p>
-          <h2>Un réseau de cabinets indépendants, pas une plateforme qui possède toute la relation.</h2>
-          <p>Chaque cabinet conserve son propre site et son propre domaine. «&nbsp;Décentralisé mais interopérable&nbsp;» signifie ici qu’un patient pourrait accéder à plusieurs cabinets depuis un point d’entrée commun, tandis que chaque cabinet garderait sa présence web, ses choix d’outils et la possibilité de partir avec ses données. Cette interopérabilité reste à prototyper et à tester.</p>
+          <p class="eyebrow">Deux usages, un même objectif</p>
+          <h2>Moins de friction pour l’équipe comme pour les patients.</h2>
+          <p>RésoSoin part des pratiques réelles. Les fonctions qui ne sont pas encore construites sont indiquées comme telles.</p>
         </div>
-        <div class="grid-3">
-          <article class="card">
-            <div class="card-icon" aria-hidden="true">1</div>
-            <h3>Un CMS maison léger</h3>
-            <p>Le socle actuel utilise un CMS maison minimal, conçu spécifiquement pour les sites de cabinets, les équipes multi-praticiens et la réversibilité.</p>
+
+        <div class="audience-panels">
+          <article class="audience-panel audience-panel-pro">
+            <div class="audience-label">Côté cabinet</div>
+            <h3>Garder la relation directe avec les patients.</h3>
+            <ul class="feature-list">
+              <li><strong>Site et domaine propres</strong><span class="status status-existing">Socle existant</span></li>
+              <li><strong>Agenda multi-praticiens et secrétariat</strong><span class="status status-building">En conception</span></li>
+              <li><strong>Rappels, confirmations et créneaux libérés</strong><span class="status status-building">En conception</span></li>
+              <li><strong>Export, migration et raccord aux outils utilisés</strong><span class="status status-testing">À valider</span></li>
+            </ul>
           </article>
-          <article class="card">
-            <div class="card-icon" aria-hidden="true">2</div>
-            <h3>Le site reste celui du cabinet</h3>
-            <p>Nom de domaine, informations publiques et identité du cabinet restent séparables de l’agenda. Quitter un service ne devrait pas signifier perdre sa présence web.</p>
-          </article>
-          <article class="card">
-            <div class="card-icon" aria-hidden="true">3</div>
-            <h3>Le sensible reste séparé</h3>
-            <p>Le site public et son CMS ne doivent pas contenir de dossier patient. Les rendez-vous, documents et futures données de santé utilisent une couche distincte adaptée à leur niveau de sensibilité.</p>
+
+          <article class="audience-panel audience-panel-patient">
+            <div class="audience-label">Côté patient</div>
+            <h3>Faire les démarches essentielles sans apprendre un nouvel écosystème.</h3>
+            <ul class="feature-list">
+              <li><strong>Trouver le site du cabinet</strong><span class="status status-existing">Principe actuel</span></li>
+              <li><strong>Réserver, déplacer ou annuler simplement</strong><span class="status status-building">En conception</span></li>
+              <li><strong>Choisir les rappels utiles</strong><span class="status status-building">En conception</span></li>
+              <li><strong>Téléphone et aide d’un proche toujours possibles</strong><span class="status status-testing">Exigence à tester</span></li>
+            </ul>
           </article>
         </div>
       </div>
     </section>
 
-    <section id="parcours" class="section">
-      <div class="shell">
-        <div class="section-heading">
-          <p class="eyebrow">Parcours visé</p>
-          <h2>La valeur ne dépend pas d’une copie miniature de Doctolib.</h2>
-          <p>RésoSoin est étudié comme un socle pour relier des cabinets autonomes. Les éléments ci-dessous distinguent ce qui existe déjà de ce qui doit encore être construit et validé.</p>
-        </div>
-        <div class="grid">
-          <article class="card">
-            <h3>Côté patient</h3>
-            <p><span class="tag">Disponible aujourd’hui</span> découvrir le projet et répondre à l’étude.</p>
-            <p><span class="tag">À prototyper</span> trouver le site du cabinet, prendre ou modifier un rendez-vous simplement, recevoir un rappel facultatif.</p>
-            <p><span class="tag">Projet à tester</span> rechercher plusieurs cabinets indépendants depuis un point d’entrée commun sans imposer un compte central.</p>
-          </article>
-          <article class="card">
-            <h3>Côté équipe</h3>
-            <p><span class="tag">Socle existant</span> CMS léger avec site et domaine propres au cabinet.</p>
-            <p><span class="tag">À prototyper</span> gérer plusieurs agendas et automatiser confirmations, rappels ou créneaux libérés avec des règles explicites.</p>
-            <p><span class="tag">Exigence de conception</span> pouvoir exporter les données utiles et changer de solution sans perdre la présence web du cabinet.</p>
-          </article>
-        </div>
-        <div class="notice" style="margin-top:1rem;color:#202622">
-          <strong>Les objections font partie de l’étude.</strong>
-          <span>Visibilité des cabinets, migration, formation, support, continuité de service, compatibilité avec le secrétariat et coût total sont mesurés au lieu d’être présentés comme déjà résolus.</span>
-        </div>
-      </div>
-    </section>
+    <section class="section mechanics-section" aria-labelledby="fonctionnement-title">
+      <div class="shell mechanics-grid">
+        <div>
+          <p class="eyebrow">Comment cela doit se relier</p>
+          <h2 id="fonctionnement-title">Le site public reste simple. Les données sensibles restent ailleurs.</h2>
+          <p class="section-intro">Le socle web du cabinet peut rester léger. Les rendez-vous, documents et futures données de santé doivent vivre dans une couche séparée, adaptée à leur sensibilité. L’hébergement final et les intégrations ne sont pas encore arrêtés.</p>
 
-    <section id="automatisation" class="section">
-      <div class="shell">
-        <div class="automation-callout">
-          <div class="automation-symbol" aria-hidden="true">≠</div>
-          <div>
-            <p class="eyebrow">Point important</p>
-            <h2>Absence d’IA ≠ absence d’automatisation.</h2>
-            <p class="lede">On peut automatiser énormément de tâches avec des règles simples, explicites et prévisibles, sans envoyer le contenu d’une consultation à un modèle d’IA.</p>
-            <div class="automation-list" aria-label="Exemples d’automatisation sans IA">
-              <span>Confirmations</span>
-              <span>Rappels</span>
-              <span>Liste d’attente</span>
-              <span>Créneaux libérés</span>
-              <span>Horaires récurrents</span>
-              <span>Synchronisation calendrier</span>
-              <span>Notifications</span>
-              <span>Statistiques simples</span>
+          <div class="connection-flow" aria-label="Fonctionnement envisagé">
+            <div class="flow-step">
+              <span class="flow-kicker">1 · Présence</span>
+              <strong>Chaque cabinet garde son site</strong>
+              <p>Informations publiques, identité et domaine restent séparables du service de rendez-vous.</p>
+            </div>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <div class="flow-step">
+              <span class="flow-kicker">2 · Organisation</span>
+              <strong>L’agenda se raccorde aux pratiques de l’équipe</strong>
+              <p>Multi-praticiens, secrétariat, calendriers et autres outils doivent être prototypés avec les cabinets.</p>
+            </div>
+            <span class="flow-arrow" aria-hidden="true">→</span>
+            <div class="flow-step">
+              <span class="flow-kicker">3 · Accès</span>
+              <strong>Le patient utilise le chemin le plus simple</strong>
+              <p>Le site du cabinet reste la porte d’entrée ; une recherche commune entre cabinets est seulement une hypothèse à tester.</p>
             </div>
           </div>
         </div>
-        <div class="grid" style="margin-top:1rem">
-          <article class="card">
-            <h3>Ce que « sans IA imposée » veut dire</h3>
-            <p>Le fonctionnement essentiel du produit ne dépend pas d’un modèle génératif. Une éventuelle fonction d’IA future devrait être identifiable, facultative et désactivable, plutôt qu’invisible dans le parcours.</p>
-          </article>
-          <article class="card">
-            <h3>Ce que cela ne veut pas dire</h3>
-            <p>RésoSoin n’a pas vocation à être un agenda manuel des années 2000. Les tâches répétitives qui peuvent être décrites par des règles peuvent être automatisées sans IA.</p>
-          </article>
+
+        <aside class="validation-card">
+          <p class="eyebrow">Ce que l’étude doit décider</p>
+          <h3>Avant de construire davantage, on veut vérifier quatre choses.</h3>
+          <ul class="question-list">
+            <li>Quels irritants font vraiment perdre du temps aux équipes ?</li>
+            <li>Quelles intégrations sont indispensables au quotidien ?</li>
+            <li>Qu’est-ce qui bloque ou complique la prise de rendez-vous côté patient ?</li>
+            <li>Quel coût permet un service durable sans faire payer des fonctions inutiles ?</li>
+          </ul>
+          <p class="automation-note"><strong>Automatiser ne veut pas dire imposer de l’IA.</strong> Confirmations, rappels, horaires récurrents ou créneaux libérés peuvent reposer sur des règles explicites et prévisibles.</p>
+          <a class="text-link" href="#etude">Voir comment participer à l’étude →</a>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section price-study-section" id="etude">
+      <div class="shell">
+        <div class="price-study-grid">
+          <div class="price-block">
+            <p class="eyebrow">Prix étudiés</p>
+            <h2>Quel prix serait juste pour ce socle&nbsp;?</h2>
+            <p>Nous demandons aux professionnels quel prix mensuel <strong>par praticien</strong> leur semblerait raisonnable pour un socle comprenant site, agenda, gestion de plusieurs praticiens et automatisations courantes.</p>
+
+            <div class="price-ranges" aria-label="Tranches proposées dans le questionnaire professionnel">
+              <span>Moins de 30 €</span>
+              <span>30 à 49 €</span>
+              <span>50 à 69 €</span>
+              <span>70 à 99 €</span>
+              <span>100 à 149 €</span>
+              <span>150 € ou plus</span>
+            </div>
+            <p class="price-footnote">Une réponse « Impossible à estimer à ce stade » est également proposée. Il s’agit d’ordres de grandeur, pas d’un tarif annoncé. Les SMS et la mise en service pourraient être facturés à part.</p>
+
+            <div class="value-note">
+              <strong>Un coût plus accessible ne doit pas vouloir dire un service au rabais.</strong>
+              <p>Le modèle étudié cherche à concentrer l’investissement sur ce dont un cabinet a réellement besoin, sans faire payer une suite entière lorsqu’elle n’est pas utilisée. Fiabilité, confidentialité, accessibilité, intégration aux outils existants, migration et accompagnement restent des exigences à financer correctement.</p>
+            </div>
+          </div>
+
+          <div class="study-block">
+            <p class="eyebrow">Participer à l’étude</p>
+            <h2>Vos usages d’abord, le concept ensuite.</h2>
+            <p>Les premières questions portent sur les pratiques réelles afin de limiter l’effet de présentation. Les résultats resteront exploratoires et auto-sélectionnés.</p>
+
+            <div class="study-cards">
+              <article class="study-card">
+                <span class="study-icon" aria-hidden="true">01</span>
+                <div>
+                  <h3>Professionnels de santé</h3>
+                  <p>Organisation actuelle, irritants, automatisations, intégrations, priorités et coût acceptable.</p>
+                  <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Répondre côté professionnel</a>
+                </div>
+              </article>
+
+              <article class="study-card">
+                <span class="study-icon" aria-hidden="true">02</span>
+                <div>
+                  <h3>Patients</h3>
+                  <p>Habitudes de rendez-vous, difficultés, accessibilité, comptes, rappels et recherche de cabinets.</p>
+                  <a class="button button-secondary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Répondre côté patient</a>
+                </div>
+              </article>
+            </div>
+
+            <div class="privacy-note">
+              <strong>18 ans et plus.</strong>
+              <span>Pas de nom, diagnostic ou traitement demandé. Les réponses peuvent être reprises sur le même navigateur et supprimées depuis le questionnaire.</span>
+            </div>
+            <p class="neutral-invite"><a href="/resosoin/questionnaire/invitation.php">Partager le lien d’invitation neutre, sans présenter RésoSoin auparavant →</a></p>
+          </div>
         </div>
       </div>
     </section>
 
-    <section id="donnees" class="section section-warm">
-      <div class="shell">
-        <div class="section-heading">
-          <p class="eyebrow">Données & souveraineté</p>
-          <h2>Le lieu du serveur ne suffit pas&nbsp;: la juridiction du prestataire compte aussi.</h2>
-          <p>Doctolib indique stocker les données en France et en Allemagne, recourir à Amazon Web Services et disposer d’un hébergement certifié HDS en France. La question étudiée par RésoSoin est différente&nbsp;: pour les données les plus sensibles, privilégier si possible un prestataire soumis exclusivement au droit européen afin de réduire l’exposition à des demandes d’accès fondées sur un droit extra-européen.</p>
+    <section class="section transparency-section" aria-labelledby="transparence-title">
+      <div class="shell transparency-grid">
+        <div>
+          <p class="eyebrow">Transparence</p>
+          <h2 id="transparence-title">Ce qui est visé n’est pas encore acquis.</h2>
+          <p class="section-intro">RésoSoin ne se présente ni comme un produit fini ni comme « plus sûr » qu’une solution existante. Les choix d’hébergement, l’agenda final, les intégrations, la recherche entre cabinets et une éventuelle application patient restent à prototyper ou à valider.</p>
         </div>
-        <div class="compare">
-          <article class="card">
-            <h3>Objectif RésoSoin</h3>
-            <ul class="checklist">
-              <li>Hébergement des données en Europe.</li>
-              <li>Pour les données de santé&nbsp;: prestataire adapté aux exigences HDS.</li>
-              <li>Préférence pour une entité soumise au droit européen pour les données sensibles.</li>
-              <li>Minimisation&nbsp;: ne pas collecter ce qui n’est pas nécessaire.</li>
-              <li>Séparation technique entre site public et données privées.</li>
-            </ul>
-          </article>
-          <article class="card">
-            <h3>Ce qu’on ne prétend pas encore</h3>
-            <p>RésoSoin n’est pas présenté comme « plus sécurisé que Doctolib » tant que l’infrastructure n’a pas été finalisée et auditée. Doctolib indique chiffrer les données, conserver ses clés en France et n’avoir reçu, à sa connaissance, aucune demande Cloud Act concernant les données hébergées sur AWS. Le différenciateur testé ici est donc la réduction de l’exposition juridique extra-européenne, pas l’affirmation d’un transfert connu vers les autorités américaines.</p>
-          </article>
-        </div>
-      </div>
-    </section>
 
-    <section class="section">
-      <div class="shell">
-        <div class="section-heading">
-          <p class="eyebrow">Prix</p>
-          <h2>Tester un modèle nettement moins cher avant de fixer un tarif.</h2>
-          <p>À titre de repère, Doctolib affiche actuellement 149&nbsp;€ TTC par mois et par soignant pour «&nbsp;Agenda & prise de RDV&nbsp;». RésoSoin veut tester si un socle beaucoup plus ciblé peut être viable à un tarif nettement inférieur, sans empiler des fonctions inutiles.</p>
-        </div>
-        <div class="grid">
-          <article class="fact-card">
-            <strong>149 € / mois / soignant</strong>
-            <p class="muted">Tarif public affiché par Doctolib pour Agenda & prise de RDV au moment de cette étude.</p>
-          </article>
-          <article class="fact-card">
-            <strong>Le bon prix reste à trouver</strong>
-            <p class="muted">Le questionnaire médecins teste plusieurs fourchettes au lieu d’imposer dès maintenant un prix décidé en interne.</p>
-          </article>
-        </div>
-      </div>
-    </section>
+        <div class="details-stack">
+          <details>
+            <summary>Hébergement, HDS et juridiction</summary>
+            <div class="details-content">
+              <p>L’objectif est d’héberger les données en Europe et, lorsqu’il s’agit de données de santé, de recourir à un prestataire adapté aux exigences HDS. Ce choix n’est pas encore finalisé.</p>
+              <p>Doctolib indique aujourd’hui recourir notamment à AWS ainsi qu’à S3NS/GCP pour l’hébergement de données de santé dans l’EEE. Pour les données particulièrement sensibles, la CNIL recommande de prendre aussi en compte la juridiction applicable au fournisseur, pas seulement la localisation physique des serveurs.</p>
+            </div>
+          </details>
 
-    <section id="etude" class="section section-dark">
-      <div class="shell">
-        <div class="section-heading">
-          <p class="eyebrow">Étude RésoSoin</p>
-          <h2>Deux questionnaires courts, avec une durée réelle encore en cours de mesure.</h2>
-          <p>Les premières questions portent sur vos usages réels. Le concept RésoSoin n’est présenté qu’ensuite afin de réduire l’effet de présentation. Les résultats resteront exploratoires et auto-sélectionnés.</p>
-        </div>
-        <div class="audience-grid">
-          <article class="audience-card">
-            <p class="eyebrow">Professionnels</p>
-            <h3>Médecins et autres professionnels de santé</h3>
-            <ul>
-              <li>Profession réglementée déclarée, sans identité demandée.</li>
-              <li>Solutions actuelles, irritants et taille de la structure.</li>
-              <li>Automatisations, critères de choix et place de l’IA.</li>
-              <li>Fonctions prioritaires, frein principal et prix indicatif.</li>
-            </ul>
-            <a class="button button-primary" href="/resosoin/questionnaire/?audience=doctor&amp;source=resosoin_page">Répondre côté professionnel</a>
-          </article>
-          <article class="audience-card">
-            <p class="eyebrow">Patients</p>
-            <h3>Personnes qui prennent des rendez-vous de santé</h3>
-            <ul>
-              <li>Habitudes de prise de rendez-vous et disponibilité.</li>
-              <li>Difficultés concrètes, compte et accessibilité.</li>
-              <li>Automatisations, critères de choix et place de l’IA.</li>
-              <li>Recherche commune, freins et application facultative.</li>
-            </ul>
-            <a class="button button-primary" href="/resosoin/questionnaire/?audience=patient&amp;source=resosoin_page">Répondre côté patient</a>
-          </article>
-        </div>
-        <div class="notice" style="margin-top:1rem;color:#202622">
-          <strong>Vie privée de l’étude</strong>
-          <span>18 ans et plus. Pas de nom, pas de diagnostic, pas de traitement, pas de texte libre médical. Les réponses sont pseudonymes, peuvent être reprises sur le même navigateur et supprimées depuis le questionnaire.</span>
-        </div>
-        <p style="margin-top:1rem"><a href="/resosoin/questionnaire/invitation.php">Lien d’invitation neutre pour partager l’étude sans présenter RésoSoin auparavant →</a></p>
-      </div>
-    </section>
+          <details>
+            <summary>Prix et comparaison avec les solutions existantes</summary>
+            <div class="details-content">
+              <p>RésoSoin n’affiche pas de prix commercial à ce stade. Les six tranches ci-dessus sont les réponses proposées dans le questionnaire de recherche. Elles ne préjugent ni du périmètre final ni de sa viabilité économique.</p>
+              <p>Les offres et tarifs publics des solutions existantes évoluent et ne couvrent pas toujours le même périmètre. Ils servent donc de contexte, pas de preuve qu’un service futur offrirait automatiquement les mêmes prestations pour moins cher.</p>
+            </div>
+          </details>
 
-    <section id="sources" class="section">
-      <div class="shell">
-        <div class="section-heading">
-          <p class="eyebrow">Sources & nuances</p>
-          <h2>Comparer sans raconter n’importe quoi.</h2>
-          <p>Les arguments du projet doivent rester vérifiables. Les liens ci-dessous expliquent les chiffres et le point juridique sur l’hébergement.</p>
-        </div>
-        <div class="source-list">
-          <article class="source-card">
-            <a href="https://info.doctolib.fr/solution/gestionnaire-de-taches/page/2/">Tarifs publics Doctolib Pro</a>
-            <small>Agenda & prise de RDV affiché à 149 €/mois TTC par soignant ; fonctions IA proposées séparément dans la suite.</small>
-          </article>
-          <article class="source-card">
-            <a href="https://info.doctolib.fr/securite/">Doctolib — sécurité et hébergement</a>
-            <small>Doctolib indique un stockage en France et en Allemagne et explique son recours à Amazon Web Services.</small>
-          </article>
-          <article class="source-card">
-            <a href="https://community.doctolib.fr/t/on-repond-a-vos-questions-sur-la-securite-des-donnees/107903">Doctolib Communauté — AWS et Cloud Act</a>
-            <small>Doctolib indique qu’aucune demande de ce type n’avait été reçue et précise que les clés de chiffrement sont conservées en France.</small>
-          </article>
-          <article class="source-card">
-            <a href="https://www.cnil.fr/fr/cloud-les-risques-dune-certification-europeenne-permettant-lacces-des-autorites-etrangeres">CNIL — cloud et accès d’autorités étrangères</a>
-            <small>La CNIL rappelle que, pour les données les plus sensibles, la juridiction du prestataire est un critère distinct de la localisation physique des serveurs.</small>
-          </article>
+          <details>
+            <summary>Sources utilisées pour cadrer ces affirmations</summary>
+            <div class="details-content sources">
+              <a href="https://info.doctolib.fr/solution/gestionnaire-de-taches/page/2/">
+                <strong>Doctolib Pro — offres et tarifs publics</strong>
+                <span>Repère public sur les offres ; les montants et périmètres peuvent évoluer.</span>
+              </a>
+              <a href="https://info.doctolib.fr/securite/">
+                <strong>Doctolib — sécurité et hébergement</strong>
+                <span>Présentation publique de l’hébergement et des mesures de sécurité.</span>
+              </a>
+              <a href="https://community.doctolib.fr/t/on-repond-a-vos-questions-sur-la-securite-des-donnees/107903">
+                <strong>Doctolib Communauté — AWS et Cloud Act</strong>
+                <span>Échanges et réponse publique de Doctolib sur le risque d’accès par des autorités américaines.</span>
+              </a>
+              <a href="https://www.cnil.fr/fr/cloud-les-risques-dune-certification-europeenne-permettant-lacces-des-autorites-etrangeres">
+                <strong>CNIL — cloud et autorités étrangères</strong>
+                <span>Pourquoi la juridiction du prestataire compte pour les traitements les plus sensibles.</span>
+              </a>
+            </div>
+          </details>
         </div>
       </div>
     </section>
@@ -268,7 +282,7 @@
 
   <footer class="footer">
     <div class="shell footer-inner">
-      <span>RésoSoin · projet du Verger du Numérique / Le Potager du Web · Metz</span>
+      <span>RésoSoin · Le Potager du Web · projet du Verger du Numérique</span>
       <span><a href="/resosoin/questionnaire/confidentialite.php">Confidentialité de l’étude</a> · <a href="mailto:contact@lepotager.org">Contact</a></span>
     </div>
   </footer>
