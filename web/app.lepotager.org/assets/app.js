@@ -169,43 +169,145 @@ document.querySelectorAll('[data-year]').forEach((el) => {
   }
 })();
 
-// Project category filters — 2026-09-27
+// Project browsing — category counts + compact mobile cards
 (() => {
   const buttons = Array.from(document.querySelectorAll('[data-project-filter]'));
   const cards = Array.from(document.querySelectorAll('[data-project-categories]'));
   const count = document.querySelector('[data-project-count]');
+  const grid = document.querySelector('#projects-list');
 
-  if (!buttons.length || !cards.length) return;
+  if (!buttons.length || !cards.length || !grid) return;
 
   const lang = document.documentElement.lang === 'en' ? 'en' : 'fr';
+  const mobileQuery = window.matchMedia('(max-width: 720px)');
+  const mobileInitialLimit = 4;
+  let activeFilter = 'all';
+  let showAllOnMobile = false;
 
-  const updateCount = (visible) => {
-    if (!count) return;
-    count.textContent = lang === 'en'
-      ? `${visible} project${visible === 1 ? '' : 's'} shown`
-      : `${visible} projet${visible === 1 ? '' : 's'} affiché${visible === 1 ? '' : 's'}`;
-  };
+  document.documentElement.classList.add('projects-enhanced');
 
-  const applyFilter = (filter) => {
-    let visible = 0;
+  const categoriesFor = (card) =>
+    (card.dataset.projectCategories || '').split(/\s+/).filter(Boolean);
+
+  // Small counts make the filters easier to scan and avoid the visual weight
+  // of the old solid-green pill group.
+  buttons.forEach((button) => {
+    const filter = button.dataset.projectFilter || 'all';
+    const total = filter === 'all'
+      ? cards.length
+      : cards.filter((card) => categoriesFor(card).includes(filter)).length;
+
+    const badge = document.createElement('span');
+    badge.className = 'project-filter-count';
+    badge.setAttribute('aria-hidden', 'true');
+    badge.textContent = String(total);
+    button.appendChild(badge);
+  });
+
+  // On mobile each project exposes the useful summary first. Milestones and
+  // links are one deliberate tap away, which keeps the page from becoming a
+  // wall of full-height cards.
+  cards.forEach((card, index) => {
+    const title = card.querySelector('h3')?.textContent?.trim() || String(index + 1);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'project-expand';
+    button.setAttribute('aria-expanded', 'false');
+    button.textContent = lang === 'en' ? 'Details and links' : 'Détails et liens';
+
+    button.addEventListener('click', () => {
+      const expanded = card.classList.toggle('is-expanded');
+      button.setAttribute('aria-expanded', String(expanded));
+      button.textContent = expanded
+        ? (lang === 'en' ? 'Hide details' : 'Masquer les détails')
+        : (lang === 'en' ? 'Details and links' : 'Détails et liens');
+      button.setAttribute(
+        'aria-label',
+        expanded
+          ? (lang === 'en' ? `Hide details for ${title}` : `Masquer les détails de ${title}`)
+          : (lang === 'en' ? `Show details for ${title}` : `Afficher les détails de ${title}`)
+      );
+    });
+
+    card.appendChild(button);
+  });
+
+  const moreButton = document.createElement('button');
+  moreButton.type = 'button';
+  moreButton.className = 'projects-more';
+  moreButton.hidden = true;
+  grid.insertAdjacentElement('afterend', moreButton);
+
+  const matchingCards = () =>
+    cards.filter((card) =>
+      activeFilter === 'all' || categoriesFor(card).includes(activeFilter)
+    );
+
+  const update = () => {
+    const matches = matchingCards();
+    const limitAll = mobileQuery.matches && activeFilter === 'all' && !showAllOnMobile;
+    const visibleLimit = limitAll ? mobileInitialLimit : matches.length;
 
     cards.forEach((card) => {
-      const categories = (card.dataset.projectCategories || '').split(/\s+/).filter(Boolean);
-      const show = filter === 'all' || categories.includes(filter);
+      const matchIndex = matches.indexOf(card);
+      const show = matchIndex >= 0 && matchIndex < visibleLimit;
       card.hidden = !show;
-      if (show) visible += 1;
     });
 
     buttons.forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.dataset.projectFilter === filter));
+      button.setAttribute(
+        'aria-pressed',
+        String((button.dataset.projectFilter || 'all') === activeFilter)
+      );
     });
 
-    updateCount(visible);
+    const visible = Math.min(visibleLimit, matches.length);
+    if (count) {
+      if (lang === 'en') {
+        count.textContent = visible < matches.length
+          ? `${visible} of ${matches.length} projects`
+          : `${matches.length} project${matches.length === 1 ? '' : 's'}`;
+      } else {
+        count.textContent = visible < matches.length
+          ? `${visible} sur ${matches.length} projets`
+          : `${matches.length} projet${matches.length === 1 ? '' : 's'}`;
+      }
+    }
+
+    const remaining = Math.max(0, matches.length - visible);
+    moreButton.hidden = !(mobileQuery.matches && activeFilter === 'all' && remaining > 0);
+    if (!moreButton.hidden) {
+      moreButton.textContent = lang === 'en'
+        ? `Show ${remaining} more project${remaining === 1 ? '' : 's'}`
+        : `Afficher les ${remaining} autre${remaining === 1 ? '' : 's'} projet${remaining === 1 ? '' : 's'}`;
+    }
   };
 
   buttons.forEach((button) => {
-    button.addEventListener('click', () => applyFilter(button.dataset.projectFilter || 'all'));
+    button.addEventListener('click', () => {
+      activeFilter = button.dataset.projectFilter || 'all';
+      showAllOnMobile = activeFilter !== 'all';
+      update();
+    });
   });
 
-  applyFilter('all');
+  moreButton.addEventListener('click', () => {
+    showAllOnMobile = true;
+    update();
+    moreButton.previousElementSibling?.querySelector('[data-project-categories]:last-of-type')?.focus?.();
+  });
+
+  const handleViewportChange = () => {
+    if (!mobileQuery.matches) showAllOnMobile = true;
+    else if (activeFilter === 'all') showAllOnMobile = false;
+    update();
+  };
+
+  if (typeof mobileQuery.addEventListener === 'function') {
+    mobileQuery.addEventListener('change', handleViewportChange);
+  } else if (typeof mobileQuery.addListener === 'function') {
+    mobileQuery.addListener(handleViewportChange);
+  }
+
+  update();
 })();
