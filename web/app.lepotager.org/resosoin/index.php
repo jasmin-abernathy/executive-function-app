@@ -21,6 +21,7 @@
 @media(max-width:700px){.shell{width:min(100% - 2rem,1160px)}.site-header .header-inner{min-height:64px;gap:.4rem}.brand-mark{width:2.25rem;height:2.25rem}.brand-copy small,.nav-link,.accessibility-label{display:none}.nav{gap:.4rem}.accessibility-toggle{width:44px;padding:0}.nav .button-small{min-height:42px;padding:.55rem .8rem;font-size:.82rem}.hero{padding:3.7rem 0 4rem}.hero h1{font-size:clamp(2.85rem,9.3vw,4.3rem)}.hero-actions{display:grid}.hero-actions .button{width:100%}.section{padding:4rem 0}.audience-panels{grid-template-columns:1fr}.audience-panel h3{min-height:0}.price-ranges{grid-template-columns:repeat(2,minmax(0,1fr))}.transparency-grid{gap:1.6rem}}
 @media(max-width:400px){.shell{width:min(100% - 1.4rem,1160px)}.brand-copy{font-size:.9rem}.hero h1{font-size:clamp(2.5rem,9.2vw,3rem)}h2{font-size:2.3rem}.journey-card,.audience-panel,.validation-card{padding:1.35rem}.flow-step{grid-template-columns:1fr;gap:.35rem}.flow-step p{grid-column:1;margin:0}.study-card{grid-template-columns:1fr}.price-ranges li{padding:.8rem;min-height:88px}.range-amount{font-size:1.08rem}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+@media(max-width:520px){.site-header .accessibility-toggle{color:var(--forest)!important}.site-header .accessibility-toggle[aria-pressed="true"]{color:#fff!important}}
 
   </style>
   <link rel="stylesheet" href="/accessibility.css">
