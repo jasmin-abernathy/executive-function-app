@@ -279,8 +279,8 @@
           <details>
             <summary>Hébergement, HDS et juridiction</summary>
             <div class="details-content">
-              <p>L’objectif est d’héberger les données en Europe et, lorsqu’il s’agit de données de santé, de recourir à un prestataire adapté aux exigences HDS. Ce choix n’est pas encore finalisé.</p>
-              <p>Doctolib indique aujourd’hui recourir notamment à AWS ainsi qu’à S3NS/GCP pour l’hébergement de données de santé dans l’EEE. Pour les données particulièrement sensibles, la CNIL recommande de prendre aussi en compte la juridiction applicable au fournisseur, pas seulement la localisation physique des serveurs.</p>
+              <p><strong>Pourquoi parler d’AWS&nbsp;?</strong> Un serveur situé en France ou en Allemagne ne répond pas uniquement à la question de savoir quelles lois peuvent s’appliquer à son fournisseur. AWS appartient à une entreprise américaine&nbsp;: pour les données les plus sensibles, la CNIL relève un risque de demande d’accès par des autorités américaines, même si les serveurs sont en Europe. C’est une exposition juridique, pas la preuve qu’une autorité a consulté des dossiers médicaux.</p>
+              <p>Doctolib indique héberger les données en Europe, les chiffrer et conserver les clés de chiffrement en France. En janvier 2025, l’entreprise précisait n’avoir reçu aucune demande de ce type concernant ses données hébergées sur AWS. Ces protections comptent. RésoSoin souhaite étudier, pour ses futures données de santé, un hébergeur adapté aux exigences HDS et exclusivement soumis au droit européen, comme le recommande la CNIL pour les traitements les plus sensibles. Aucun hébergeur définitif n’a encore été choisi.</p>
             </div>
           </details>
 
