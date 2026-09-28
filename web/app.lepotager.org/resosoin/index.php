@@ -121,9 +121,9 @@
             <li>
               <span class="journey-number">3</span>
               <div>
-                <strong>Un accès simple pour les patients</strong>
-                <small class="status status-testing">À tester</small>
-                <p>Prendre, déplacer ou annuler un rendez-vous sans imposer un portail unique.</p>
+                <strong>Un annuaire commun pour les patients</strong>
+                <small class="status status-building">À construire</small>
+                <p>Retrouver les cabinets au même endroit, puis accéder à leur site ou prendre rendez-vous.</p>
               </div>
             </li>
           </ol>
@@ -155,7 +155,7 @@
             <div class="audience-label">Côté patient</div>
             <h3>Faire les démarches essentielles sans apprendre un nouvel écosystème.</h3>
             <ul class="feature-list">
-              <li><strong>Trouver le site du cabinet</strong><span class="status status-existing">Principe actuel</span></li>
+              <li><strong>Trouver un cabinet dans l’annuaire commun</strong><span class="status status-building">À construire</span></li>
               <li><strong>Réserver, déplacer ou annuler simplement</strong><span class="status status-building">En conception</span></li>
               <li><strong>Choisir les rappels utiles</strong><span class="status status-building">En conception</span></li>
               <li><strong>Téléphone et aide d’un proche toujours possibles</strong><span class="status status-testing">Exigence à tester</span></li>
@@ -187,8 +187,8 @@
             <span class="flow-arrow" aria-hidden="true">→</span>
             <div class="flow-step">
               <span class="flow-kicker">3 · Accès</span>
-              <strong>Le patient utilise le chemin le plus simple</strong>
-              <p>Le site du cabinet reste la porte d’entrée ; une recherche commune entre cabinets est seulement une hypothèse à tester.</p>
+              <strong>Site du cabinet ou annuaire commun</strong>
+              <p>Deux portes d’entrée vers les mêmes cabinets et leurs rendez-vous. La recherche commune reste à construire et à tester.</p>
             </div>
           </div>
         </div>
@@ -272,7 +272,7 @@
         <div>
           <p class="eyebrow">Transparence</p>
           <h2 id="transparence-title">Ce qui est visé n’est pas encore acquis.</h2>
-          <p class="section-intro">RésoSoin ne se présente ni comme un produit fini ni comme « plus sûr » qu’une solution existante. Les choix d’hébergement, l’agenda final, les intégrations, la recherche entre cabinets et une éventuelle application patient restent à prototyper ou à valider.</p>
+          <p class="section-intro">RésoSoin ne se présente ni comme un produit fini ni comme « plus sûr » qu’une solution existante. Les choix d’hébergement, l’agenda final, les intégrations, l’annuaire commun des cabinets et une éventuelle application patient restent à construire ou à valider.</p>
         </div>
 
         <div class="details-stack">
