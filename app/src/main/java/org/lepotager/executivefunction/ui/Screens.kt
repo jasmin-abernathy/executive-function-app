@@ -936,12 +936,12 @@ fun FocusScreen(
             },
             onContinue = {
                 showPauseSuggestion = false
-                nextPausePromptAtMs = Long.MAX_VALUE
+                nextPausePromptAtMs = org.lepotager.executivefunction.domain.PauseReminderTimes.afterContinue(elapsed, pauseAfterMinutes)
                 org.lepotager.executivefunction.PauseSchedule.set(context, activeFocus, nextPausePromptAtMs)
             },
             onRemindLater = {
                 showPauseSuggestion = false
-                nextPausePromptAtMs = elapsed + 10 * 60_000L
+                nextPausePromptAtMs = org.lepotager.executivefunction.domain.PauseReminderTimes.afterSnooze(elapsed)
                 org.lepotager.executivefunction.PauseSchedule.set(context, activeFocus, nextPausePromptAtMs)
             },
         )
