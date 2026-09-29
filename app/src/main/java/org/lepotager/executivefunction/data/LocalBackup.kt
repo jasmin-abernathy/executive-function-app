@@ -6,6 +6,18 @@ import org.json.JSONObject
 
 /** Explicit plaintext export. Import is atomic and checks schema and foreign keys. */
 internal class LocalBackup(private val database: AppDatabase) {
+    private companion object {
+        // Keep one symmetric ceiling: this app must never create a backup that its own
+        // importer rejects purely because of size. 32 MiB leaves headroom above the
+        // historical 10,000,000-character cap while still bounding JSONObject memory use.
+        const val MAX_BACKUP_BYTES = 32 * 1024 * 1024
+    }
+
+    private fun requireBackupSize(text: String) {
+        require(text.toByteArray(Charsets.UTF_8).size <= MAX_BACKUP_BYTES) {
+            "Backup exceeds the 32 MiB safety limit"
+        }
+    }
     private val tables = listOf("tasks", "focus_sessions", "learning_exclusions", "learning_overrides", "task_steps", "task_planning", "check_ins", "quick_notes", "session_context", "learning_resets", "recurrences", "task_reminders", "session_steps")
 
     fun export(): String {
@@ -32,7 +44,7 @@ internal class LocalBackup(private val database: AppDatabase) {
             }
             db.setTransactionSuccessful()
         } finally { db.endTransaction() }
-        return result.toString(2)
+        return result.toString(2).also(::requireBackupSize)
     }
 
     fun clear() {
@@ -42,7 +54,7 @@ internal class LocalBackup(private val database: AppDatabase) {
     }
 
     fun restore(text: String) {
-        require(text.length <= 10_000_000) { "Backup too large" }
+        requireBackupSize(text)
         val root=JSONObject(text)
         require(root.getString("format")=="executive-function-local" && root.getInt("version")==4)
         val exportedAt=root.getLong("exported_at")
