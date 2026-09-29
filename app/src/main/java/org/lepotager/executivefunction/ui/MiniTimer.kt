@@ -22,7 +22,10 @@ fun MiniTimer(active: ActiveFocus) {
     Surface(Modifier.fillMaxSize()) {
         Column(Modifier.padding(8.dp),horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.Center) {
             Text(active.task.title,maxLines=2)
-            Text((if(target!=null&&elapsed>target) "+" else "")+"${duration/60000}:${((duration/1000)%60).toString().padStart(2,'0')}",style=MaterialTheme.typography.headlineMedium)
+            Text(
+                (if(target!=null&&elapsed>target) "+" else "") + FocusClockText.format(duration),
+                style=MaterialTheme.typography.headlineMedium,
+            )
         }
     }
 }

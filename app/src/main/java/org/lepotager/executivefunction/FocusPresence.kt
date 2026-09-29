@@ -18,17 +18,35 @@ import java.util.concurrent.Executors
 internal object FocusPresence {
     const val ID=3107
     const val CHANGED="org.lepotager.executivefunction.FOCUS_CHANGED"
-    private const val CHANNEL="active_focus"
+    internal const val CHANNEL="active_focus_v2"
     fun sync(context: Context,active: ActiveFocus?) {
         val manager=context.getSystemService(NotificationManager::class.java)
-        if(active==null) {manager.cancel(ID);PauseSchedule.cancel(context);return}
+        if(active==null) {
+            manager.cancel(ID)
+            PauseSchedule.cancel(context)
+            BreakSchedule.cancel(context)
+            context.stopService(Intent(context, FocusOverlayService::class.java))
+            return
+        }
+        if(active.session.status != FocusStatus.INTERRUPTED) BreakSchedule.cancel(context)
         PauseSchedule.sync(context,active)
         if(Build.VERSION.SDK_INT>=33 && ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return
         manager.notify(ID,build(context,active))
     }
     fun build(context: Context,active: ActiveFocus): Notification {
         val manager=context.getSystemService(NotificationManager::class.java)
-        manager.createNotificationChannel(NotificationChannel(CHANNEL,context.getString(R.string.focus_notification_channel),NotificationManager.IMPORTANCE_LOW))
+        manager.createNotificationChannel(
+            NotificationChannel(
+                CHANNEL,
+                context.getString(R.string.focus_notification_channel),
+                NotificationManager.IMPORTANCE_LOW,
+            ).apply {
+                description = context.getString(R.string.focus_notification_channel_description)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setSound(null, null)
+                enableVibration(false)
+            },
+        )
         val running=active.session.status==FocusStatus.RUNNING
         val elapsed=SessionClock.elapsedMs(active.session,System.currentTimeMillis())
         val target=active.session.targetDurationMs
@@ -37,8 +55,10 @@ internal object FocusPresence {
             .setSmallIcon(R.drawable.ic_timer_notification)
             .setContentTitle(context.getString(R.string.focus_notification_channel))
             .setContentText(context.getString(if(running) R.string.floating_timer_running else R.string.resume_action))
-            .setContentIntent(open).setOngoing(running).setSilent(true).setOnlyAlertOnce(true)
-            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setContentIntent(open).setOngoing(true).setSilent(true).setOnlyAlertOnce(true)
+            .setAutoCancel(false)
+            .setCategory(NotificationCompat.CATEGORY_PROGRESS)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setUsesChronometer(running)
             .setWhen(System.currentTimeMillis() - elapsed + (target ?: 0L))
             .setChronometerCountDown(running && target!=null && target>elapsed)
@@ -48,6 +68,58 @@ internal object FocusPresence {
     }
     fun action(context: Context,active: ActiveFocus,action: String): PendingIntent = PendingIntent.getBroadcast(
         context,action.hashCode(),Intent(context,FocusActionReceiver::class.java).setAction(action).putExtra("session",active.session.id),PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+}
+
+internal object BreakSchedule {
+    private const val NOTIFICATION_ID = 3110
+    private const val ACTION = "break_finished"
+    private fun prefs(context: Context)=context.getSharedPreferences("break_schedule",Context.MODE_PRIVATE)
+    private fun pending(context: Context)=PendingIntent.getBroadcast(
+        context,
+        NOTIFICATION_ID,
+        Intent(context,FocusActionReceiver::class.java).setAction(ACTION),
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+    fun start(context: Context,active: ActiveFocus,minutes: Int) {
+        cancel(context)
+        val safe=minutes.coerceIn(1,60)
+        val until=System.currentTimeMillis()+safe*60_000L
+        prefs(context).edit()
+            .putString("session",active.session.id)
+            .putInt("minutes",safe)
+            .putLong("until",until)
+            .apply()
+        context.getSystemService(AlarmManager::class.java)
+            .setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,until,pending(context))
+    }
+    fun cancel(context: Context) {
+        context.getSystemService(AlarmManager::class.java).cancel(pending(context))
+        context.getSystemService(NotificationManager::class.java).cancel(NOTIFICATION_ID)
+        prefs(context).edit().clear().apply()
+    }
+    fun show(context: Context,active: ActiveFocus) {
+        val p=prefs(context)
+        if(active.session.status!=FocusStatus.INTERRUPTED || p.getString("session",null)!=active.session.id) {
+            cancel(context)
+            return
+        }
+        if(System.currentTimeMillis()<p.getLong("until",Long.MAX_VALUE)) return
+        if(Build.VERSION.SDK_INT>=33 &&
+            ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED
+        ) return
+        val minutes=p.getInt("minutes",10)
+        val base=FocusPresence.build(context,active)
+        val notification=NotificationCompat.Builder(context,FocusPresence.CHANNEL)
+            .setSmallIcon(R.drawable.ic_timer_notification)
+            .setContentTitle(context.getString(R.string.break_finished_title))
+            .setContentText(context.getString(R.string.break_finished_message,minutes))
+            .setContentIntent(base.contentIntent)
+            .setAutoCancel(true)
+            .addAction(0,context.getString(R.string.resume_action),FocusPresence.action(context,active,"resume"))
+            .build()
+        context.getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID,notification)
+    }
+    fun isAction(action: String?) = action==ACTION
 }
 
 internal object PauseSchedule {
@@ -85,7 +157,7 @@ internal object PauseSchedule {
         if(deadline(context,active,settings.getInt("pause_after_minutes",25))>SessionClock.elapsedMs(active.session,System.currentTimeMillis())) return
         if(Build.VERSION.SDK_INT>=33 && ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return
         val base=FocusPresence.build(context,active)
-        val notification=NotificationCompat.Builder(context,"active_focus")
+        val notification=NotificationCompat.Builder(context,FocusPresence.CHANNEL)
             .setSmallIcon(R.drawable.ic_timer_notification).setContentTitle(context.getString(R.string.pause_suggestion_title))
             .setContentText(context.getString(R.string.pause_suggestion_message,settings.getInt("pause_after_minutes",25)))
             .setContentIntent(base.contentIntent).setAutoCancel(true)
@@ -105,16 +177,26 @@ class FocusActionReceiver : BroadcastReceiver() {
             try {
                 val active=db.activeFocus() ?: return@execute
                 if(intent.action=="pause_prompt") {PauseSchedule.show(context,active);return@execute}
+                if(BreakSchedule.isAction(intent.action)) {BreakSchedule.show(context,active);return@execute}
                 if(intent.getStringExtra("session")!=active.session.id) return@execute
                 when(intent.action) {
-                    "pause" -> if(active.session.status==FocusStatus.RUNNING) db.interruptFocus(FocusTransitions.interrupt(active.session,System.currentTimeMillis(),null))
+                    "pause" -> if(active.session.status==FocusStatus.RUNNING) {
+                        val minutes=context.getSharedPreferences("app_preferences",Context.MODE_PRIVATE)
+                            .getInt("pause_duration_minutes",10)
+                        BreakSchedule.start(context,active,minutes)
+                        db.interruptFocus(FocusTransitions.interrupt(active.session,System.currentTimeMillis(),null))
+                    }
                     "resume" -> if(active.session.status==FocusStatus.INTERRUPTED) {
+                        BreakSchedule.cancel(context)
                         db.resumeFocus(FocusTransitions.resume(active.session,System.currentTimeMillis()),active.task.firstStep)
                         val updated=db.activeFocus()!!
                         val minutes=context.getSharedPreferences("app_preferences",Context.MODE_PRIVATE).getInt("pause_after_minutes",25)
                         PauseSchedule.set(context,updated,SessionClock.elapsedMs(updated.session,System.currentTimeMillis())+minutes*60_000L)
                     }
-                    "complete" -> db.closeFocus(FocusTransitions.finish(active.session,System.currentTimeMillis(),FocusStatus.COMPLETED),TaskStatus.COMPLETED)
+                    "complete" -> {
+                        BreakSchedule.cancel(context)
+                        db.closeFocus(FocusTransitions.finish(active.session,System.currentTimeMillis(),FocusStatus.COMPLETED),TaskStatus.COMPLETED)
+                    }
                     "later" -> PauseSchedule.set(context,active,SessionClock.elapsedMs(active.session,System.currentTimeMillis())+600_000)
                     "continue" -> PauseSchedule.set(context,active,Long.MAX_VALUE)
                 }

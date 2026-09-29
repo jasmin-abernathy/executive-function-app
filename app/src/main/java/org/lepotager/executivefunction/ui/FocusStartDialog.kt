@@ -43,6 +43,7 @@ internal fun FocusStartDialog(
     }
     val minutes = minutesText.toIntOrNull()
     val canStart = mode == FocusTimerMode.STOPWATCH || minutes?.let { it in 1..FocusTimerChoice.MAX_MINUTES } == true
+    val durationEquivalent = minutes?.takeIf { it >= 60 }?.let(DurationText::minutes)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -79,15 +80,18 @@ internal fun FocusStartDialog(
                 )
                 if (mode == FocusTimerMode.COUNTDOWN) {
                     suggestedMinutes?.let {
-                        Text(stringResource(R.string.learned_duration_reference, it))
+                        Text(stringResource(R.string.learned_duration_reference, DurationText.minutes(it)))
                     }
                     OutlinedTextField(
                         value = minutesText,
                         onValueChange = { value -> minutesText = value.filter(Char::isDigit).take(5) },
                         label = { Text(stringResource(R.string.countdown_minutes_label)) },
                         supportingText = {
-                            if (minutesText.isNotBlank() && !canStart) {
-                                Text(stringResource(R.string.countdown_minutes_error))
+                            when {
+                                minutesText.isNotBlank() && !canStart ->
+                                    Text(stringResource(R.string.countdown_minutes_error))
+                                durationEquivalent != null ->
+                                    Text(stringResource(R.string.duration_equivalent, durationEquivalent))
                             }
                         },
                         singleLine = true,

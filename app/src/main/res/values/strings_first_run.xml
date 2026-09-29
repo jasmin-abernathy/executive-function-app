@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="setup_intro_eyebrow">Réglage de départ</string>
-    <string name="setup_intro_title">On règle l’app autour de toi</string>
-    <string name="setup_intro_body">Quelques questions courtes, une à la fois. Elles servent uniquement à choisir les réglages de départ et les aides à mettre en avant. Tu pourras tout modifier plus tard.</string>
-    <string name="setup_intro_privacy">Tout reste sur ton téléphone. Aucun compte, aucune question de diagnostic et aucune réponse envoyée ailleurs.</string>
+    <string name="setup_intro_title">Salut 👋 On fait les réglages ensemble ?</string>
+    <string name="setup_intro_body">Quelques choix rapides, un à la fois. Je te montre seulement ce qui peut être utile, et tu pourras tout changer ensuite.</string>
+    <string name="setup_intro_privacy">Tu peux passer quand tu veux. Tout reste sur ton téléphone : pas de compte, pas de diagnostic, pas d’envoi ailleurs.</string>
+    <string name="setup_chat_start">On y va</string>
+    <string name="setup_chat_confirm">Ça me va</string>
+    <string name="setup_chat_pause_on">Pause proposée après %1$s · pause de %2$s</string>
+    <string name="setup_chat_pause_off">Pas de proposition de pause</string>
+    <string name="setup_chat_no_automatic">Aucune aide automatique pour le moment</string>
 
     <string name="setup_difficulty_eyebrow">Une situation récente</string>
-    <string name="setup_difficulty_title">Sans penser à ta pire journée, quand quelque chose coince, quelle partie est le plus souvent difficile ?</string>
-    <string name="setup_difficulty_help">Choisis ce qui correspond le mieux. La question sert seulement à afficher ensuite les réglages les plus utiles.</string>
+    <string name="setup_difficulty_title">Quand une tâche coince, c’est surtout à quel moment ?</string>
+    <string name="setup_difficulty_help">Choisis ce qui te ressemble le plus aujourd’hui. Ce n’est pas un diagnostic : ça sert juste à éviter de te montrer des réglages inutiles.</string>
     <string name="setup_difficulty_starting">Commencer l’activité</string>
     <string name="setup_difficulty_choosing">Décider quoi faire en premier</string>
     <string name="setup_difficulty_focusing">Rester sur l’activité</string>
@@ -18,7 +23,7 @@
     <string name="setup_difficulty_other">Autre chose / ça dépend</string>
 
     <string name="setup_support_eyebrow">Ce qui peut aider</string>
-    <string name="setup_support_help">Choisis jusqu’à 2 réponses. L’app ne masquera pas les autres outils : cela sert seulement à préparer des réglages de départ cohérents.</string>
+    <string name="setup_support_help">Tu peux en choisir deux maximum. Les autres outils resteront disponibles plus tard.</string>
     <string name="setup_support_starting_title">Tu sais quoi faire, mais tu ne commences pas. Qu’est-ce qui aiderait le plus ?</string>
     <string name="setup_support_choosing_title">Quand choisir devient difficile, qu’est-ce qui t’aiderait le plus ?</string>
     <string name="setup_support_focus_title">Quand rester concentré, suivre le temps ou changer d’activité est difficile, qu’est-ce qui aiderait le plus ?</string>
@@ -39,18 +44,23 @@
     <string name="setup_support_minimal">Le moins d’interventions possible</string>
 
     <string name="setup_focus_eyebrow">Sessions de concentration</string>
-    <string name="setup_focus_title">Comment veux-tu que les sessions commencent par défaut ?</string>
-    <string name="setup_focus_help">Tu pourras toujours changer ce choix avant chaque session. Après trois réalisations mesurées, l’app peut proposer un repère local : elle garde la plus longue durée active admissible, l’arrondit à la minute supérieure puis ajoute une minute de marge. Ce repère n’est jamais imposé.</string>
+    <string name="setup_focus_title">Pour le temps, tu préfères quoi ?</string>
+    <string name="setup_focus_help">Tu pourras changer avant chaque session. Après 3 réalisations, l’app peut proposer un repère local basé sur ta plus longue durée active, arrondie puis augmentée d’une minute. Jamais imposé.</string>
     <string name="setup_timer_stopwatch_default">Chronomètre par défaut — le temps part de zéro</string>
     <string name="setup_timer_countdown_default">Minuteur par défaut — je choisis une durée</string>
     <string name="setup_pause_custom">Autre durée</string>
     <string name="setup_pause_custom_label">Durée avant proposition de pause</string>
     <string name="setup_pause_custom_help">Entre 5 et 120 minutes.</string>
     <string name="setup_pause_custom_error">Choisis une durée entre 5 et 120 minutes.</string>
+    <string name="setup_break_duration_label">Et la pause elle-même, tu la veux combien de temps ?</string>
+    <string name="setup_break_custom">Autre durée de pause</string>
+    <string name="setup_break_custom_label">Durée de la pause</string>
+    <string name="setup_break_custom_help">Entre 1 et 60 minutes. L’app te rappelle ensuite, sans reprendre à ta place.</string>
+    <string name="setup_break_custom_error">Choisis une durée entre 1 et 60 minutes.</string>
 
     <string name="setup_behaviour_eyebrow">Aides automatiques</string>
-    <string name="setup_behaviour_title">Qu’est-ce que l’app peut faire sans que tu aies à y penser ?</string>
-    <string name="setup_behaviour_help">Seulement des comportements locaux, explicites et réversibles. L’adaptation utilise des règles visibles — énergie, temps disponible et contexte — pas un profil caché. Désactive ce qui te gênerait.</string>
+    <string name="setup_behaviour_title">Et qu’est-ce que je peux faire automatiquement pour t’aider ?</string>
+    <string name="setup_behaviour_help">Tout reste local et réversible. Si tu actives l’adaptation, elle utilise seulement ton énergie, ton temps disponible et ton contexte.</string>
     <string name="setup_checkin_title">Points humeur / motivation / énergie</string>
     <string name="setup_checkin_support">Au maximum toutes les 4 heures, et toujours facultatifs.</string>
     <string name="setup_adaptation_title">Suggestions selon mon état et mon contexte</string>
@@ -61,12 +71,13 @@
     <string name="setup_auto_mini_support">Passer en mini-fenêtre quand je quitte une session de focus.</string>
 
     <string name="setup_review_eyebrow">Récapitulatif</string>
-    <string name="setup_review_title">Tes réglages de départ</string>
+    <string name="setup_review_title">Ça te va comme point de départ ?</string>
     <string name="setup_review_help">Vérifie simplement que cela te ressemble. Retour permet de modifier une réponse.</string>
     <string name="setup_review_main_difficulty">Difficulté principale</string>
     <string name="setup_review_timer">Mode de timer</string>
     <string name="setup_review_pauses">Propositions de pause</string>
-    <string name="setup_review_enabled_minutes">Oui · %1$d min</string>
+    <string name="setup_review_break_duration">Durée de la pause</string>
+    <string name="setup_review_enabled_minutes">Oui · %1$s</string>
     <string name="setup_review_disabled">Non</string>
     <string name="setup_review_note">Ces choix ne désactivent pas les fonctions manuelles. Ils règlent surtout ce que l’app propose ou fait automatiquement. Tu pourras relancer ce réglage plus tard.</string>
     <string name="setup_yes">Oui</string>

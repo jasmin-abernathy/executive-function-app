@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,6 +14,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -49,6 +53,8 @@ class JournalActivity : ComponentActivity() {
         var notes by remember {mutableStateOf(emptyList<QuickNote>())}
         var noteText by remember {mutableStateOf("")}
         var editingCheck by remember {mutableStateOf<String?>(null)}
+        var showCheckDetails by remember {mutableStateOf(false)}
+        var checkMetric by remember { mutableStateOf(CheckMetric.MOOD) }
         var recurrence by remember {mutableStateOf<Int?>(null)}
         var stepRecommendation by remember {mutableStateOf<StepRecommendation?>(null)}
         var repeatDays by remember(selected) {mutableStateOf("")}
@@ -97,7 +103,7 @@ class JournalActivity : ComponentActivity() {
                 stepRecommendation=withContext(Dispatchers.IO) {if(adapt) journal.recommendedSteps(task.id) else null}
             }
         }
-        fun run(action: () -> Unit) {
+        fun run(after: () -> Unit = {}, action: () -> Unit) {
             if(busy) return
             busy=true
             scope.launch {
@@ -107,10 +113,21 @@ class JournalActivity : ComponentActivity() {
                         try { FocusPresence.sync(this@JournalActivity,database.activeFocus());TaskReminder.restore(this@JournalActivity,database) } catch (_: Exception) { }
                     }
                     refresh()
+                    after()
                 }
                 catch (_: Exception) { error=true }
                 finally { busy=false }
             }
+        }
+        fun returnHome() {
+            startActivity(
+                android.content.Intent(this@JournalActivity, MainActivity::class.java)
+                    .addFlags(
+                        android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP,
+                    ),
+            )
+            finish()
         }
         LaunchedEffect(selected) { try { refresh() } catch (_: Exception) { error=true } }
         DisposableEffect(Unit) { onDispose { database.close() } }
@@ -172,7 +189,20 @@ class JournalActivity : ComponentActivity() {
                         Level(label("Humeur","Mood"),mood) { mood=it }
                         Level(label("Motivation","Motivation"),motivation) { motivation=it }
                         Level(label("Énergie","Energy"),energy) { energy=it }
-                        Button(enabled=!busy,onClick={val id=editingCheck;run { if(id==null) journal.checkIn(mood,motivation,energy) else journal.editCheckIn(id,mood,motivation,energy) };editingCheck=null}) { Text(if(editingCheck==null) label("Enregistrer cet état","Save this check-in") else label("Corriger cet état","Update check-in")) }
+                        Button(
+                            enabled=!busy,
+                            onClick={
+                                val id=editingCheck
+                                if(id==null) {
+                                    run(after={ returnHome() }) {
+                                        journal.checkIn(mood,motivation,energy)
+                                    }
+                                } else {
+                                    run { journal.editCheckIn(id,mood,motivation,energy) }
+                                    editingCheck=null
+                                }
+                            },
+                        ) { Text(if(editingCheck==null) label("Enregistrer et revenir à l’accueil","Save and return home") else label("Corriger cet état","Update check-in")) }
                         if(editingCheck!=null) TextButton(onClick={editingCheck=null}) {Text(label("Annuler la correction","Cancel editing"))}
                         Row { Switch(checked=checkEnabled,onCheckedChange={checkEnabled=it;getSharedPreferences("wellbeing",MODE_PRIVATE).edit().putBoolean("enabled",it).apply()});Text(label("Proposer ce point toutes les 4 heures au maximum","Offer a check-in at most every 4 hours")) }
                         Text(label("Les états restent locaux. Ils ne constituent pas un diagnostic. Tu peux les supprimer ci-dessous.","Check-ins stay local. They are not a diagnosis. You can delete them below."))
@@ -198,11 +228,43 @@ class JournalActivity : ComponentActivity() {
                     if(section=="tasks") items(tasks.filter { (!todayOnly || planningMap[it.id]?.today==true) && (showCompleted || !it.completed) },key={it.id}) { t ->
                         OutlinedButton(onClick={selected=t.id},modifier=Modifier.fillMaxWidth()) { Text(t.title+if(t.completed) label(" — terminée"," — completed") else "") }
                     }
-                    if(section=="state") item { Text(label("États enregistrés","Saved check-ins"),style=MaterialTheme.typography.titleLarge) }
-                    if(section=="state") items(checks,key={it.id}) { c ->
-                        Text(DateFormat.getDateTimeInstance().format(Date(c.date))+" · "+label("Humeur / motivation / énergie : ","Mood / motivation / energy: ")+"${c.mood} / ${c.motivation} / ${c.energy}")
-                        TextButton(enabled=!busy,onClick={run { journal.deleteCheckIn(c.id) }}) { Text(label("Supprimer cet état","Delete check-in")) }
-                        TextButton(enabled=!busy,onClick={editingCheck=c.id;mood=c.mood;motivation=c.motivation;energy=c.energy}) {Text(label("Corriger avec les champs ci-dessus","Edit using the fields above"))}
+                    if(section=="state") item {
+                        Text(label("Évolution récente","Recent trend"),style=MaterialTheme.typography.titleLarge)
+                        CheckInTrendCard(
+                            checks = checks,
+                            selected = checkMetric,
+                            onSelected = { checkMetric = it },
+                            moodLabel = label("Humeur","Mood"),
+                            motivationLabel = label("Motivation","Motivation"),
+                            energyLabel = label("Énergie","Energy"),
+                            emptyLabel = label("Enregistre quelques points pour voir une évolution ici.","Add a few check-ins to see a trend here."),
+                            accessibilityLabel = label("Évolution des derniers points enregistrés.","Trend of recent saved check-ins."),
+                            veryLowLabel = label("Très bas","Very low"),
+                            lowLabel = label("Bas","Low"),
+                            mediumLabel = label("Moyen","Medium"),
+                            highLabel = label("Haut","High"),
+                            latestLabel = label("Dernier point","Latest"),
+                        )
+                        if(checks.isNotEmpty()) {
+                            TextButton(onClick={showCheckDetails=!showCheckDetails}) {
+                                Text(
+                                    if(showCheckDetails) label("Masquer les détails","Hide details")
+                                    else label("Voir les points enregistrés (${checks.size})","Show saved check-ins (${checks.size})"),
+                                )
+                            }
+                        }
+                    }
+                    if(section=="state" && showCheckDetails) items(checks,key={it.id}) { c ->
+                        Card(modifier=Modifier.fillMaxWidth()) {
+                            Column(Modifier.padding(12.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                                Text(DateFormat.getDateTimeInstance().format(Date(c.date)))
+                                Text(label("Humeur / motivation / énergie : ","Mood / motivation / energy: ")+"${c.mood} / ${c.motivation} / ${c.energy}")
+                                Row {
+                                    TextButton(enabled=!busy,onClick={editingCheck=c.id;mood=c.mood;motivation=c.motivation;energy=c.energy}) {Text(label("Corriger","Edit"))}
+                                    TextButton(enabled=!busy,onClick={run { journal.deleteCheckIn(c.id) }}) { Text(label("Supprimer","Delete")) }
+                                }
+                            }
+                        }
                     }
                     if(section=="notes") item {
                         OutlinedTextField(value=noteText,onValueChange={noteText=it},label={Text(label("Une idée à garder","An idea to keep"))},modifier=Modifier.fillMaxWidth())
@@ -291,6 +353,210 @@ class JournalActivity : ComponentActivity() {
         }
         if(error) AlertDialog(onDismissRequest={error=false},title={Text(label("Action non effectuée","Action failed"))},text={Text(label("Vérifie les valeurs ou le fichier puis réessaie. Une restauration invalide conserve les données précédentes.","Check the values or file and retry. An invalid restore preserves previous data."))},confirmButton={TextButton(onClick={error=false}) {Text("OK")}})
         if(pendingImport!=null) AlertDialog(onDismissRequest={pendingImport=null},title={Text(label("Remplacer les données locales ?","Replace local data?"))},text={Text(label("Exporte d’abord tes données actuelles. Cette restauration remplace tâches, sessions et états. Aucun envoi réseau.","Export your current data first. Restore replaces tasks, sessions and check-ins. No network upload."))},confirmButton={TextButton(onClick={val text=pendingImport!!;pendingImport=null;run {LocalBackup(database).restore(text)}}){Text(label("Remplacer","Replace"))}},dismissButton={TextButton(onClick={pendingImport=null}){Text(label("Annuler","Cancel"))}})
+    }
+}
+
+private enum class CheckMetric { MOOD, MOTIVATION, ENERGY }
+
+@Composable
+private fun CheckInTrendCard(
+    checks: List<CheckIn>,
+    selected: CheckMetric,
+    onSelected: (CheckMetric) -> Unit,
+    moodLabel: String,
+    motivationLabel: String,
+    energyLabel: String,
+    emptyLabel: String,
+    accessibilityLabel: String,
+    veryLowLabel: String,
+    lowLabel: String,
+    mediumLabel: String,
+    highLabel: String,
+    latestLabel: String,
+) {
+    if (checks.isEmpty()) {
+        ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                emptyLabel,
+                modifier = Modifier.padding(18.dp),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        return
+    }
+
+    val points = checks.take(14).asReversed()
+    val metricLabel = when (selected) {
+        CheckMetric.MOOD -> moodLabel
+        CheckMetric.MOTIVATION -> motivationLabel
+        CheckMetric.ENERGY -> energyLabel
+    }
+    fun value(check: CheckIn): Int = when (selected) {
+        CheckMetric.MOOD -> check.mood
+        CheckMetric.MOTIVATION -> check.motivation
+        CheckMetric.ENERGY -> check.energy
+    }
+    val values = points.map(::value)
+    val latest = points.last()
+    val latestValue = value(latest)
+    val latestLevel = listOf(veryLowLabel, lowLabel, mediumLabel, highLabel)[latestValue.coerceIn(0, 3)]
+    val trend = latestValue - values.first()
+    val trendText = when {
+        trend > 0 -> "↑ +$trend"
+        trend < 0 -> "↓ $trend"
+        else -> "→"
+    }
+    val lineColor = when (selected) {
+        CheckMetric.MOOD -> MaterialTheme.colorScheme.primary
+        CheckMetric.MOTIVATION -> MaterialTheme.colorScheme.secondary
+        CheckMetric.ENERGY -> MaterialTheme.colorScheme.tertiary
+    }
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f)
+    val dateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
+    val chartSummary = buildString {
+        append(accessibilityLabel)
+        append(" ")
+        append(metricLabel)
+        append(": ")
+        append(values.joinToString(", "))
+        append(". ")
+        append(latestLabel)
+        append(": ")
+        append(latestLevel)
+        append(".")
+    }
+
+    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
+        ) {
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf(
+                    CheckMetric.MOOD to moodLabel,
+                    CheckMetric.MOTIVATION to motivationLabel,
+                    CheckMetric.ENERGY to energyLabel,
+                ).forEach { (metric, label) ->
+                    FilterChip(
+                        selected = selected == metric,
+                        onClick = { onSelected(metric) },
+                        label = { Text(label) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = androidx.compose.ui.Alignment.Bottom,
+            ) {
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(metricLabel, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        "${latestLabel} · $latestLevel",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Surface(
+                    shape = androidx.compose.foundation.shape.RoundedCornerShape(18.dp),
+                    color = lineColor.copy(alpha = 0.12f),
+                    contentColor = lineColor,
+                ) {
+                    Text(
+                        "$latestValue / 3   $trendText",
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                    )
+                }
+            }
+
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .height(190.dp)
+                    .semantics { contentDescription = chartSummary },
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxHeight().width(62.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                ) {
+                    Text(highLabel, style = MaterialTheme.typography.labelSmall)
+                    Text(mediumLabel, style = MaterialTheme.typography.labelSmall)
+                    Text(lowLabel, style = MaterialTheme.typography.labelSmall)
+                    Text(veryLowLabel, style = MaterialTheme.typography.labelSmall)
+                }
+                Canvas(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                    val left = 8.dp.toPx()
+                    val right = size.width - 8.dp.toPx()
+                    val top = 8.dp.toPx()
+                    val bottom = size.height - 8.dp.toPx()
+
+                    fun x(index: Int): Float =
+                        if (values.size == 1) (left + right) / 2f
+                        else left + (right - left) * index / values.lastIndex.toFloat()
+                    fun y(v: Int): Float =
+                        bottom - (bottom - top) * (v.coerceIn(0, 3) / 3f)
+
+                    repeat(4) { level ->
+                        val gy = y(level)
+                        drawLine(
+                            color = gridColor,
+                            start = Offset(left, gy),
+                            end = Offset(right, gy),
+                            strokeWidth = 1.dp.toPx(),
+                        )
+                    }
+
+                    values.zipWithNext().forEachIndexed { index, pair ->
+                        drawLine(
+                            color = lineColor,
+                            start = Offset(x(index), y(pair.first)),
+                            end = Offset(x(index + 1), y(pair.second)),
+                            strokeWidth = 4.dp.toPx(),
+                            cap = androidx.compose.ui.graphics.StrokeCap.Round,
+                        )
+                    }
+                    values.forEachIndexed { index, v ->
+                        drawCircle(
+                            color = surfaceColor,
+                            radius = 6.dp.toPx(),
+                            center = Offset(x(index), y(v)),
+                        )
+                        drawCircle(
+                            color = lineColor,
+                            radius = 4.dp.toPx(),
+                            center = Offset(x(index), y(v)),
+                        )
+                    }
+                }
+            }
+
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(
+                    dateFormat.format(Date(points.first().date)),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                if (points.size > 1) {
+                    Text(
+                        dateFormat.format(Date(points.last().date)),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
     }
 }
 

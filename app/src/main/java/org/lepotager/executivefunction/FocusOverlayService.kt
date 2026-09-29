@@ -26,6 +26,7 @@ import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.FocusStatus
+import org.lepotager.executivefunction.ui.FocusClockText
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -35,11 +36,15 @@ class FocusOverlayService : Service() {
     private lateinit var windowManager: WindowManager
     private var overlayView: View? = null
     private var timerView: TextView? = null
+    private var pauseView: TextView? = null
+    private val dimOverlay = Runnable {
+        overlayView?.animate()?.alpha(IDLE_ALPHA)?.setDuration(180L)?.start()
+    }
 
     private val ticker = object : Runnable {
         override fun run() {
             val active = database.activeFocus()
-            if (active?.session?.status != FocusStatus.RUNNING) {
+            if (active == null || active.session.status !in setOf(FocusStatus.RUNNING, FocusStatus.INTERRUPTED)) {
                 setEnabledPreference(false)
                 stopSelf()
                 return
@@ -58,26 +63,56 @@ class FocusOverlayService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val active = database.activeFocus()
-        if (!Settings.canDrawOverlays(this) || active?.session?.status != FocusStatus.RUNNING) {
-            setEnabledPreference(false)
+        if (active == null ||
+            active.session.status !in setOf(FocusStatus.RUNNING, FocusStatus.INTERRUPTED)
+        ) {
+            removeOverlay()
+            stopForeground(STOP_FOREGROUND_REMOVE)
             stopSelf()
             return START_NOT_STICKY
         }
+
+        // The foreground notification is the persistent focus presence, including lock screen.
+        // The floating overlay is optional and must not own the timer lifecycle.
         startForeground(FocusPresence.ID, FocusPresence.build(this, active))
-        if (overlayView == null) createOverlay()
+
+        val shouldShowOverlay =
+            getSharedPreferences(PREFERENCES, Context.MODE_PRIVATE).getBoolean(KEY_ENABLED, false) &&
+                Settings.canDrawOverlays(this)
         handler.removeCallbacks(ticker)
-        ticker.run()
-        return START_NOT_STICKY
+        if (shouldShowOverlay) {
+            if (overlayView == null) createOverlay()
+            ticker.run()
+        } else {
+            removeOverlay()
+        }
+        return START_STICKY
     }
 
     override fun onDestroy() {
         handler.removeCallbacks(ticker)
-        overlayView?.let { runCatching { windowManager.removeView(it) } }
-        overlayView = null
+        handler.removeCallbacks(dimOverlay)
+        removeOverlay()
+        // Detach keeps the SystemUI chronometer from visually jumping if Android restarts
+        // this sticky service after killing the process. Explicit session end cancels it.
         stopForeground(STOP_FOREGROUND_DETACH)
-        runCatching { FocusPresence.sync(this, database.activeFocus()) }
         database.close()
         super.onDestroy()
+    }
+
+    private fun removeOverlay() {
+        handler.removeCallbacks(dimOverlay)
+        overlayView?.let { runCatching { windowManager.removeView(it) } }
+        overlayView = null
+        timerView = null
+        pauseView = null
+    }
+
+    private fun wakeOverlay() {
+        handler.removeCallbacks(dimOverlay)
+        overlayView?.animate()?.cancel()
+        overlayView?.alpha = 1f
+        handler.postDelayed(dimOverlay, OPAQUE_AFTER_TOUCH_MS)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -85,6 +120,7 @@ class FocusOverlayService : Service() {
     private fun createOverlay() {
         val row = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
+            alpha = IDLE_ALPHA
             gravity = Gravity.CENTER_VERTICAL
             setPadding(dp(14), dp(9), dp(8), dp(9))
             background = GradientDrawable().apply {
@@ -102,6 +138,28 @@ class FocusOverlayService : Service() {
             setTypeface(typeface, Typeface.BOLD)
             setPadding(dp(10), 0, dp(8), 0)
         }
+        pauseView = TextView(this).apply {
+            text = getString(R.string.overlay_pause_symbol)
+            textSize = 20f
+            gravity = Gravity.CENTER
+            contentDescription = getString(R.string.interrupt_action)
+            setTextColor(getColor(R.color.floating_text))
+            minimumWidth = dp(48)
+            minimumHeight = dp(48)
+            setPadding(dp(6), dp(2), dp(6), dp(2))
+            setOnClickListener { wakeOverlay(); togglePauseResume() }
+        }
+        val note = TextView(this).apply {
+            text = getString(R.string.overlay_note_symbol)
+            textSize = 24f
+            gravity = Gravity.CENTER
+            contentDescription = getString(R.string.pip_add_note)
+            setTextColor(getColor(R.color.floating_text))
+            minimumWidth = dp(48)
+            minimumHeight = dp(48)
+            setPadding(dp(6), dp(2), dp(6), dp(2))
+            setOnClickListener { wakeOverlay(); openQuickNote() }
+        }
         val close = TextView(this).apply {
             text = "×"
             textSize = 22f
@@ -112,11 +170,15 @@ class FocusOverlayService : Service() {
             minimumHeight = dp(48)
             setPadding(dp(8), dp(2), dp(8), dp(2))
             setOnClickListener {
+                wakeOverlay()
                 setEnabledPreference(false)
-                stopSelf()
+                // Keep the foreground timer service alive; only remove the floating view.
+                removeOverlay()
             }
         }
         row.addView(timerView)
+        row.addView(pauseView)
+        row.addView(note)
         row.addView(close)
 
         val params = WindowManager.LayoutParams(
@@ -137,7 +199,7 @@ class FocusOverlayService : Service() {
     }
 
     private fun installDragAndOpen(view: View, params: WindowManager.LayoutParams) {
-        view.setOnClickListener { openApp() }
+        view.setOnClickListener { wakeOverlay(); openApp() }
         var startX = 0
         var startY = 0
         var touchX = 0f
@@ -146,6 +208,7 @@ class FocusOverlayService : Service() {
         view.setOnTouchListener { _, event ->
             when (event.actionMasked) {
                 MotionEvent.ACTION_DOWN -> {
+                    wakeOverlay()
                     startX = params.x
                     startY = params.y
                     touchX = event.rawX
@@ -176,7 +239,41 @@ class FocusOverlayService : Service() {
         val target = active.session.targetDurationMs
         val value = if (target == null) elapsed else abs(target - elapsed)
         val prefix = if (target != null && elapsed > target) "+" else ""
-        timerView?.text = prefix + formatTime(value)
+        timerView?.text = prefix + FocusClockText.format(value)
+        pauseView?.apply {
+            text = getString(
+                if (active.session.status == FocusStatus.RUNNING) R.string.overlay_pause_symbol
+                else R.string.overlay_resume_symbol,
+            )
+            contentDescription = getString(
+                if (active.session.status == FocusStatus.RUNNING) R.string.interrupt_action
+                else R.string.resume_action,
+            )
+        }
+    }
+
+    private fun togglePauseResume() {
+        val active = database.activeFocus() ?: return
+        val action = when (active.session.status) {
+            FocusStatus.RUNNING -> "pause"
+            FocusStatus.INTERRUPTED -> "resume"
+            else -> return
+        }
+        sendBroadcast(
+            Intent(this, FocusActionReceiver::class.java)
+                .setAction(action)
+                .putExtra("session", active.session.id),
+        )
+        handler.postDelayed({ database.activeFocus()?.let(::render) }, 120L)
+    }
+
+    private fun openQuickNote() {
+        startActivity(
+            Intent(this, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                putExtra("quick_action", "overlay_note")
+            },
+        )
     }
 
     private fun buildNotification(active: ActiveFocus): android.app.Notification {
@@ -214,6 +311,7 @@ class FocusOverlayService : Service() {
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 description = getString(R.string.focus_notification_channel_description)
+                lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
                 setSound(null, null)
                 enableVibration(false)
             },
@@ -235,22 +333,15 @@ class FocusOverlayService : Service() {
             .apply()
     }
 
-    private fun formatTime(milliseconds: Long): String {
-        val seconds = milliseconds / 1_000
-        val hours = seconds / 3_600
-        val minutes = (seconds % 3_600) / 60
-        val remainder = seconds % 60
-        return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, remainder)
-        else "%02d:%02d".format(minutes, remainder)
-    }
-
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).roundToInt()
 
     companion object {
         const val PREFERENCES = "focus_overlay"
         const val KEY_ENABLED = "enabled"
-        private const val CHANNEL_ID = "active_focus"
+        private const val CHANNEL_ID = FocusPresence.CHANNEL
         private const val NOTIFICATION_ID = 3107
+        private const val IDLE_ALPHA = 0.5f
+        private const val OPAQUE_AFTER_TOUCH_MS = 2_500L
 
         fun start(context: Context) {
             ContextCompat.startForegroundService(context, Intent(context, FocusOverlayService::class.java))

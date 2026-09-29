@@ -21,6 +21,11 @@ enum class TaskColor {
     TERRACOTTA,
     LAVENDER,
     SAND,
+    RED,
+    VIOLET,
+    NAVY,
+    MINT,
+    PEACH,
 }
 
 data class TaskItem(
@@ -58,4 +63,5 @@ data class AppSnapshot(
     val loading: Boolean = true,
     val eligibleDrawIds: Set<String>? = null,
     val suggestedTaskId: String? = null,
+    val resumableTaskIds: Set<String> = emptySet(),
 )

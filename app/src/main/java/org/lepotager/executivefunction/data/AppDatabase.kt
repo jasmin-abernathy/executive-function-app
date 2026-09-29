@@ -131,8 +131,34 @@ internal class AppDatabase(private val context: Context) :
         "1",
     ).use { cursor -> if (cursor.moveToFirst()) cursor.toTask() else null }
 
-    // Each reopened session already carries earlier segments: use the latest,
-    // never SUM, which would double-count earlier work after multiple reports.
+    fun postponedTaskIds(): Set<String> = readableDatabase.rawQuery(
+        """
+        SELECT DISTINCT s.task_id
+        FROM focus_sessions s
+        INNER JOIN tasks t ON t.id = s.task_id
+        WHERE s.status = ? AND t.status != ?
+        """.trimIndent(),
+        arrayOf(FocusStatus.POSTPONED.name, TaskStatus.COMPLETED.name),
+    ).use { cursor ->
+        buildSet { while (cursor.moveToNext()) add(cursor.getString(0)) }
+    }
+
+    fun latestPostponedFocus(taskId: String): ActiveFocus? {
+        val session = readableDatabase.query(
+            "focus_sessions",
+            SESSION_COLUMNS,
+            "task_id = ? AND status = ? AND is_active = 0",
+            arrayOf(taskId, FocusStatus.POSTPONED.name),
+            null,
+            null,
+            "updated_at DESC, rowid DESC",
+            "1",
+        ).use { cursor -> if (cursor.moveToFirst()) cursor.toSession() else null } ?: return null
+        return taskById(taskId)?.let { ActiveFocus(it, session) }
+    }
+
+    // Kept for compatibility with older start flows. A dedicated continue action now
+    // reactivates the postponed session itself instead of creating a new session.
     fun postponedElapsedMs(taskId: String): Long = readableDatabase.rawQuery(
         "SELECT elapsed_before_segment_ms FROM focus_sessions WHERE task_id=? AND status='POSTPONED' ORDER BY updated_at DESC, rowid DESC LIMIT 1",
         arrayOf(taskId),
@@ -253,6 +279,17 @@ internal class AppDatabase(private val context: Context) :
     }
 
     fun resumeFocus(session: FocusSession, firstStep: String?) = transaction { db ->
+        val taskValues = ContentValues().apply {
+            put("status", TaskStatus.IN_PROGRESS.name)
+            putNullableString("first_step", firstStep)
+            put("updated_at", session.updatedAt)
+        }
+        require(db.update("tasks", taskValues, "id = ?", arrayOf(session.taskId)) == 1)
+        updateSession(db, session, isActive = true)
+    }
+
+    fun resumePostponedFocus(session: FocusSession, firstStep: String?) = transaction { db ->
+        deactivateExistingFocus(db, session.updatedAt)
         val taskValues = ContentValues().apply {
             put("status", TaskStatus.IN_PROGRESS.name)
             putNullableString("first_step", firstStep)

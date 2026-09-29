@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledTonalButton
@@ -48,6 +49,7 @@ internal data class FirstRunSetupConfig(
     val adaptationEnabled: Boolean,
     val calmMode: Boolean,
     val autoMiniWindow: Boolean,
+    val pauseDurationMinutes: Int = 10,
 )
 
 private enum class FirstRunDifficulty {
@@ -78,6 +80,7 @@ private enum class FirstRunSupport {
 }
 
 private val pausePresets = listOf(15, 25, 45, 60)
+private val breakPresets = listOf(5, 10, 15, 20)
 
 /**
  * First-run configuration wizard inspired by the app research survey and Le Jardinier:
@@ -103,6 +106,13 @@ internal fun FirstRunSetupFlow(
     var customPauseText by rememberSaveable {
         mutableStateOf(if (initial.pauseAfterMinutes !in pausePresets) initial.pauseAfterMinutes.toString() else "")
     }
+    var breakMinutes by rememberSaveable { mutableIntStateOf(initial.pauseDurationMinutes.coerceIn(1, 60)) }
+    var customBreakSelected by rememberSaveable {
+        mutableStateOf(initial.pauseDurationMinutes !in breakPresets)
+    }
+    var customBreakText by rememberSaveable {
+        mutableStateOf(if (initial.pauseDurationMinutes !in breakPresets) initial.pauseDurationMinutes.toString() else "")
+    }
     var checkInEnabled by rememberSaveable { mutableStateOf(initial.checkInEnabled) }
     var adaptationEnabled by rememberSaveable { mutableStateOf(initial.adaptationEnabled) }
     var calmMode by rememberSaveable { mutableStateOf(initial.calmMode) }
@@ -117,7 +127,9 @@ internal fun FirstRunSetupFlow(
     val customPauseValue = customPauseText.toIntOrNull()
     val customPauseValid = !pauseEnabled || !customPauseSelected ||
         (customPauseValue != null && customPauseValue in 5..120)
-    val totalPages = 6
+    val customBreakValue = customBreakText.toIntOrNull()
+    val customBreakValid = !pauseEnabled || !customBreakSelected ||
+        (customBreakValue != null && customBreakValue in 1..60)
 
     fun toggleSupport(value: FirstRunSupport) {
         val next = supports.toMutableSet()
@@ -154,22 +166,14 @@ internal fun FirstRunSetupFlow(
         if (FirstRunSupport.CALM in supports) calmMode = true
     }
 
-    val canContinue = when (page) {
-        0 -> true
-        1 -> difficulty != null
-        2 -> supports.isNotEmpty()
-        3 -> customPauseValid
-        else -> true
-    }
-
     Surface(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(24.dp),
+                .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(20.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -177,81 +181,140 @@ internal fun FirstRunSetupFlow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    if (page == 0) stringResource(R.string.setup_intro_eyebrow)
-                    else stringResource(R.string.intro_step, page, totalPages - 1),
+                    stringResource(R.string.setup_intro_eyebrow),
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 TextButton(onClick = onSkip) { Text(stringResource(R.string.intro_skip)) }
             }
 
+            ConversationHistory(
+                page = page,
+                difficulty = difficulty,
+                supports = supports,
+                timerMode = timerMode,
+                pauseEnabled = pauseEnabled,
+                pauseMinutes = pauseMinutes,
+                pauseDurationMinutes = breakMinutes,
+                drawEnabled = drawEnabled,
+                checkInEnabled = checkInEnabled,
+                adaptationEnabled = adaptationEnabled,
+                calmMode = calmMode,
+                autoMini = autoMini,
+            )
+
             when (page) {
-                0 -> SetupIntro()
+                0 -> {
+                    SetupIntro()
+                    Button(
+                        onClick = { page = 1 },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_chat_start)) }
+                }
+
                 1 -> DifficultyQuestion(
                     selected = difficulty,
                     onSelect = {
                         difficultyName = it.name
                         supportNames = ""
+                        page = 2
                     },
                 )
-                2 -> SupportQuestion(
-                    difficulty = requireNotNull(difficulty),
-                    selected = supports,
-                    onToggle = ::toggleSupport,
-                )
-                3 -> FocusDefaultsQuestion(
-                    timerMode = timerMode,
-                    onTimerMode = { timerModeName = it.name },
-                    pauseEnabled = pauseEnabled,
-                    onPauseEnabled = { pauseEnabled = it },
-                    pauseMinutes = pauseMinutes,
-                    customPauseSelected = customPauseSelected,
-                    customPauseText = customPauseText,
-                    customPauseValid = customPauseValid,
-                    onPresetMinutes = {
-                        pauseMinutes = it
-                        customPauseSelected = false
-                    },
-                    onSelectCustom = {
-                        customPauseSelected = true
-                        if (customPauseText.isBlank()) customPauseText = pauseMinutes.toString()
-                    },
-                    onCustomPauseText = { raw ->
-                        customPauseText = raw.filter(Char::isDigit).take(3)
-                        customPauseText.toIntOrNull()?.takeIf { it in 5..120 }?.let { pauseMinutes = it }
-                    },
-                )
-                4 -> LocalBehaviourQuestion(
-                    drawEnabled = drawEnabled,
-                    onDrawEnabled = { drawEnabled = it },
-                    checkInEnabled = checkInEnabled,
-                    onCheckInEnabled = { checkInEnabled = it },
-                    adaptationEnabled = adaptationEnabled,
-                    onAdaptationEnabled = { adaptationEnabled = it },
-                    calmMode = calmMode,
-                    onCalmMode = { calmMode = it },
-                    autoMini = autoMini,
-                    onAutoMini = { autoMini = it },
-                )
-                5 -> SetupReview(
-                    difficulty = requireNotNull(difficulty),
-                    timerMode = timerMode,
-                    drawEnabled = drawEnabled,
-                    pauseEnabled = pauseEnabled,
-                    pauseMinutes = pauseMinutes,
-                    checkInEnabled = checkInEnabled,
-                    adaptationEnabled = adaptationEnabled,
-                    calmMode = calmMode,
-                    autoMini = autoMini,
-                )
-            }
 
-            Spacer(Modifier.height(4.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                if (page == totalPages - 1) {
+                2 -> {
+                    SupportQuestion(
+                        difficulty = requireNotNull(difficulty),
+                        selected = supports,
+                        onToggle = ::toggleSupport,
+                    )
+                    Button(
+                        enabled = supports.isNotEmpty(),
+                        onClick = {
+                            applyBranchDefaults()
+                            page = 3
+                        },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_chat_confirm)) }
+                }
+
+                3 -> {
+                    FocusDefaultsQuestion(
+                        timerMode = timerMode,
+                        onTimerMode = { timerModeName = it.name },
+                        pauseEnabled = pauseEnabled,
+                        onPauseEnabled = { pauseEnabled = it },
+                        pauseMinutes = pauseMinutes,
+                        customPauseSelected = customPauseSelected,
+                        customPauseText = customPauseText,
+                        customPauseValid = customPauseValid,
+                        onPresetMinutes = {
+                            pauseMinutes = it
+                            customPauseSelected = false
+                        },
+                        onSelectCustom = {
+                            customPauseSelected = true
+                            if (customPauseText.isBlank()) customPauseText = pauseMinutes.toString()
+                        },
+                        onCustomPauseText = { raw ->
+                            customPauseText = raw.filter(Char::isDigit).take(3)
+                            customPauseText.toIntOrNull()?.takeIf { it in 5..120 }?.let { pauseMinutes = it }
+                        },
+                        breakMinutes = breakMinutes,
+                        customBreakSelected = customBreakSelected,
+                        customBreakText = customBreakText,
+                        customBreakValid = customBreakValid,
+                        onPresetBreakMinutes = {
+                            breakMinutes = it
+                            customBreakSelected = false
+                        },
+                        onSelectCustomBreak = {
+                            customBreakSelected = true
+                            if (customBreakText.isBlank()) customBreakText = breakMinutes.toString()
+                        },
+                        onCustomBreakText = { raw ->
+                            customBreakText = raw.filter(Char::isDigit).take(2)
+                            customBreakText.toIntOrNull()?.takeIf { it in 1..60 }?.let { breakMinutes = it }
+                        },
+                    )
+                    Button(
+                        enabled = customPauseValid && customBreakValid,
+                        onClick = { page = 4 },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_chat_confirm)) }
+                }
+
+                4 -> {
+                    LocalBehaviourQuestion(
+                        drawEnabled = drawEnabled,
+                        onDrawEnabled = { drawEnabled = it },
+                        checkInEnabled = checkInEnabled,
+                        onCheckInEnabled = { checkInEnabled = it },
+                        adaptationEnabled = adaptationEnabled,
+                        onAdaptationEnabled = { adaptationEnabled = it },
+                        calmMode = calmMode,
+                        onCalmMode = { calmMode = it },
+                        autoMini = autoMini,
+                        onAutoMini = { autoMini = it },
+                    )
+                    Button(
+                        onClick = { page = 5 },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_chat_confirm)) }
+                }
+
+                5 -> {
+                    SetupReview(
+                        difficulty = requireNotNull(difficulty),
+                        timerMode = timerMode,
+                        drawEnabled = drawEnabled,
+                        pauseEnabled = pauseEnabled,
+                        pauseMinutes = pauseMinutes,
+                        pauseDurationMinutes = breakMinutes,
+                        checkInEnabled = checkInEnabled,
+                        adaptationEnabled = adaptationEnabled,
+                        calmMode = calmMode,
+                        autoMini = autoMini,
+                    )
                     Button(
                         onClick = {
                             onApply(
@@ -264,28 +327,130 @@ internal fun FirstRunSetupFlow(
                                     adaptationEnabled = adaptationEnabled,
                                     calmMode = calmMode,
                                     autoMiniWindow = autoMini,
+                                    pauseDurationMinutes = breakMinutes,
                                 ),
                             )
                         },
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                     ) { Text(stringResource(R.string.setup_apply)) }
-                } else {
-                    Button(
-                        enabled = canContinue,
-                        onClick = {
-                            if (page == 2) applyBranchDefaults()
-                            page += 1
-                        },
-                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
-                    ) { Text(stringResource(R.string.intro_next)) }
-                }
-                if (page > 0) {
-                    TextButton(
-                        onClick = { page -= 1 },
-                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
-                    ) { Text(stringResource(R.string.intro_back)) }
                 }
             }
+
+            if (page in 2..5) {
+                TextButton(
+                    onClick = { page -= 1 },
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                ) { Text(stringResource(R.string.intro_back)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConversationHistory(
+    page: Int,
+    difficulty: FirstRunDifficulty?,
+    supports: Set<FirstRunSupport>,
+    timerMode: FocusTimerMode,
+    pauseEnabled: Boolean,
+    pauseMinutes: Int,
+    pauseDurationMinutes: Int,
+    drawEnabled: Boolean,
+    checkInEnabled: Boolean,
+    adaptationEnabled: Boolean,
+    calmMode: Boolean,
+    autoMini: Boolean,
+) {
+    if (page <= 1) return
+
+    val difficultyValue = difficulty ?: return
+    ChatExchange(
+        question = stringResource(R.string.setup_difficulty_title),
+        answer = stringResource(difficultyLabel(difficultyValue)),
+    )
+
+    if (page >= 3 && supports.isNotEmpty()) {
+        val supportTitle = supportOptions(difficultyValue).first
+        val supportLabels = supportOptions(difficultyValue).second
+            .filter { it.first in supports }
+            .map { stringResource(it.second) }
+        ChatExchange(
+            question = stringResource(supportTitle),
+            answer = supportLabels.joinToString(" · "),
+        )
+    }
+
+    if (page >= 4) {
+        val timer = stringResource(
+            if (timerMode == FocusTimerMode.STOPWATCH) R.string.timer_mode_stopwatch
+            else R.string.timer_mode_countdown,
+        )
+        val pause = if (pauseEnabled) {
+            stringResource(
+                R.string.setup_chat_pause_on,
+                DurationText.minutes(pauseMinutes),
+                DurationText.minutes(pauseDurationMinutes),
+            )
+        } else {
+            stringResource(R.string.setup_chat_pause_off)
+        }
+        ChatExchange(
+            question = stringResource(R.string.setup_focus_title),
+            answer = "$timer · $pause",
+        )
+    }
+
+    if (page >= 5) {
+        val enabled = buildList {
+            if (drawEnabled) add(stringResource(R.string.random_draw_option))
+            if (checkInEnabled) add(stringResource(R.string.setup_checkin_title))
+            if (adaptationEnabled) add(stringResource(R.string.setup_adaptation_title))
+            if (calmMode) add(stringResource(R.string.setup_calm_title))
+            if (autoMini) add(stringResource(R.string.setup_auto_mini_title))
+        }
+        ChatExchange(
+            question = stringResource(R.string.setup_behaviour_title),
+            answer = enabled.takeIf { it.isNotEmpty() }?.joinToString(" · ")
+                ?: stringResource(R.string.setup_chat_no_automatic),
+        )
+    }
+}
+
+@Composable
+private fun ChatExchange(question: String, answer: String) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        ChatBubble(text = question, fromUser = false)
+        ChatBubble(text = answer, fromUser = true)
+    }
+}
+
+@Composable
+private fun ChatBubble(text: String, fromUser: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = if (fromUser) Arrangement.End else Arrangement.Start,
+    ) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(0.88f),
+            shape = RoundedCornerShape(
+                topStart = 20.dp,
+                topEnd = 20.dp,
+                bottomStart = if (fromUser) 20.dp else 5.dp,
+                bottomEnd = if (fromUser) 5.dp else 20.dp,
+            ),
+            color = if (fromUser) MaterialTheme.colorScheme.secondaryContainer
+            else MaterialTheme.colorScheme.primaryContainer,
+            contentColor = if (fromUser) MaterialTheme.colorScheme.onSecondaryContainer
+            else MaterialTheme.colorScheme.onPrimaryContainer,
+        ) {
+            Text(
+                text,
+                modifier = Modifier.padding(horizontal = 14.dp, vertical = 11.dp),
+                style = MaterialTheme.typography.bodyLarge,
+            )
         }
     }
 }
@@ -294,27 +459,19 @@ internal fun FirstRunSetupFlow(
 private fun SetupIntro() {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         ToolBadge(ToolGlyphKind.START)
-        Text(
-            stringResource(R.string.setup_intro_title),
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.semantics { heading() },
-        )
-        Text(
-            stringResource(R.string.setup_intro_body),
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
+        ChatBubble(
+            text = stringResource(R.string.setup_intro_title) + "\n\n" +
+                stringResource(R.string.setup_intro_body),
+            fromUser = false,
         )
         Text(
             stringResource(R.string.setup_intro_privacy),
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 4.dp),
         )
     }
 }
@@ -376,7 +533,15 @@ private fun FocusDefaultsQuestion(
     onPresetMinutes: (Int) -> Unit,
     onSelectCustom: () -> Unit,
     onCustomPauseText: (String) -> Unit,
+    breakMinutes: Int,
+    customBreakSelected: Boolean,
+    customBreakText: String,
+    customBreakValid: Boolean,
+    onPresetBreakMinutes: (Int) -> Unit,
+    onSelectCustomBreak: () -> Unit,
+    onCustomBreakText: (String) -> Unit,
 ) {
+    val customPauseValue = customPauseText.toIntOrNull()
     QuestionHeader(R.string.setup_focus_eyebrow, R.string.setup_focus_title, R.string.setup_focus_help)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
         ChoiceButton(
@@ -402,7 +567,7 @@ private fun FocusDefaultsQuestion(
                     FilterChip(
                         selected = !customPauseSelected && pauseMinutes == minutes,
                         onClick = { onPresetMinutes(minutes) },
-                        label = { Text(stringResource(R.string.minutes_short, minutes)) },
+                        label = { Text(DurationText.minutes(minutes)) },
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -420,14 +585,44 @@ private fun FocusDefaultsQuestion(
                     modifier = Modifier.fillMaxWidth().testTag("setup-custom-pause-minutes"),
                     label = { Text(stringResource(R.string.setup_pause_custom_label)) },
                     supportingText = {
-                        Text(
-                            stringResource(
-                                if (customPauseValid) R.string.setup_pause_custom_help
-                                else R.string.setup_pause_custom_error,
-                            ),
-                        )
+                        when {
+                            !customPauseValid -> Text(stringResource(R.string.setup_pause_custom_error))
+                            customPauseValue != null && customPauseValue >= 60 ->
+                                Text(stringResource(R.string.duration_equivalent, DurationText.minutes(customPauseValue)))
+                            else -> Text(stringResource(R.string.setup_pause_custom_help))
+                        }
                     },
                     isError = !customPauseValid,
+                    singleLine = true,
+                )
+            }
+            Text(stringResource(R.string.setup_break_duration_label), style = MaterialTheme.typography.labelLarge)
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                breakPresets.forEach { minutes ->
+                    FilterChip(
+                        selected = !customBreakSelected && breakMinutes == minutes,
+                        onClick = { onPresetBreakMinutes(minutes) },
+                        label = { Text(DurationText.minutes(minutes)) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+            FilterChip(
+                selected = customBreakSelected,
+                onClick = onSelectCustomBreak,
+                label = { Text(stringResource(R.string.setup_break_custom)) },
+                modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+            )
+            if (customBreakSelected) {
+                OutlinedTextField(
+                    value = customBreakText,
+                    onValueChange = onCustomBreakText,
+                    modifier = Modifier.fillMaxWidth().testTag("setup-custom-break-minutes"),
+                    label = { Text(stringResource(R.string.setup_break_custom_label)) },
+                    supportingText = {
+                        Text(stringResource(if (customBreakValid) R.string.setup_break_custom_help else R.string.setup_break_custom_error))
+                    },
+                    isError = !customBreakValid,
                     singleLine = true,
                 )
             }
@@ -490,6 +685,7 @@ private fun SetupReview(
     drawEnabled: Boolean,
     pauseEnabled: Boolean,
     pauseMinutes: Int,
+    pauseDurationMinutes: Int,
     checkInEnabled: Boolean,
     adaptationEnabled: Boolean,
     calmMode: Boolean,
@@ -504,8 +700,12 @@ private fun SetupReview(
         )
         ReviewLine(
             stringResource(R.string.setup_review_pauses),
-            if (pauseEnabled) stringResource(R.string.setup_review_enabled_minutes, pauseMinutes)
+            if (pauseEnabled) stringResource(R.string.setup_review_enabled_minutes, DurationText.minutes(pauseMinutes))
             else stringResource(R.string.setup_review_disabled),
+        )
+        if (pauseEnabled) ReviewLine(
+            stringResource(R.string.setup_review_break_duration),
+            DurationText.minutes(pauseDurationMinutes),
         )
         ReviewLine(stringResource(R.string.random_draw_option), yesNo(drawEnabled))
         ReviewLine(stringResource(R.string.setup_checkin_title), yesNo(checkInEnabled))
@@ -574,24 +774,40 @@ private fun ChoiceButton(text: String, selected: Boolean, onClick: () -> Unit) {
 private fun QuestionHeader(eyebrow: Int, title: Int, help: Int) {
     Column(
         modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Text(
             stringResource(eyebrow),
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        Text(
-            stringResource(title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.semantics { heading() },
-        )
-        Text(
-            stringResource(help),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
+        Surface(
+            modifier = Modifier.fillMaxWidth(0.94f),
+            shape = RoundedCornerShape(
+                topStart = 20.dp,
+                topEnd = 20.dp,
+                bottomEnd = 20.dp,
+                bottomStart = 5.dp,
+            ),
+            color = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        ) {
+            Column(
+                modifier = Modifier.padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(5.dp),
+            ) {
+                Text(
+                    stringResource(title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.semantics { heading() },
+                )
+                Text(
+                    stringResource(help),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+        }
     }
 }
 

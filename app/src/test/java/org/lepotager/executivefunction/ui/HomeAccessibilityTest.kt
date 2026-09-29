@@ -33,11 +33,12 @@ class HomeAccessibilityTest {
                 CompositionLocalProvider(LocalCalmMode provides true) {
                     HomeScreen(
                         tasks = tasks, drawRequest = 1,
-                        drawEnabled = true, pauseSuggestionsEnabled = false, pauseAfterMinutes = 25,
+                        drawEnabled = true, pauseSuggestionsEnabled = false, pauseAfterMinutes = 25, pauseDurationMinutes = 10,
                         onCapture = { _, _, _, _ -> }, onStart = { started = it },
+                        onContinue = { started = it }, onEditTask = {},
                         onMoveTask = { _, _ -> }, onApplyTaskOrder = { _, done -> writes++; done(true) },
                         onSetTaskColor = { _, _ -> }, onSetDrawEnabled = {},
-                        onSetPauseSuggestionsEnabled = {}, onSetPauseAfterMinutes = {},
+                        onSetPauseSuggestionsEnabled = {}, onSetPauseAfterMinutes = {}, onSetPauseDurationMinutes = {},
                     )
                 }
             }
@@ -72,15 +73,16 @@ class HomeAccessibilityTest {
                 CompositionLocalProvider(LocalCalmMode provides true) {
                     HomeScreen(
                         tasks = tasks,
-                        drawEnabled = true, pauseSuggestionsEnabled = false, pauseAfterMinutes = 25,
+                        drawEnabled = true, pauseSuggestionsEnabled = false, pauseAfterMinutes = 25, pauseDurationMinutes = 10,
                         onCapture = { _, _, _, _ -> }, onStart = { started = it },
+                        onContinue = { started = it }, onEditTask = {},
                         onMoveTask = { _, _ -> }, onApplyTaskOrder = { ids, done ->
                             savedOrder = ids
                             tasks = ids.map { id -> tasks.first { it.id == id } }
                             done(true)
                         },
                         onSetTaskColor = { _, _ -> }, onSetDrawEnabled = {},
-                        onSetPauseSuggestionsEnabled = {}, onSetPauseAfterMinutes = {},
+                        onSetPauseSuggestionsEnabled = {}, onSetPauseAfterMinutes = {}, onSetPauseDurationMinutes = {},
                     )
                 }
             }
@@ -95,5 +97,48 @@ class HomeAccessibilityTest {
         compose.onNodeWithTag("home-task-list").performScrollToNode(hasText("Le dé propose"))
         compose.onNode(hasText("Le dé propose") and hasClickAction()).performClick()
         assertEquals(savedOrder?.first(), started)
+    }
+
+
+    @Test
+    fun taskCardClickOpensEditAndResumableTaskContinues() {
+        var edited: String? = null
+        var continued: String? = null
+        var started: String? = null
+        val tasks = listOf(TaskItem("a", "Relire", null, TaskStatus.READY, 0, 0))
+
+        compose.setContent {
+            ExecutiveFunctionTheme {
+                HomeScreen(
+                    tasks = tasks,
+                    resumableTaskIds = setOf("a"),
+                    drawEnabled = false,
+                    pauseSuggestionsEnabled = false,
+                    pauseAfterMinutes = 25,
+                    pauseDurationMinutes = 10,
+                    onCapture = { _, _, _, _ -> },
+                    onStart = { started = it },
+                    onContinue = { continued = it },
+                    onEditTask = { edited = it },
+                    onMoveTask = { _, _ -> },
+                    onApplyTaskOrder = { _, done -> done(true) },
+                    onSetTaskColor = { _, _ -> },
+                    onSetDrawEnabled = {},
+                    onSetPauseSuggestionsEnabled = {},
+                    onSetPauseAfterMinutes = {},
+                    onSetPauseDurationMinutes = {},
+                )
+            }
+        }
+
+        compose.onNodeWithTag("home-task-list").performScrollToNode(
+            hasText("Relire") and hasClickAction(),
+        )
+        compose.onNode(hasText("Relire") and hasClickAction()).performClick()
+        assertEquals("a", edited)
+
+        compose.onNodeWithText("Continuer").performClick()
+        assertEquals("a", continued)
+        assertNull(started)
     }
 }

@@ -43,9 +43,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun capture(
         title: String,
         firstStep: String? = null,
-        color: TaskColor = TaskColor.NEUTRAL,
+        color: TaskColor? = null,
+        steps: List<String> = emptyList(),
         after: () -> Unit = {},
-    ) = launch(after) { repository.capture(title, firstStep, color) }
+    ) = launch(after) { repository.capture(title, firstStep, color, steps) }
 
     fun addQuickNote(text: String, after: () -> Unit = {}) =
         launch(after) { repository.addQuickNote(text) }
@@ -92,6 +93,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun reload() = launch { repository.load() }
+
+    fun continueTask(taskId: String) = launch {
+        repository.continuePostponed(taskId)
+        try { FocusPresence.sync(getApplication(), snapshot.value.activeFocus) } catch (_: Exception) { }
+    }
 
     fun moveTask(taskId: String, offset: Int) = launch { repository.moveTask(taskId, offset) }
     fun applyTaskOrder(ids: List<String>, onSettled: (Boolean) -> Unit) {
