@@ -1,21 +1,27 @@
 <?php
 declare(strict_types=1);require dirname(__DIR__).'/_common.php';
+require __DIR__.'/analytics.php';
+$lang = ($_GET['lang'] ?? 'fr') === 'en' ? 'en' : 'fr';
+function tr(string $fr, string $en): string { global $lang; return $lang === 'fr' ? $fr : $en; }
+$catalog = ['groups' => [], 'questions' => []]; $catalogError = false;
+
 session_set_cookie_params(['httponly'=>true,'secure'=>!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off','samesite'=>'Strict']);session_start();
 $error='';if(isset($_GET['logout'])){session_destroy();header('Location: ./');exit;}
-if($_SERVER['REQUEST_METHOD']==='POST'&&isset($_POST['login'])){$u=trim((string)($_POST['username']??''));$p=(string)($_POST['password']??'');if(hash_equals((string)config('admin.username'),$u)&&password_verify($p,(string)config('admin.password_hash'))){$_SESSION['v2_admin']=true;header('Location: ./');exit;}$error='Invalid username or password.';}
+if($_SERVER['REQUEST_METHOD']==='POST'&&isset($_POST['login'])){$u=trim((string)($_POST['username']??''));$p=(string)($_POST['password']??'');if(hash_equals((string)config('admin.username'),$u)&&password_verify($p,(string)config('admin.password_hash'))){$_SESSION['v2_admin']=true;header('Location: ./');exit;}$error=tr('Identifiant ou mot de passe incorrect.', 'Invalid username or password.');}
 $auth=!empty($_SESSION['v2_admin']);$data=[];$rows=[];$qcounts=[];$guard=[];
-if($auth){$pdo=db();if(v2_tables_ready($pdo)){
+if($auth){
+try { $catalog = v2_admin_catalog(dirname(__DIR__)); } catch (Throwable $e) { $catalogError = true; }
+$pdo=db();if(v2_tables_ready($pdo)){
 $data['started']=(int)$pdo->query("SELECT COUNT(*) FROM survey_v2_sessions")->fetchColumn();
 $data['core']=(int)$pdo->query("SELECT COUNT(*) FROM survey_v2_sessions WHERE status IN ('core_submitted','completed')")->fetchColumn();
 $data['done']=(int)$pdo->query("SELECT COUNT(*) FROM survey_v2_sessions WHERE status='completed'")->fetchColumn();
 $data['minor']=(int)$pdo->query("SELECT COUNT(*) FROM survey_v2_sessions WHERE cohort='minor' AND status IN ('core_submitted','completed')")->fetchColumn();
 $data['adult']=(int)$pdo->query("SELECT COUNT(*) FROM survey_v2_sessions WHERE cohort='adult' AND status IN ('core_submitted','completed')")->fetchColumn();
 $rows=$pdo->query("SELECT current_step,status,COUNT(*) n FROM survey_v2_sessions GROUP BY current_step,status ORDER BY n DESC")->fetchAll();
-$guard=$pdo->query("SELECT status,COUNT(*) n FROM survey_v2_guardian_consents GROUP BY status")->fetchAll();
 $answers=$pdo->query("SELECT a.question_id,a.answer_json FROM survey_v2_answers a JOIN survey_v2_sessions s ON s.id=a.session_id WHERE s.status IN ('core_submitted','completed')")->fetchAll();
-foreach($answers as $r){$a=json_decode((string)$r['answer_json'],true);foreach(is_array($a)?$a:[$a] as $v){$qcounts[$r['question_id']][(string)$v]=($qcounts[$r['question_id']][(string)$v]??0)+1;}}
+$qcounts = v2_admin_aggregate($answers);
 }}
-?><!doctype html><html lang="en"><head>
+?><!doctype html><html lang="<?=v2_h($lang)?>"><head>
 <link rel="icon" href="../favicon.ico?v=123" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png?v=123">
 <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png?v=123">
@@ -73,16 +79,36 @@ table{width:100%;border-collapse:collapse;min-width:620px}
 th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:16px}
 @media(max-width:680px){body{padding:10px}.grid,.kpis{grid-template-columns:1fr}.actions>*{flex:1 1 100%}.card{border-radius:20px}}
+.question{border-top:1px solid var(--line);padding:26px 0;scroll-margin-top:16px}
+.question h3{font-size:1.2rem;line-height:1.45;overflow-wrap:anywhere}
+.chart{list-style:none;padding:0;display:grid;gap:18px;margin:20px 0 0}
+.chart-label{display:flex;justify-content:space-between;align-items:baseline;gap:12px;line-height:1.5}
+.chart-label>div{min-width:0;overflow-wrap:anywhere}.chart-description{display:block}
+.chart-value{white-space:nowrap;font-size:.9rem;font-variant-numeric:tabular-nums}
+.chart-track{height:12px;background:var(--green2);border-radius:8px;overflow:hidden;margin-top:7px}
+.chart-track span{display:block;height:100%;background:var(--green);border-radius:8px}
+.chart-base{font-size:.86rem;line-height:1.5;color:#45564d}
+.section-nav{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0}.section-nav a{padding:9px 12px;border:1px solid var(--line);border-radius:12px}
+.header{flex-wrap:wrap}.header h1{font-size:clamp(1.8rem,5vw,2.8rem)}
+details{margin:24px 0}summary{cursor:pointer;font-weight:700;padding:12px 0}
+@media(max-width:480px){.chart-label{display:block}.chart-value{display:block;margin-top:4px}.card{padding:18px}.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style></head><body><div class="shell"><main class="card">
-<?php if(!$auth):?><p class="eyebrow">V2 admin</p><h1>Research dashboard</h1><?php if($error):?><div class="notice error"><?=v2_h($error)?></div><?php endif;?><form method="post"><input type="hidden" name="login" value="1"><label>Username<input class="field" name="username"></label><br><br><label>Password<input class="field" type="password" name="password"></label><div class="actions"><button class="primary">Sign in</button></div></form>
-<?php else:?><header class="header"><div><p class="eyebrow">V2 admin</p><h1>Product-research dashboard</h1></div><div class="actions"><a class="btn secondary" href="v1-comparison.php">V1 comparison</a><a class="btn quiet" href="?logout=1">Sign out</a></div></header>
-<?php if(!$data):?><div class="notice error">V2 tables are not installed. <a href="../install.php">Run installer</a>.</div>
-<?php else:?><div class="kpis"><div class="kpi"><span>Started</span><strong><?=$data['started']?></strong></div><div class="kpi"><span>Required submitted</span><strong><?=$data['core']?></strong></div><div class="kpi"><span>Fully finished</span><strong><?=$data['done']?></strong></div><div class="kpi"><span>Minor submitted</span><strong><?=$data['minor']?></strong></div></div>
-<h2>Drop-off / current step</h2><div class="tablewrap"><table><thead><tr><th>Step</th><th>Status</th><th>Sessions</th></tr></thead><tbody><?php foreach($rows as $r):?><tr><td><?=v2_h($r['current_step'])?></td><td><?=v2_h($r['status'])?></td><td><?=$r['n']?></td></tr><?php endforeach;?></tbody></table></div>
-<h2>Legacy guardian permission workflow</h2><p class="small">Historical only — no new guardian request is created by the current questionnaire.</p><div class="options"><?php foreach($guard as $g):?><div class="option"><strong><?=v2_h($g['status'])?></strong><span style="margin-left:auto"><?=$g['n']?></span></div><?php endforeach;?></div>
-<h2>Core choices</h2><?php foreach(['recent_difficulty','visual_home_density','today_model','visual_quick_capture','inbox_review','visual_return_screen','progress_style','abandon_risks','mvp_top5','mvp_one','survey_ease'] as $qid):?>
-<?php $countsForQuestion = $qcounts[$qid] ?? []; arsort($countsForQuestion); ?>
-<h3><?=v2_h($qid)?></h3><div class="options"><?php foreach($countsForQuestion as $v=>$c):?><div class="option"><span><?=v2_h($v)?></span><strong style="margin-left:auto"><?=$c?></strong></div><?php endforeach;?></div><?php endforeach;?>
-<div class="notice small"><strong>Privacy design:</strong> this admin does not display parent/guardian email addresses, participant names, exact ages, IP addresses or individual timestamps.</div>
+<?php if(!$auth):?><p class="eyebrow">V2 admin</p><h1><?=tr('Résultats du questionnaire', 'Research dashboard')?></h1><?php if($error):?><div class="notice error"><?=v2_h($error)?></div><?php endif;?><form method="post"><input type="hidden" name="login" value="1"><label><?=tr('Identifiant', 'Username')?><input class="field" name="username"></label><br><br><label><?=tr('Mot de passe', 'Password')?><input class="field" type="password" name="password"></label><div class="actions"><button class="primary"><?=tr('Se connecter', 'Sign in')?></button></div></form>
+<?php else:?><header class="header"><div><p class="eyebrow">V2 admin</p><h1><?=tr('Résultats du questionnaire V2', 'Product-research dashboard')?></h1></div><div class="actions"><a class="btn secondary" href="?lang=fr" lang="fr">Français</a><a class="btn secondary" href="?lang=en" lang="en">English</a><a class="btn secondary" href="v1-comparison.php"><?=tr('Comparaison avec la V1', 'V1 comparison')?></a><a class="btn quiet" href="?logout=1"><?=tr('Se déconnecter', 'Sign out')?></a></div></header>
+<?php if(!$data):?><div class="notice error"><?=tr('Les tables du questionnaire V2 ne sont pas installées.', 'V2 tables are not installed.')?> <a href="../install.php"><?=tr('Ouvrir l’installation', 'Run installer')?></a>.</div>
+<?php else:?><div class="kpis"><div class="kpi"><span><?=tr('Commencés', 'Started')?></span><strong><?=$data['started']?></strong></div><div class="kpi"><span><?=tr('Partie obligatoire envoyée', 'Required submitted')?></span><strong><?=$data['core']?></strong></div><div class="kpi"><span><?=tr('Terminés intégralement', 'Fully finished')?></span><strong><?=$data['done']?></strong></div><div class="kpi"><span><?=tr('Réponses de mineurs', 'Minor submitted')?></span><strong><?=$data['minor']?></strong></div></div>
+<details><summary><?=tr('Parcours et abandons', 'Progress and drop-off')?></summary><div class="tablewrap"><table><thead><tr><th><?=tr('Étape', 'Step')?></th><th><?=tr('Statut', 'Status')?></th><th>Sessions</th></tr></thead><tbody><?php foreach($rows as $r):
+$stepLabels = ['completed'=>tr('Questionnaire terminé','Questionnaire completed'),'optional_hub'=>tr('Modules facultatifs','Optional modules'),'core_submitted'=>tr('Partie obligatoire envoyée','Core submitted')];
+$statusLabels = ['active'=>tr('En cours','In progress'),'core_submitted'=>tr('Partie obligatoire envoyée','Core submitted'),'completed'=>tr('Terminé','Completed'),'deleted'=>tr('Supprimé','Deleted')];
+?><tr><td><?=v2_h($catalog['questions'][$r['current_step']][$lang]['title'] ?? $stepLabels[$r['current_step']] ?? $r['current_step'])?></td><td><?=v2_h($statusLabels[$r['status']] ?? $r['status'])?></td><td><?=$r['n']?></td></tr><?php endforeach;?></tbody></table></div></details>
+<?php if ($catalogError): ?><div class="notice error"><?=tr('Les libellés du questionnaire sont temporairement indisponibles.', 'Questionnaire labels are temporarily unavailable.')?></div><?php else: ?>
+<p class="notice"><?=tr('Les graphiques regroupent les questionnaires dont la partie obligatoire a été envoyée. Chaque pourcentage utilise le nombre de personnes ayant répondu à la question, toutes langues confondues. Les questions facultatives ou adaptatives peuvent avoir moins de réponses.', 'Charts include questionnaires with submitted core answers. Each percentage uses the number of people who answered that question, across all languages. Optional or adaptive questions may have fewer answers.')?></p>
+<nav class="section-nav" aria-label="<?=tr('Sections des résultats', 'Results sections')?>"><?php foreach ($catalog['groups'] as $i => $group): ?><a href="#group-<?=$i?>"><?=v2_h($group[$lang])?></a><?php endforeach; ?></nav>
+<?php foreach ($catalog['groups'] as $i => $group): ?>
+<h2 id="group-<?=$i?>"><?=v2_h($group[$lang])?></h2>
+<?php foreach ($group['questions'] as $question): $qid = $question['id']; v2_admin_chart($catalog['questions'][$qid], $qcounts[$qid] ?? [], $lang); endforeach; ?>
+<?php endforeach; ?>
+<?php endif; ?>
+<div class="notice small"><?=tr('Cette page affiche uniquement des résultats agrégés, sans noms, adresses e-mail, âges exacts, adresses IP ni horodatages individuels.', 'This page displays aggregate results only, without names, email addresses, exact ages, IP addresses or individual timestamps.')?></div>
 <?php endif;?><?php endif;?>
 </main></div></body></html>
