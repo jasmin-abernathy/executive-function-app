@@ -1,52 +1,53 @@
-# Relay — post-V2 friction reduction — 2026-10-06
+# Relay — post-V2 friction reduction — 2026-10-07
 
 Branch: `work/post-v2-defaults-onboarding-20261006`
+Pull request: #34 (open, draft, not merged)
+Verified head: `0d60ccd031109180a08c91e71253f23b0bc5809c`
 
 ## Goal
 
 Use the V2 aggregated feedback to stop asking for the same focus/task choices on every start. Configure defaults once, then keep one-off overrides.
 
-## Product decisions
+## Product decisions implemented
 
-- Home modes: `ONE_NEXT`, `NOW_NEXT`, `LIST`.
-- Recommended default: `NOW_NEXT`.
+- Home modes: `ONE_NEXT`, `NOW_NEXT`, `LIST`; recommended default `NOW_NEXT`.
 - Focus presets: `SHORT=10`, `NORMAL=25`, `LONG=50`, `OPEN=no target`.
-- Primary Start uses stored defaults directly.
-- Existing `FocusStartDialog` becomes the explicit “adjust this session” exception.
-- A learned local duration may replace a fixed preset only when the user keeps that preference enabled.
-- Compact home shows one current task and at most two next tasks.
-- “Today is difficult” temporarily hides alternatives without deleting/rescheduling anything.
-- Onboarding grows from 6 to 7 pages by adding home-view choice and replacing stopwatch/countdown setup with reusable focus presets.
+- The primary Start action uses saved defaults directly when quick start is enabled.
+- The existing `FocusStartDialog` remains available as the one-off adjustment flow; disabling quick start also keeps the dialog on primary start.
+- A learned local duration may replace a fixed preset only when its preference is enabled.
+- Compact home shows one current task and at most two next tasks, with an option to show the full list.
+- “Today is difficult” temporarily hides alternatives without deleting or rescheduling anything.
+- First-run setup has seven pages, including home-view and reusable focus choices.
+- Preferences and learned durations remain local.
 
-## Existing code path causing friction
+## Implementation
 
-`HomeScreen.onStart` -> `AppViewModel.requestStart()` -> `PendingStart` -> `FocusStartDialog`.
+- `AppViewModel.kt`: `requestStartWithDefaults(...)` resolves the optional learned duration and starts without `PendingStart`.
+- `MainActivity.kt`: persists preferences, maps old stopwatch preference to `OPEN`, and routes quick/custom starts.
+- `OnboardingFlow.kt`: captures home mode, preset, quick start, learned-duration preference, and existing support settings.
+- `Screens.kt`: compact home modes, difficult-day simplification, full-list toggle, and custom-start action.
+- FR/EN resources and domain/Compose tests are included.
 
-The new normal path should call `AppViewModel.requestStartWithDefaults(...)` and skip `PendingStart`.
+## Validation at verified head
 
-## Required source changes
+- Android workflow run `37581816092`: success; unit tests and lint passed.
+- Secret scan run `37581813817`: success.
+- FR/EN resource XML parsing and key parity checks passed.
+- No APK was generated.
+- No human review comments or review threads had been recorded as of 2026-10-07.
 
-- `AppViewModel.kt`: add `requestStartWithDefaults(taskId, preset, preferLearnedDuration)`.
-- `MainActivity.kt`: persist/load home mode, focus preset, quick-start and learned-duration preference; normal Home start uses defaults; custom start still uses `requestStart`.
-- `OnboardingFlow.kt`: extend config and add home/preset pages; total 7 pages.
-- `Screens.kt`: compact `Now + Next` surface, difficult-day toggle, collapsed full list, one-off custom-session action.
-- Update `OnboardingAndTimerChoiceTest.kt`; add domain-default and home-mode tests.
-- Add FR/EN strings for these surfaces.
+Before relying on these results after any new commit, check that the workflows pass on that exact new head.
 
-Full implementation detail is in the conversation handoff artifact `RELAIS-APP-TDAH-POST-V2-2026-10-06.md`.
+## Remaining steps
 
-## Connector blocker
+1. Finish independent review of the complete PR diff, including preferences migration, notification permission behavior, accessibility, and FR/EN copy.
+2. Fix any substantial issue on this work branch and verify CI on the resulting SHA.
+3. Obtain human review. Keep the PR as a draft until the owner is ready to request review.
+4. Do not merge without Jasmin's explicit instruction. Squash merge is preferred so `main` receives one clean commit.
 
-This session can create branches and new Markdown files, but the safety layer blocked all existing-file mutations (`update_file`, `delete_file`) and raw Git-data writes (`create_blob`, `create_tree`). A dry-run of the planned transformations succeeded against the exact current source before any write attempt.
+## Guardrails
 
-Do not interpret the branch as runtime-complete yet: only ADR/roadmap/error/handoff documentation is committed.
-
-## Validation after integration
-
-Run:
-
-```bash
-./gradlew :app:testDebugUnitTest :app:lintDebug --stacktrace
-```
-
-Do not generate an APK unless explicitly requested. Re-read the exact tested SHA, then open a draft PR to `main`. Because this work branch contains several connector-generated documentation commits, squash merge is required so `main` receives one clean commit.
+- Do not generate an APK unless explicitly requested.
+- Preserve existing ADR/roadmap/error documentation.
+- Do not claim local test execution when only GitHub workflow results were inspected.
+- If GitHub writes are blocked, finish read-only review and report the blocked operation; do not bypass the safety layer.
