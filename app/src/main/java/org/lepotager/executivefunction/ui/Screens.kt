@@ -301,7 +301,10 @@ fun HomeScreen(
                         difficultDay = difficultDay,
                         customStartAvailable = customStartAvailable,
                         onToggleAll = { showAllTasks = !showAllTasks },
-                        onToggleDifficultDay = { difficultDay = !difficultDay },
+                        onToggleDifficultDay = {
+                            difficultDay = !difficultDay
+                            if (difficultDay) showAllTasks = false
+                        },
                         onStart = onStart,
                         onStartCustom = onStartCustom,
                     )
