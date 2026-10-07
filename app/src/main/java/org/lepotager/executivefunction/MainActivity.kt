@@ -559,7 +559,7 @@ class MainActivity : ComponentActivity() {
         const val KEY_INTRO_SEEN = "local_algorithm_intro_seen"
         const val KEY_TIMER_MODE = "focus_timer_mode"
         const val KEY_HOME_VIEW_MODE = "home_view_mode"
-        const val KEY_FOCUS_PRESET = "focus_session_preset"
+        const val KEY_FOCUS_PRESET = FocusPresetPreferences.KEY
         const val KEY_QUICK_START = "quick_start_enabled"
         const val KEY_PREFER_LEARNED = "prefer_learned_duration"
     }
