@@ -87,4 +87,16 @@ class HomeModesTest {
         compose.onNodeWithText("Revenir à la vue habituelle").performScrollTo().performClick()
         compose.onNodeWithText("Suivante 1").assertExists()
     }
+
+    @Test fun difficultDayClosesAnAlreadyExpandedTaskList() {
+        render()
+        scrollToTodayPanel()
+        compose.onNodeWithText("Voir toutes mes tâches").performScrollTo().performClick()
+        compose.onNodeWithText("Quatrième").assertExists()
+        compose.onNodeWithText("Aujourd’hui, ça coince").performScrollTo().performClick()
+        compose.onNodeWithText("Quatrième").assertDoesNotExist()
+        compose.onNodeWithText("Revenir à la vue habituelle").performScrollTo().performClick()
+        compose.onNodeWithText("Suivante 1").assertExists()
+        compose.onNodeWithText("Quatrième").assertDoesNotExist()
+    }
 }
