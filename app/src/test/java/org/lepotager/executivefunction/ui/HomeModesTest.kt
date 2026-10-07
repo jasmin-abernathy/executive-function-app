@@ -27,11 +27,16 @@ class HomeModesTest {
             TaskItem("task-$index", title, null, TaskStatus.READY, index.toLong(), index.toLong())
         }
 
-    private fun render(onStart: (String) -> Unit = {}, onCustom: (String) -> Unit = {}) {
+    private fun render(
+        onStart: (String) -> Unit = {},
+        onCustom: (String) -> Unit = {},
+        onCheckIn: () -> Unit = {},
+    ) {
         compose.setContent {
             ExecutiveFunctionTheme {
                 HomeScreen(
                     tasks = tasks,
+                    onCheckIn = onCheckIn,
                     drawEnabled = false,
                     pauseSuggestionsEnabled = true,
                     pauseAfterMinutes = 25,
@@ -53,6 +58,13 @@ class HomeModesTest {
 
     private fun scrollToTodayPanel() {
         compose.onNodeWithTag("home-task-list").performScrollToNode(hasText("Maintenant"))
+    }
+
+    @Test fun checkInStaysAvailableFromHome() {
+        var opened = 0
+        render(onCheckIn = { opened += 1 })
+        compose.onNodeWithText("Comment je vais").performClick()
+        compose.runOnIdle { assertEquals(1, opened) }
     }
 
     @Test fun nowNextShowsOnlyCurrentAndTwoAlternatives() {

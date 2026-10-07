@@ -78,9 +78,81 @@ import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.model.TaskItem
 
 @Composable
+fun CheckInDialog(
+    onDismiss: () -> Unit,
+    onSave: (mood: Int, motivation: Int, energy: Int) -> Unit,
+) {
+    var mood by remember { mutableIntStateOf(1) }
+    var motivation by remember { mutableIntStateOf(1) }
+    var energy by remember { mutableIntStateOf(1) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.check_in_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.check_in_body))
+                Text(
+                    text = stringResource(R.string.check_in_scale),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                CheckInLevel(stringResource(R.string.check_in_mood), mood) { mood = it }
+                CheckInLevel(stringResource(R.string.check_in_motivation), motivation) { motivation = it }
+                CheckInLevel(stringResource(R.string.check_in_energy), energy) { energy = it }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(mood, motivation, energy) }) {
+                Text(stringResource(R.string.check_in_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.not_now))
+            }
+        },
+    )
+}
+
+@Composable
+private fun CheckInLevel(
+    label: String,
+    value: Int,
+    onChange: (Int) -> Unit,
+) {
+    val choices = listOf(
+        R.string.check_in_level_0,
+        R.string.check_in_level_1,
+        R.string.check_in_level_2,
+        R.string.check_in_level_3,
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(label, style = MaterialTheme.typography.labelLarge)
+        choices.chunked(2).forEachIndexed { rowIndex, rowChoices ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                rowChoices.forEachIndexed { columnIndex, choice ->
+                    val level = rowIndex * 2 + columnIndex
+                    FilterChip(
+                        selected = value == level,
+                        onClick = { onChange(level) },
+                        label = { Text(stringResource(choice)) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun HomeScreen(
     tasks: List<TaskItem>,
     onJournal: () -> Unit = {},
+    onCheckIn: () -> Unit = {},
     onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
     suggestedTaskId: String? = null,
@@ -164,13 +236,34 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
+                Text(
+                    text = stringResource(R.string.home_title),
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.semantics { heading() },
+                )
+                Text(
+                    text = stringResource(R.string.home_subtitle),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Spacer(Modifier.size(8.dp))
+                FilledTonalButton(
+                    onClick = onCheckIn,
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                ) {
+                    Text(stringResource(R.string.home_check_in))
+                }
+                OutlinedButton(
+                    onClick = onJournal,
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                ) {
+                    Text(stringResource(R.string.open_journal))
+                }
                 TextButton(onClick = onHelp, colors = appTextButtonColors()) {
                     UtilityGlyph(UtilityGlyphKind.HELP, Modifier.size(20.dp))
                     Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.help_how_it_works))
-                }
-                TextButton(onClick = onJournal, colors = appTextButtonColors()) {
-                    Text(stringResource(R.string.open_journal))
                 }
                 if (eligibleDrawIds != null) {
                     Text(stringResource(R.string.adaptation_rule))
@@ -184,17 +277,6 @@ fun HomeScreen(
                         }
                     }
                 }
-                Text(
-                    text = stringResource(R.string.home_title),
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.semantics { heading() },
-                )
-                Text(
-                    text = stringResource(R.string.home_subtitle),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
             }
             item {
                 Card(
