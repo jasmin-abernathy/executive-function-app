@@ -2,7 +2,7 @@
 
 Branch: `work/post-v2-defaults-onboarding-20261006`
 Pull request: #34 (open, draft, not merged)
-Latest verified head: `73d34beb53447850fc73804808c83712aef05474`
+Validated code head: `539a7457c136cf1aced9b5b7e93c820947e912df`
 
 ## Goal
 
@@ -15,37 +15,53 @@ Use V2 feedback to configure recurring choices once and preserve one-off overrid
 - Primary start uses stored defaults when quick start is enabled; one-off session editing remains available.
 - Learned duration stays local and only overrides a fixed preset when enabled.
 - Compact home shows one current task and up to two alternatives; full list remains available.
-- Difficult-day mode hides alternatives. Activating it now also closes an already expanded full list.
+- Difficult-day mode hides alternatives and closes an already expanded full list.
 - Seven-page first-run setup, with French and English strings.
-- Added regression coverage for focus-preset migration and the expanded-list/difficult-day interaction.
+- Regression coverage for focus-preset migration and the expanded-list/difficult-day interaction.
 - Random task selection via the die remains intact.
 
-## Review fixes on this branch
+## Main integration
 
-- Materialized the legacy timer-mode migration into `focus_session_preset`, so a later one-off dialog timer choice cannot become the global preset.
-- Closed the full task list when difficult-day mode is activated.
-- Replaced the stale pre-integration handoff text with current implementation and validation status.
+- `main` at integration time: `5a871270546b0999081ab2274ec5b7474f508a1f`.
+- Merged into the PR branch with merge commit `53786be7d5cd7f99e8692e6afd894e669d3968e7`.
+- The two incoming changes affected only:
+  - `web/app.lepotager.org/index.html`
+  - `web/app.lepotager.org/en/index.html`
+- Their `main` content was preserved.
+- After integration the PR branch was 0 commits behind `main`.
 
-## Validation status
+## Validation fixes found while finishing the PR
 
-- Prior tested head `0d60ccd031109180a08c91e71253f23b0bc5809c`: Android CI and secret scans passed.
-- Latest head `73d34beb53447850fc73804808c83712aef05474`: secret scan passed.
-- Android unit tests/lint have not been run on the latest head.
+Two validation issues were found and corrected without changing the intended product behaviour:
+
+1. `FocusPresetPreferencesTest` used the obsolete generic Robolectric call `RuntimeEnvironment.getApplication<Application>()`. It was replaced by `RuntimeEnvironment.getApplication()`.
+2. `HomeModesTest.difficultDayClosesAnAlreadyExpandedTaskList` expected a lazy-list item to exist before scrolling it into composition. The test now scrolls `home-task-list` to the item before asserting it, then scrolls back to the difficult-day control.
+
+These were test/validation defects, not changes to the die, focus defaults, difficult-day behaviour, or other product logic.
+
+## Exact validation status
+
+Validated code head: `539a7457c136cf1aced9b5b7e93c820947e912df`.
+
+- GitHub Actions Android run #157: **passed**.
+- Command executed by CI: `./gradlew :app:testDebugUnitTest :app:lintDebug --stacktrace`.
+- Unit tests: **67 completed, 0 failed**.
+- Android lint: **passed** as part of the same successful workflow.
+- Secret scan run #86: **passed** on the same code head.
 - No APK was generated.
+- The PR remains a draft and was not merged.
 
-## Required before review/merge
+A documentation-only commit updating this handoff may sit after the validated code head; it does not change Android, Gradle, web, or product code.
 
-- Current `main` is `5a871270546b0999081ab2274ec5b7474f508a1f`; this branch remains two commits behind, with merge base `4a05d6aa426a88db77e1f768fc9bcd0e7e498c05`.
-- Integrate the two new `main` commits in a local checkout. They affect web index pages; preserve their content and inspect conflicts.
-- Run `./gradlew :app:testDebugUnitTest :app:lintDebug --stacktrace` on the resulting head and verify secret scans.
-- Keep the PR draft until checks pass. Obtain human review before merging; squash merge is preferred.
+## Review fixes retained
 
-## Tooling limitation at relay
+- Legacy timer-mode migration is materialized into `focus_session_preset`, so a later one-off dialog timer choice cannot replace the global preset.
+- Difficult-day mode closes an already expanded task list.
+- The random-task die remains available and unchanged.
 
-The GitHub connector reports `allow_update_branch=false`; this session has no local checkout and no workflow-dispatch action. It could not rebase/update the branch or run Android CI for the latest head. The last verified branch state is still available remotely.
+## Remaining before merge
 
-## Guardrails
-
+- Human review of PR #34.
+- Keep the PR in draft until Jasmin explicitly decides it is ready.
 - Do not merge without Jasmin's explicit instruction.
 - Do not generate an APK unless explicitly requested.
-- Do not remove or hide the random-task die from the home flow.
