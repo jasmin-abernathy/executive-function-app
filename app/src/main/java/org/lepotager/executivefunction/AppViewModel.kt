@@ -11,6 +11,8 @@ import kotlinx.coroutines.launch
 import org.lepotager.executivefunction.data.AppDatabase
 import org.lepotager.executivefunction.data.FocusRepository
 import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.domain.FocusSessionPreset
+import org.lepotager.executivefunction.domain.FocusStartDefaults
 import org.lepotager.executivefunction.model.TaskColor
 
 class AppViewModel(application: Application) : AndroidViewModel(application) {
@@ -69,6 +71,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 throw error
             }
         }
+    }
+
+    /** Starts with the saved global defaults and deliberately bypasses the per-session dialog. */
+    fun requestStartWithDefaults(
+        taskId: String,
+        preset: FocusSessionPreset,
+        preferLearnedDuration: Boolean,
+    ) = launch {
+        val learnedTarget = repository.suggestedDurationMs(taskId)
+        val target = FocusStartDefaults.targetDurationMs(preset, learnedTarget, preferLearnedDuration)
+        repository.start(taskId, target)
     }
 
     fun cancelStart() {

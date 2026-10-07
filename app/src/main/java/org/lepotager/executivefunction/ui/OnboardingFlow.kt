@@ -37,10 +37,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.lepotager.executivefunction.R
-import org.lepotager.executivefunction.domain.FocusTimerMode
+import org.lepotager.executivefunction.domain.FocusSessionPreset
+import org.lepotager.executivefunction.domain.HomeViewMode
 
 internal data class FirstRunSetupConfig(
-    val timerMode: FocusTimerMode,
+    val homeViewMode: HomeViewMode,
+    val focusPreset: FocusSessionPreset,
+    val quickStartEnabled: Boolean,
+    val preferLearnedDuration: Boolean,
     val drawEnabled: Boolean,
     val pauseSuggestionsEnabled: Boolean,
     val pauseAfterMinutes: Int,
@@ -93,7 +97,10 @@ internal fun FirstRunSetupFlow(
     var page by rememberSaveable { mutableIntStateOf(0) }
     var difficultyName by rememberSaveable { mutableStateOf("") }
     var supportNames by rememberSaveable { mutableStateOf("") }
-    var timerModeName by rememberSaveable { mutableStateOf(initial.timerMode.name) }
+    var homeViewModeName by rememberSaveable { mutableStateOf(initial.homeViewMode.name) }
+    var focusPresetName by rememberSaveable { mutableStateOf(initial.focusPreset.name) }
+    var quickStartEnabled by rememberSaveable { mutableStateOf(initial.quickStartEnabled) }
+    var preferLearnedDuration by rememberSaveable { mutableStateOf(initial.preferLearnedDuration) }
     var drawEnabled by rememberSaveable { mutableStateOf(initial.drawEnabled) }
     var pauseEnabled by rememberSaveable { mutableStateOf(initial.pauseSuggestionsEnabled) }
     var pauseMinutes by rememberSaveable { mutableIntStateOf(initial.pauseAfterMinutes.coerceIn(5, 120)) }
@@ -113,11 +120,12 @@ internal fun FirstRunSetupFlow(
         .filter { it.isNotBlank() }
         .map { FirstRunSupport.valueOf(it) }
         .toSet()
-    val timerMode = FocusTimerMode.valueOf(timerModeName)
+    val homeViewMode = HomeViewMode.valueOf(homeViewModeName)
+    val focusPreset = FocusSessionPreset.valueOf(focusPresetName)
     val customPauseValue = customPauseText.toIntOrNull()
     val customPauseValid = !pauseEnabled || !customPauseSelected ||
         (customPauseValue != null && customPauseValue in 5..120)
-    val totalPages = 6
+    val totalPages = 7
 
     fun toggleSupport(value: FirstRunSupport) {
         val next = supports.toMutableSet()
@@ -140,6 +148,11 @@ internal fun FirstRunSetupFlow(
     }
 
     fun applyBranchDefaults() {
+        homeViewModeName = when {
+            FirstRunSupport.MINIMAL in supports || FirstRunSupport.ONE_NEXT in supports -> HomeViewMode.ONE_NEXT.name
+            FirstRunSupport.FEW_OPTIONS in supports -> HomeViewMode.NOW_NEXT.name
+            else -> homeViewModeName
+        }
         if (FirstRunSupport.MINIMAL in supports) {
             pauseEnabled = false
             checkInEnabled = false
@@ -158,7 +171,7 @@ internal fun FirstRunSetupFlow(
         0 -> true
         1 -> difficulty != null
         2 -> supports.isNotEmpty()
-        3 -> customPauseValid
+        4 -> customPauseValid
         else -> true
     }
 
@@ -199,9 +212,17 @@ internal fun FirstRunSetupFlow(
                     selected = supports,
                     onToggle = ::toggleSupport,
                 )
-                3 -> FocusDefaultsQuestion(
-                    timerMode = timerMode,
-                    onTimerMode = { timerModeName = it.name },
+                3 -> HomeViewQuestion(
+                    selected = homeViewMode,
+                    onSelect = { homeViewModeName = it.name },
+                )
+                4 -> FocusDefaultsQuestion(
+                    focusPreset = focusPreset,
+                    onFocusPreset = { focusPresetName = it.name },
+                    quickStartEnabled = quickStartEnabled,
+                    onQuickStartEnabled = { quickStartEnabled = it },
+                    preferLearnedDuration = preferLearnedDuration,
+                    onPreferLearnedDuration = { preferLearnedDuration = it },
                     pauseEnabled = pauseEnabled,
                     onPauseEnabled = { pauseEnabled = it },
                     pauseMinutes = pauseMinutes,
@@ -221,7 +242,7 @@ internal fun FirstRunSetupFlow(
                         customPauseText.toIntOrNull()?.takeIf { it in 5..120 }?.let { pauseMinutes = it }
                     },
                 )
-                4 -> LocalBehaviourQuestion(
+                5 -> LocalBehaviourQuestion(
                     drawEnabled = drawEnabled,
                     onDrawEnabled = { drawEnabled = it },
                     checkInEnabled = checkInEnabled,
@@ -233,9 +254,12 @@ internal fun FirstRunSetupFlow(
                     autoMini = autoMini,
                     onAutoMini = { autoMini = it },
                 )
-                5 -> SetupReview(
+                6 -> SetupReview(
                     difficulty = requireNotNull(difficulty),
-                    timerMode = timerMode,
+                    homeViewMode = homeViewMode,
+                    focusPreset = focusPreset,
+                    quickStartEnabled = quickStartEnabled,
+                    preferLearnedDuration = preferLearnedDuration,
                     drawEnabled = drawEnabled,
                     pauseEnabled = pauseEnabled,
                     pauseMinutes = pauseMinutes,
@@ -256,7 +280,10 @@ internal fun FirstRunSetupFlow(
                         onClick = {
                             onApply(
                                 FirstRunSetupConfig(
-                                    timerMode = timerMode,
+                                    homeViewMode = homeViewMode,
+                                    focusPreset = focusPreset,
+                                    quickStartEnabled = quickStartEnabled,
+                                    preferLearnedDuration = preferLearnedDuration,
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseEnabled,
                                     pauseAfterMinutes = pauseMinutes,
@@ -364,9 +391,27 @@ private fun SupportQuestion(
 }
 
 @Composable
+private fun HomeViewQuestion(selected: HomeViewMode, onSelect: (HomeViewMode) -> Unit) {
+    QuestionHeader(R.string.setup_home_eyebrow, R.string.setup_home_title, R.string.setup_home_help)
+    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        listOf(
+            HomeViewMode.ONE_NEXT to R.string.setup_home_one,
+            HomeViewMode.NOW_NEXT to R.string.setup_home_now_next,
+            HomeViewMode.LIST to R.string.setup_home_list,
+        ).forEach { (mode, label) ->
+            ChoiceButton(stringResource(label), selected == mode) { onSelect(mode) }
+        }
+    }
+}
+
+@Composable
 private fun FocusDefaultsQuestion(
-    timerMode: FocusTimerMode,
-    onTimerMode: (FocusTimerMode) -> Unit,
+    focusPreset: FocusSessionPreset,
+    onFocusPreset: (FocusSessionPreset) -> Unit,
+    quickStartEnabled: Boolean,
+    onQuickStartEnabled: (Boolean) -> Unit,
+    preferLearnedDuration: Boolean,
+    onPreferLearnedDuration: (Boolean) -> Unit,
     pauseEnabled: Boolean,
     onPauseEnabled: (Boolean) -> Unit,
     pauseMinutes: Int,
@@ -377,17 +422,27 @@ private fun FocusDefaultsQuestion(
     onSelectCustom: () -> Unit,
     onCustomPauseText: (String) -> Unit,
 ) {
-    QuestionHeader(R.string.setup_focus_eyebrow, R.string.setup_focus_title, R.string.setup_focus_help)
+    QuestionHeader(R.string.setup_focus_eyebrow, R.string.setup_focus_presets_title, R.string.setup_focus_presets_help)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        ChoiceButton(
-            text = stringResource(R.string.setup_timer_stopwatch_default),
-            selected = timerMode == FocusTimerMode.STOPWATCH,
-            onClick = { onTimerMode(FocusTimerMode.STOPWATCH) },
+        listOf(
+            FocusSessionPreset.SHORT to R.string.setup_focus_preset_short,
+            FocusSessionPreset.NORMAL to R.string.setup_focus_preset_normal,
+            FocusSessionPreset.LONG to R.string.setup_focus_preset_long,
+            FocusSessionPreset.OPEN to R.string.setup_focus_preset_open,
+        ).forEach { (preset, label) ->
+            ChoiceButton(stringResource(label), focusPreset == preset) { onFocusPreset(preset) }
+        }
+        SettingSwitch(
+            title = stringResource(R.string.setup_quick_start_title),
+            support = stringResource(R.string.setup_quick_start_support),
+            checked = quickStartEnabled,
+            onCheckedChange = onQuickStartEnabled,
         )
-        ChoiceButton(
-            text = stringResource(R.string.setup_timer_countdown_default),
-            selected = timerMode == FocusTimerMode.COUNTDOWN,
-            onClick = { onTimerMode(FocusTimerMode.COUNTDOWN) },
+        SettingSwitch(
+            title = stringResource(R.string.setup_learned_duration_title),
+            support = stringResource(R.string.setup_learned_duration_support),
+            checked = preferLearnedDuration,
+            onCheckedChange = onPreferLearnedDuration,
         )
         SettingSwitch(
             title = stringResource(R.string.pause_suggestions_option),
@@ -486,7 +541,10 @@ private fun LocalBehaviourQuestion(
 @Composable
 private fun SetupReview(
     difficulty: FirstRunDifficulty,
-    timerMode: FocusTimerMode,
+    homeViewMode: HomeViewMode,
+    focusPreset: FocusSessionPreset,
+    quickStartEnabled: Boolean,
+    preferLearnedDuration: Boolean,
     drawEnabled: Boolean,
     pauseEnabled: Boolean,
     pauseMinutes: Int,
@@ -498,10 +556,19 @@ private fun SetupReview(
     QuestionHeader(R.string.setup_review_eyebrow, R.string.setup_review_title, R.string.setup_review_help)
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         ReviewLine(stringResource(R.string.setup_review_main_difficulty), stringResource(difficultyLabel(difficulty)))
-        ReviewLine(
-            stringResource(R.string.setup_review_timer),
-            stringResource(if (timerMode == FocusTimerMode.STOPWATCH) R.string.timer_mode_stopwatch else R.string.timer_mode_countdown),
-        )
+        ReviewLine(stringResource(R.string.setup_review_home), stringResource(when (homeViewMode) {
+            HomeViewMode.ONE_NEXT -> R.string.setup_home_one
+            HomeViewMode.NOW_NEXT -> R.string.setup_home_now_next
+            HomeViewMode.LIST -> R.string.setup_home_list
+        }))
+        ReviewLine(stringResource(R.string.setup_review_focus_preset), stringResource(when (focusPreset) {
+            FocusSessionPreset.SHORT -> R.string.setup_focus_preset_short
+            FocusSessionPreset.NORMAL -> R.string.setup_focus_preset_normal
+            FocusSessionPreset.LONG -> R.string.setup_focus_preset_long
+            FocusSessionPreset.OPEN -> R.string.setup_focus_preset_open
+        }))
+        ReviewLine(stringResource(R.string.setup_review_quick_start), yesNo(quickStartEnabled))
+        ReviewLine(stringResource(R.string.setup_review_learned_duration), yesNo(preferLearnedDuration))
         ReviewLine(
             stringResource(R.string.setup_review_pauses),
             if (pauseEnabled) stringResource(R.string.setup_review_enabled_minutes, pauseMinutes)

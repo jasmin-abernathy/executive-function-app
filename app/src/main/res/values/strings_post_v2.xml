@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_now_label">Maintenant</string>
+    <string name="home_next_label">Ensuite</string>
+    <string name="home_open_all">Voir toutes mes tâches</string>
+    <string name="home_hide_all">Masquer la liste complète</string>
+    <string name="home_difficult_day_action">Aujourd’hui, ça coince</string>
+    <string name="home_difficult_day_active">Revenir à la vue habituelle</string>
+    <string name="home_difficult_day_support">Les autres tâches restent là. Cette vue les masque seulement pour le moment.</string>
+    <string name="start_custom_once">Modifier cette session</string>
+    <string name="setup_home_eyebrow">Ta vue du jour</string>
+    <string name="setup_home_title">Comment préfères-tu voir tes tâches ?</string>
+    <string name="setup_home_help">Tu pourras changer d’avis plus tard. Rien ne sera supprimé.</string>
+    <string name="setup_home_one">Une seule prochaine action</string>
+    <string name="setup_home_now_next">Maintenant + Ensuite</string>
+    <string name="setup_home_list">Toute la liste</string>
+    <string name="setup_focus_presets_title">Choisis ton repère de durée</string>
+    <string name="setup_focus_presets_help">Ce sont des points de départ, pas des objectifs. Tu pourras modifier une session ponctuellement.</string>
+    <string name="setup_focus_preset_short">Court · 10 min</string>
+    <string name="setup_focus_preset_normal">Normal · 25 min</string>
+    <string name="setup_focus_preset_long">Long · 50 min</string>
+    <string name="setup_focus_preset_open">Ouvert · je m’arrête quand je décide</string>
+    <string name="setup_quick_start_title">Commencer sans me redemander les réglages</string>
+    <string name="setup_quick_start_support">Le bouton principal lance directement avec tes choix. Tu peux toujours modifier une session.</string>
+    <string name="setup_learned_duration_title">Utiliser mon repère appris quand il existe</string>
+    <string name="setup_learned_duration_support">Pour une durée fixe, un repère appris remplace le réglage par défaut. Le mode ouvert reste sans cible.</string>
+    <string name="setup_review_home">Vue d’accueil</string>
+    <string name="setup_review_focus_preset">Repère de durée</string>
+    <string name="setup_review_quick_start">Démarrage direct</string>
+    <string name="setup_review_learned_duration">Durée apprise</string>
+</resources>
