@@ -1,6 +1,5 @@
 package org.lepotager.executivefunction
 
-import android.app.Application
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -14,7 +13,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [28])
 class FocusPresetPreferencesTest {
     @Test fun migratedPresetIsPersistedAndUnaffectedByLaterOneOffTimerMode() {
-        val preferences = RuntimeEnvironment.getApplication<Application>()
+        val preferences = RuntimeEnvironment.getApplication()
             .getSharedPreferences("focus-preset-migration-test", 0)
         preferences.edit().clear().commit()
 
