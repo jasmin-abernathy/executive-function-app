@@ -1,7 +1,6 @@
 package org.lepotager.executivefunction.ui
 
-import androidx.compose.ui.test.assertDoesNotExist
-import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -12,7 +11,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.lepotager.executivefunction.domain.HomeViewMode
-import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.model.TaskItem
 import org.lepotager.executivefunction.model.TaskStatus
 import org.lepotager.executivefunction.ui.theme.ExecutiveFunctionTheme
