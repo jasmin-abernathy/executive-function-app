@@ -107,9 +107,7 @@ class MainActivity : ComponentActivity() {
         homeViewMode = preferences.getString(KEY_HOME_VIEW_MODE, null)?.let {
             runCatching { HomeViewMode.valueOf(it) }.getOrNull()
         } ?: HomeViewMode.NOW_NEXT
-        focusPreset = preferences.getString(KEY_FOCUS_PRESET, null)?.let {
-            runCatching { FocusSessionPreset.valueOf(it) }.getOrNull()
-        } ?: if (lastTimerMode == FocusTimerMode.STOPWATCH) FocusSessionPreset.OPEN else FocusSessionPreset.NORMAL
+        focusPreset = FocusPresetPreferences.load(preferences, lastTimerMode)
         quickStartEnabled = preferences.getBoolean(KEY_QUICK_START, true)
         preferLearnedDuration = preferences.getBoolean(KEY_PREFER_LEARNED, true)
         enableEdgeToEdge()
@@ -469,9 +467,7 @@ class MainActivity : ComponentActivity() {
         homeViewMode = prefs.getString(KEY_HOME_VIEW_MODE, null)?.let {
             runCatching { HomeViewMode.valueOf(it) }.getOrNull()
         } ?: HomeViewMode.NOW_NEXT
-        focusPreset = prefs.getString(KEY_FOCUS_PRESET, null)?.let {
-            runCatching { FocusSessionPreset.valueOf(it) }.getOrNull()
-        } ?: if (lastTimerMode == FocusTimerMode.STOPWATCH) FocusSessionPreset.OPEN else FocusSessionPreset.NORMAL
+        focusPreset = FocusPresetPreferences.load(prefs, lastTimerMode)
         quickStartEnabled = prefs.getBoolean(KEY_QUICK_START, true)
         preferLearnedDuration = prefs.getBoolean(KEY_PREFER_LEARNED, true)
     }
