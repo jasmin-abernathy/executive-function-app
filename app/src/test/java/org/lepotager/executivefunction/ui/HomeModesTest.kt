@@ -51,8 +51,13 @@ class HomeModesTest {
         }
     }
 
+    private fun scrollToTodayPanel() {
+        compose.onNodeWithTag("home-task-list").performScrollToNode(hasText("Maintenant"))
+    }
+
     @Test fun nowNextShowsOnlyCurrentAndTwoAlternatives() {
         render()
+        scrollToTodayPanel()
         compose.onNodeWithText("Maintenant").assertExists()
         compose.onNodeWithText("Ensuite").assertExists()
         compose.onNodeWithText("Courant").assertExists()
@@ -65,7 +70,8 @@ class HomeModesTest {
         var started: String? = null
         var customized: String? = null
         render(onStart = { started = it }, onCustom = { customized = it })
-        compose.onNodeWithTag("home-primary-start").performClick()
+        scrollToTodayPanel()
+        compose.onNodeWithTag("home-primary-start").performScrollTo().performClick()
         compose.onNodeWithTag("home-custom-start").performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals("task-0", started)
@@ -75,6 +81,7 @@ class HomeModesTest {
 
     @Test fun difficultDayHidesAlternativesAndCanRestoreThem() {
         render()
+        scrollToTodayPanel()
         compose.onNodeWithText("Aujourd’hui, ça coince").performScrollTo().performClick()
         compose.onNodeWithText("Suivante 1").assertDoesNotExist()
         compose.onNodeWithText("Revenir à la vue habituelle").performScrollTo().performClick()
