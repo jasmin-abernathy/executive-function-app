@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="home_now_label">Now</string>
+    <string name="home_next_label">Next</string>
+    <string name="home_open_all">See all my tasks</string>
+    <string name="home_hide_all">Hide the full list</string>
+    <string name="home_difficult_day_action">Today feels difficult</string>
+    <string name="home_difficult_day_active">Return to the usual view</string>
+    <string name="home_difficult_day_support">Your other tasks are still here. This only hides them for now.</string>
+    <string name="start_custom_once">Adjust this session</string>
+    <string name="setup_home_eyebrow">Your view of the day</string>
+    <string name="setup_home_title">How would you like to see your tasks?</string>
+    <string name="setup_home_help">You can change this later. Nothing will be deleted.</string>
+    <string name="setup_home_one">One next action</string>
+    <string name="setup_home_now_next">Now + Next</string>
+    <string name="setup_home_list">The full list</string>
+    <string name="setup_focus_presets_title">Choose your duration reference</string>
+    <string name="setup_focus_presets_help">These are starting points, not goals. You can adjust any session once.</string>
+    <string name="setup_focus_preset_short">Short · 10 min</string>
+    <string name="setup_focus_preset_normal">Normal · 25 min</string>
+    <string name="setup_focus_preset_long">Long · 50 min</string>
+    <string name="setup_focus_preset_open">Open · I stop when I decide</string>
+    <string name="setup_quick_start_title">Start without asking me for settings again</string>
+    <string name="setup_quick_start_support">The main button starts with your choices. You can still adjust a session.</string>
+    <string name="setup_learned_duration_title">Use my learned reference when available</string>
+    <string name="setup_learned_duration_support">For a fixed duration, a learned reference replaces the default. Open mode stays untimed.</string>
+    <string name="setup_review_home">Home view</string>
+    <string name="setup_review_focus_preset">Duration reference</string>
+    <string name="setup_review_quick_start">Direct start</string>
+    <string name="setup_review_learned_duration">Learned duration</string>
+</resources>

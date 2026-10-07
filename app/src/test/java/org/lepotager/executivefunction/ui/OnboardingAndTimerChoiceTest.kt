@@ -9,6 +9,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.lepotager.executivefunction.domain.FocusTimerMode
+import org.lepotager.executivefunction.domain.FocusSessionPreset
+import org.lepotager.executivefunction.domain.HomeViewMode
 import org.lepotager.executivefunction.ui.theme.ExecutiveFunctionTheme
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -19,7 +21,10 @@ class OnboardingAndTimerChoiceTest {
     @get:Rule val compose = createComposeRule()
 
     private fun baseline() = FirstRunSetupConfig(
-        timerMode = FocusTimerMode.STOPWATCH,
+        homeViewMode = HomeViewMode.NOW_NEXT,
+        focusPreset = FocusSessionPreset.NORMAL,
+        quickStartEnabled = true,
+        preferLearnedDuration = true,
         drawEnabled = true,
         pauseSuggestionsEnabled = true,
         pauseAfterMinutes = 25,
@@ -84,7 +89,8 @@ class OnboardingAndTimerChoiceTest {
         clickText("Me proposer une pause après un moment")
         clickText("Garder une petite fenêtre quand je quitte le focus")
         clickText("Le moins d’interventions possible")
-        clickText("Suivant") // support -> focus defaults
+        clickText("Suivant") // support -> home view
+        clickText("Suivant") // home view -> focus defaults
         clickText("Suivant") // focus defaults -> automatic supports
         clickText("Suivant") // automatic supports -> review
         clickText("Appliquer ces réglages")
@@ -111,14 +117,17 @@ class OnboardingAndTimerChoiceTest {
         clickText("Suivant")
         clickText("Me proposer une pause après un moment")
         clickText("Suivant")
-        clickText("Minuteur par défaut — je choisis une durée")
+        clickText("Suivant") // home view -> focus defaults
+        clickText("Long · 50 min")
         clickText("45 min")
         clickText("Suivant")
         clickText("Suivant")
         clickText("Appliquer ces réglages")
 
         compose.runOnIdle {
-            assertEquals(FocusTimerMode.COUNTDOWN, applied?.timerMode)
+            assertEquals(HomeViewMode.NOW_NEXT, applied?.homeViewMode)
+            assertEquals(FocusSessionPreset.LONG, applied?.focusPreset)
+            assertEquals(true, applied?.quickStartEnabled)
             assertEquals(true, applied?.pauseSuggestionsEnabled)
             assertEquals(45, applied?.pauseAfterMinutes)
         }
@@ -138,6 +147,7 @@ class OnboardingAndTimerChoiceTest {
         clickText("Suivant")
         clickText("Me proposer une pause après un moment")
         clickText("Suivant")
+        clickText("Suivant") // home view -> focus defaults
         clickText("Autre durée")
         compose.onNodeWithTag("setup-custom-pause-minutes")
             .performScrollTo()

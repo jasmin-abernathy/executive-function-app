@@ -46,6 +46,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,6 +71,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.delay
 import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.domain.SessionClock
+import org.lepotager.executivefunction.domain.HomeViewMode
 import org.lepotager.executivefunction.domain.TaskDraw
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.TaskColor
@@ -89,6 +91,9 @@ fun HomeScreen(
     pauseAfterMinutes: Int,
     onCapture: (String, String?, TaskColor, () -> Unit) -> Unit,
     onStart: (String) -> Unit,
+    homeViewMode: HomeViewMode = HomeViewMode.LIST,
+    customStartAvailable: Boolean = true,
+    onStartCustom: (String) -> Unit = {},
     onMoveTask: (String, Int) -> Unit,
     onApplyTaskOrder: (List<String>, (Boolean) -> Unit) -> Unit,
     onSetTaskColor: (String, TaskColor) -> Unit,
@@ -106,6 +111,8 @@ fun HomeScreen(
     var isDrawing by remember { mutableStateOf(false) }
     var selectedColor by remember { mutableStateOf(TaskColor.NEUTRAL) }
     var organizing by remember { mutableStateOf(false) }
+    var showAllTasks by rememberSaveable { mutableStateOf(homeViewMode == HomeViewMode.LIST) }
+    var difficultDay by rememberSaveable { mutableStateOf(false) }
 
     val reorder = rememberTaskReorder(tasks, onApplyTaskOrder)
     val drawResultRequester = remember { BringIntoViewRequester() }
@@ -285,9 +292,24 @@ fun HomeScreen(
                     }
                 }
             }
+            if (homeViewMode != HomeViewMode.LIST && tasks.isNotEmpty()) {
+                item {
+                    TodayFocusPanel(
+                        tasks = tasks.filter { it.status == org.lepotager.executivefunction.model.TaskStatus.READY },
+                        mode = homeViewMode,
+                        showAll = showAllTasks,
+                        difficultDay = difficultDay,
+                        customStartAvailable = customStartAvailable,
+                        onToggleAll = { showAllTasks = !showAllTasks },
+                        onToggleDifficultDay = { difficultDay = !difficultDay },
+                        onStart = onStart,
+                        onStartCustom = onStartCustom,
+                    )
+                }
+            }
             if (tasks.isEmpty()) {
                 item { EmptyTasksPanel() }
-            } else {
+            } else if (homeViewMode == HomeViewMode.LIST || showAllTasks) {
                 itemsIndexed(reorder.visibleTasks, key = { _, task -> task.id }) { index, task ->
                     TaskCard(
                         task = task,
@@ -299,6 +321,8 @@ fun HomeScreen(
                         onMoveDown = { onMoveTask(task.id, 1) },
                         onSetColor = { onSetTaskColor(task.id, it) },
                         onStart = { onStart(task.id) },
+                        customStartAvailable = customStartAvailable,
+                        onStartCustom = { onStartCustom(task.id) },
                     )
                 }
             }
@@ -326,6 +350,8 @@ fun HomeScreen(
                                 proposalOnly = proposalOnly,
                                 onRedraw = { beginDraw(task.id, proposalOnly) },
                                 onStart = { onStart(task.id) },
+                                customStartAvailable = customStartAvailable,
+                                onStartCustom = { onStartCustom(task.id) },
                             )
                         }
                     }
@@ -372,6 +398,54 @@ fun HomeScreen(
                     isDrawing = false
                 },
             )
+        }
+    }
+}
+
+@Composable
+private fun TodayFocusPanel(
+    tasks: List<TaskItem>,
+    mode: HomeViewMode,
+    showAll: Boolean,
+    difficultDay: Boolean,
+    customStartAvailable: Boolean,
+    onToggleAll: () -> Unit,
+    onToggleDifficultDay: () -> Unit,
+    onStart: (String) -> Unit,
+    onStartCustom: (String) -> Unit,
+) {
+    val current = tasks.firstOrNull()
+    Card(modifier = Modifier.fillMaxWidth(), colors = appCardColors(), border = appBorder(), shape = RoundedCornerShape(22.dp)) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(stringResource(R.string.home_now_label), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
+            if (current == null) {
+                Text(stringResource(R.string.empty_tasks), style = MaterialTheme.typography.bodyLarge)
+            } else {
+                Text(current.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
+                current.firstStep?.let { Text(stringResource(R.string.first_step_value, it), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                Button(onClick = { onStart(current.id) }, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-primary-start"), colors = appButtonColors()) {
+                    ToolGlyph(ToolGlyphKind.START); Spacer(Modifier.size(8.dp)); Text(stringResource(R.string.start_action))
+                }
+                if (customStartAvailable) TextButton(onClick = { onStartCustom(current.id) }, modifier = Modifier.fillMaxWidth().testTag("home-custom-start")) {
+                    Text(stringResource(R.string.start_custom_once))
+                }
+            }
+            if (mode == HomeViewMode.NOW_NEXT && !difficultDay && tasks.size > 1) {
+                Text(stringResource(R.string.home_next_label), style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                tasks.drop(1).take(2).forEach { task ->
+                    TextButton(onClick = { onStart(task.id) }, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)) {
+                        Text(task.title, modifier = Modifier.weight(1f), textAlign = TextAlign.Start)
+                        Text(stringResource(R.string.start_action))
+                    }
+                }
+            }
+            if (difficultDay) Text(stringResource(R.string.home_difficult_day_support), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            if (mode == HomeViewMode.NOW_NEXT && tasks.size > 1) TextButton(onClick = onToggleDifficultDay, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(if (difficultDay) R.string.home_difficult_day_active else R.string.home_difficult_day_action))
+            }
+            TextButton(onClick = onToggleAll, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(if (showAll) R.string.home_hide_all else R.string.home_open_all))
+            }
         }
     }
 }
@@ -540,6 +614,8 @@ private fun TaskDrawPanel(
     proposalOnly: Boolean,
     onRedraw: () -> Unit,
     onStart: () -> Unit,
+    customStartAvailable: Boolean,
+    onStartCustom: () -> Unit,
 ) {
     val startLabel = stringResource(R.string.start_action)
     Card(
@@ -607,6 +683,9 @@ private fun TaskDrawPanel(
                     Text(stringResource(R.string.start_action))
                 }
             }
+            if (customStartAvailable) TextButton(onClick = onStartCustom, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.start_custom_once))
+            }
         }
     }
 }
@@ -622,6 +701,8 @@ private fun TaskCard(
     onMoveDown: () -> Unit,
     onSetColor: (TaskColor) -> Unit,
     onStart: () -> Unit,
+    customStartAvailable: Boolean,
+    onStartCustom: () -> Unit,
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -698,6 +779,9 @@ private fun TaskCard(
                 ToolGlyph(ToolGlyphKind.START)
                 Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.start_action))
+            }
+            if (customStartAvailable) TextButton(onClick = onStartCustom, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.start_custom_once))
             }
         }
     }

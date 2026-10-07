@@ -24,6 +24,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import org.lepotager.executivefunction.domain.FocusTimerMode
+import org.lepotager.executivefunction.domain.FocusSessionPreset
+import org.lepotager.executivefunction.domain.FocusStartDefaults
+import org.lepotager.executivefunction.domain.HomeViewMode
 import org.lepotager.executivefunction.model.FocusStatus
 import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.ui.ErrorDialog
@@ -55,6 +58,10 @@ class MainActivity : ComponentActivity() {
     private var introSeen by mutableStateOf(false)
     private var showIntro by mutableStateOf(false)
     private var lastTimerMode by mutableStateOf<FocusTimerMode?>(null)
+    private var homeViewMode by mutableStateOf(HomeViewMode.NOW_NEXT)
+    private var focusPreset by mutableStateOf(FocusSessionPreset.NORMAL)
+    private var quickStartEnabled by mutableStateOf(true)
+    private var preferLearnedDuration by mutableStateOf(true)
     private val focusChanges=object : android.content.BroadcastReceiver() {
         override fun onReceive(context: Context,intent: Intent) { viewModel.reload() }
     }
@@ -97,6 +104,14 @@ class MainActivity : ComponentActivity() {
         lastTimerMode = preferences.getString(KEY_TIMER_MODE, null)?.let { value ->
             runCatching { FocusTimerMode.valueOf(value) }.getOrNull()
         }
+        homeViewMode = preferences.getString(KEY_HOME_VIEW_MODE, null)?.let {
+            runCatching { HomeViewMode.valueOf(it) }.getOrNull()
+        } ?: HomeViewMode.NOW_NEXT
+        focusPreset = preferences.getString(KEY_FOCUS_PRESET, null)?.let {
+            runCatching { FocusSessionPreset.valueOf(it) }.getOrNull()
+        } ?: if (lastTimerMode == FocusTimerMode.STOPWATCH) FocusSessionPreset.OPEN else FocusSessionPreset.NORMAL
+        quickStartEnabled = preferences.getBoolean(KEY_QUICK_START, true)
+        preferLearnedDuration = preferences.getBoolean(KEY_PREFER_LEARNED, true)
         enableEdgeToEdge()
         setContent {
             ExecutiveFunctionTheme {
@@ -270,7 +285,10 @@ class MainActivity : ComponentActivity() {
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                     pauseAfterMinutes = pauseAfterMinutes,
                                     onCapture = viewModel::capture,
-                                    onStart = viewModel::requestStart,
+                                    homeViewMode = homeViewMode,
+                                    customStartAvailable = quickStartEnabled,
+                                    onStart = ::startTaskWithDefaults,
+                                    onStartCustom = viewModel::requestStart,
                                     onMoveTask = viewModel::moveTask,
                                     onApplyTaskOrder = viewModel::applyTaskOrder,
                                     onSetTaskColor = viewModel::setTaskColor,
@@ -448,13 +466,24 @@ class MainActivity : ComponentActivity() {
         lastTimerMode = prefs.getString(KEY_TIMER_MODE, null)?.let {
             runCatching { FocusTimerMode.valueOf(it) }.getOrNull()
         }
+        homeViewMode = prefs.getString(KEY_HOME_VIEW_MODE, null)?.let {
+            runCatching { HomeViewMode.valueOf(it) }.getOrNull()
+        } ?: HomeViewMode.NOW_NEXT
+        focusPreset = prefs.getString(KEY_FOCUS_PRESET, null)?.let {
+            runCatching { FocusSessionPreset.valueOf(it) }.getOrNull()
+        } ?: if (lastTimerMode == FocusTimerMode.STOPWATCH) FocusSessionPreset.OPEN else FocusSessionPreset.NORMAL
+        quickStartEnabled = prefs.getBoolean(KEY_QUICK_START, true)
+        preferLearnedDuration = prefs.getBoolean(KEY_PREFER_LEARNED, true)
     }
 
     private fun currentSetupConfig(): FirstRunSetupConfig {
         val wellbeing = getSharedPreferences("wellbeing", Context.MODE_PRIVATE)
         val app = appPreferences()
         return FirstRunSetupConfig(
-            timerMode = lastTimerMode ?: FocusTimerMode.STOPWATCH,
+            homeViewMode = homeViewMode,
+            focusPreset = focusPreset,
+            quickStartEnabled = quickStartEnabled,
+            preferLearnedDuration = preferLearnedDuration,
             drawEnabled = drawEnabled,
             pauseSuggestionsEnabled = pauseSuggestionsEnabled,
             pauseAfterMinutes = pauseAfterMinutes,
@@ -469,12 +498,20 @@ class MainActivity : ComponentActivity() {
         drawEnabled = config.drawEnabled
         pauseSuggestionsEnabled = config.pauseSuggestionsEnabled
         pauseAfterMinutes = config.pauseAfterMinutes.coerceIn(5, 120)
-        lastTimerMode = config.timerMode
+        homeViewMode = config.homeViewMode
+        focusPreset = config.focusPreset
+        quickStartEnabled = config.quickStartEnabled
+        preferLearnedDuration = config.preferLearnedDuration
+        lastTimerMode = FocusStartDefaults.timerMode(config.focusPreset)
         appPreferences().edit()
             .putBoolean(KEY_DRAW_ENABLED, drawEnabled)
             .putBoolean(KEY_PAUSE_ENABLED, pauseSuggestionsEnabled)
             .putInt(KEY_PAUSE_MINUTES, pauseAfterMinutes)
-            .putString(KEY_TIMER_MODE, config.timerMode.name)
+            .putString(KEY_TIMER_MODE, requireNotNull(lastTimerMode).name)
+            .putString(KEY_HOME_VIEW_MODE, config.homeViewMode.name)
+            .putString(KEY_FOCUS_PRESET, config.focusPreset.name)
+            .putBoolean(KEY_QUICK_START, config.quickStartEnabled)
+            .putBoolean(KEY_PREFER_LEARNED, config.preferLearnedDuration)
             .putBoolean("calm", config.calmMode)
             .putBoolean("auto_pip", config.autoMiniWindow)
             .putBoolean(KEY_INTRO_SEEN, true)
@@ -491,6 +528,15 @@ class MainActivity : ComponentActivity() {
     private fun saveTimerMode(mode: FocusTimerMode) {
         lastTimerMode = mode
         appPreferences().edit().putString(KEY_TIMER_MODE, mode.name).apply()
+    }
+
+    private fun startTaskWithDefaults(taskId: String) {
+        if (!quickStartEnabled) {
+            viewModel.requestStart(taskId)
+            return
+        }
+        requestNotificationPermissionIfNeeded()
+        viewModel.requestStartWithDefaults(taskId, focusPreset, preferLearnedDuration)
     }
 
     private fun requestNotificationPermissionIfNeeded() {
@@ -516,5 +562,9 @@ class MainActivity : ComponentActivity() {
         const val KEY_PAUSE_MINUTES = "pause_after_minutes"
         const val KEY_INTRO_SEEN = "local_algorithm_intro_seen"
         const val KEY_TIMER_MODE = "focus_timer_mode"
+        const val KEY_HOME_VIEW_MODE = "home_view_mode"
+        const val KEY_FOCUS_PRESET = "focus_session_preset"
+        const val KEY_QUICK_START = "quick_start_enabled"
+        const val KEY_PREFER_LEARNED = "prefer_learned_duration"
     }
 }
