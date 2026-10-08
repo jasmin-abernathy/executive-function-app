@@ -52,7 +52,7 @@ main{background:var(--paper);border:1px solid var(--border);border-radius:24px;p
 .eyebrow{font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.09em;font-size:.8rem}
 h1{font-size:clamp(2rem,5vw,3rem);line-height:1.14;margin:.3rem 0 1rem}h2{font-size:1.55rem;margin:2.5rem 0 1rem}h3{font-size:1.07rem;margin:0 0 1rem;line-height:1.4}
 .lead{max-width:66ch;font-size:1.08rem;color:#45564d}.note{padding:14px 16px;background:#eef6ef;border:1px solid #cbded0;border-radius:14px;margin:20px 0;color:#355443}
-.section-nav{display:flex;flex-wrap:wrap;gap:8px;margin:24px 0}.section-nav a{padding:9px 12px;border:1px solid var(--border);border-radius:12px;text-decoration:none;background:white}
+.topics-hint{margin:18px 0 14px;color:var(--green);font-weight:700}
 .question{padding:22px 0;border-top:1px solid var(--border)}.chart{list-style:none;margin:0;padding:0;display:grid;gap:13px}
 .chart li{min-width:0}.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:18px}.chart-label{overflow-wrap:anywhere}.chart-percent{font-variant-numeric:tabular-nums;font-weight:850;white-space:nowrap}
 .track{height:11px;background:var(--pale);border-radius:8px;overflow:hidden;margin-top:5px}.track span{display:block;height:100%;background:#508066;border-radius:8px}
@@ -67,25 +67,40 @@ footer{color:var(--muted);font-size:.9rem;text-align:center;padding:20px}
 .guide strong{font-size:1.04rem}.guide p{margin:0;font-size:.92rem;line-height:1.5}
 .guide--core{background:#edf5ee;border-color:#a9c9b2;color:#244c35}
 .guide--optional{background:#f1f3f5;border-color:#c5cfd5;color:#364e5b}
-.section-nav .section-link{display:flex;flex-direction:column;align-items:flex-start;gap:3px;line-height:1.35}
-.section-link--core{border-color:#93bca0!important;background:#edf5ee!important}
-.section-link--optional{border-color:#c5cfd5!important;background:#f5f7f8!important}
-.nav-kind{font-size:.71rem;font-weight:850;letter-spacing:.04em;text-transform:uppercase}
-.result-group{border:1px solid var(--border);border-radius:18px;padding:clamp(17px,3vw,27px);margin:24px 0 30px;scroll-margin-top:18px}
+.result-group{border:1px solid var(--border);border-radius:18px;padding:0;margin:18px 0 22px;scroll-margin-top:18px;overflow:hidden}
 .result-group--core{background:#f0f7f1;border:2px solid #a9c9b2;border-top:6px solid #427355}
 .result-group--optional{background:#f8fafb;border-color:#bfcbd1;border-left:6px solid #718995}
-.result-group h2{margin:8px 0 10px}.group-kind{display:block;font-size:.79rem;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+.group-summary{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:clamp(17px,3vw,27px);min-height:112px;list-style:none;cursor:pointer}
+.group-summary::-webkit-details-marker{display:none}
+.group-summary:hover{background:#20302808}
+.group-summary:focus-visible{outline:3px solid var(--green);outline-offset:-4px;border-radius:13px}
+.group-summary-main{display:block;min-width:0}
+.group-heading{display:block;font-size:clamp(1.18rem,3vw,1.55rem);font-weight:800;line-height:1.27;margin:4px 0 7px}
+.group-kind{display:block;font-size:.79rem;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
 .result-group--core .group-kind{color:#245337}.result-group--optional .group-kind{color:#3a5968}
-.group-intro{color:#42574b;line-height:1.55;margin:0 0 15px;max-width:70ch}
-.result-group--optional .group-intro{color:#4d6069}
+.group-teaser{display:block;font-size:.92rem;line-height:1.45;color:#42574b}
+.result-group--optional .group-teaser{color:#4d6069}
+.group-summary-action{display:flex;align-items:center;justify-content:flex-end;gap:8px;flex-shrink:0;color:var(--green);font-weight:800;font-size:.84rem}
+.result-group--optional .group-summary-action{color:#3a5968}
+.group-open{display:none}.result-group[open] .group-open{display:inline}
+.result-group[open] .group-closed{display:none}
+.group-chevron{display:inline-block;font-size:1.6rem;line-height:1;transition:transform .18s ease}
+.result-group[open] .group-chevron{transform:rotate(180deg)}
+.group-body{border-top:1px solid var(--border);padding:6px clamp(15px,3vw,26px) 15px}
 .optional-heading{padding:24px 4px 0}.optional-heading h2{margin:0 0 6px}.optional-heading p{margin:0;color:var(--muted)}
 .result-group .question{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;margin:12px 0}
 .question h3{margin:0 0 10px}.adaptive-note{font-size:.87rem;color:#355b43;margin:0 0 10px}
-@media(max-width:650px){.reading-guide{grid-template-columns:1fr}.result-group{margin:16px 0 24px}.section-nav .section-link{width:100%}}
+.back-to-top{position:fixed;z-index:10;right:clamp(14px,3vw,28px);bottom:calc(18px + env(safe-area-inset-bottom,0px));display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:48px;padding:10px 16px;background:var(--green);color:white;text-decoration:none;font-size:.95rem;font-weight:800;border-radius:100px;border:2px solid white;box-shadow:0 8px 26px #2030284d}
+.back-to-top[hidden]{display:none}
+.back-to-top:hover{background:#234832}
+.back-to-top:focus-visible{outline:3px solid var(--text);outline-offset:3px}
+html{scroll-behavior:smooth}
+@media(max-width:650px){.reading-guide{grid-template-columns:1fr}.result-group{margin:14px 0 20px}.group-summary{align-items:flex-start;flex-direction:column;gap:12px}.group-summary-action{align-self:flex-end}.back-to-top{padding:9px 12px;min-height:48px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.group-chevron{transition:none}}
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="shell" id="top">
   <header class="header">
     <a href="./" class="brand">🌱 Le Potager Lab · V2</a>
     <nav class="languages" aria-label="<?= $fr ? 'Langue' : 'Language' ?>">
@@ -115,14 +130,9 @@ footer{color:var(--muted);font-size:.9rem;text-align:center;padding:20px}
     <?php elseif (!$groups): ?>
       <div class="empty" role="status"><?= $fr ? 'Les résultats apparaîtront ici dès que suffisamment de réponses pourront être présentées sans compromettre la confidentialité.' : 'Results will appear here when enough responses can be shared without compromising privacy.' ?></div>
     <?php else: ?>
-      <nav class="section-nav" aria-label="<?= $fr ? 'Sections des résultats' : 'Results sections' ?>">
-      <?php foreach ($groups as $i => $group): $core = $group['kind'] === 'core'; ?>
-        <a class="section-link <?= $core ? 'section-link--core' : 'section-link--optional' ?>" href="#group-<?=$i?>">
-          <span class="nav-kind"><?= $core ? ($fr ? 'Obligatoire' : 'Required') : ($fr ? 'Facultatif' : 'Optional') ?></span>
-          <span><?=v2_h($group['title'])?></span>
-        </a>
-      <?php endforeach; ?>
-      </nav>
+      <p class="topics-hint"><?= $fr
+          ? 'Choisissez un thème ci-dessous pour afficher ou masquer ses résultats.'
+          : 'Select a topic below to show or hide its results.' ?></p>
       <?php $optionalHeadingShown = false; ?>
       <?php foreach ($groups as $i => $group): $core = $group['kind'] === 'core'; ?>
         <?php if (!$core && !$optionalHeadingShown): $optionalHeadingShown = true; ?>
@@ -131,12 +141,22 @@ footer{color:var(--muted);font-size:.9rem;text-align:center;padding:20px}
             <p><?= $fr ? 'Ces thèmes étaient proposés après la partie obligatoire : tout le monde n’a pas répondu à chacun.' : 'These topics were offered after the required section: not everyone answered each one.' ?></p>
           </div>
         <?php endif; ?>
-        <section class="result-group <?= $core ? 'result-group--core' : 'result-group--optional' ?>" id="group-<?=$i?>" aria-labelledby="group-title-<?=$i?>">
-          <span class="group-kind"><?= $core ? ($fr ? 'Partie obligatoire' : 'Required section') : ($fr ? 'Module facultatif' : 'Optional module') ?></span>
-          <h2 id="group-title-<?=$i?>"><?=v2_h($group['title'])?></h2>
-          <p class="group-intro"><?= $core
-              ? ($fr ? 'Questions communes de la partie principale, avec quelques questions conditionnelles selon la première réponse.' : 'Core questions, with a few questions shown conditionally based on the first answer.')
-              : ($fr ? 'Ce module était laissé au choix des personnes participantes.' : 'Participation in this module was entirely voluntary.') ?></p>
+        <details class="result-group <?= $core ? 'result-group--core' : 'result-group--optional' ?>" id="group-<?=$i?>">
+          <summary class="group-summary">
+            <span class="group-summary-main">
+              <span class="group-kind"><?= $core ? ($fr ? 'Partie obligatoire' : 'Required section') : ($fr ? 'Module facultatif' : 'Optional module') ?></span>
+              <span class="group-heading" role="heading" aria-level="<?= $core ? '2' : '3' ?>"><?=v2_h($group['title'])?></span>
+              <span class="group-teaser"><?= $core
+                  ? ($fr ? 'Questions communes, avec quelques variantes selon le parcours.' : 'Core questions, with some differences depending on the path.')
+                  : ($fr ? 'Réponses sur ce thème complémentaire, proposé au choix.' : 'Answers about this additional, voluntary topic.') ?></span>
+            </span>
+            <span class="group-summary-action" aria-hidden="true">
+              <span class="group-closed"><?= $fr ? 'Voir les détails' : 'View details' ?></span>
+              <span class="group-open"><?= $fr ? 'Masquer les détails' : 'Hide details' ?></span>
+              <span class="group-chevron">⌄</span>
+            </span>
+          </summary>
+          <div class="group-body">
           <?php foreach ($group['questions'] as $question): ?>
             <section class="question">
               <h3><?=v2_h($question['title'])?></h3>
@@ -156,12 +176,29 @@ footer{color:var(--muted);font-size:.9rem;text-align:center;padding:20px}
               </ol>
             </section>
           <?php endforeach; ?>
-        </section>
+          </div>
+        </details>
       <?php endforeach; ?>
     <?php endif; ?>
     <div class="actions"><a class="button" href="./?lang=<?=v2_h($lang)?>"><?= $fr ? 'Revenir au questionnaire' : 'Return to the questionnaire' ?></a></div>
   </main>
   <footer><?= $fr ? 'Aucun chiffre brut ni aucune réponse individuelle ne sont publiés.' : 'No raw counts or individual responses are published.' ?></footer>
 </div>
+<a href="#top" class="back-to-top" id="back-to-top"
+   aria-label="<?= $fr ? 'Retour en haut de la page' : 'Back to top of page' ?>"
+   title="<?= $fr ? 'Retour en haut' : 'Back to top' ?>">
+  <span aria-hidden="true">↑</span>
+  <span class="back-to-top-text" aria-hidden="true"><?= $fr ? 'En haut' : 'Top' ?></span>
+</a>
+<script>
+// Progressive enhancement: the navigation remains usable if scripts are blocked.
+(() => {
+  const button = document.getElementById('back-to-top');
+  if (!button) return;
+  const syncVisibility = () => { button.hidden = window.scrollY < 280; };
+  window.addEventListener('scroll', syncVisibility, { passive: true });
+  syncVisibility();
+})();
+</script>
 </body>
 </html>

@@ -107,6 +107,30 @@ check(str_contains($publicPage, 'Partie obligatoire') && str_contains($publicPag
 check(str_contains($publicPage, 'adaptive-note'), 'Conditional core questions explained in public view');
 check(str_contains($publicPage, '@media(max-width:650px)'), 'Required and optional visual distinctions remain responsive');
 
+// The public page starts with folded theme cards; native details/summary supports
+// mouse, touch and keyboard without requiring scripts.
+check(str_contains($publicPage, '<details class="result-group') &&
+    str_contains($publicPage, '<summary class="group-summary">') &&
+    str_contains($publicPage, '<div class="group-body">') &&
+    str_contains($publicPage, '</details>'),
+    'Public results are grouped into accessible expandable themes');
+check(!str_contains($publicPage, '<details open'), 'Themes are initially collapsed');
+check(str_contains($publicPage, 'Voir les détails') &&
+    str_contains($publicPage, 'Masquer les détails') &&
+    str_contains($publicPage, 'View details') &&
+    str_contains($publicPage, 'Hide details'), 'Expanded and collapsed controls translated');
+check(str_contains($publicPage, 'class="back-to-top"') &&
+    str_contains($publicPage, 'href="#top"') &&
+    str_contains($publicPage, 'id="top"') &&
+    str_contains($publicPage, 'Retour en haut de la page') &&
+    str_contains($publicPage, 'Back to top of page'), 'Floating back-to-top works in both languages');
+check(str_contains($publicPage, 'window.scrollY < 280') &&
+    str_contains($publicPage, '.back-to-top[hidden]{display:none}') &&
+    str_contains($publicPage, '@media(prefers-reduced-motion:reduce)'),
+    'Back-to-top hides near start and supports reduced motion');
+check(!str_contains($publicPage, '<nav class="section-nav"'), 'No redundant link list ahead of expandable themes');
+
+
 // Regression: an older public results page rendered exact response totals as raw
 // choice values and even announced the number of submitted questionnaires.
 foreach (['<?=$value?>', '<?=$count?>', 'Il y a actuellement {$n}', 'There are currently {$n}'] as $forbidden) {
