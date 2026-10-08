@@ -34,8 +34,14 @@ done
 # Double garde-fou : ni valeur brute, ni ancien rendu de comptes dans la page publique.
 grep -Fq 'class="chart-percent"' "$TMP/results.php" ||
     fail "Le fichier distant ne contient pas la version en pourcentages."
-grep -Fq 'V2_PUBLIC_MIN_RESPONSES' "$TMP/public-analytics.php" ||
-    fail "La protection des petits échantillons est absente."
+grep -Fq 'const V2_PUBLIC_MIN_RESPONSES = 6;' "$TMP/public-analytics.php" ||
+    fail "Le seuil public de six réponses est absent."
+grep -Fq "['survey_ease', 'survey_friction_v2']" "$TMP/public-analytics.php" ||
+    fail "Les retours de difficulté du questionnaire ne sont pas exclus du public."
+grep -Fq '<details class="result-group' "$TMP/results.php" ||
+    fail "La page ne possède pas les thèmes dépliables."
+grep -Fq 'id="back-to-top"' "$TMP/results.php" ||
+    fail "Le bouton flottant de retour en haut est absent."
 if grep -Fq '<?=$value?>' "$TMP/results.php" ||
    grep -Fq '<?=$count?>' "$TMP/results.php" ||
    grep -Fq 'Il y a actuellement {$n}' "$TMP/results.php"; then
@@ -70,6 +76,8 @@ printf '4/4 — Vérification HTTP du vrai site\n'
 URL="https://app.lepotager.org/adhd-app/v2/results.php?lang=fr&verification=$STAMP"
 if command -v curl >/dev/null && curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$URL" > "$TMP/live.html"; then
     if grep -Fq 'Résultats publics du questionnaire V2' "$TMP/live.html" &&
+       grep -Fq 'id="back-to-top"' "$TMP/live.html" &&
+       grep -Fq '.group-summary' "$TMP/live.html" &&
        ! grep -Fq 'Il y a actuellement' "$TMP/live.html"; then
         printf 'OK : le serveur renvoie la nouvelle page publique.\n'
     else
