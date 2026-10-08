@@ -52,6 +52,12 @@ check(!str_contains(json_encode($public), '"n"') && !str_contains(json_encode($p
 check(v2_public_groups($publicCatalog, ['sample'=>['n'=>10,'counts'=>['a'=>9]]], 'en')[0]['questions'][0]['options'][0]['label'] === 'Option A', 'Public result labels localized');
 $publicPage = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/results.php');
 check(str_contains($publicPage, 'class="chart-percent"') && str_contains($publicPage, '<?=$option') && !str_contains($publicPage, '<?=$n?>'), 'Public HTML renders percentages without respondent counts');
+// Regression: an older public results page rendered exact response totals as raw
+// choice values and even announced the number of submitted questionnaires.
+foreach (['<?=$value?>', '<?=$count?>', 'Il y a actuellement {$n}', 'There are currently {$n}'] as $forbidden) {
+    check(!str_contains($publicPage, $forbidden), 'No exact counts or respondent totals on the public page: ' . $forbidden);
+}
+
 $survey = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/runtime-js/questionnaire-v131.php');
 check(str_contains($survey, 'View public results (%)') && str_contains($survey, 'Voir les résultats publics (%)') && str_contains($survey, 'href="results.php?lang='), 'Completion screen links to localized public results');
 
