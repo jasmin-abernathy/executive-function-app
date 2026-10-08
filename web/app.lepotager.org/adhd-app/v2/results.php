@@ -60,6 +60,28 @@ h1{font-size:clamp(2rem,5vw,3rem);line-height:1.14;margin:.3rem 0 1rem}h2{font-s
 .actions{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap}.button{display:inline-block;background:var(--green);color:white;text-decoration:none;border-radius:12px;font-weight:800;padding:12px 17px}
 footer{color:var(--muted);font-size:.9rem;text-align:center;padding:20px}
 @media(max-width:520px){.chart-head{align-items:flex-start}.chart-label{flex:1}main{border-radius:18px}}
+
+/* Separate reading paths: required core vs voluntary deep-dive topics. */
+.reading-guide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:22px 0 26px}
+.guide{display:flex;flex-direction:column;gap:6px;border-radius:15px;padding:16px 17px;border:1px solid var(--border)}
+.guide strong{font-size:1.04rem}.guide p{margin:0;font-size:.92rem;line-height:1.5}
+.guide--core{background:#edf5ee;border-color:#a9c9b2;color:#244c35}
+.guide--optional{background:#f1f3f5;border-color:#c5cfd5;color:#364e5b}
+.section-nav .section-link{display:flex;flex-direction:column;align-items:flex-start;gap:3px;line-height:1.35}
+.section-link--core{border-color:#93bca0!important;background:#edf5ee!important}
+.section-link--optional{border-color:#c5cfd5!important;background:#f5f7f8!important}
+.nav-kind{font-size:.71rem;font-weight:850;letter-spacing:.04em;text-transform:uppercase}
+.result-group{border:1px solid var(--border);border-radius:18px;padding:clamp(17px,3vw,27px);margin:24px 0 30px;scroll-margin-top:18px}
+.result-group--core{background:#f0f7f1;border:2px solid #a9c9b2;border-top:6px solid #427355}
+.result-group--optional{background:#f8fafb;border-color:#bfcbd1;border-left:6px solid #718995}
+.result-group h2{margin:8px 0 10px}.group-kind{display:block;font-size:.79rem;font-weight:850;letter-spacing:.07em;text-transform:uppercase}
+.result-group--core .group-kind{color:#245337}.result-group--optional .group-kind{color:#3a5968}
+.group-intro{color:#42574b;line-height:1.55;margin:0 0 15px;max-width:70ch}
+.result-group--optional .group-intro{color:#4d6069}
+.optional-heading{padding:24px 4px 0}.optional-heading h2{margin:0 0 6px}.optional-heading p{margin:0;color:var(--muted)}
+.result-group .question{background:white;border:1px solid var(--border);border-radius:14px;padding:18px;margin:12px 0}
+.question h3{margin:0 0 10px}.adaptive-note{font-size:.87rem;color:#355b43;margin:0 0 10px}
+@media(max-width:650px){.reading-guide{grid-template-columns:1fr}.result-group{margin:16px 0 24px}.section-nav .section-link{width:100%}}
 </style>
 </head>
 <body>
@@ -78,22 +100,49 @@ footer{color:var(--muted);font-size:.9rem;text-align:center;padding:20px}
     <p class="note"><?= $fr
         ? 'Seuls des pourcentages agrégés sont publiés. Les questions ayant reçu trop peu de réponses sont masquées afin de préserver la confidentialité.'
         : 'Only aggregate percentages are published. Questions with too few answers are hidden to protect privacy.' ?></p>
+    <div class="reading-guide" aria-label="<?= $fr ? 'Comprendre les deux parties' : 'Understanding the two sections' ?>">
+      <div class="guide guide--core">
+        <strong><?= $fr ? '01 · Partie obligatoire' : '01 · Required section' ?></strong>
+        <p><?= $fr ? 'Les choix essentiels communs à l’étude, avec quelques questions adaptées au parcours.' : 'Core product decisions, with some questions tailored to each path.' ?></p>
+      </div>
+      <div class="guide guide--optional">
+        <strong><?= $fr ? '02 · Modules facultatifs' : '02 · Optional modules' ?></strong>
+        <p><?= $fr ? 'Des sujets complémentaires que chaque personne peut choisir de remplir ou non.' : 'Extra topics each person can choose to answer or skip.' ?></p>
+      </div>
+    </div>
     <?php if ($unavailable): ?>
       <div class="empty" role="status"><?= $fr ? 'Les résultats sont temporairement indisponibles.' : 'Results are temporarily unavailable.' ?></div>
     <?php elseif (!$groups): ?>
       <div class="empty" role="status"><?= $fr ? 'Les résultats apparaîtront ici dès que suffisamment de réponses pourront être présentées sans compromettre la confidentialité.' : 'Results will appear here when enough responses can be shared without compromising privacy.' ?></div>
     <?php else: ?>
       <nav class="section-nav" aria-label="<?= $fr ? 'Sections des résultats' : 'Results sections' ?>">
-      <?php foreach ($groups as $i => $group): ?>
-        <a href="#group-<?=$i?>"><?=v2_h($group['title'])?></a>
+      <?php foreach ($groups as $i => $group): $core = $group['kind'] === 'core'; ?>
+        <a class="section-link <?= $core ? 'section-link--core' : 'section-link--optional' ?>" href="#group-<?=$i?>">
+          <span class="nav-kind"><?= $core ? ($fr ? 'Obligatoire' : 'Required') : ($fr ? 'Facultatif' : 'Optional') ?></span>
+          <span><?=v2_h($group['title'])?></span>
+        </a>
       <?php endforeach; ?>
       </nav>
-      <?php foreach ($groups as $i => $group): ?>
-        <section aria-labelledby="group-<?=$i?>">
-          <h2 id="group-<?=$i?>"><?=v2_h($group['title'])?></h2>
+      <?php $optionalHeadingShown = false; ?>
+      <?php foreach ($groups as $i => $group): $core = $group['kind'] === 'core'; ?>
+        <?php if (!$core && !$optionalHeadingShown): $optionalHeadingShown = true; ?>
+          <div class="optional-heading">
+            <h2><?= $fr ? 'Questions facultatives' : 'Optional questions' ?></h2>
+            <p><?= $fr ? 'Ces thèmes étaient proposés après la partie obligatoire : tout le monde n’a pas répondu à chacun.' : 'These topics were offered after the required section: not everyone answered each one.' ?></p>
+          </div>
+        <?php endif; ?>
+        <section class="result-group <?= $core ? 'result-group--core' : 'result-group--optional' ?>" id="group-<?=$i?>" aria-labelledby="group-title-<?=$i?>">
+          <span class="group-kind"><?= $core ? ($fr ? 'Partie obligatoire' : 'Required section') : ($fr ? 'Module facultatif' : 'Optional module') ?></span>
+          <h2 id="group-title-<?=$i?>"><?=v2_h($group['title'])?></h2>
+          <p class="group-intro"><?= $core
+              ? ($fr ? 'Questions communes de la partie principale, avec quelques questions conditionnelles selon la première réponse.' : 'Core questions, with a few questions shown conditionally based on the first answer.')
+              : ($fr ? 'Ce module était laissé au choix des personnes participantes.' : 'Participation in this module was entirely voluntary.') ?></p>
           <?php foreach ($group['questions'] as $question): ?>
             <section class="question">
               <h3><?=v2_h($question['title'])?></h3>
+              <?php if (!empty($question['conditional'])): ?>
+                <p class="adaptive-note"><?= $fr ? 'Question adaptée selon le premier choix, non présentée à tout le monde.' : 'Adapted to the first answer; not shown to everyone.' ?></p>
+              <?php endif; ?>
               <?php if ($question['multi']): ?>
                 <p class="small"><?= $fr ? 'Plusieurs réponses étaient possibles : le total peut dépasser 100 %.' : 'Multiple answers were possible: the total may exceed 100%.' ?></p>
               <?php endif; ?>

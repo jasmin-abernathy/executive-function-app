@@ -44,14 +44,43 @@ $publicQ = [
     'en'=>['title'=>'A question', 'options'=>[['a','Option A'],['b','Option B']]],
 ];
 $publicCatalog = ['groups'=>[['fr'=>'Groupe', 'en'=>'Group', 'questions'=>[$publicQ]]], 'questions'=>['sample'=>$publicQ]];
-check(v2_public_groups($publicCatalog, ['sample'=>['n'=>9,'counts'=>['a'=>9]]], 'fr') === [], 'Public hides questions below privacy threshold');
-$public = v2_public_groups($publicCatalog, ['sample'=>['n'=>10,'counts'=>['a'=>9,'b'=>7,'private_legacy_value'=>1]]], 'fr');
-check($public[0]['questions'][0]['options'] === [['label'=>'Choix A','percent'=>90],['label'=>'Choix B','percent'=>70]], 'Public percentages count respondents even for multiple choices');
+check(V2_PUBLIC_MIN_RESPONSES === 4, 'Public publication threshold is four responses per question');
+check(v2_public_groups($publicCatalog, ['sample'=>['n'=>3,'counts'=>['a'=>3]]], 'fr') === [], 'Public hides questions with fewer than four responses');
+$public = v2_public_groups($publicCatalog, ['sample'=>['n'=>4,'counts'=>['a'=>3,'b'=>2,'private_legacy_value'=>1]]], 'fr');
+check($public[0]['questions'][0]['options'] === [['label'=>'Choix A','percent'=>75],['label'=>'Choix B','percent'=>50]], 'Public percentages count respondents even for multiple choices');
+check($public[0]['kind'] === 'core', 'The core group has a required-section identity');
+$optionalQ = [
+    'id'=>'extra', 'type'=>'single',
+    'fr'=>['title'=>'Question en option', 'options'=>[['yes','Oui'],['no','Non']]],
+    'en'=>['title'=>'Optional question', 'options'=>[['yes','Yes'],['no','No']]],
+];
+$bothCatalog = [
+    'groups'=>[
+        ['fr'=>'Principales','en'=>'Core','questions'=>[$publicQ]],
+        ['fr'=>'Thème en option','en'=>'Optional topic','questions'=>[$optionalQ]],
+    ],
+    'questions'=>['sample'=>$publicQ, 'extra'=>$optionalQ],
+];
+$bothGroups = v2_public_groups($bothCatalog, ['sample'=>['n'=>4,'counts'=>['a'=>3]], 'extra'=>['n'=>4,'counts'=>['yes'=>4]]], 'fr');
+check($bothGroups[0]['kind'] === 'core' && $bothGroups[1]['kind'] === 'optional', 'Core and optional groups remain visibly distinguishable');
+check($bothGroups[1]['title'] === 'Thème en option', 'Optional module title preserved');
 check($public[0]['questions'][0]['multi'] === true, 'Public view indicates multiple choices');
 check(!str_contains(json_encode($public), '"n"') && !str_contains(json_encode($public), 'private_legacy_value'), 'Public data contains no counts or unknown answer values');
-check(v2_public_groups($publicCatalog, ['sample'=>['n'=>10,'counts'=>['a'=>9]]], 'en')[0]['questions'][0]['options'][0]['label'] === 'Option A', 'Public result labels localized');
+check(v2_public_groups($publicCatalog, ['sample'=>['n'=>4,'counts'=>['a'=>3]]], 'en')[0]['questions'][0]['options'][0]['label'] === 'Option A', 'Public result labels localized');
+$adaptive = $publicQ;
+$adaptive['id'] = 'adapt';
+$adaptive['adaptive'] = ['beginning'];
+$adaptiveCatalog = ['groups'=>[['fr'=>'Principales','en'=>'Core','questions'=>[$adaptive]]], 'questions'=>['adapt'=>$adaptive]];
+$adaptedGroups = v2_public_groups($adaptiveCatalog, ['adapt'=>['n'=>4,'counts'=>['a'=>4]]], 'fr');
+check($adaptedGroups[0]['questions'][0]['conditional'] === true, 'Adaptive core question is labeled as conditional');
+check($public[0]['questions'][0]['conditional'] === false, 'Ordinary core question is not labeled conditional');
 $publicPage = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/results.php');
 check(str_contains($publicPage, 'class="chart-percent"') && str_contains($publicPage, '<?=$option') && !str_contains($publicPage, '<?=$n?>'), 'Public HTML renders percentages without respondent counts');
+check(str_contains($publicPage, 'result-group--core') && str_contains($publicPage, 'result-group--optional'), 'Required and optional modules have distinct visual wrappers');
+check(str_contains($publicPage, 'Partie obligatoire') && str_contains($publicPage, 'Questions facultatives') && str_contains($publicPage, 'Optional questions'), 'Sections explicitly labeled in French and English');
+check(str_contains($publicPage, 'adaptive-note'), 'Conditional core questions explained in public view');
+check(str_contains($publicPage, '@media(max-width:650px)'), 'Required and optional visual distinctions remain responsive');
+
 // Regression: an older public results page rendered exact response totals as raw
 // choice values and even announced the number of submitted questionnaires.
 foreach (['<?=$value?>', '<?=$count?>', 'Il y a actuellement {$n}', 'There are currently {$n}'] as $forbidden) {

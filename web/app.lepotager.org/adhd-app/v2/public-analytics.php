@@ -5,14 +5,14 @@ require_once __DIR__ . '/admin/analytics.php';
 
 // Public percentages are released only for questions with a sufficiently large base.
 // The threshold and counts never appear in the public HTML.
-const V2_PUBLIC_MIN_RESPONSES = 10;
+const V2_PUBLIC_MIN_RESPONSES = 4;
 
 /** Prepare only labeled, aggregated percentages for the public view. */
 function v2_public_groups(array $catalog, array $aggregates, string $lang): array
 {
     $lang = $lang === 'en' ? 'en' : 'fr';
     $groups = [];
-    foreach ($catalog['groups'] as $group) {
+    foreach ($catalog['groups'] as $index => $group) {
         $questions = [];
         foreach ($group['questions'] as $entry) {
             $question = $catalog['questions'][$entry['id']] ?? $entry;
@@ -34,10 +34,15 @@ function v2_public_groups(array $catalog, array $aggregates, string $lang): arra
             $questions[] = [
                 'title' => (string) $question[$lang]['title'],
                 'multi' => str_starts_with((string) $question['type'], 'multi') || $question['type'] === 'exact5',
+                'conditional' => $index === 0 && !empty($question['adaptive']),
                 'options' => $options,
             ];
         }
-        if ($questions) $groups[] = ['title' => (string) $group[$lang], 'questions' => $questions];
+        if ($questions) $groups[] = [
+            'kind' => $index === 0 ? 'core' : 'optional',
+            'title' => (string) $group[$lang],
+            'questions' => $questions,
+        ];
     }
     return $groups;
 }
