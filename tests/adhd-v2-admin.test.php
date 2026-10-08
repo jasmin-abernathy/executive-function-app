@@ -45,6 +45,24 @@ $publicQ = [
 ];
 $publicCatalog = ['groups'=>[['fr'=>'Groupe', 'en'=>'Group', 'questions'=>[$publicQ]]], 'questions'=>['sample'=>$publicQ]];
 check(V2_PUBLIC_MIN_RESPONSES === 6, 'Public publication threshold is six responses per question');
+
+check(V2_PUBLIC_EXCLUDED_QUESTION_IDS === ['survey_ease', 'survey_friction_v2'], 'Questionnaire difficulty feedback hidden only from public publication');
+$privateFeedbackIds = ['survey_ease', 'survey_friction_v2'];
+foreach ($privateFeedbackIds as $privateId) {
+    check(isset($catalog['questions'][$privateId]), 'Survey difficulty question retained in the private analytics catalog: ' . $privateId);
+    $feedback = $catalog['questions'][$privateId];
+    $feedbackGroup = [
+        'groups'=>[['fr'=>'Retour sur le questionnaire','en'=>'Survey feedback','questions'=>[$feedback, $publicQ]]],
+        'questions'=>[$privateId=>$feedback, 'sample'=>$publicQ],
+    ];
+    $responseCode = (string) $feedback['fr']['options'][0][0];
+    $publicFiltered = v2_public_groups($feedbackGroup, [
+        $privateId=>['n'=>10, 'counts'=>[$responseCode=>10]],
+        'sample'=>['n'=>6, 'counts'=>['a'=>4]],
+    ], 'fr');
+    check(count($publicFiltered) === 1 && count($publicFiltered[0]['questions']) === 1 && $publicFiltered[0]['questions'][0]['title'] === 'Une question', 'Survey difficulty feedback excluded publicly even above threshold, other questions preserved: ' . $privateId);
+}
+
 // The private dashboard must remain unrestricted and continue to display exact
 // respondent counts, even when there is just one answer.
 $singleAdminChoice = (string) $catalog['questions']['survey_ease']['fr']['options'][0][0];

@@ -7,6 +7,9 @@ require_once __DIR__ . '/admin/analytics.php';
 // The threshold and counts never appear in the public HTML.
 const V2_PUBLIC_MIN_RESPONSES = 6;
 
+// Survey-usability feedback is retained for private research only.
+const V2_PUBLIC_EXCLUDED_QUESTION_IDS = ['survey_ease', 'survey_friction_v2'];
+
 /** Prepare only labeled, aggregated percentages for the public view. */
 function v2_public_groups(array $catalog, array $aggregates, string $lang): array
 {
@@ -17,6 +20,7 @@ function v2_public_groups(array $catalog, array $aggregates, string $lang): arra
         foreach ($group['questions'] as $entry) {
             $question = $catalog['questions'][$entry['id']] ?? $entry;
             $id = (string) $question['id'];
+            if (in_array($id, V2_PUBLIC_EXCLUDED_QUESTION_IDS, true)) continue;
             $base = (int) ($aggregates[$id]['n'] ?? 0);
             if ($base < V2_PUBLIC_MIN_RESPONSES) continue;
 
