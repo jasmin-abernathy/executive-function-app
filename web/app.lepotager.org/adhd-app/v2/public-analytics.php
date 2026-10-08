@@ -5,7 +5,7 @@ require_once __DIR__ . '/admin/analytics.php';
 
 // Public percentages are released only for questions with a sufficiently large base.
 // The threshold and counts never appear in the public HTML.
-const V2_PUBLIC_MIN_RESPONSES = 4;
+const V2_PUBLIC_MIN_RESPONSES = 6;
 
 /** Prepare only labeled, aggregated percentages for the public view. */
 function v2_public_groups(array $catalog, array $aggregates, string $lang): array

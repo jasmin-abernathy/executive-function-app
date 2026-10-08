@@ -44,10 +44,18 @@ $publicQ = [
     'en'=>['title'=>'A question', 'options'=>[['a','Option A'],['b','Option B']]],
 ];
 $publicCatalog = ['groups'=>[['fr'=>'Groupe', 'en'=>'Group', 'questions'=>[$publicQ]]], 'questions'=>['sample'=>$publicQ]];
-check(V2_PUBLIC_MIN_RESPONSES === 4, 'Public publication threshold is four responses per question');
-check(v2_public_groups($publicCatalog, ['sample'=>['n'=>3,'counts'=>['a'=>3]]], 'fr') === [], 'Public hides questions with fewer than four responses');
-$public = v2_public_groups($publicCatalog, ['sample'=>['n'=>4,'counts'=>['a'=>3,'b'=>2,'private_legacy_value'=>1]]], 'fr');
-check($public[0]['questions'][0]['options'] === [['label'=>'Choix A','percent'=>75],['label'=>'Choix B','percent'=>50]], 'Public percentages count respondents even for multiple choices');
+check(V2_PUBLIC_MIN_RESPONSES === 6, 'Public publication threshold is six responses per question');
+// The private dashboard must remain unrestricted and continue to display exact
+// respondent counts, even when there is just one answer.
+$singleAdminChoice = (string) $catalog['questions']['survey_ease']['fr']['options'][0][0];
+ob_start();
+v2_admin_chart($catalog['questions']['survey_ease'], ['n'=>1, 'counts'=>[$singleAdminChoice=>1]], 'fr');
+$singleAdminHtml = ob_get_clean();
+check(str_contains($singleAdminHtml, '1 / 1') && str_contains($singleAdminHtml, '100,0 %'), 'Private admin always shows single-response exact counts independently of public threshold');
+
+check(v2_public_groups($publicCatalog, ['sample'=>['n'=>5,'counts'=>['a'=>5]]], 'fr') === [], 'Public hides questions with fewer than six responses');
+$public = v2_public_groups($publicCatalog, ['sample'=>['n'=>6,'counts'=>['a'=>5,'b'=>3,'private_legacy_value'=>1]]], 'fr');
+check($public[0]['questions'][0]['options'] === [['label'=>'Choix A','percent'=>83],['label'=>'Choix B','percent'=>50]], 'Public percentages count respondents even for multiple choices');
 check($public[0]['kind'] === 'core', 'The core group has a required-section identity');
 $optionalQ = [
     'id'=>'extra', 'type'=>'single',
@@ -61,17 +69,17 @@ $bothCatalog = [
     ],
     'questions'=>['sample'=>$publicQ, 'extra'=>$optionalQ],
 ];
-$bothGroups = v2_public_groups($bothCatalog, ['sample'=>['n'=>4,'counts'=>['a'=>3]], 'extra'=>['n'=>4,'counts'=>['yes'=>4]]], 'fr');
+$bothGroups = v2_public_groups($bothCatalog, ['sample'=>['n'=>6,'counts'=>['a'=>5]], 'extra'=>['n'=>6,'counts'=>['yes'=>6]]], 'fr');
 check($bothGroups[0]['kind'] === 'core' && $bothGroups[1]['kind'] === 'optional', 'Core and optional groups remain visibly distinguishable');
 check($bothGroups[1]['title'] === 'Thème en option', 'Optional module title preserved');
 check($public[0]['questions'][0]['multi'] === true, 'Public view indicates multiple choices');
 check(!str_contains(json_encode($public), '"n"') && !str_contains(json_encode($public), 'private_legacy_value'), 'Public data contains no counts or unknown answer values');
-check(v2_public_groups($publicCatalog, ['sample'=>['n'=>4,'counts'=>['a'=>3]]], 'en')[0]['questions'][0]['options'][0]['label'] === 'Option A', 'Public result labels localized');
+check(v2_public_groups($publicCatalog, ['sample'=>['n'=>6,'counts'=>['a'=>5]]], 'en')[0]['questions'][0]['options'][0]['label'] === 'Option A', 'Public result labels localized');
 $adaptive = $publicQ;
 $adaptive['id'] = 'adapt';
 $adaptive['adaptive'] = ['beginning'];
 $adaptiveCatalog = ['groups'=>[['fr'=>'Principales','en'=>'Core','questions'=>[$adaptive]]], 'questions'=>['adapt'=>$adaptive]];
-$adaptedGroups = v2_public_groups($adaptiveCatalog, ['adapt'=>['n'=>4,'counts'=>['a'=>4]]], 'fr');
+$adaptedGroups = v2_public_groups($adaptiveCatalog, ['adapt'=>['n'=>6,'counts'=>['a'=>6]]], 'fr');
 check($adaptedGroups[0]['questions'][0]['conditional'] === true, 'Adaptive core question is labeled as conditional');
 check($public[0]['questions'][0]['conditional'] === false, 'Ordinary core question is not labeled conditional');
 $publicPage = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/results.php');
