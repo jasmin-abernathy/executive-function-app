@@ -49,8 +49,18 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         after: () -> Unit = {},
     ) = launch(after) { repository.capture(title, firstStep, color) }
 
+    fun captureInFolder(title: String, firstStep: String?, color: TaskColor, folderId: String?, after: () -> Unit) =
+        launch(after) { repository.capture(title, firstStep, color, folderId) }
+
     fun addQuickNote(text: String, after: () -> Unit = {}) =
         launch(after) { repository.addQuickNote(text) }
+
+    fun recordCheckIn(
+        mood: Int,
+        motivation: Int,
+        energy: Int,
+        after: () -> Unit = {},
+    ) = launch(after) { repository.recordCheckIn(mood, motivation, energy) }
 
     /** Kept for non-interactive/internal callers. Normal UI starts go through requestStart(). */
     fun start(taskId: String) = launch { repository.start(taskId) }
@@ -104,7 +114,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun reload() = launch { repository.load() }
+    fun reload(after: () -> Unit = {}) = launch(after) { repository.load() }
 
     fun moveTask(taskId: String, offset: Int) = launch { repository.moveTask(taskId, offset) }
     fun applyTaskOrder(ids: List<String>, onSettled: (Boolean) -> Unit) {

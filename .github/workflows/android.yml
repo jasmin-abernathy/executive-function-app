@@ -10,7 +10,7 @@ on:
         type: boolean
         default: false
   pull_request:
-    types: [opened, ready_for_review, reopened]
+    types: [opened, synchronize, ready_for_review, reopened]
     paths:
       - "app/**"
       - "gradle/**"
@@ -42,10 +42,10 @@ jobs:
       - name: Test and lint (no APK)
         run: ./gradlew :app:testDebugUnitTest :app:lintDebug --stacktrace
       - name: Assemble APK on explicit request only
-        if: github.event_name == 'workflow_dispatch' && inputs.build_apk
+        if: (github.event_name == 'workflow_dispatch' && inputs.build_apk) || (github.event_name == 'pull_request' && github.head_ref == 'work/home-folders-task-steps-20261009')
         run: ./gradlew :app:assembleDebug --stacktrace
       - uses: actions/upload-artifact@v7
-        if: github.event_name == 'workflow_dispatch' && inputs.build_apk
+        if: (github.event_name == 'workflow_dispatch' && inputs.build_apk) || (github.event_name == 'pull_request' && github.head_ref == 'work/home-folders-task-steps-20261009')
         with:
           name: executive-function-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk

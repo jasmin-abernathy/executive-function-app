@@ -33,13 +33,18 @@ class FocusRepository internal constructor(
         title: String,
         firstStep: String? = null,
         color: TaskColor = TaskColor.NEUTRAL,
+        folderId: String? = null,
     ) = mutate {
         val cleanTitle = title.trim()
         require(cleanTitle.isNotEmpty())
         val timestamp = now()
+        val id = newId()
+        val db = database.writableDatabase
+        db.beginTransaction()
+        try {
         database.insertTask(
             TaskItem(
-                id = newId(),
+                id = id,
                 title = cleanTitle,
                 firstStep = firstStep.normalizedOrNull(),
                 status = TaskStatus.READY,
@@ -49,11 +54,21 @@ class FocusRepository internal constructor(
                 sortPosition = database.nextTaskPosition(),
             ),
         )
+        WorkspaceStore(database).assignTask(id, folderId)
+        WorkspaceStore(database).ensureSteps(id)
+        db.setTransactionSuccessful()
+        } finally { db.endTransaction() }
         refresh()
     }
 
     suspend fun addQuickNote(text: String) = mutate {
         LearningJournal(database).note(text)
+        refresh()
+    }
+
+    suspend fun recordCheckIn(mood: Int, motivation: Int, energy: Int) = mutate {
+        require(mood in 0..3 && motivation in 0..3 && energy in 0..3)
+        LearningJournal(database).checkIn(mood, motivation, energy)
         refresh()
     }
 

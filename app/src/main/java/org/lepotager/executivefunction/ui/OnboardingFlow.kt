@@ -592,13 +592,26 @@ private fun yesNo(value: Boolean): String = stringResource(if (value) R.string.s
 
 @Composable
 private fun ReviewLine(label: String, value: String) {
-    Row(
+    Surface(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.Top,
+        shape = MaterialTheme.shapes.medium,
+        tonalElevation = 1.dp,
     ) {
-        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-        Text(value, fontWeight = FontWeight.SemiBold, textAlign = TextAlign.End)
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                label,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                value,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
     }
 }
 
