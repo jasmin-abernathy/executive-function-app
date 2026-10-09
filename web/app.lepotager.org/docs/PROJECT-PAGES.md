@@ -1,5 +1,9 @@
-# Fiches de projets
+# Catalogue public du Verger
 
-Le catalogue et ses filtres sont sur `index.html` et `en/index.html`. Les 12 cartes sont entièrement cliquables et disposent de fiches statiques FR/EN sous `projets/<slug>/` et `en/projects/<slug>/`.
+Les douze cartes de l’accueil (`index.html` et `en/index.html`) renvoient vers leurs fiches statiques sous `projets/<slug>/` et `en/projects/<slug>/`.
 
-Mettre à jour les informations sur les deux pages d’accueil et les deux fiches de chaque projet ; confirmer les statuts dans les dépôts. Les fiches se lisent sans JavaScript et leurs liens restent accessibles au clavier. Vérifier retour, langue, focus, affichage mobile et mode accessible. Ne pas écraser les services PHP existants `adhd-app`, `resosoin`, `research`, `soutenir` au déploiement.
+La liste et les fiches restent accessibles sans JavaScript ; les filtres sont enrichis via `assets/app.js`. Les cartes sont un seul lien natif couvrant toute la surface : pas d’accordéon mobile et pas de liens imbriqués.
+
+À chaque évolution d’un projet, mettre à jour les deux fiches FR/EN, les statuts des deux accueils, et la date de vérification. Vérifier la maturité dans le dépôt concerné et ne pas présenter les prototypes comme prêts pour la production.
+
+Préserver les dossiers dynamiques (`adhd-app`, `resosoin`, `research`, `soutenir`) lors des déploiements. Vérifier les 24 chemins, l’accessibilité, les liens de retour et les filtres mobiles.

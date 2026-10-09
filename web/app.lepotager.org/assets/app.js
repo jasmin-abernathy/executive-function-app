@@ -204,7 +204,7 @@ document.querySelectorAll('[data-year]').forEach((el) => {
     button.appendChild(badge);
   });
 
-  // Les cartes sont des liens vers les fiches détaillées.
+  // Chaque projet est un lien natif vers sa fiche détaillée.
   const moreButton = document.createElement('button');
   moreButton.type = 'button';
   moreButton.className = 'projects-more';
@@ -267,8 +267,8 @@ document.querySelectorAll('[data-year]').forEach((el) => {
   moreButton.addEventListener('click', () => {
     showAllOnMobile = true;
     update();
-    const visibleLinks = Array.from(grid.querySelectorAll('.project-card:not([hidden]) .project-card-link'));
-    visibleLinks[mobileInitialLimit]?.focus();
+    const links = Array.from(grid.querySelectorAll('.project-card:not([hidden]) .project-card-link'));
+    links[mobileInitialLimit]?.focus();
   });
 
   const handleViewportChange = () => {
