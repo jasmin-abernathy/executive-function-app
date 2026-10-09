@@ -754,3 +754,14 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .projects-more:focus-visible { background: var(--white); border-color: var(--green); }
   .projects-more[hidden] { display: none !important; }
 }
+
+/* Cartes navigables, cible tactile sur toute la surface et retour clavier visible. */
+.project-card {position:relative;transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease}
+.project-card:hover {transform:translateY(-2px);border-color:#acc9b5;box-shadow:0 10px 28px rgba(23,61,43,.10)}
+.project-card:focus-within {outline:3px solid #276348;outline-offset:3px}
+.project-card-link {display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;margin-top:auto;padding-top:20px;color:var(--green);font-weight:800;text-decoration:none}
+.project-card-link::after {content:"";position:absolute;inset:0;border-radius:inherit}
+.project-card-link:focus-visible {outline:none}
+.project-card-link span {font-size:1.3rem}
+@media(max-width:720px){.project-card-link{grid-column:1/-1;border-top:1px solid #dfe2da;margin-top:14px;padding-top:14px}}
+@media(prefers-reduced-motion:reduce){.project-card{transition:none}.project-card:hover{transform:none}}
