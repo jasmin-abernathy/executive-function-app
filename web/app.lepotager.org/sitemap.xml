@@ -24,4 +24,84 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/mentions-legales.html"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/legal-notice.html"/>
   </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/fonctions-executives/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/fonctions-executives/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/fonctions-executives/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/fonctions-executives/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/fonctions-executives/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/fonctions-executives/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/resilience-vault/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/resilience-vault/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/resilience-vault/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/resilience-vault/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/resilience-vault/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/resilience-vault/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/dendrila-cms/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-cms/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-cms/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/dendrila-cms/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-cms/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-cms/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/mon-manager-web/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/mon-manager-web/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/mon-manager-web/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/mon-manager-web/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/mon-manager-web/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/mon-manager-web/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/communication-libre/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/communication-libre/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/communication-libre/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/communication-libre/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/communication-libre/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/communication-libre/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/verger-associations/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/verger-associations/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/verger-associations/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/verger-associations/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/verger-associations/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/verger-associations/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/atelier-epub/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/atelier-epub/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/atelier-epub/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/atelier-epub/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/atelier-epub/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/atelier-epub/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/sans-effort/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/sans-effort/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/sans-effort/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/sans-effort/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/sans-effort/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/sans-effort/"/>
+  </url>
 </urlset>

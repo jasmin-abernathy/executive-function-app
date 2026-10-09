@@ -1,0 +1,47 @@
+name: Catalogue web check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/app.lepotager.org/index.html'
+      - 'web/app.lepotager.org/en/index.html'
+      - 'web/app.lepotager.org/projets/**'
+      - 'web/app.lepotager.org/en/projects/**'
+      - 'web/app.lepotager.org/assets/**'
+      - 'web/app.lepotager.org/sitemap.xml'
+      - 'tests/catalogue-structure.test.mjs'
+      - 'scripts/deploy-app-catalogue.sh'
+  pull_request:
+    paths:
+      - 'web/app.lepotager.org/index.html'
+      - 'web/app.lepotager.org/en/index.html'
+      - 'web/app.lepotager.org/projets/**'
+      - 'web/app.lepotager.org/en/projects/**'
+      - 'web/app.lepotager.org/assets/**'
+      - 'web/app.lepotager.org/sitemap.xml'
+      - 'tests/catalogue-structure.test.mjs'
+      - 'scripts/deploy-app-catalogue.sh'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: catalogue-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript, HTML routes and deployment script
+        run: |
+          node --check web/app.lepotager.org/assets/app.js
+          node --test tests/catalogue-structure.test.mjs
+          bash -n scripts/deploy-app-catalogue.sh
