@@ -204,34 +204,7 @@ document.querySelectorAll('[data-year]').forEach((el) => {
     button.appendChild(badge);
   });
 
-  // On mobile each project exposes the useful summary first. Milestones and
-  // links are one deliberate tap away, which keeps the page from becoming a
-  // wall of full-height cards.
-  cards.forEach((card, index) => {
-    const title = card.querySelector('h3')?.textContent?.trim() || String(index + 1);
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'project-expand';
-    button.setAttribute('aria-expanded', 'false');
-    button.textContent = lang === 'en' ? 'Details and links' : 'Détails et liens';
-
-    button.addEventListener('click', () => {
-      const expanded = card.classList.toggle('is-expanded');
-      button.setAttribute('aria-expanded', String(expanded));
-      button.textContent = expanded
-        ? (lang === 'en' ? 'Hide details' : 'Masquer les détails')
-        : (lang === 'en' ? 'Details and links' : 'Détails et liens');
-      button.setAttribute(
-        'aria-label',
-        expanded
-          ? (lang === 'en' ? `Hide details for ${title}` : `Masquer les détails de ${title}`)
-          : (lang === 'en' ? `Show details for ${title}` : `Afficher les détails de ${title}`)
-      );
-    });
-
-    card.appendChild(button);
-  });
-
+  // Les cartes sont des liens vers les fiches détaillées.
   const moreButton = document.createElement('button');
   moreButton.type = 'button';
   moreButton.className = 'projects-more';
@@ -294,7 +267,8 @@ document.querySelectorAll('[data-year]').forEach((el) => {
   moreButton.addEventListener('click', () => {
     showAllOnMobile = true;
     update();
-    moreButton.previousElementSibling?.querySelector('[data-project-categories]:last-of-type')?.focus?.();
+    const visibleLinks = Array.from(grid.querySelectorAll('.project-card:not([hidden]) .project-card-link'));
+    visibleLinks[mobileInitialLimit]?.focus();
   });
 
   const handleViewportChange = () => {
