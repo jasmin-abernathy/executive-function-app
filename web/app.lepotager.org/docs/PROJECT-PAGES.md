@@ -1,6 +1,6 @@
 # Catalogue public du Verger — publication
 
-Le catalogue est composé de deux accueils HTML, 24 fiches détaillées FR/EN et de ressources CSS/JS. Les cartes VeVak, RésoSoin et Librairie universelle pointent vers leurs sites officiels. Dendrila Privacy renvoie vers sa fiche FR/EN enrichie de trois cartes : gratuit, Studio (prototype multi-sites avancé, prix envisagé 99 €/an pour 10 sites), Agence (fonctions encore à développer, prix envisagé 199 €/an pour 50 sites). Aucune offre Solo, aucune souscription active. Les pages indiquent les liens de demandes GitHub et de support WordPress.org.
+Le catalogue est composé de deux accueils HTML, 26 fiches détaillées FR/EN et de ressources CSS/JS. Les cartes VeVak, RésoSoin et Librairie universelle pointent vers leurs sites officiels. Dendrila Privacy renvoie vers sa fiche FR/EN enrichie de trois cartes : gratuit, Studio (prototype multi-sites avancé, prix envisagé 99 €/an pour 10 sites), Agence (fonctions encore à développer, prix envisagé 199 €/an pour 50 sites). Aucune offre Solo, aucune souscription active. Les pages indiquent les liens de demandes GitHub et de support WordPress.org.
 
 ## Diagnostic et synchronisation o2switch
 
@@ -14,7 +14,7 @@ git fetch origin main
 git show origin/main:scripts/deploy-app-catalogue.sh | bash -s -- --check
 ```
 
-Ce diagnostic compare **30 fichiers** du catalogue entre `origin/main` et le dossier public, contrôle la présence du HTML attendu, puis teste les réponses HTTP du site sans écrire aucun fichier. Si le chemin cPanel diffère de `$HOME/public_html/app/app.lepotager.org`, définir `APP_LIVE` avec le vrai DocumentRoot avant la commande.
+Ce diagnostic compare **32 fichiers** du catalogue entre `origin/main` et le dossier public, contrôle la présence du HTML attendu, puis teste les réponses HTTP du site sans écrire aucun fichier. Si le chemin cPanel diffère de `$HOME/public_html/app/app.lepotager.org`, définir `APP_LIVE` avec le vrai DocumentRoot avant la commande.
 
 Après lecture du diagnostic, pour effectuer la synchronisation ciblée :
 
@@ -35,11 +35,11 @@ node --test tests/catalogue-structure.test.mjs
 bash -n scripts/deploy-app-catalogue.sh
 ```
 
-Le test garantit que les accueils FR/EN comportent chacun 12 cartes et destinations, que les 24 fiches existent, que les routes, CSS et JS sont liés, et que le sitemap répertorie des fiches. Ce test n'est **pas** une preuve de déploiement.
+Le test garantit que les accueils FR/EN comportent chacun 13 cartes et destinations, que les 26 fiches existent, que les routes, CSS et JS sont liés, et que le sitemap répertorie des fiches. Ce test n'est **pas** une preuve de déploiement.
 
 ## À vérifier après publication
 
-Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 9 cartes avec fiches locales et les 3 cartes ouvrant des services dédiés. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
+Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 10 cartes avec fiches locales et les 3 cartes ouvrant des services dédiés. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
 
 ## Correctif mobile Dendrila Privacy du 10 octobre 2026
 
@@ -54,3 +54,11 @@ La feuille `assets/project-detail.css` rétablit **le flux flex vertical uniquem
 - Agence : le socle Studio existe, mais les rapports, droits délégués, comparaison des environnements et licences restent à développer.
 - Prix de travail seulement : Studio 99 €/an pour 10 sites, Agence 199 €/an pour 50 sites, selon docs/OFFRES-AGENCES.md. La surveillance locale et les alertes locales restent prévues gratuitement.
 - Le déploiement depuis GitHub vers le DocumentRoot o2switch doit être vérifié indépendamment avec le script de diagnostic, puis une comparaison du HTML public.
+
+## Familles de produits et Dendrila Forms — 10 octobre 2026
+
+Les anciens tags (autonomie, sécurité, collectifs, services, culture) ont été remplacés par quatre **familles exclusives** : WordPress, gestion de sites, applications et autres. Les pages FR/EN affichent les sections même sans JavaScript, et les filtres ne cachent plus arbitrairement les dernières cartes sur mobile. Toutes les fiches locales reprennent une famille unique.
+
+**Dendrila Forms** apparaît dans « Autres » avec ses fiches française et anglaise et ses liens vers le dépôt et ses issues GitHub. État : **0.1.0-alpha, démonstration technique**, exclusivement avec des données fictives. Ne pas le présenter comme prêt à recueillir des données personnelles/sensibles ou à gérer des entretiens privés.
+
+La synchronisation attend **13 cartes par langue, 26 fiches FR/EN et 32 fichiers statiques**. Appliquer le diagnostic et la copie ciblée décrits plus haut ; contrôler ensuite la présence de « Dendrila Forms » et `data-project-group="sites"` dans le HTML réellement servi par le domaine.

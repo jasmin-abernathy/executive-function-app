@@ -16,9 +16,9 @@
   <link rel="alternate" hreflang="x-default" href="https://app.lepotager.org/">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="manifest" href="/manifest.webmanifest">
-  <link rel="stylesheet" href="/assets/style.css?v=20261009-catalogue">
+  <link rel="stylesheet" href="/assets/style.css?v=20261010-families1">
   <link rel="stylesheet" href="/accessibility.css">
-  <script defer src="/assets/app.js?v=20261009-catalogue"></script>
+  <script defer src="/assets/app.js?v=20261010-families1"></script>
   <script defer src="/accessibility.js"></script>
 </head>
 <body>
@@ -137,125 +137,139 @@
     </div>
 
     <div class="project-toolbar" aria-label="Filter projects">
-      <div class="project-filters" role="group" aria-label="Project categories">
-        <button class="project-filter" type="button" data-project-filter="all" aria-pressed="true">All</button>
-        <button class="project-filter" type="button" data-project-filter="autonomie" aria-pressed="false">Autonomy</button>
-        <button class="project-filter" type="button" data-project-filter="securite" aria-pressed="false">Security & data</button>
-        <button class="project-filter" type="button" data-project-filter="collectifs" aria-pressed="false">Collectives</button>
-        <button class="project-filter" type="button" data-project-filter="services" aria-pressed="false">Services</button>
-        <button class="project-filter" type="button" data-project-filter="culture" aria-pressed="false">Culture & publishing</button>
+      <div class="project-filters" role="group" aria-label="Project types">
+        <button class="project-filter" type="button" data-project-filter="all" aria-pressed="true" aria-controls="projects-list">All</button>
+        <button class="project-filter" type="button" data-project-filter="wordpress" aria-pressed="false" aria-controls="projects-list">WordPress</button>
+        <button class="project-filter" type="button" data-project-filter="sites" aria-pressed="false" aria-controls="projects-list">Website management</button>
+        <button class="project-filter" type="button" data-project-filter="applications" aria-pressed="false" aria-controls="projects-list">Apps</button>
+        <button class="project-filter" type="button" data-project-filter="autres" aria-pressed="false" aria-controls="projects-list">Other</button>
       </div>
       <p class="project-count" data-project-count aria-live="polite"></p>
     </div>
 
-    <div class="projects-grid" id="projects-list">
-      <article class="project-card project-featured" data-project-categories="autonomie securite">
-        <div class="project-topline"><span class="status status-active">Android beta · Play validation</span><span class="project-kind">Android · FOSS</span></div>
-        <div class="project-tags" aria-label="Categories"><span>Autonomy</span><span>Security & data</span></div>
-        <div class="project-symbol" aria-hidden="true">V</div>
-        <h3>VeVak</h3>
-        <p class="project-summary">Share a location by SMS with explicitly authorised contacts, without requiring a cloud account or Internet access for the core workflow.</p>
-        <a class="project-card-link" href="https://vevak.lepotager.org/" aria-label="Visit VeVak website">Visit VeVak website <span aria-hidden="true">↗</span></a>
+    <div class="project-groups" id="projects-list">
+      <section class="project-group" data-project-group="wordpress" aria-labelledby="category-wordpress">
+        <div class="project-group-heading"><div><h3 id="category-wordpress">WordPress</h3><p>Plugins built for WordPress.</p></div><span class="project-group-total">1 project</span></div>
+        <div class="projects-grid">
+<article class="project-card" data-project-category="wordpress">
+        <div class="project-topline"><span class="status status-active">Version 0.0.5 · published</span><span class="project-kind">WordPress · GPL</span></div>
+        <div class="project-symbol symbol-line" aria-hidden="true">P</div>
+        <h3>Dendrila Privacy</h3>
+        <p class="project-summary">A local-first WordPress plugin for analysing trackers and third-party services, keeping privacy documentation up to date and optionally managing consent without advertising telemetry.</p>
+        <a class="project-card-link" href="/en/projects/dendrila-privacy/" aria-label="Explore Dendrila Privacy features and plans">Explore Dendrila Privacy <span aria-hidden="true">↗</span></a>
       </article>
+        </div>
+      </section>
 
-      <article class="project-card project-featured" data-project-categories="autonomie">
-        <div class="project-topline"><span class="status status-active">Android prototype · user testing</span><span class="project-kind">Android · AGPL</span></div>
-        <div class="project-tags" aria-label="Category"><span>Autonomy</span></div>
-        <div class="project-symbol symbol-soft" aria-hidden="true">↺</div>
-        <h3>Executive functions / ADHD</h3>
-        <p class="project-summary">A non-punitive app for capturing, choosing a next action, starting, handling interruption and returning without turning absence into failure.</p>
-        <a class="project-card-link" href="/en/projects/fonctions-executives/" aria-label="Explore project Executive functions / ADHD">Explore project <span aria-hidden="true">→</span></a>
-      </article>
-
-      <article class="project-card" data-project-categories="services autonomie">
-        <div class="project-topline"><span class="status status-research">V3 study · pilot preparation</span><span class="project-kind">Web · Healthcare</span></div>
-        <div class="project-tags" aria-label="Categories"><span>Services</span><span>Autonomy</span></div>
-        <div class="project-symbol symbol-soft" aria-hidden="true">S</div>
-        <h3>RésoSoin</h3>
-        <p class="project-summary">An independent foundation for medical practices: their own website, appointments, explicit automation and interoperability with existing tools, without imposed AI.</p>
-        <a class="project-card-link" href="/resosoin/" aria-label="Visit RésoSoin (FR)">Visit RésoSoin (FR) <span aria-hidden="true">↗</span></a>
-      </article>
-
-      <article class="project-card" data-project-categories="securite autonomie">
-        <div class="project-topline"><span class="status status-dev">Security foundation · not released</span><span class="project-kind">Android · public repository</span></div>
-        <div class="project-tags" aria-label="Categories"><span>Security & data</span><span>Autonomy</span></div>
-        <div class="project-symbol symbol-line" aria-hidden="true">R</div>
-        <h3>Resilience Vault</h3>
-        <p class="project-summary">A local vault for backing up explicitly selected data and rapidly making local data inaccessible in an emergency situation.</p>
-        <a class="project-card-link" href="/en/projects/resilience-vault/" aria-label="Explore project Resilience Vault">Explore project <span aria-hidden="true">→</span></a>
-      </article>
-
-      <article class="project-card" data-project-categories="services securite">
+      <section class="project-group" data-project-group="sites" aria-labelledby="category-sites">
+        <div class="project-group-heading"><div><h3 id="category-sites">Website management</h3><p>CMS and services for managing websites.</p></div><span class="project-group-total">3 projects</span></div>
+        <div class="projects-grid">
+<article class="project-card" data-project-category="sites">
         <div class="project-topline"><span class="status status-dev">Active core · pilot development</span><span class="project-kind">PHP · modular CMS</span></div>
-        <div class="project-tags" aria-label="Categories"><span>Services</span><span>Security & data</span></div>
         <div class="project-symbol symbol-soft" aria-hidden="true">D</div>
         <h3>Dendrila CMS</h3>
         <p class="project-summary">A modular CMS core designed to be managed through Mon Manager Web: content, media, roles, revisions, editorial workflow, modules, functional kits and visual styles remain composable without imposing one public front end.</p>
         <a class="project-card-link" href="/en/projects/dendrila-cms/" aria-label="Explore project Dendrila CMS">Explore project <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="project-card" data-project-categories="services">
+<article class="project-card" data-project-category="sites">
         <div class="project-topline"><span class="status status-dev">V1 under development</span><span class="project-kind">Android · AGPL</span></div>
-        <div class="project-tags" aria-label="Category"><span>Services</span></div>
         <div class="project-symbol symbol-line" aria-hidden="true">M</div>
         <h3>Mon Manager Web</h3>
         <p class="project-summary">The universal client app for managing several compatible websites from one interface, including Dendrila CMS, without building a separate app for every client.</p>
         <a class="project-card-link" href="/en/projects/mon-manager-web/" aria-label="Explore project Mon Manager Web">Explore project <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="project-card" data-project-categories="collectifs securite">
+<article class="project-card" data-project-category="sites">
+        <div class="project-topline"><span class="status status-research">V3 study · pilot preparation</span><span class="project-kind">Web · Healthcare</span></div>
+        <div class="project-symbol symbol-soft" aria-hidden="true">S</div>
+        <h3>RésoSoin</h3>
+        <p class="project-summary">An independent foundation for medical practices: their own website, appointments, explicit automation and interoperability with existing tools, without imposed AI.</p>
+        <a class="project-card-link" href="/resosoin/" aria-label="Visit RésoSoin (FR)">Visit RésoSoin (FR) <span aria-hidden="true">↗</span></a>
+      </article>
+        </div>
+      </section>
+
+      <section class="project-group" data-project-group="applications" aria-labelledby="category-applications">
+        <div class="project-group-heading"><div><h3 id="category-applications">Apps</h3><p>Mobile applications for everyday use.</p></div><span class="project-group-total">3 projects</span></div>
+        <div class="projects-grid">
+<article class="project-card project-featured" data-project-category="applications">
+        <div class="project-topline"><span class="status status-active">Android beta · Play validation</span><span class="project-kind">Android · FOSS</span></div>
+        <div class="project-symbol" aria-hidden="true">V</div>
+        <h3>VeVak</h3>
+        <p class="project-summary">Share a location by SMS with explicitly authorised contacts, without requiring a cloud account or Internet access for the core workflow.</p>
+        <a class="project-card-link" href="https://vevak.lepotager.org/" aria-label="Visit VeVak website">Visit VeVak website <span aria-hidden="true">↗</span></a>
+      </article>
+
+<article class="project-card project-featured" data-project-category="applications">
+        <div class="project-topline"><span class="status status-active">Android prototype · user testing</span><span class="project-kind">Android · AGPL</span></div>
+        <div class="project-symbol symbol-soft" aria-hidden="true">↺</div>
+        <h3>Executive functions / ADHD</h3>
+        <p class="project-summary">A non-punitive app for capturing, choosing a next action, starting, handling interruption and returning without turning absence into failure.</p>
+        <a class="project-card-link" href="/en/projects/fonctions-executives/" aria-label="Explore project Executive functions / ADHD">Explore project <span aria-hidden="true">→</span></a>
+      </article>
+
+<article class="project-card" data-project-category="applications">
+        <div class="project-topline"><span class="status status-dev">Security foundation · not released</span><span class="project-kind">Android · public repository</span></div>
+        <div class="project-symbol symbol-line" aria-hidden="true">R</div>
+        <h3>Resilience Vault</h3>
+        <p class="project-summary">A local vault for backing up explicitly selected data and rapidly making local data inaccessible in an emergency situation.</p>
+        <a class="project-card-link" href="/en/projects/resilience-vault/" aria-label="Explore project Resilience Vault">Explore project <span aria-hidden="true">→</span></a>
+      </article>
+        </div>
+      </section>
+
+      <section class="project-group" data-project-group="autres" aria-labelledby="category-autres">
+        <div class="project-group-heading"><div><h3 id="category-autres">Other</h3><p>Forms, publishing, culture and collective tools.</p></div><span class="project-group-total">6 projects</span></div>
+        <div class="projects-grid">
+<article class="project-card" data-project-category="autres">
         <div class="project-topline"><span class="status status-research">Labs · device testing pending</span><span class="project-kind">Web · free messaging</span></div>
-        <div class="project-tags" aria-label="Categories"><span>Collectives</span><span>Security & data</span></div>
         <div class="project-symbol symbol-soft" aria-hidden="true">C</div>
         <h3>Communication libre</h3>
         <p class="project-summary">A browser-first route to self-hostable collective messaging, with encryption where the chosen upstream provides it and no mandatory app for the pilot.</p>
         <a class="project-card-link" href="/en/projects/communication-libre/" aria-label="Explore project Communication libre">Explore project <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="project-card" data-project-categories="collectifs">
+<article class="project-card" data-project-category="autres">
         <div class="project-topline"><span class="status status-research">Pilot 0.2 · PWA/Android in preparation</span><span class="project-kind">Webxdc · Delta Chat · AGPL</span></div>
-        <div class="project-tags" aria-label="Category"><span>Collectives</span></div>
         <div class="project-symbol symbol-soft" aria-hidden="true">A</div>
         <h3>Verger Associations</h3>
         <p class="project-summary">Small, lightweight tools for meetings, decisions, actions and association organisation, deliberately kept separate from the messaging layer.</p>
         <a class="project-card-link" href="/en/projects/verger-associations/" aria-label="Explore project Verger Associations">Explore project <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="project-card" data-project-categories="culture services">
+<article class="project-card" data-project-category="autres">
         <div class="project-topline"><span class="status status-dev">Advanced prototype · human review</span><span class="project-kind">Web · local-first</span></div>
-        <div class="project-tags" aria-label="Categories"><span>Culture & publishing</span><span>Services</span></div>
         <div class="project-symbol symbol-line" aria-hidden="true">E</div>
         <h3>Atelier EPUB</h3>
         <p class="project-summary">A local-first ebook editor for importing, cleaning, structuring and preparing accessible EPUB files without uploading the manuscript to a server by default.</p>
         <a class="project-card-link" href="/en/projects/atelier-epub/" aria-label="Explore project Atelier EPUB">Explore project <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="project-card" data-project-categories="culture">
+<article class="project-card" data-project-category="autres">
         <div class="project-topline"><span class="status status-dev">Web alpha · improved search</span><span class="project-kind">Web · AGPL</span></div>
-        <div class="project-tags" aria-label="Category"><span>Culture & publishing</span></div>
         <div class="project-symbol symbol-line" aria-hidden="true">L</div>
         <h3>Librairie universelle</h3>
         <p class="project-summary">Search once for a work, compare editions and see different legal ways to access it, free or paid, without profiling or opaque ranking.</p>
         <a class="project-card-link" href="https://librairie.lepotager.org/" aria-label="Visit the book search website">Visit the book search website <span aria-hidden="true">↗</span></a>
       </article>
 
-      <article class="project-card" data-project-categories="securite services">
-        <div class="project-topline"><span class="status status-active">Version 0.0.5 · published</span><span class="project-kind">WordPress · GPL</span></div>
-        <div class="project-tags" aria-label="Categories"><span>Security & data</span><span>Services</span></div>
-        <div class="project-symbol symbol-line" aria-hidden="true">P</div>
-        <h3>Dendrila Privacy</h3>
-        <p class="project-summary">A local-first WordPress plugin for analysing trackers and third-party services, keeping privacy documentation up to date and optionally managing consent without advertising telemetry.</p>
-        <a class="project-card-link" href="/en/projects/dendrila-privacy/" aria-label="Explore Dendrila Privacy features and plans">Explore Dendrila Privacy <span aria-hidden="true">↗</span></a>
-      </article>
-
-      <article class="project-card project-muted" data-project-categories="services autonomie">
+<article class="project-card project-muted" data-project-category="autres">
         <div class="project-topline"><span class="status status-explore">Comparator design · not launched</span><span class="project-kind">Web · AGPL</span></div>
-        <div class="project-tags" aria-label="Categories"><span>Services</span><span>Autonomy</span></div>
         <div class="project-symbol symbol-muted" aria-hidden="true">＋</div>
         <h3>Delivery aggregator</h3>
         <p class="project-summary">A prototype for comparing delivery services without collecting platform passwords or bypassing their official checkout.</p>
         <a class="project-card-link" href="/en/projects/sans-effort/" aria-label="Explore project Delivery aggregator">Explore project <span aria-hidden="true">→</span></a>
       </article>
+
+      <article class="project-card" data-project-category="autres">
+        <div class="project-topline"><span class="status status-dev">0.1.0-alpha · technical demo</span><span class="project-kind">PHP · AGPL-3.0</span></div>
+        <div class="project-symbol symbol-soft" aria-hidden="true">F</div><h3>Dendrila Forms</h3>
+        <p class="project-summary">An open-source engine for surveys and interviews, configured with JSON files and self-hosted. For fictional test data only at this stage.</p>
+        <a class="project-card-link" href="/en/projects/dendrila-forms/" aria-label="Explore Dendrila Forms">Explore project <span aria-hidden="true">→</span></a>
+      </article>
+        </div>
+      </section>
     </div>
   </div>
 </section>

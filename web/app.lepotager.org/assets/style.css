@@ -765,3 +765,53 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .project-card-link span {font-size:1.3rem}
 @media(max-width:720px){.project-card-link{grid-column:1/-1;border-top:1px solid #dfe2da;margin-top:14px;padding-top:14px}}
 @media(prefers-reduced-motion:reduce){.project-card{transition:none}.project-card:hover{transform:none}}
+
+/* Product families replace the former thematic tags in the public catalogue. */
+.project-groups { display: grid; gap: clamp(36px, 5vw, 64px); }
+.project-group[hidden] { display: none !important; }
+.project-group-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 18px;
+  padding: 0 0 18px;
+  border-bottom: 2px solid #bfd5c3;
+}
+.project-group-heading h3 {
+  margin: 0 0 7px;
+  color: #173d2b;
+  font: 500 clamp(1.9rem, 3.5vw, 2.8rem)/1.12 Georgia, serif;
+  letter-spacing: -.035em;
+}
+.project-group-heading p {
+  max-width: 650px;
+  margin: 0;
+  color: #526058;
+  line-height: 1.55;
+}
+.project-group-total {
+  flex: 0 0 auto;
+  color: #41594a;
+  font-size: .85rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+.detail-category {
+  display: inline-block;
+  margin: 0;
+  border: 1px solid #bcd2c1;
+  border-radius: 10px;
+  background: #eef6ef;
+  color: #1e5235;
+  padding: .4rem .8rem;
+  font-weight: 800;
+  font-size: .9rem;
+}
+@media (max-width: 720px) {
+  .project-group-heading { align-items: start; flex-direction: column; gap: 9px; }
+  .project-group-heading h3 { font-size: 1.9rem; }
+  .project-group-total { font-size: .78rem; }
+  .project-groups { gap: 38px; }
+  .project-filter { min-height: 46px; }
+}

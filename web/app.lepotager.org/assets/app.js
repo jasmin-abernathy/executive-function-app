@@ -169,119 +169,53 @@ document.querySelectorAll('[data-year]').forEach((el) => {
   }
 })();
 
-// Project browsing — category counts + compact mobile cards
+// Product families: each project belongs to exactly one visible category.
 (() => {
   const buttons = Array.from(document.querySelectorAll('[data-project-filter]'));
-  const cards = Array.from(document.querySelectorAll('[data-project-categories]'));
+  const cards = Array.from(document.querySelectorAll('[data-project-category]'));
+  const groups = Array.from(document.querySelectorAll('[data-project-group]'));
   const count = document.querySelector('[data-project-count]');
-  const grid = document.querySelector('#projects-list');
+  if (!buttons.length || !cards.length || !groups.length) return;
 
-  if (!buttons.length || !cards.length || !grid) return;
-
-  const lang = document.documentElement.lang === 'en' ? 'en' : 'fr';
-  const mobileQuery = window.matchMedia('(max-width: 720px)');
-  const mobileInitialLimit = 4;
-  let activeFilter = 'all';
-  let showAllOnMobile = false;
-
+  let selected = 'all';
   document.documentElement.classList.add('projects-enhanced');
 
-  const categoriesFor = (card) =>
-    (card.dataset.projectCategories || '').split(/\s+/).filter(Boolean);
-
-  // Small counts make the filters easier to scan and avoid the visual weight
-  // of the old solid-green pill group.
   buttons.forEach((button) => {
-    const filter = button.dataset.projectFilter || 'all';
-    const total = filter === 'all'
-      ? cards.length
-      : cards.filter((card) => categoriesFor(card).includes(filter)).length;
-
+    const category = button.dataset.projectFilter || 'all';
+    const number = category === 'all' ? cards.length
+      : cards.filter(card => card.dataset.projectCategory === category).length;
     const badge = document.createElement('span');
     badge.className = 'project-filter-count';
     badge.setAttribute('aria-hidden', 'true');
-    badge.textContent = String(total);
+    badge.textContent = String(number);
     button.appendChild(badge);
   });
 
-  // Chaque projet est un lien natif vers sa fiche détaillée.
-  const moreButton = document.createElement('button');
-  moreButton.type = 'button';
-  moreButton.className = 'projects-more';
-  moreButton.hidden = true;
-  grid.insertAdjacentElement('afterend', moreButton);
-
-  const matchingCards = () =>
-    cards.filter((card) =>
-      activeFilter === 'all' || categoriesFor(card).includes(activeFilter)
-    );
-
-  const update = () => {
-    const matches = matchingCards();
-    const limitAll = mobileQuery.matches && activeFilter === 'all' && !showAllOnMobile;
-    const visibleLimit = limitAll ? mobileInitialLimit : matches.length;
-
+  const render = () => {
+    let shown = 0;
     cards.forEach((card) => {
-      const matchIndex = matches.indexOf(card);
-      const show = matchIndex >= 0 && matchIndex < visibleLimit;
-      card.hidden = !show;
+      const visible = selected === 'all' || card.dataset.projectCategory === selected;
+      card.hidden = !visible;
+      if (visible) shown++;
     });
-
+    groups.forEach((group) => {
+      group.hidden = !Array.from(group.querySelectorAll('[data-project-category]'))
+        .some(card => !card.hidden);
+    });
     buttons.forEach((button) => {
-      button.setAttribute(
-        'aria-pressed',
-        String((button.dataset.projectFilter || 'all') === activeFilter)
-      );
+      button.setAttribute('aria-pressed', String(button.dataset.projectFilter === selected));
     });
-
-    const visible = Math.min(visibleLimit, matches.length);
     if (count) {
-      if (lang === 'en') {
-        count.textContent = visible < matches.length
-          ? `${visible} of ${matches.length} projects`
-          : `${matches.length} project${matches.length === 1 ? '' : 's'}`;
-      } else {
-        count.textContent = visible < matches.length
-          ? `${visible} sur ${matches.length} projets`
-          : `${matches.length} projet${matches.length === 1 ? '' : 's'}`;
-      }
-    }
-
-    const remaining = Math.max(0, matches.length - visible);
-    moreButton.hidden = !(mobileQuery.matches && activeFilter === 'all' && remaining > 0);
-    if (!moreButton.hidden) {
-      moreButton.textContent = lang === 'en'
-        ? `Show ${remaining} more project${remaining === 1 ? '' : 's'}`
-        : `Afficher les ${remaining} autre${remaining === 1 ? '' : 's'} projet${remaining === 1 ? '' : 's'}`;
+      const en = document.documentElement.lang === 'en';
+      count.textContent = en
+        ? `${shown} project${shown === 1 ? '' : 's'}`
+        : `${shown} projet${shown === 1 ? '' : 's'}`;
     }
   };
 
-  buttons.forEach((button) => {
-    button.addEventListener('click', () => {
-      activeFilter = button.dataset.projectFilter || 'all';
-      showAllOnMobile = activeFilter !== 'all';
-      update();
-    });
-  });
-
-  moreButton.addEventListener('click', () => {
-    showAllOnMobile = true;
-    update();
-    const links = Array.from(grid.querySelectorAll('.project-card:not([hidden]) .project-card-link'));
-    links[mobileInitialLimit]?.focus();
-  });
-
-  const handleViewportChange = () => {
-    if (!mobileQuery.matches) showAllOnMobile = true;
-    else if (activeFilter === 'all') showAllOnMobile = false;
-    update();
-  };
-
-  if (typeof mobileQuery.addEventListener === 'function') {
-    mobileQuery.addEventListener('change', handleViewportChange);
-  } else if (typeof mobileQuery.addListener === 'function') {
-    mobileQuery.addListener(handleViewportChange);
-  }
-
-  update();
+  buttons.forEach((button) => button.addEventListener('click', () => {
+    selected = button.dataset.projectFilter || 'all';
+    render();
+  }));
+  render();
 })();
