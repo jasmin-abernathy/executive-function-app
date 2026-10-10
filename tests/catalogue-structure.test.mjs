@@ -25,7 +25,7 @@ for(const lang of ['fr','en']){
     const detail=(lang==='fr'?'projets/':'en/projects/')+slug+'/index.html';
     assert.ok(existsSync(join(base,detail)),lang+' : fiche manquante : '+slug);
     const html=read(detail);
-    assert.match(html, /class="detail-section"/,lang+' : contenu absent : '+slug);
+    assert.ok(html.includes('class="detail-section"') || html.includes('class="detail-section '),lang+' : contenu absent : '+slug);
     assert.ok(html.includes(lang==='fr'?'/#projets':'/en/#projets'),lang+' : lien retour absent : '+slug);
   }
   assert.ok(home.includes('/assets/style.css?v='),lang+' : CSS non référencé');
@@ -45,6 +45,8 @@ for (const p of ['projets/dendrila-privacy/index.html','en/projects/dendrila-pri
  assert.ok(!/solo/i.test(html),p+' : offre Solo supprimée');
  assert.ok(html.includes(p.startsWith('en/')?'€99':'99 €'),p+' : tarif Studio manquant');
  assert.ok(html.includes(p.startsWith('en/')?'€199':'199 €'),p+' : tarif Agence manquant');
+ assert.ok(html.includes(p.startsWith('en/')?'Advanced prototype':'Prototype avancé'),p+' : Studio doit être présenté comme avancé');
+ assert.ok(html.includes(p.startsWith('en/')?'Planning · partial features':'En conception · fonctions partielles'),p+' : Agence doit être présentée comme moins avancée');
 }
 assert.ok(read('sitemap.xml').includes('/projets/dendrila-privacy/'),'Dendrila Privacy absente du sitemap');
 console.log('OK : accueil FR/EN, 24 fiches, tarifs multi-sites, support et sitemap cohérents.');
