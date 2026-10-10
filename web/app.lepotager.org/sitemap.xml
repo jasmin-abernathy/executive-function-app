@@ -104,4 +104,6 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/sans-effort/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/sans-effort/"/>
   </url>
+  <url><loc>https://app.lepotager.org/projets/dendrila-privacy/</loc><xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-privacy/"/><xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-privacy/"/></url>
+  <url><loc>https://app.lepotager.org/en/projects/dendrila-privacy/</loc><xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-privacy/"/><xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-privacy/"/></url>
 </urlset>

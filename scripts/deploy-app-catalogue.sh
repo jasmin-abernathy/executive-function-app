@@ -61,6 +61,9 @@ grep -Fq 'class="project-card-link"' "$TMP/staging/en/index.html" || fail "L'acc
 grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/staging/index.html" || fail "La carte VeVak n'utilise pas son site dédié."
 grep -Fq 'project-card-link' "$TMP/staging/assets/style.css" || fail "Le CSS des cartes cliquables manque."
 if grep -Fq 'project-expand' "$TMP/staging/assets/app.js"; then fail "Ancien accordéon toujours présent dans le JS Git."; fi
+grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/staging/index.html" || fail "La carte Dendrila Privacy FR ne renvoie pas à sa fiche."
+grep -Fq 'href="/en/projects/dendrila-privacy/"' "$TMP/staging/en/index.html" || fail "La carte Dendrila Privacy EN ne renvoie pas à sa fiche."
+grep -Fq 'privacy-offers' "$TMP/staging/projets/dendrila-privacy/index.html" || fail "Les offres Dendrila Privacy sont absentes."
 for rel in "${PAGES[@]}"; do
   grep -Fq 'detail-section' "$TMP/staging/$rel" || fail "Fiche HTML incomplète: $rel"
 done
@@ -85,9 +88,9 @@ check_http() {
   local stamp http_root http_detail
   stamp="$(date +%s)"
   http_root="https://app.lepotager.org/?_catalogue_check=$stamp"
-  http_detail="https://app.lepotager.org/projets/fonctions-executives/?_catalogue_check=$stamp"
+  http_detail="https://app.lepotager.org/projets/dendrila-privacy/?_catalogue_check=$stamp"
   if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$http_root" -o "$TMP/public-home.html"; then
-    if grep -Fq 'class="project-card-link"' "$TMP/public-home.html" && grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/public-home.html"; then
+    if grep -Fq 'class="project-card-link"' "$TMP/public-home.html" && grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/public-home.html" && grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/public-home.html"; then
       echo "HTTP accueil : nouveau catalogue détecté."
     else
       warn "HTTP accueil : ANCIEN HTML encore servi (dossier incorrect, cache ou synchronisation non appliquée)."
@@ -96,13 +99,13 @@ check_http() {
     warn "Contrôle HTTP de l'accueil impossible depuis le serveur."
   fi
   if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$http_detail" -o "$TMP/public-detail.html"; then
-    if grep -Fq 'detail-section' "$TMP/public-detail.html"; then
-      echo "HTTP fiche TDAH : nouvelle page détectée."
+    if grep -Fq 'privacy-offers' "$TMP/public-detail.html" && grep -Fq 'https://wordpress.org/support/plugin/dendrila-privacy/' "$TMP/public-detail.html"; then
+      echo "HTTP fiche Dendrila Privacy : nouvelle page détectée."
     else
-      warn "HTTP fiche TDAH : contenu inattendu."
+      warn "HTTP fiche Dendrila Privacy : contenu inattendu."
     fi
   else
-    warn "HTTP fiche TDAH : requête impossible ou page absente."
+    warn "HTTP fiche Dendrila Privacy : requête impossible ou page absente."
   fi
 }
 

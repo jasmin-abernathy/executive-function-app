@@ -17,3 +17,26 @@
 .detail-reviewed{margin-top:26px;color:#647067;font-size:.86rem}
 .detail-header-actions{display:flex;align-items:center;gap:12px;margin-left:auto}
 @media(max-width:760px){.detail-head{grid-template-columns:1fr}.detail-facts{padding:18px}.detail-actions a{width:100%;justify-content:center}}
+
+/* Plans Dendrila Privacy: inherit the catalogue's accessible cards. */
+.privacy-intro,.privacy-progress,.privacy-feedback{max-width:none}
+.privacy-intro>p,.privacy-feedback>p{max-width:850px}
+.privacy-disclaimer{padding:12px 16px;border-left:3px solid #7caf8b;background:#f1f7f2;border-radius:0 10px 10px 0}
+.privacy-offers{grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-top:24px}
+.privacy-offers .project-card{min-width:0;min-height:600px;padding:clamp(20px,2.6vw,29px)}
+.privacy-offers .project-card h3{font-size:clamp(1.8rem,2.8vw,2.5rem);margin:18px 0 8px}
+.privacy-offers .project-symbol{margin-top:22px}
+.privacy-offers .project-summary{font-size:.98rem;line-height:1.6}
+.privacy-price{font-size:2rem;color:#173d2b;font-weight:850;line-height:1.25;margin:0 0 17px}
+.privacy-price small{display:block;margin-top:5px;color:#556a5d;font-size:.86rem;font-weight:650}
+.privacy-features{margin:20px 0;padding-left:1.3rem;color:#374a3d;font-size:.94rem;line-height:1.6}
+.privacy-features li+li{margin-top:9px}
+.privacy-note{margin:auto 0 14px;color:#53645b;font-size:.89rem;line-height:1.6}
+.privacy-unavailable{margin:0;border-top:1px solid #d5e0d8;padding-top:16px;color:#4d6655;font-size:.89rem;font-weight:800}
+.privacy-milestones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:22px}
+.privacy-milestones article{padding:22px;border:1px solid var(--line);border-radius:16px;background:#fff}
+.privacy-milestones h3{font:500 1.38rem/1.2 Georgia,serif;margin:18px 0 10px}
+.privacy-milestones p{font-size:.95rem;line-height:1.6}
+.privacy-safety{font-size:.91rem}
+@media(max-width:1000px){.privacy-offers{grid-template-columns:repeat(2,minmax(0,1fr))}.privacy-milestones{grid-template-columns:1fr}}
+@media(max-width:690px){.privacy-offers{grid-template-columns:1fr}.privacy-offers .project-card{min-height:0}}

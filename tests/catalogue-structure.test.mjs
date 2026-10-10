@@ -9,7 +9,6 @@ const external = new Map([
   ['vevak','https://vevak.lepotager.org/'],
   ['resosoin','/resosoin/'],
   ['librairie-universelle','https://librairie.lepotager.org/'],
-  ['dendrila-privacy','https://wordpress.org/plugins/dendrila-privacy/']
 ]);
 const slugs = ['vevak','fonctions-executives','resosoin','resilience-vault','dendrila-cms','mon-manager-web','communication-libre','verger-associations','atelier-epub','librairie-universelle','dendrila-privacy','sans-effort'];
 for(const lang of ['fr','en']){
@@ -37,4 +36,15 @@ const css=read('assets/style.css');
 assert.ok(!js.includes('project-expand'),'ancien accordéon non supprimé');
 assert.ok(css.includes('.project-card-link'),'CSS des cartes absent');
 assert.ok(read('sitemap.xml').includes('/projets/fonctions-executives/'),'Fiches absentes du sitemap');
-console.log('OK : accueil FR/EN, 24 fiches, liens, CSS/JS et sitemap cohérents.');
+for (const p of ['projets/dendrila-privacy/index.html','en/projects/dendrila-privacy/index.html']) {
+ const html=read(p);
+ assert.ok(html.includes('privacy-offers')&&html.includes('privacy-studio')&&html.includes('privacy-agency'),p+' : cartes manquantes');
+ assert.ok(html.includes('https://github.com/jasmin-abernathy/dendrila-privacy/issues'),p+' : demandes GitHub manquantes');
+ assert.ok(html.includes('https://wordpress.org/support/plugin/dendrila-privacy/'),p+' : forum WordPress manquant');
+ assert.ok(html.includes('https://wordpress.org/plugins/dendrila-privacy/'),p+' : installation gratuite manquante');
+ assert.ok(!/solo/i.test(html),p+' : offre Solo supprimée');
+ assert.ok(html.includes(p.startsWith('en/')?'€99':'99 €'),p+' : tarif Studio manquant');
+ assert.ok(html.includes(p.startsWith('en/')?'€199':'199 €'),p+' : tarif Agence manquant');
+}
+assert.ok(read('sitemap.xml').includes('/projets/dendrila-privacy/'),'Dendrila Privacy absente du sitemap');
+console.log('OK : accueil FR/EN, 24 fiches, tarifs multi-sites, support et sitemap cohérents.');

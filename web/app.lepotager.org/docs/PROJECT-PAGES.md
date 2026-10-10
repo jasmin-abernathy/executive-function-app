@@ -1,6 +1,6 @@
 # Catalogue public du Verger — publication
 
-Le catalogue est composé de deux accueils HTML, 24 fiches détaillées FR/EN et de ressources CSS/JS. Les fiches VeVak, RésoSoin, Librairie universelle et Dendrila Privacy restent disponibles à leur ancienne adresse, mais les cartes principales pointent directement vers leurs pages officielles.
+Le catalogue est composé de deux accueils HTML, 24 fiches détaillées FR/EN et de ressources CSS/JS. Les cartes VeVak, RésoSoin et Librairie universelle pointent vers leurs sites officiels. Dendrila Privacy renvoie vers sa fiche FR/EN enrichie de trois cartes : gratuit, Studio (prototype multi-sites avancé, prix envisagé 99 €/an pour 10 sites), Agence (fonctions encore à développer, prix envisagé 199 €/an pour 50 sites). Aucune offre Solo, aucune souscription active. Les pages indiquent les liens de demandes GitHub et de support WordPress.org.
 
 ## Diagnostic et synchronisation o2switch
 
@@ -39,4 +39,12 @@ Le test garantit que les accueils FR/EN comportent chacun 12 cartes et destinati
 
 ## À vérifier après publication
 
-Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 8 cartes avec fiches locales et les 4 cartes ouvrant des pages dédiées. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
+Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 9 cartes avec fiches locales et les 3 cartes ouvrant des services dédiés. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
+
+## Statuts et validation Dendrila Privacy
+
+- Gratuit : version publiée 0.0.5 (dépôt dendrila-privacy).
+- Studio : prototype plus avancé (dendrila-monitor, branche feature/monitor-remote-link), réception HTTPS signée, tableau de bord, regroupements et CSV. Tests de bout en bout sur plusieurs WordPress indépendants requis.
+- Agence : le socle Studio existe, mais les rapports, droits délégués, comparaison des environnements et licences restent à développer.
+- Prix de travail seulement : Studio 99 €/an pour 10 sites, Agence 199 €/an pour 50 sites, selon docs/OFFRES-AGENCES.md. La surveillance locale et les alertes locales restent prévues gratuitement.
+- Le déploiement depuis GitHub vers le DocumentRoot o2switch doit être vérifié indépendamment avec le script de diagnostic, puis une comparaison du HTML public.

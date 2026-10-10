@@ -7,7 +7,7 @@
 <link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-privacy/">
 <link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-privacy/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/style.css?v=20261009-catalogue"><link rel="stylesheet" href="/assets/project-detail.css?v=20261009"><link rel="stylesheet" href="/accessibility.css">
+<link rel="stylesheet" href="/assets/style.css?v=20261009-catalogue"><link rel="stylesheet" href="/assets/project-detail.css?v=20261010-offres"><link rel="stylesheet" href="/accessibility.css">
 <script defer src="/accessibility.js"></script></head>
 <body><a class="skip-link" href="#contenu">Skip to content</a>
 <header class="site-header"><div class="shell header-inner"><a class="brand" href="/en/" aria-label="Le Verger du Numérique">
@@ -19,20 +19,53 @@
 </div></div></header>
 <main id="contenu" class="detail-page"><div class="shell">
 <a class="detail-back" href="/en/#projets">← Back to all projects</a>
-<div class="detail-head"><div><div class="project-tags" aria-label="Categories"><span>Security & data</span><span>Services</span></div><h1>Dendrila Privacy</h1><p class="detail-lede">A local-first WordPress plugin for analysing trackers and third-party services, keeping privacy documentation up to date and optionally managing consent without advertising telemetry.</p></div>
+<div class="detail-head"><div><div class="project-tags" aria-label="Categories"><span>Security & data</span><span>Services</span></div><h1>Dendrila Privacy</h1><p class="detail-lede">A free WordPress plugin for analysing trackers and third-party services, documenting privacy practices and optionally managing consent. Studio and Agency are multi-site tools still in development.</p></div>
 <aside class="detail-facts"><dl><dt>Current stage</dt><dd>Version 0.0.5 · published</dd>
-<dt>Platform</dt><dd>WordPress · GPL</dd><dt>Reviewed</dt><dd><time datetime="2026-10-09">9 October 2026</time></dd></dl></aside></div>
-<section class="detail-section"><h2>What it does and what is planned</h2><ul><li>WordPress tracker and third-party service analysis</li>
-<li>Locally stored privacy documentation and audit results</li>
-<li>Optional consent management and organisation checks</li></ul></section>
-<section class="detail-section"><h2>Latest development</h2><p>Version 0.0.5 on WordPress.org, with France/Norway organisation lookup and VIES checks.</p></section>
-<section class="detail-section"><h2>Known limitations and next steps</h2><ul><li>Automated scanning does not certify GDPR compliance.</li>
-<li>Purpose, settings and documents must be reviewed for each website.</li></ul></section>
-<section class="detail-section"><h2>Learn more and participate</h2>
-<div class="detail-actions"><a href="https://wordpress.org/plugins/dendrila-privacy/">WordPress.org plugin <span aria-hidden="true">↗</span></a>
-<a href="https://github.com/jasmin-abernathy/dendrila-privacy">Source code <span aria-hidden="true">↗</span></a></div>
-<div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Dendrila%20Privacy">Ask about this project →</a></div></section>
-<p class="detail-reviewed">Information reviewed on 9 October 2026, from the project repositories and existing catalogue.</p>
+<dt>Platform</dt><dd>WordPress · GPL</dd><dt>Reviewed</dt><dd><time datetime="2026-10-10">10 October 2026</time></dd></dl></aside></div>
+<section class="detail-section privacy-intro"><h2>Versions and pricing</h2><p>The plugin remains free, without artificial restrictions. Local monitoring and alerts will also remain free; automation is still in development. Paid plans focus only on coordinating multiple sites and clients.</p><p class="privacy-disclaimer">Studio and Agency prices are <strong>provisional estimates, not final prices</strong>. No paid subscription is available yet.</p>
+<div class="projects-grid privacy-offers"><article class="project-card privacy-offer privacy-free">
+<div class="project-topline"><span class="status status-active">Available · version 0.0.5</span><span class="project-kind">WordPress · GPL</span></div>
+<div class="project-symbol symbol-line" aria-hidden="true">P</div>
+<h3>Free</h3><p class="privacy-price">€0<small>no subscription</small></p>
+<p class="project-summary">Audit and document your website without payment or mandatory commercial monitoring.</p>
+<ul class="privacy-features"><li>Standard or progressive scans for trackers and third-party services.</li>
+<li>Privacy assistant and draft legal, privacy and cookie pages.</li>
+<li>Optional consent management, disabled by default, with blocking of recognised optional services.</li>
+<li>Conservative support for Gutenberg, Divi and Elementor.</li></ul>
+<p class="privacy-note">Coming free of charge: automated local monitoring and alerts.</p><a class="project-card-link" href="https://wordpress.org/plugins/dendrila-privacy/">Install for free on WordPress.org <span aria-hidden="true">↗</span></a>
+</article>
+<article class="project-card privacy-offer privacy-studio">
+<div class="project-topline"><span class="status status-dev">Advanced prototype · testing needed</span><span class="project-kind">Up to 10 sites</span></div>
+<div class="project-symbol symbol-soft" aria-hidden="true">S</div>
+<h3>Studio</h3><p class="privacy-price">€99<small>/ year, estimated</small></p>
+<p class="project-summary">Manage several WordPress sites in one dashboard, grouped by client and environment.</p>
+<ul class="privacy-features"><li>Implemented in prototype: protected central dashboard, clients and environments.</li>
+<li>Implemented in prototype: signed HTTPS connection, connection state and silent-site detection.</li>
+<li>Implemented in prototype: CSV export of installations.</li>
+<li>Still to validate: two separate real WordPress sites, outage recovery, easier setup and licences.</li></ul>
+<p class="privacy-note">Further along than Agency, but not production-validated.</p><p class="privacy-unavailable">Subscription not available</p>
+</article>
+<article class="project-card privacy-offer privacy-agency">
+<div class="project-topline"><span class="status status-explore">Planning · partial features</span><span class="project-kind">Up to 50 sites</span></div>
+<div class="project-symbol symbol-line" aria-hidden="true">A</div>
+<h3>Agency</h3><p class="privacy-price">€199<small>/ year, estimated</small></p>
+<p class="project-summary">For teams coordinating many websites, clients and contributors.</p>
+<ul class="privacy-features"><li>Shared Studio multi-site foundation exists, requiring live validation.</li>
+<li>To develop: usable client PDF reports.</li>
+<li>To develop: staging/production comparisons and delegated access.</li>
+<li>To develop: data separation between agencies, permissions, licences and billing.</li></ul>
+<p class="privacy-note">Agency-specific features are mainly on the roadmap.</p><p class="privacy-unavailable">Subscription not available</p>
+</article></div></section>
+<section class="detail-section privacy-progress"><h2>Actual development status</h2><div class="privacy-milestones"><article><span class="status status-active">Published</span><h3>Free plugin</h3><p>Version 0.0.5 is available on WordPress.org, with scans, documentation and optional consent.</p></article>
+<article><span class="status status-dev">Prototype</span><h3>Local monitoring and Studio</h3><p>Local history, alerts and central multi-site dashboard prepared. Real-world HTTPS and multi-client testing still needed.</p></article>
+<article><span class="status status-explore">Planned</span><h3>Agency</h3><p>Client reports, delegated access, environment comparison and licensing are not operational.</p></article></div></section>
+<section class="detail-section privacy-feedback"><h2>Requests, bugs and complaints</h2><p>Suggest features, report reproducible issues or ask for help. GitHub is for feature requests and issue tracking; WordPress.org has a public support forum.</p>
+<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/dendrila-privacy/issues">Issues and requests on GitHub <span aria-hidden="true">↗</span></a>
+<a href="https://wordpress.org/support/plugin/dendrila-privacy/">WordPress.org support <span aria-hidden="true">↗</span></a>
+<a href="https://github.com/jasmin-abernathy/dendrila-privacy">Source code on GitHub <span aria-hidden="true">↗</span></a></div>
+<p class="privacy-safety">Automated scans do not certify GDPR compliance. Never share passwords, secret keys or personal data in public issues. For confidential matters, write to <a href="mailto:contact@lepotager.org?subject=Dendrila%20Privacy">contact@lepotager.org</a>.</p>
+</section>
+<p class="detail-reviewed">Information reviewed on 10 October 2026 from Dendrila Privacy and Dendrila Monitor repositories.</p>
 <a class="detail-back" href="/en/#projets">← Back to all projects</a>
 </div></main><footer class="site-footer"><div class="shell footer-grid"><div><a class="brand brand-footer" href="/en/"><span><strong>Le Verger</strong><small>du Numérique</small></span></a>
 <p>Useful, open and privacy-minded digital tools.</p></div><div class="footer-links">
