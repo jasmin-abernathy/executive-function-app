@@ -42,7 +42,7 @@ for(const lang of ['fr','en']){
     const detail=(lang==='fr'?'projets/':'en/projects/')+slug+'/index.html';
     assert.ok(existsSync(join(base,detail)),lang+' : fiche absente '+slug);
     const html=read(detail);
-    assert.ok(html.includes('class="detail-section"'),lang+' : contenu absent '+slug);
+    assert.ok(html.includes('class="detail-section"') || html.includes('class="detail-section '),lang+' : contenu absent '+slug);
     assert.ok(html.includes(lang==='fr'?'/#projets':'/en/#projets'),lang+' : retour manquant '+slug);
     assert.ok(html.includes('class="detail-category"'),lang+' : type absent '+slug);
   }
