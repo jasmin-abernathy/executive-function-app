@@ -64,6 +64,8 @@ if grep -Fq 'project-expand' "$TMP/staging/assets/app.js"; then fail "Ancien acc
 grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/staging/index.html" || fail "La carte Dendrila Privacy FR ne renvoie pas à sa fiche."
 grep -Fq 'href="/en/projects/dendrila-privacy/"' "$TMP/staging/en/index.html" || fail "La carte Dendrila Privacy EN ne renvoie pas à sa fiche."
 grep -Fq 'privacy-offers' "$TMP/staging/projets/dendrila-privacy/index.html" || fail "Les offres Dendrila Privacy sont absentes."
+grep -Fq '20261010-mobilefix1' "$TMP/staging/projets/dendrila-privacy/index.html" || fail "Le CSS de la fiche Dendrila n'est pas actualisé."
+grep -Fq '.privacy-offers .project-card {' "$TMP/staging/assets/project-detail.css" || fail "Le correctif mobile des cartes Dendrila est absent."
 for rel in "${PAGES[@]}"; do
   grep -Fq 'detail-section' "$TMP/staging/$rel" || fail "Fiche HTML incomplète: $rel"
 done

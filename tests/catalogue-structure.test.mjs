@@ -47,6 +47,11 @@ for (const p of ['projets/dendrila-privacy/index.html','en/projects/dendrila-pri
  assert.ok(html.includes(p.startsWith('en/')?'€199':'199 €'),p+' : tarif Agence manquant');
  assert.ok(html.includes(p.startsWith('en/')?'Advanced prototype':'Prototype avancé'),p+' : Studio doit être présenté comme avancé');
  assert.ok(html.includes(p.startsWith('en/')?'Planning · partial features':'En conception · fonctions partielles'),p+' : Agence doit être présentée comme moins avancée');
+ assert.ok(html.includes('class="privacy-detail"'),p+' : la page manque son sélecteur CSS dédié');
+ assert.ok(html.includes('/assets/project-detail.css?v=20261010-mobilefix1'),p+' : cache du CSS non invalidé');
 }
 assert.ok(read('sitemap.xml').includes('/projets/dendrila-privacy/'),'Dendrila Privacy absente du sitemap');
-console.log('OK : accueil FR/EN, 24 fiches, tarifs multi-sites, support et sitemap cohérents.');
+const detailCss=read('assets/project-detail.css');
+assert.match(detailCss,/\.privacy-offers \.project-card\s*\{\s*display:\s*flex\s*;/,'Les cartes Dendrila reprennent la grille compacte mobile du catalogue');
+assert.match(detailCss,/\.privacy-detail \.site-header \.header-inner\s*\{/,'Le bandeau Dendrila doit se réorganiser sur mobile');
+console.log('OK : accueils FR/EN, 24 fiches, offres Dendrila responsives, support et sitemap cohérents.');

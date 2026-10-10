@@ -40,3 +40,51 @@
 .privacy-safety{font-size:.91rem}
 @media(max-width:1000px){.privacy-offers{grid-template-columns:repeat(2,minmax(0,1fr))}.privacy-milestones{grid-template-columns:1fr}}
 @media(max-width:690px){.privacy-offers{grid-template-columns:1fr}.privacy-offers .project-card{min-height:0}}
+
+/* Dendrila offers are full content cards. The mobile catalogue switches
+   .project-card to a two-column GRID for compact catalogue previews.
+   That grid must not leak into the long pricing cards. */
+.privacy-offers .project-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+.privacy-offers .project-card > * { min-width: 0; }
+.privacy-offers .project-card .project-topline { margin-bottom: 0; }
+.privacy-offers .project-card .project-symbol {
+  align-self: flex-start;
+  flex-shrink: 0;
+}
+.privacy-offers .project-card h3 { align-self: stretch; }
+.privacy-offers .project-card .project-summary {
+  grid-column: auto;
+  margin-top: 0;
+}
+.privacy-offers .privacy-features { width: 100%; }
+@media (max-width: 690px) {
+  .privacy-offers { grid-template-columns: minmax(0, 1fr); }
+  .privacy-offers .project-card {
+    width: 100%;
+    min-height: 0;
+    padding: 22px;
+  }
+  .privacy-offers .project-card .project-card-link { margin-top: 14px; }
+}
+/* The full-width catalogue header also needs room for the language selector
+   and the accessibility toggle on narrow phones and at enlarged text sizes. */
+@media (max-width: 540px) {
+  .privacy-detail .site-header .header-inner {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-block: 10px;
+  }
+  .privacy-detail .detail-header-actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .privacy-detail .detail-head h1 {
+    overflow-wrap: break-word;
+  }
+}

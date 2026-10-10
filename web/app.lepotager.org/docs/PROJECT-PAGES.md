@@ -41,6 +41,12 @@ Le test garantit que les accueils FR/EN comportent chacun 12 cartes et destinati
 
 Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 9 cartes avec fiches locales et les 3 cartes ouvrant des services dédiés. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
 
+## Correctif mobile Dendrila Privacy du 10 octobre 2026
+
+Le catalogue utilise volontairement des cartes compactes en **grille à deux colonnes sur mobile**. Réutiliser la classe `project-card` sur la fiche Dendrila forçait les listes et prix dans une colonne d'environ 46 px : texte vertical illisible.
+
+La feuille `assets/project-detail.css` rétablit **le flux flex vertical uniquement pour les cartes `.privacy-offers .project-card`**, garde une carte par ligne sur téléphone et réorganise l'en-tête du projet sur petit écran. Les deux fiches FR/EN utilisent une version CSS distincte pour éviter un cache ancien. Contrôler la largeur du contenu à 320, 375, 390, 430, 768 et 1024 px, et ne pas confondre déploiement Git avec HTML/CSS réellement servis par o2switch.
+
 ## Statuts et validation Dendrila Privacy
 
 - Gratuit : version publiée 0.0.5 (dépôt dendrila-privacy).
