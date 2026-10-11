@@ -133,7 +133,7 @@
     <div class="section-heading">
       <p class="eyebrow">Projects</p>
       <h2>From laboratory work to real pilots.</h2>
-      <p>Status checked against the repositories on October 6, 2026. Categories are intentionally broad: they help find a need without turning the page into an endless taxonomy.</p>
+      <p>Projects grouped by product type: WordPress, website management, applications and web apps. Progress reviewed on 11 October 2026.</p>
     </div>
 
     <div class="project-toolbar" aria-label="Filter projects">
@@ -142,7 +142,7 @@
         <button class="project-filter" type="button" data-project-filter="wordpress" aria-pressed="false" aria-controls="projects-list">WordPress</button>
         <button class="project-filter" type="button" data-project-filter="sites" aria-pressed="false" aria-controls="projects-list">Website management</button>
         <button class="project-filter" type="button" data-project-filter="applications" aria-pressed="false" aria-controls="projects-list">Apps</button>
-        <button class="project-filter" type="button" data-project-filter="autres" aria-pressed="false" aria-controls="projects-list">Other</button>
+        <button class="project-filter" type="button" data-project-filter="webapps" aria-pressed="false" aria-controls="projects-list">Web apps</button>
       </div>
       <p class="project-count" data-project-count aria-live="polite"></p>
     </div>
@@ -239,7 +239,7 @@
       </section>
 
       <section class="project-group" data-project-group="applications" aria-labelledby="category-applications">
-        <div class="project-group-heading"><div><h3 id="category-applications">Apps</h3><p>Mobile applications for everyday use.</p></div><span class="project-group-total">3 projects</span></div>
+        <div class="project-group-heading"><div><h3 id="category-applications">Apps</h3><p>Mobile apps and installable PWAs, including Android development.</p></div><span class="project-group-total">4 projects</span></div>
         <div class="projects-grid">
 <article class="project-card project-featured" data-project-category="applications">
         <div class="project-topline"><span class="status status-active">Android beta · Play validation</span><span class="project-kind">Android · FOSS</span></div>
@@ -264,13 +264,21 @@
         <p class="project-summary">A local vault for backing up explicitly selected data and rapidly making local data inaccessible in an emergency situation.</p>
         <a class="project-card-link" href="/en/projects/resilience-vault/" aria-label="Explore project Resilience Vault">Explore project <span aria-hidden="true">→</span></a>
       </article>
+
+<article class="project-card" data-project-category="applications">
+        <div class="project-topline"><span class="status status-research">PWA v0.3 · v0.4 in preparation</span><span class="project-kind">PWA · Android · AGPL</span></div>
+        <div class="project-symbol symbol-soft" aria-hidden="true">A</div>
+        <h3>Verger Associations</h3>
+        <p class="project-summary">A local-first PWA for members, meetings, decisions and association activities, with an Android version in development.</p>
+        <a class="project-card-link" href="/en/projects/verger-associations/" aria-label="Explore project Verger Associations">Explore project <span aria-hidden="true">→</span></a>
+      </article>
         </div>
       </section>
 
-      <section class="project-group" data-project-group="autres" aria-labelledby="category-autres">
-        <div class="project-group-heading"><div><h3 id="category-autres">Other</h3><p>Forms, publishing, culture and collective tools.</p></div><span class="project-group-total">6 projects</span></div>
+      <section class="project-group" data-project-group="webapps" aria-labelledby="category-webapps">
+        <div class="project-group-heading"><div><h3 id="category-webapps">Web apps</h3><p>Browser-based applications, online services and self-hostable tools.</p></div><span class="project-group-total">5 projects</span></div>
         <div class="projects-grid">
-<article class="project-card" data-project-category="autres">
+<article class="project-card" data-project-category="webapps">
         <div class="project-topline"><span class="status status-research">Labs · device testing pending</span><span class="project-kind">Web · free messaging</span></div>
         <div class="project-symbol symbol-soft" aria-hidden="true">C</div>
         <h3>Communication libre</h3>
@@ -278,23 +286,15 @@
         <a class="project-card-link" href="/en/projects/communication-libre/" aria-label="Explore project Communication libre">Explore project <span aria-hidden="true">→</span></a>
       </article>
 
-<article class="project-card" data-project-category="autres">
-        <div class="project-topline"><span class="status status-research">Pilot 0.2 · PWA/Android in preparation</span><span class="project-kind">Webxdc · Delta Chat · AGPL</span></div>
-        <div class="project-symbol symbol-soft" aria-hidden="true">A</div>
-        <h3>Verger Associations</h3>
-        <p class="project-summary">Small, lightweight tools for meetings, decisions, actions and association organisation, deliberately kept separate from the messaging layer.</p>
-        <a class="project-card-link" href="/en/projects/verger-associations/" aria-label="Explore project Verger Associations">Explore project <span aria-hidden="true">→</span></a>
-      </article>
-
-<article class="project-card" data-project-category="autres">
-        <div class="project-topline"><span class="status status-dev">Advanced prototype · human review</span><span class="project-kind">Web · local-first</span></div>
+<article class="project-card" data-project-category="webapps">
+        <div class="project-topline"><span class="status status-dev">Web app online · active development</span><span class="project-kind">Web · local-first</span></div>
         <div class="project-symbol symbol-line" aria-hidden="true">E</div>
         <h3>Atelier EPUB</h3>
-        <p class="project-summary">A local-first ebook editor for importing, cleaning, structuring and preparing accessible EPUB files without uploading the manuscript to a server by default.</p>
-        <a class="project-card-link" href="/en/projects/atelier-epub/" aria-label="Explore project Atelier EPUB">Explore project <span aria-hidden="true">→</span></a>
+        <p class="project-summary">An online local-first ebook editor for creating and exporting EPUB files. Live at epub-gen.lepotager.org, with features still in development.</p>
+        <a class="project-card-link" href="https://epub-gen.lepotager.org/" aria-label="Open Atelier EPUB online">Open the web app <span aria-hidden="true">→</span></a>
       </article>
 
-<article class="project-card" data-project-category="autres">
+<article class="project-card" data-project-category="webapps">
         <div class="project-topline"><span class="status status-dev">Web alpha · improved search</span><span class="project-kind">Web · AGPL</span></div>
         <div class="project-symbol symbol-line" aria-hidden="true">L</div>
         <h3>Librairie universelle</h3>
@@ -302,7 +302,7 @@
         <a class="project-card-link" href="https://librairie.lepotager.org/" aria-label="Visit the book search website">Visit the book search website <span aria-hidden="true">↗</span></a>
       </article>
 
-<article class="project-card project-muted" data-project-category="autres">
+<article class="project-card project-muted" data-project-category="webapps">
         <div class="project-topline"><span class="status status-explore">Comparator design · not launched</span><span class="project-kind">Web · AGPL</span></div>
         <div class="project-symbol symbol-muted" aria-hidden="true">＋</div>
         <h3>Delivery aggregator</h3>
@@ -310,7 +310,7 @@
         <a class="project-card-link" href="/en/projects/sans-effort/" aria-label="Explore project Delivery aggregator">Explore project <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="project-card" data-project-category="autres">
+<article class="project-card" data-project-category="webapps">
         <div class="project-topline"><span class="status status-dev">0.1.0-alpha · technical demo</span><span class="project-kind">PHP · AGPL-3.0</span></div>
         <div class="project-symbol symbol-soft" aria-hidden="true">F</div><h3>Dendrila Forms</h3>
         <p class="project-summary">An open-source engine for surveys and interviews, configured with JSON files and self-hosted. For fictional test data only at this stage.</p>

@@ -134,7 +134,7 @@
     <div class="section-heading">
       <p class="eyebrow">Projets</p>
       <h2>Du laboratoire au pilote.</h2>
-      <p>Projets regroupés par type de produit : WordPress, gestion de sites, applications et autres outils. États d’avancement revus le 11 octobre 2026.</p>
+      <p>Projets regroupés par type de produit : WordPress, gestion de sites, applications et applis web. États d’avancement revus le 11 octobre 2026.</p>
     </div>
 
     <div class="project-toolbar" aria-label="Filtrer les projets">
@@ -143,7 +143,7 @@
         <button class="project-filter" type="button" data-project-filter="wordpress" aria-pressed="false" aria-controls="projects-list">WordPress</button>
         <button class="project-filter" type="button" data-project-filter="sites" aria-pressed="false" aria-controls="projects-list">Gestion de sites</button>
         <button class="project-filter" type="button" data-project-filter="applications" aria-pressed="false" aria-controls="projects-list">Applications</button>
-        <button class="project-filter" type="button" data-project-filter="autres" aria-pressed="false" aria-controls="projects-list">Autres</button>
+        <button class="project-filter" type="button" data-project-filter="webapps" aria-pressed="false" aria-controls="projects-list">Applis web</button>
       </div>
       <p class="project-count" data-project-count aria-live="polite"></p>
     </div>
@@ -252,7 +252,7 @@
       </section>
 
       <section class="project-group" data-project-group="applications" aria-labelledby="category-applications">
-        <div class="project-group-heading"><div><h3 id="category-applications">Applications</h3><p>Applications mobiles pour un usage direct.</p></div><span class="project-group-total">3 projets</span></div>
+        <div class="project-group-heading"><div><h3 id="category-applications">Applications</h3><p>Applications mobiles et PWA installables, dont des projets Android.</p></div><span class="project-group-total">4 projets</span></div>
         <div class="projects-grid">
 <article class="project-card project-featured" data-project-category="applications">
         <div class="project-topline">
@@ -286,13 +286,24 @@
         <p class="project-summary">Un coffre local pour sauvegarder des données explicitement choisies puis rendre rapidement les données locales inaccessibles en situation d’urgence.</p>
         <a class="project-card-link" href="/projets/resilience-vault/" aria-label="Découvrir le projet Resilience Vault">Découvrir le projet <span aria-hidden="true">→</span></a>
       </article>
+
+<article class="project-card" data-project-category="applications">
+        <div class="project-topline">
+          <span class="status status-research">PWA v0.3 · v0.4 en préparation</span>
+          <span class="project-kind">PWA · Android · AGPL</span>
+        </div>
+        <div class="project-symbol symbol-soft" aria-hidden="true">A</div>
+        <h3>Verger Associations</h3>
+        <p class="project-summary">Une application associative local-first pour les membres, réunions, décisions et actions, avec une version Android en préparation.</p>
+        <a class="project-card-link" href="/projets/verger-associations/" aria-label="Découvrir le projet Verger Associations">Découvrir le projet <span aria-hidden="true">→</span></a>
+      </article>
         </div>
       </section>
 
-      <section class="project-group" data-project-group="autres" aria-labelledby="category-autres">
-        <div class="project-group-heading"><div><h3 id="category-autres">Autres</h3><p>Formulaires, édition, culture et outils collectifs.</p></div><span class="project-group-total">6 projets</span></div>
+      <section class="project-group" data-project-group="webapps" aria-labelledby="category-webapps">
+        <div class="project-group-heading"><div><h3 id="category-webapps">Applis web</h3><p>Applications accessibles dans un navigateur, en ligne ou à auto-héberger.</p></div><span class="project-group-total">5 projets</span></div>
         <div class="projects-grid">
-<article class="project-card" data-project-category="autres">
+<article class="project-card" data-project-category="webapps">
         <div class="project-topline">
           <span class="status status-research">Laboratoires · tests appareils à faire</span>
           <span class="project-kind">Web · messagerie libre</span>
@@ -303,29 +314,18 @@
         <a class="project-card-link" href="/projets/communication-libre/" aria-label="Découvrir le projet Communication libre">Découvrir le projet <span aria-hidden="true">→</span></a>
       </article>
 
-<article class="project-card" data-project-category="autres">
+<article class="project-card" data-project-category="webapps">
         <div class="project-topline">
-          <span class="status status-research">Pilote 0.2 · PWA/Android en préparation</span>
-          <span class="project-kind">Webxdc · Delta Chat · AGPL</span>
-        </div>
-        <div class="project-symbol symbol-soft" aria-hidden="true">A</div>
-        <h3>Verger Associations</h3>
-        <p class="project-summary">Des mini-outils sobres pour réunions, décisions, actions et organisation associative, séparés de la messagerie elle-même.</p>
-        <a class="project-card-link" href="/projets/verger-associations/" aria-label="Découvrir le projet Verger Associations">Découvrir le projet <span aria-hidden="true">→</span></a>
-      </article>
-
-<article class="project-card" data-project-category="autres">
-        <div class="project-topline">
-          <span class="status status-dev">Prototype avancé · validation humaine</span>
+          <span class="status status-dev">Appli web en ligne · développement actif</span>
           <span class="project-kind">Web · local-first</span>
         </div>
         <div class="project-symbol symbol-line" aria-hidden="true">E</div>
         <h3>Atelier EPUB</h3>
-        <p class="project-summary">Un éditeur de livres numériques local-first pour importer, nettoyer, structurer et préparer des EPUB accessibles sans envoyer le manuscrit sur un serveur par défaut.</p>
-        <a class="project-card-link" href="/projets/atelier-epub/" aria-label="Découvrir le projet Atelier EPUB">Découvrir le projet <span aria-hidden="true">→</span></a>
+        <p class="project-summary">Un éditeur d’EPUB en ligne pour créer, modifier et exporter des livres numériques local-first, sans envoyer les manuscrits à un serveur par défaut.</p>
+        <a class="project-card-link" href="https://epub-gen.lepotager.org/" aria-label="Ouvrir Atelier EPUB en ligne">Ouvrir l’appli web <span aria-hidden="true">→</span></a>
       </article>
 
-<article class="project-card" data-project-category="autres">
+<article class="project-card" data-project-category="webapps">
         <div class="project-topline">
           <span class="status status-dev">Alpha web · recherches améliorées</span>
           <span class="project-kind">Web · AGPL</span>
@@ -336,7 +336,7 @@
         <a class="project-card-link" href="https://librairie.lepotager.org/" aria-label="Accéder à la librairie">Accéder à la librairie <span aria-hidden="true">↗</span></a>
       </article>
 
-<article class="project-card project-muted" data-project-category="autres">
+<article class="project-card project-muted" data-project-category="webapps">
         <div class="project-topline">
           <span class="status status-dev">Comparateur en conception · non lancé</span>
           <span class="project-kind">Web · AGPL</span>
@@ -347,7 +347,7 @@
         <a class="project-card-link" href="/projets/sans-effort/" aria-label="Découvrir le projet Sans Effort">Découvrir le projet <span aria-hidden="true">→</span></a>
       </article>
 
-      <article class="project-card" data-project-category="autres">
+<article class="project-card" data-project-category="webapps">
         <div class="project-topline"><span class="status status-dev">0.1.0-alpha · démonstration technique</span><span class="project-kind">PHP · AGPL-3.0</span></div>
         <div class="project-symbol symbol-soft" aria-hidden="true">F</div><h3>Dendrila Forms</h3>
         <p class="project-summary">Moteur libre de questionnaires, enquêtes et entretiens, configurable par fichiers JSON et auto-hébergeable. Pour des données fictives uniquement à ce stade.</p>

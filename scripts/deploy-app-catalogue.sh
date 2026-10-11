@@ -64,6 +64,10 @@ for lang in index.html en/index.html; do
   grep -Fq 'Dendrila Forms' "$TMP/staging/$lang" || fail "Dendrila Forms absent: $lang"
   grep -Fq 'Dendrila Accessibility Assistant' "$TMP/staging/$lang" || fail "Nouveau catalogue WordPress absent: $lang"
   grep -Fq 'Dendrila Age Assurance' "$TMP/staging/$lang" || fail "Age Assurance absent: $lang"
+  grep -Fq 'data-project-filter="webapps"' "$TMP/staging/$lang" || fail "Filtre Applis web absent : $lang"
+  grep -Fq 'data-project-group="webapps"' "$TMP/staging/$lang" || fail "Section Applis web absente : $lang"
+  grep -Fq 'href="https://epub-gen.lepotager.org/"' "$TMP/staging/$lang" || fail "Lien vers l'outil EPUB en ligne absent : $lang"
+  if grep -Eq 'data-project-(filter|group|category)="autres"' "$TMP/staging/$lang"; then fail "Ancienne rubrique Autres encore présente : $lang"; fi
 done
 grep -Fq 'https://github.com/jasmin-abernathy/dendrila-forms' "$TMP/staging/projets/dendrila-forms/index.html" || fail "Fiche Dendrila Forms invalide."
 grep -Fq 'Aucun test de soumission réelle' "$TMP/staging/projets/dendrila-form-sentinel/index.html" || fail "Limites Form Sentinel absentes."
@@ -102,7 +106,7 @@ check_http() {
   http_root="https://app.lepotager.org/?_catalogue_check=$stamp"
   http_detail="https://app.lepotager.org/projets/dendrila-privacy/?_catalogue_check=$stamp"
   if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$http_root" -o "$TMP/public-home.html"; then
-    if grep -Fq 'class="project-card-link"' "$TMP/public-home.html" && grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/public-home.html" && grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/public-home.html" && grep -Fq 'Dendrila Forms' "$TMP/public-home.html" && grep -Fq 'data-project-group="sites"' "$TMP/public-home.html" && grep -Fq 'Dendrila Accessibility Assistant' "$TMP/public-home.html" && grep -Fq 'Dendrila Age Assurance' "$TMP/public-home.html"; then
+    if grep -Fq 'class="project-card-link"' "$TMP/public-home.html" && grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/public-home.html" && grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/public-home.html" && grep -Fq 'Dendrila Forms' "$TMP/public-home.html" && grep -Fq 'data-project-group="sites"' "$TMP/public-home.html" && grep -Fq 'Dendrila Accessibility Assistant' "$TMP/public-home.html" && grep -Fq 'Dendrila Age Assurance' "$TMP/public-home.html" && grep -Fq 'data-project-group="webapps"' "$TMP/public-home.html" && grep -Fq 'href="https://epub-gen.lepotager.org/"' "$TMP/public-home.html"; then
       echo "HTTP accueil : nouveau catalogue détecté."
     else
       warn "HTTP accueil : ANCIEN HTML encore servi (dossier incorrect, cache ou synchronisation non appliquée)."

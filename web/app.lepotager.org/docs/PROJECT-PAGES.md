@@ -1,6 +1,6 @@
 # Catalogue public du Verger — publication
 
-Le catalogue est composé de deux accueils HTML, 38 fiches détaillées FR/EN et de ressources CSS/JS. Les cartes VeVak, RésoSoin et Librairie universelle pointent vers leurs sites officiels. Dendrila Privacy renvoie vers sa fiche FR/EN enrichie de trois cartes : gratuit, Studio (prototype multi-sites avancé, prix envisagé 99 €/an pour 10 sites), Agence (fonctions encore à développer, prix envisagé 199 €/an pour 50 sites). Aucune offre Solo, aucune souscription active. Les pages indiquent les liens de demandes GitHub et de support WordPress.org.
+Le catalogue est composé de deux accueils HTML, 38 fiches détaillées FR/EN et de ressources CSS/JS. Les cartes VeVak, RésoSoin, Librairie universelle et Atelier EPUB pointent vers leurs sites officiels. Dendrila Privacy renvoie vers sa fiche FR/EN enrichie de trois cartes : gratuit, Studio (prototype multi-sites avancé, prix envisagé 99 €/an pour 10 sites), Agence (fonctions encore à développer, prix envisagé 199 €/an pour 50 sites). Aucune offre Solo, aucune souscription active. Les pages indiquent les liens de demandes GitHub et de support WordPress.org.
 
 ## Diagnostic et synchronisation o2switch
 
@@ -39,7 +39,7 @@ Le test garantit que les accueils FR/EN comportent chacun 19 cartes et destinati
 
 ## À vérifier après publication
 
-Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 16 cartes avec fiches locales et les 3 cartes ouvrant des services dédiés. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
+Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 15 cartes ouvrant des fiches locales et les 4 cartes ouvrant des services dédiés. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
 
 ## Correctif mobile Dendrila Privacy du 10 octobre 2026
 
@@ -59,7 +59,7 @@ La feuille `assets/project-detail.css` rétablit **le flux flex vertical uniquem
 
 Les anciens tags (autonomie, sécurité, collectifs, services, culture) ont été remplacés par quatre **familles exclusives** : WordPress, gestion de sites, applications et autres. Les pages FR/EN affichent les sections même sans JavaScript, et les filtres ne cachent plus arbitrairement les dernières cartes sur mobile. Toutes les fiches locales reprennent une famille unique.
 
-**Dendrila Forms** apparaît dans « Autres » avec ses fiches française et anglaise et ses liens vers le dépôt et ses issues GitHub. État : **0.1.0-alpha, démonstration technique**, exclusivement avec des données fictives. Ne pas le présenter comme prêt à recueillir des données personnelles/sensibles ou à gérer des entretiens privés.
+**Dendrila Forms** apparaît dans « Applis web » avec ses fiches française et anglaise et ses liens vers le dépôt et ses issues GitHub. État : **0.1.0-alpha, démonstration technique**, exclusivement avec des données fictives. Ne pas le présenter comme prêt à recueillir des données personnelles/sensibles ou à gérer des entretiens privés.
 
 La synchronisation attend **19 cartes par langue, 38 fiches FR/EN et 44 fichiers statiques**. Appliquer le diagnostic et la copie ciblée décrits plus haut ; contrôler ensuite la présence de « Dendrila Forms » et `data-project-group="sites"` dans le HTML réellement servi par le domaine.
 
@@ -74,6 +74,16 @@ La famille WordPress regroupe **7 projets** : Dendrila Privacy (0.0.5 publié su
 - Dendrila Age Assurance : privé, fondation en PR, **médias directement exposés non protégés**.
 - Dendrila Monitor : privé, prototypes en PR ; **aucune offre Solo payante**, Studio/Agence non commercialisés.
 
-Le moteur PHP « Dendrila Forms » indépendant reste classé dans **Autres** et possède sa fiche distincte de l'extension WordPress. Les fiches ne créent des liens GitHub publics que lorsque les dépôts le sont. Les dépôts privés renvoient vers le contact du Potager.
+Le moteur PHP « Dendrila Forms » indépendant reste classé dans **Applis web** et possède sa fiche distincte de l'extension WordPress. Les fiches ne créent des liens GitHub publics que lorsque les dépôts le sont. Les dépôts privés renvoient vers le contact du Potager.
 
-**Invariants :** 19 cartes par langue, 7 WordPress, 3 gestion de sites, 3 applications, 6 autres, 38 fiches et 44 fichiers statiques synchronisés. Contrôler en production le HTML servant « Dendrila Accessibility Assistant » et une fiche FR/EN. GitHub et le site public peuvent être désynchronisés.
+**Invariants :** 19 cartes par langue, 7 WordPress, 3 gestion de sites, 4 applications, 5 applis web, 38 fiches et 44 fichiers statiques synchronisés. Contrôler en production le HTML servant « Dendrila Accessibility Assistant » et une fiche FR/EN. GitHub et le site public peuvent être désynchronisés.
+
+## Reclassement « Applis web » et Atelier EPUB en ligne — 11 octobre 2026
+
+La rubrique **« Autres » a été supprimée** du catalogue visible et des filtres. Les familles publiques sont désormais : **WordPress** (7), **Gestion de sites** (3), **Applications** (4) et **Applis web** (5). Un projet a une famille unique, quelle que soit sa maturité.
+
+- **Applications** : VeVak, Fonctions exécutives / TDAH, Resilience Vault et **Verger Associations** (PWA v0.3, v0.4 en préparation, adaptation Android Capacitor). Le prototype Webxdc 0.2 de ce dernier n'est plus présenté comme son architecture principale.
+- **Applis web** : Communication libre (laboratoire, non déployé), Atelier EPUB (web en ligne, développement actif), Librairie universelle (alpha web publique), Sans Effort (projet de comparateur web non lancé) et Dendrila Forms (moteur PHP expérimental auto-hébergeable, données fictives uniquement).
+- **Atelier EPUB** : la carte ouvre directement `https://epub-gen.lepotager.org/`, comme VeVak et la Librairie pour leurs sites dédiés. Les fiches locales FR/EN sont conservées pour documenter le développement et contiennent aussi le lien public, le dépôt communautaire et les limites connues. Le déploiement public a été documenté dans `jasmin-abernathy/atelier-epub`, sans que l'existence d'un site signifie que toutes ses fonctions ont été validées.
+
+**Tests à préserver** : aucun filtre/groupe/carte `autres`, 19 cartes par langue (7/3/4/5), 38 fiches FR/EN, 44 fichiers statiques sans suppression, liens vers les services dédiés. Le rendu public Git→o2switch doit être revérifié ; un commit GitHub réussi n'est pas une preuve de synchronisation du DocumentRoot.

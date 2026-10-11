@@ -9,15 +9,16 @@ const external = new Map([
   ['vevak','https://vevak.lepotager.org/'],
   ['resosoin','/resosoin/'],
   ['librairie-universelle','https://librairie.lepotager.org/'],
+  ['atelier-epub','https://epub-gen.lepotager.org/'],
 ]);
 const slugs = ['vevak','fonctions-executives','resosoin','resilience-vault','dendrila-cms','mon-manager-web','communication-libre','verger-associations','atelier-epub','librairie-universelle','dendrila-privacy','sans-effort','dendrila-forms','dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor'];
 const types = {
   'dendrila-privacy':'wordpress',
   'dendrila-cms':'sites','mon-manager-web':'sites','resosoin':'sites',
   'vevak':'applications','fonctions-executives':'applications','resilience-vault':'applications',
-  'communication-libre':'autres','verger-associations':'autres','atelier-epub':'autres','librairie-universelle':'autres','sans-effort':'autres','dendrila-forms':'autres','dendrila-simple-edit':'wordpress','dendrila-forms-wordpress':'wordpress','dendrila-form-sentinel':'wordpress','dendrila-accessibility-assistant':'wordpress','dendrila-age-assurance':'wordpress','dendrila-monitor':'wordpress'
+  'communication-libre':'webapps','verger-associations':'applications','atelier-epub':'webapps','librairie-universelle':'webapps','sans-effort':'webapps','dendrila-forms':'webapps','dendrila-simple-edit':'wordpress','dendrila-forms-wordpress':'wordpress','dendrila-form-sentinel':'wordpress','dendrila-accessibility-assistant':'wordpress','dendrila-age-assurance':'wordpress','dendrila-monitor':'wordpress'
 };
-const categories = ['wordpress','sites','applications','autres'];
+const categories = ['wordpress','sites','applications','webapps'];
 for(const lang of ['fr','en']){
   const home = read(lang==='fr'?'index.html':'en/index.html');
   const prefix = lang==='fr'?'/projets/':'/en/projects/';
@@ -46,8 +47,13 @@ for(const lang of ['fr','en']){
     assert.ok(html.includes(lang==='fr'?'/#projets':'/en/#projets'),lang+' : retour manquant '+slug);
     assert.ok(html.includes('class="detail-category"'),lang+' : type absent '+slug);
   }
+  assert.ok(!home.includes('data-project-filter="autres"') && !home.includes('data-project-group="autres"') && !home.includes('data-project-category="autres"'),lang+' : ancienne rubrique Autres encore utilisée');
+  assert.ok(home.includes('data-project-filter="webapps"'),lang+' : filtre Applis web manquant');
+  assert.ok(home.includes('data-project-group="webapps"'),lang+' : rubrique Applis web manquante');
+  assert.ok(home.includes('https://epub-gen.lepotager.org/'),lang+' : accès direct au générateur EPUB manquant');
+  assert.ok(home.includes('PWA v0.3'),lang+' : Verger Associations non actualisé');
   assert.equal(cards.filter(c=>c[1]==='wordpress').length,7,lang+' : sept projets WordPress attendus');
-  for(const [category,number] of [['sites',3],['applications',3],['autres',6]]){
+  for(const [category,number] of [['sites',3],['applications',4],['webapps',5]]){
     assert.equal(cards.filter(c=>c[1]===category).length,number,lang+' : mauvais nombre de projets '+category);
   }
   assert.ok(home.includes('Dendrila Accessibility Assistant'),lang+' : dernier plugin manquant');
@@ -83,6 +89,16 @@ for(const p of ['projets/dendrila-forms/index.html','en/projects/dendrila-forms/
   assert.ok(html.includes('https://github.com/jasmin-abernathy/dendrila-forms/issues'),p+' : issues manquantes');
 }
 assert.ok(read('sitemap.xml').includes('/projets/dendrila-forms/'),'Dendrila Forms absent du sitemap');
+for(const lang of ['fr','en']){
+  const prefix=lang==='fr'?'projets/':'en/projects/';
+  const webLabel=lang==='fr'?'Applis web':'Web apps';
+  const webApps=['communication-libre','atelier-epub','librairie-universelle','sans-effort','dendrila-forms'];
+  for(const slug of webApps) assert.ok(read(prefix+slug+'/index.html').includes('class="detail-category">'+webLabel+'</p>'), lang+' : fiche appli web mal classée '+slug);
+  assert.ok(read(prefix+'verger-associations/index.html').includes('class="detail-category">Applications</p>'),lang+' : PWA Verger Associations mal classée');
+  const epub=read(prefix+'atelier-epub/index.html');
+  assert.ok(epub.includes('href="https://epub-gen.lepotager.org/"'),lang+' : lien vers le site EPUB absent de la fiche');
+  assert.ok(epub.includes('2026-10-11'),lang+' : statut EPUB obsolète');
+}
 assert.ok(js.includes('data-project-category'),'Filtrage par familles non implémenté');
 for(const slug of ['dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor']){
   const fr=read('projets/'+slug+'/index.html');
