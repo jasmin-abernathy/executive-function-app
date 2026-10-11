@@ -165,6 +165,27 @@ class OnboardingAndTimerChoiceTest {
     }
 
     @Test
+    fun savingKeepsSuggestedMethodWithoutOpeningAlternatives() {
+        var saved = false
+        var customChoice: Boolean? = null
+        var target: Long? = null
+        compose.setContent {
+            ExecutiveFunctionTheme {
+                FocusStartDialog("Lire", 1_500_000L, FocusTimerMode.COUNTDOWN,
+                    onDismiss = {}, onConfirm = { _, _ -> }, savingTask = true,
+                    onChoice = { _, duration, custom -> saved = true; target = duration; customChoice = custom })
+            }
+        }
+        compose.onNodeWithTag("countdown-minutes").assertDoesNotExist()
+        compose.onNodeWithText("Enregistrer la tâche").performClick()
+        compose.runOnIdle {
+            assertEquals(true, saved)
+            assertEquals(false, customChoice)
+            assertEquals(1_500_000L, target)
+        }
+    }
+
+    @Test
     fun stopwatchCanIgnoreAnExistingLearnedReference() {
         var chosenMode: FocusTimerMode? = null
         var target: Long? = -1L
@@ -180,6 +201,7 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
+        compose.onNodeWithTag("toggle-task-timer").performClick()
         compose.onNodeWithText("Chronomètre").performClick()
         compose.onNodeWithText("Commencer").assertIsEnabled().performClick()
         compose.runOnIdle {
@@ -204,6 +226,7 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
+        compose.onNodeWithTag("toggle-task-timer").performClick()
         compose.onNodeWithText("Minuteur").performClick()
         compose.onNodeWithTag("countdown-minutes").performTextInput("12")
         compose.onNodeWithText("Commencer").assertIsEnabled().performClick()
@@ -222,6 +245,7 @@ class OnboardingAndTimerChoiceTest {
                     onDismiss = {}, onConfirm = { _, value -> target = value })
             }
         }
+        compose.onNodeWithTag("toggle-task-timer").performClick()
         compose.onNodeWithText("Minuteur").performClick()
         compose.onNodeWithTag("countdown-minutes").performTextInput("17")
         restoration.emulateSavedInstanceStateRestore()

@@ -32,8 +32,10 @@ class FocusRepository internal constructor(
     suspend fun capture(
         title: String,
         firstStep: String? = null,
-        color: TaskColor = TaskColor.NEUTRAL,
+        color: TaskColor = TaskColor.randomPastel(),
         folderId: String? = null,
+        customTimer: Boolean = false,
+        timerTarget: Long? = null,
     ) = mutate {
         val cleanTitle = title.trim()
         require(cleanTitle.isNotEmpty())
@@ -54,10 +56,17 @@ class FocusRepository internal constructor(
                 sortPosition = database.nextTaskPosition(),
             ),
         )
+        if (customTimer) TaskOptionsStore(database).timer(id, timerTarget)
         WorkspaceStore(database).assignTask(id, folderId)
         WorkspaceStore(database).ensureSteps(id)
         db.setTransactionSuccessful()
         } finally { db.endTransaction() }
+        refresh()
+        id
+    }
+
+    suspend fun setTaskTimer(taskId: String, target: Long?) = mutate {
+        TaskOptionsStore(database).timer(taskId, target)
         refresh()
     }
 
@@ -166,7 +175,7 @@ class FocusRepository internal constructor(
         refresh()
     }
 
-    private suspend fun mutate(block: () -> Unit) {
+    private suspend fun <T> mutate(block: () -> T): T =
         withContext(ioDispatcher) {
             mutex.withLock {
                 try {
@@ -177,7 +186,6 @@ class FocusRepository internal constructor(
                 }
             }
         }
-    }
 
     private fun refresh() {
         val tasks=database.openTasks()
@@ -188,6 +196,7 @@ class FocusRepository internal constructor(
             activeFocus = database.activeFocus(),
             loading = false,
             eligibleDrawIds = eligible,
+            lowEnergyUntil = database.lowEnergyUntil(),
             suggestedTaskId = if(eligible==null) null else tasks.filter { it.id in eligible && it.status==TaskStatus.READY }.maxByOrNull { journal.planning(it.id).importance }?.id,
         )
     }

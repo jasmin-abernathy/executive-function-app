@@ -2,7 +2,6 @@ package org.lepotager.executivefunction.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
@@ -31,6 +30,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
+import org.lepotager.executivefunction.ui.theme.LightColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -159,6 +159,7 @@ fun HomeScreen(
     onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
     suggestedTaskId: String? = null,
+    lowEnergy: Boolean = false,
     drawRequest: Int = 0,
     onApplySuggestedOrder: () -> Unit = {},
     drawEnabled: Boolean,
@@ -185,11 +186,13 @@ fun HomeScreen(
     var pendingDrawTaskId by remember { mutableStateOf<String?>(null) }
     var drawRollKey by remember { mutableIntStateOf(0) }
     var isDrawing by remember { mutableStateOf(false) }
-    var selectedColor by remember { mutableStateOf(TaskColor.NEUTRAL) }
+    var selectedColor by remember { mutableStateOf(TaskColor.randomPastel()) }
     var organizing by remember { mutableStateOf(false) }
     var showAllTasks by rememberSaveable { mutableStateOf(homeViewMode == HomeViewMode.LIST) }
     var difficultDay by rememberSaveable { mutableStateOf(false) }
 
+    LaunchedEffect(lowEnergy) { if (lowEnergy) showAllTasks = false }
+    val effectiveHomeMode = if (lowEnergy) HomeViewMode.ONE_NEXT else homeViewMode
     val visibleTasks = tasks.filter { visibleTaskIds == null || it.id in visibleTaskIds }
     val reorder = rememberTaskReorder(tasks, onApplyTaskOrder)
     val drawResultRequester = remember { BringIntoViewRequester() }
@@ -270,8 +273,12 @@ fun HomeScreen(
                     Spacer(Modifier.size(8.dp))
                     Text(stringResource(R.string.help_how_it_works))
                 }
+                if (lowEnergy) {
+                    Text(stringResource(R.string.low_energy_active), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.low_energy_explanation))
+                }
                 if (eligibleDrawIds != null) {
-                    Text(stringResource(R.string.adaptation_rule))
+                    if (!lowEnergy) Text(stringResource(R.string.adaptation_rule))
                     tasks.firstOrNull { it.id == suggestedTaskId }?.let {
                         Text(stringResource(R.string.adaptation_suggestion, it.title))
                     }
@@ -347,7 +354,7 @@ fun HomeScreen(
                                     showCapture = false
                                     firstStep = ""
                                     showCaptureOptions = false
-                                    selectedColor = TaskColor.NEUTRAL
+                                    selectedColor = TaskColor.randomPastel()
                                 }
                             },
                             enabled = title.isNotBlank(),
@@ -386,12 +393,13 @@ fun HomeScreen(
                     }
                 }
             }
-            if (homeViewMode != HomeViewMode.LIST && tasks.isNotEmpty()) {
+            if (effectiveHomeMode != HomeViewMode.LIST && tasks.isNotEmpty()) {
                 item {
                     TodayFocusPanel(
-                        tasks = visibleTasks.filter { it.status == org.lepotager.executivefunction.model.TaskStatus.READY },
-                        mode = homeViewMode,
+                        tasks = visibleTasks.filter { it.status == org.lepotager.executivefunction.model.TaskStatus.READY && (!lowEnergy || eligibleDrawIds == null || it.id in eligibleDrawIds) },
+                        mode = effectiveHomeMode,
                         showAll = showAllTasks,
+                        noSuggestedTask = lowEnergy,
                         difficultDay = difficultDay,
                         customStartAvailable = customStartAvailable,
                         onToggleAll = { showAllTasks = !showAllTasks },
@@ -407,7 +415,7 @@ fun HomeScreen(
             }
             if (visibleTasks.isEmpty()) {
                 item { if (visibleTaskIds == null) EmptyTasksPanel() else Text(stringResource(R.string.folder_empty_tasks)) }
-            } else if (homeViewMode == HomeViewMode.LIST || showAllTasks) {
+            } else if (effectiveHomeMode == HomeViewMode.LIST || showAllTasks) {
                 itemsIndexed(reorder.visibleTasks.filter { visibleTaskIds == null || it.id in visibleTaskIds }, key = { _, task -> task.id }) { index, task ->
                     TaskCard(
                         task = task,
@@ -506,6 +514,7 @@ private fun TodayFocusPanel(
     tasks: List<TaskItem>,
     mode: HomeViewMode,
     showAll: Boolean,
+    noSuggestedTask: Boolean = false,
     difficultDay: Boolean,
     customStartAvailable: Boolean,
     onToggleAll: () -> Unit,
@@ -515,14 +524,15 @@ private fun TodayFocusPanel(
     onStartCustom: (String) -> Unit,
 ) {
     val current = tasks.firstOrNull()
-    Card(modifier = Modifier.fillMaxWidth(), colors = appCardColors(), border = appBorder(), shape = RoundedCornerShape(22.dp)) {
+    Card(modifier = Modifier.fillMaxWidth(), colors = appCardColors(), border = current?.let { taskBorder(it) } ?: appBorder(), shape = RoundedCornerShape(22.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.home_now_label), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             if (current == null) {
-                Text(stringResource(R.string.empty_tasks), style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(if (noSuggestedTask) R.string.low_energy_no_suggestion else R.string.empty_tasks), style = MaterialTheme.typography.bodyLarge)
             } else {
                 Text(current.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                 TextButton(onClick = { onEditTask(current.id) }) { Text(stringResource(R.string.task_steps_folder)) }
+                TaskDeadlineLabel(current)
                 current.firstStep?.let { Text(stringResource(R.string.first_step_value, it), color = MaterialTheme.colorScheme.onSurfaceVariant) }
                 Button(onClick = { onStart(current.id) }, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-primary-start"), colors = appButtonColors()) {
                     ToolGlyph(ToolGlyphKind.START); Spacer(Modifier.size(8.dp)); Text(stringResource(R.string.start_action))
@@ -647,10 +657,10 @@ private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) 
                         .semantics { contentDescription = name },
                     shape = CircleShape,
                     color = palette.container,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    contentColor = Color(0xFF2D2D2D),
                     border = BorderStroke(
                         if (selected == color) 3.dp else 1.dp,
-                        if (selected == color) MaterialTheme.colorScheme.onSurface else palette.border,
+                        if (selected == color) Color(0xFF2D2D2D) else palette.border,
                     ),
                 ) {
                     if (selected == color) {
@@ -661,7 +671,7 @@ private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) 
                 }
             }
         }
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(12.dp))
     }
 }
 
@@ -669,22 +679,21 @@ private data class TaskPalette(val container: Color, val border: Color)
 
 @Composable
 private fun taskPalette(color: TaskColor): TaskPalette {
-    val dark = isSystemInDarkTheme()
     return when (color) {
-        TaskColor.NEUTRAL -> TaskPalette(
-            MaterialTheme.colorScheme.surface,
-            MaterialTheme.colorScheme.outline,
-        )
-        TaskColor.SAGE -> if (dark) TaskPalette(Color(0xFF28342C), Color(0xFF71917A))
-            else TaskPalette(Color(0xFFEDF6EF), Color(0xFFA9CBB2))
-        TaskColor.BLUE -> if (dark) TaskPalette(Color(0xFF27313A), Color(0xFF7189A0))
-            else TaskPalette(Color(0xFFEEF4FA), Color(0xFFA8C4DD))
-        TaskColor.TERRACOTTA -> if (dark) TaskPalette(Color(0xFF392D29), Color(0xFFA57B6C))
-            else TaskPalette(Color(0xFFF9F0EC), Color(0xFFD6AD9D))
-        TaskColor.LAVENDER -> if (dark) TaskPalette(Color(0xFF322B39), Color(0xFF8E79A0))
-            else TaskPalette(Color(0xFFF4EFF9), Color(0xFFC4ADD8))
-        TaskColor.SAND -> if (dark) TaskPalette(Color(0xFF393428), Color(0xFF9C8B61))
-            else TaskPalette(Color(0xFFFAF5E8), Color(0xFFD9C493))
+        TaskColor.NEUTRAL -> TaskPalette(Color.White, Color(0xFFB7D8BF))
+        TaskColor.SAGE -> TaskPalette(Color(0xFFEDF6EF), Color(0xFFA9CBB2))
+        TaskColor.BLUE -> TaskPalette(Color(0xFFEEF4FA), Color(0xFFA8C4DD))
+        TaskColor.TERRACOTTA -> TaskPalette(Color(0xFFF9F0EC), Color(0xFFD6AD9D))
+        TaskColor.LAVENDER -> TaskPalette(Color(0xFFF4EFF9), Color(0xFFC4ADD8))
+        TaskColor.SAND -> TaskPalette(Color(0xFFFAF5E8), Color(0xFFD9C493))
+        TaskColor.MINT -> TaskPalette(Color(0xFFD8F5E5), Color(0xFF83C8A4))
+        TaskColor.TURQUOISE -> TaskPalette(Color(0xFFD4F3F1), Color(0xFF79C4BF))
+        TaskColor.SKY -> TaskPalette(Color(0xFFD9EEFF), Color(0xFF8DBDE2))
+        TaskColor.PERIWINKLE -> TaskPalette(Color(0xFFE1E5FF), Color(0xFFA0ACE0))
+        TaskColor.LILAC -> TaskPalette(Color(0xFFEEDBFA), Color(0xFFC09AD8))
+        TaskColor.ROSE -> TaskPalette(Color(0xFFFADDE8), Color(0xFFD99DB5))
+        TaskColor.CORAL -> TaskPalette(Color(0xFFFFDDD5), Color(0xFFDD9E8D))
+        TaskColor.APRICOT -> TaskPalette(Color(0xFFFFE8CF), Color(0xFFDCB082))
     }
 }
 
@@ -697,6 +706,14 @@ private fun taskColorName(color: TaskColor): String = stringResource(
         TaskColor.TERRACOTTA -> R.string.task_color_terracotta
         TaskColor.LAVENDER -> R.string.task_color_lavender
         TaskColor.SAND -> R.string.task_color_sand
+        TaskColor.MINT -> R.string.task_color_mint
+        TaskColor.TURQUOISE -> R.string.task_color_turquoise
+        TaskColor.SKY -> R.string.task_color_sky
+        TaskColor.PERIWINKLE -> R.string.task_color_periwinkle
+        TaskColor.LILAC -> R.string.task_color_lilac
+        TaskColor.ROSE -> R.string.task_color_rose
+        TaskColor.CORAL -> R.string.task_color_coral
+        TaskColor.APRICOT -> R.string.task_color_apricot
     },
 )
 
@@ -707,7 +724,37 @@ private fun taskCardColors(color: TaskColor) = CardDefaults.cardColors(
 )
 
 @Composable
-private fun taskBorder(color: TaskColor) = BorderStroke(1.dp, taskPalette(color).border)
+private fun taskBorder(task: TaskItem): BorderStroke {
+    val today = deadlineToday()
+    val strength = task.deadlineDay?.let { org.lepotager.executivefunction.domain.TaskDeadline.intensity(it - today.toEpochDay(), task.deadlineWarningDays) } ?: 0f
+    return BorderStroke((1f + 3f * strength).dp, androidx.compose.ui.graphics.lerp(taskPalette(task.color).border, Color(0xFF7761B3), strength))
+}
+
+@Composable
+private fun deadlineToday(): java.time.LocalDate {
+    var today by remember { mutableStateOf(java.time.LocalDate.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            val zone = java.time.ZoneId.systemDefault()
+            val nextDay = java.time.LocalDate.now(zone).plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+            delay((nextDay - System.currentTimeMillis()).coerceAtLeast(1_000L))
+            today = java.time.LocalDate.now()
+        }
+    }
+    return today
+}
+
+@Composable
+private fun TaskDeadlineLabel(task: TaskItem) {
+    val day = task.deadlineDay ?: return
+    val today = deadlineToday()
+    val days = day - today.toEpochDay()
+    val date = java.time.LocalDate.ofEpochDay(day).format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM))
+    Text(
+        stringResource(when { days < 0 -> R.string.task_date_passed; days == 0L -> R.string.task_date_today; else -> R.string.task_date_future }, date),
+        style = MaterialTheme.typography.bodyMedium,
+    )
+}
 
 @Composable
 private fun TaskDrawPanel(
@@ -718,22 +765,23 @@ private fun TaskDrawPanel(
     customStartAvailable: Boolean,
     onStartCustom: () -> Unit,
 ) {
+    MaterialTheme(colorScheme = LightColors) {
     val startLabel = stringResource(R.string.start_action)
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = taskCardColors(task.color),
-        border = taskBorder(task.color),
+        border = taskBorder(task),
         shape = RoundedCornerShape(22.dp),
     ) {
         Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)
                     .clickable(onClickLabel = startLabel, role = Role.Button, onClick = onStart)
                     .semantics { liveRegion = LiveRegionMode.Polite },
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 ToolBadge(
                     kind = ToolGlyphKind.DRAW,
@@ -750,6 +798,7 @@ private fun TaskDrawPanel(
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.semantics { heading() },
                 )
+                TaskDeadlineLabel(task)
                 task.firstStep?.let {
                     Text(
                         text = stringResource(R.string.first_step_value, it),
@@ -763,7 +812,7 @@ private fun TaskDrawPanel(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
                     onClick = onRedraw,
                     colors = appOutlinedButtonColors(),
@@ -789,6 +838,7 @@ private fun TaskDrawPanel(
             }
         }
     }
+    }
 }
 
 @Composable
@@ -806,10 +856,11 @@ private fun TaskCard(
     customStartAvailable: Boolean,
     onStartCustom: () -> Unit,
 ) {
+    MaterialTheme(colorScheme = LightColors) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = taskCardColors(task.color),
-        border = taskBorder(task.color),
+        border = taskBorder(task),
         shape = RoundedCornerShape(
             topStart = 22.dp,
             topEnd = 14.dp,
@@ -818,8 +869,8 @@ private fun TaskCard(
         ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             val handleLabel = stringResource(R.string.reorder_handle, task.title)
             val upLabel = stringResource(R.string.move_task_up)
@@ -843,6 +894,7 @@ private fun TaskCard(
                     contentAlignment = Alignment.Center,
                 ) { DragHandleGlyph() }
             }
+            TaskDeadlineLabel(task)
             task.firstStep?.let {
                 Text(
                     text = stringResource(R.string.first_step_value, it),
@@ -859,7 +911,7 @@ private fun TaskCard(
                     style = MaterialTheme.typography.labelLarge,
                 )
                 TaskColorPicker(selected = task.color, onSelect = onSetColor)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(
                         onClick = onMoveUp,
                         enabled = canMoveUp,
@@ -890,6 +942,7 @@ private fun TaskCard(
             }
         }
     }
+    }
 }
 
 @Composable
@@ -897,6 +950,7 @@ fun FocusScreen(
     activeFocus: ActiveFocus,
     modalBlocked: Boolean = false,
     onJournal: () -> Unit = {},
+    onHome: () -> Unit = {},
     onMini: () -> Unit = {},
     onNote: () -> Unit = {},
     overlayEnabled: Boolean,
@@ -969,6 +1023,9 @@ fun FocusScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            OutlinedButton(onClick = onHome, modifier = Modifier.fillMaxWidth().testTag("focus-back-home")) {
+                Text(stringResource(R.string.focus_back_home))
+            }
             Text(
                 text = stringResource(R.string.focus_label),
                 style = MaterialTheme.typography.labelLarge,
@@ -981,6 +1038,7 @@ fun FocusScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { heading() },
             )
+            TaskDeadlineLabel(activeFocus.task)
             activeFocus.task.firstStep?.let {
                 Text(
                     text = stringResource(R.string.first_step_value, it),
@@ -1093,6 +1151,7 @@ fun FocusScreen(
                 Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.focus_finish_short))
             }
+            FocusFolderNotes(activeFocus.task.id)
         }
     }
 
@@ -1476,4 +1535,30 @@ private fun formatElapsed(milliseconds: Long): String {
     val minutes = (totalSeconds % 3_600) / 60
     val seconds = totalSeconds % 60
     return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, seconds) else "%02d:%02d".format(minutes, seconds)
+}
+
+@Composable
+internal fun RunningFocusBanner(active: ActiveFocus, onReturn: () -> Unit) {
+    var now by remember(active.session.id) { mutableLongStateOf(System.currentTimeMillis()) }
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(active.session.id) {
+        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            while (true) { now = System.currentTimeMillis(); delay(1_000) }
+        }
+    }
+    val elapsed = SessionClock.elapsedMs(active.session, now)
+    val target = active.session.targetDurationMs
+    val remaining = target?.minus(elapsed)
+    val clock = if (remaining == null) formatElapsed(elapsed)
+        else if (remaining >= 0) formatElapsed(remaining) else "+" + formatElapsed(-remaining)
+    Card(Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(active.task.title, style = MaterialTheme.typography.titleMedium)
+            TaskDeadlineLabel(active.task)
+            Text(clock, style = MaterialTheme.typography.headlineSmall)
+            Button(onClick = onReturn, modifier = Modifier.fillMaxWidth().testTag("home-return-timer")) {
+                Text(stringResource(R.string.focus_return_timer))
+            }
+        }
+    }
 }

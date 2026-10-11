@@ -85,7 +85,7 @@ class WorkspaceStoreTest {
             db.writableDatabase.version = 4
             db.close(); db = AppDatabase(context)
             val store = WorkspaceStore(db)
-            assertEquals(5, db.writableDatabase.version)
+            assertEquals(6, db.writableDatabase.version)
             store.ensureSteps(id); store.ensureSteps(id)
             assertEquals("Premier geste", LearningJournal(db).steps(id).single().title)
             assertEquals("Note ancienne", store.load().notes.single().text)

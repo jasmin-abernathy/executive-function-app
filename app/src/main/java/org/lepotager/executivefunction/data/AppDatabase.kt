@@ -64,6 +64,7 @@ internal class AppDatabase(private val context: Context) :
         )
         createLearningTables(db)
         WorkspaceStore.createTables(db)
+        TaskOptionsStore.createTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -90,6 +91,10 @@ internal class AppDatabase(private val context: Context) :
             WorkspaceStore.createTables(db)
             version = 5
         }
+        if (version == 5) {
+            TaskOptionsStore.createTables(db)
+            version = 6
+        }
         check(version == newVersion) { "Missing migration from $oldVersion to $newVersion" }
     }
 
@@ -107,14 +112,22 @@ internal class AppDatabase(private val context: Context) :
         db.execSQL("CREATE TABLE session_steps (session_id TEXT NOT NULL REFERENCES focus_sessions(id) ON DELETE CASCADE, position INTEGER NOT NULL, title TEXT NOT NULL, PRIMARY KEY(session_id,position))")
     }
 
+    fun lowEnergyUntil(): Long? {
+        val latest = LearningJournal(this).checkIns().firstOrNull() ?: return null
+        return if (org.lepotager.executivefunction.domain.LowEnergyMode.active(latest.mood, latest.energy, latest.date, System.currentTimeMillis()))
+            latest.date + org.lepotager.executivefunction.domain.LowEnergyMode.VALID_FOR_MS else null
+    }
+
     fun eligibleDrawIds(tasks: List<TaskItem>): Set<String>? {
         val preferences=context.getSharedPreferences("wellbeing",Context.MODE_PRIVATE)
-        if(!preferences.getBoolean("adapt",false)) return null
+        val adapt = preferences.getBoolean("adapt",false)
+        val lowEnergy = lowEnergyUntil() != null
+        if (!adapt && !lowEnergy) return null
         val journal=LearningJournal(this)
         val recent=journal.checkIns().firstOrNull()?.takeIf { System.currentTimeMillis()-it.date in 0..14_400_000L }
-        val energy=if(preferences.getBoolean("low_energy",false)) 1 else recent?.energy
-        val minutes=preferences.getInt("available_minutes",0).takeIf { it>0 }
-        val selectedContext=preferences.getString("context","").orEmpty()
+        val energy=if(lowEnergy) 1 else recent?.energy
+        val minutes=preferences.getInt("available_minutes",0).takeIf { adapt && it>0 }
+        val selectedContext=if (adapt) preferences.getString("context","").orEmpty() else ""
         return tasks.filter { task ->
             val plan=journal.planning(task.id)
             org.lepotager.executivefunction.domain.TaskEligibility.accepts(plan.energy,energy,suggestedDurationMs(task.id),minutes,plan.context,selectedContext)
@@ -363,7 +376,9 @@ internal class AppDatabase(private val context: Context) :
         if (value.isNullOrBlank()) putNull(key) else put(key, value.trim())
     }
 
-    private fun Cursor.toTask() = TaskItem(
+    private fun Cursor.toTask(): TaskItem {
+        val options = TaskOptionsStore(this@AppDatabase).load(getString(getColumnIndexOrThrow("id")))
+        return TaskItem(
         id = getString(getColumnIndexOrThrow("id")),
         title = getString(getColumnIndexOrThrow("title")),
         firstStep = getNullableString("first_step"),
@@ -374,7 +389,12 @@ internal class AppDatabase(private val context: Context) :
             TaskColor.valueOf(getString(getColumnIndexOrThrow("color_key")))
         }.getOrDefault(TaskColor.NEUTRAL),
         sortPosition = getLong(getColumnIndexOrThrow("sort_position")),
+        deadlineDay = options.deadlineDay,
+        deadlineWarningDays = options.warningDays,
+        timerOverride = options.timerOverride,
+        timerTarget = options.timerTarget,
     )
+    }
 
     private fun Cursor.toSession() = FocusSession(
         id = getString(getColumnIndexOrThrow("id")),
@@ -400,7 +420,7 @@ internal class AppDatabase(private val context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "executive-function.db"
-        const val DATABASE_VERSION = 5
+        const val DATABASE_VERSION = 6
         val TASK_COLUMNS = arrayOf(
             "id",
             "title",

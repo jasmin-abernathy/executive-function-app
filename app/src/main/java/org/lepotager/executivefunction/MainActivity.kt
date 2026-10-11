@@ -55,6 +55,7 @@ class MainActivity : ComponentActivity() {
     private var showQuickNote by mutableStateOf(false)
     private var returnToMiniWindow = false
     private var externalCapture by mutableStateOf(false)
+    private var showHomeDuringFocus by mutableStateOf(false)
     private var drawRequest by mutableStateOf(0)
     private var introSeen by mutableStateOf(false)
     private var showIntro by mutableStateOf(false)
@@ -118,7 +119,14 @@ class MainActivity : ComponentActivity() {
                 val error by viewModel.error.collectAsStateWithLifecycle()
                 val completionLeadMinutes by viewModel.completionLeadMinutes.collectAsStateWithLifecycle()
                 val pendingStart by viewModel.pendingStart.collectAsStateWithLifecycle()
+                val pendingCapture by viewModel.pendingCapture.collectAsStateWithLifecycle()
 
+                LaunchedEffect(snapshot.lowEnergyUntil) {
+                    snapshot.lowEnergyUntil?.let { expiry ->
+                        kotlinx.coroutines.delay((expiry - System.currentTimeMillis()).coerceAtLeast(0L) + 1L)
+                        viewModel.reload()
+                    }
+                }
                 LaunchedEffect(requestedTask, snapshot.loading) {
                     val taskId = requestedTask ?: return@LaunchedEffect
                     if (snapshot.loading || pendingStart?.taskId == taskId) return@LaunchedEffect
@@ -182,10 +190,11 @@ class MainActivity : ComponentActivity() {
                         onSkip = ::markIntroSeen,
                     )
                 } else {
-                    if(externalCapture && !miniWindow) {
+                    androidx.activity.compose.BackHandler(enabled = snapshot.activeFocus?.session?.status == FocusStatus.RUNNING && !showHomeDuringFocus && pendingStart == null && pendingCapture == null && !showQuickNote && !externalCapture) { showHomeDuringFocus = true }
+                    if(externalCapture && !miniWindow && pendingCapture == null) {
                         org.lepotager.executivefunction.ui.ExternalCaptureDialog(
                             onDismiss={externalCapture=false},
-                            onCapture={title->viewModel.capture(title,null,TaskColor.NEUTRAL){externalCapture=false}},
+                            onCapture={title->viewModel.capture(title,null,TaskColor.randomPastel()){externalCapture=false}},
                         )
                     }
                     if (showQuickNote && !externalCapture && !miniWindow) {
@@ -194,22 +203,31 @@ class MainActivity : ComponentActivity() {
                             onSave = { text -> viewModel.addQuickNote(text, ::closeQuickNote) },
                         )
                     }
+                    pendingCapture?.let { draft ->
+                        val defaultTarget = FocusStartDefaults.targetDurationMs(focusPreset, null, preferLearnedDuration)
+                        FocusStartDialog(
+                            taskTitle = draft.title,
+                            learnedTargetDurationMs = defaultTarget,
+                            initialMode = FocusStartDefaults.timerMode(focusPreset),
+                            savingTask = true,
+                            onDismiss = viewModel::cancelCapture,
+                            onConfirm = { _, _ -> },
+                            onChoice = { _, target, custom -> viewModel.confirmCapture(target, custom) },
+                        )
+                    }
                     if (!externalCapture && !showQuickNote && !miniWindow) pendingStart?.let { request ->
                         key(request.taskId) {
                             FocusStartDialog(
                                 taskTitle = request.title,
-                                learnedTargetDurationMs = request.learnedTargetDurationMs,
-                                initialMode = lastTimerMode ?: if (request.learnedTargetDurationMs == null) {
-                                    FocusTimerMode.STOPWATCH
-                                } else {
-                                    FocusTimerMode.COUNTDOWN
-                                },
+                                learnedTargetDurationMs = viewModel.timerTarget(request.taskId, FocusStartDefaults.targetDurationMs(focusPreset, request.learnedTargetDurationMs, preferLearnedDuration)),
+                                initialMode = if (viewModel.timerTarget(request.taskId, FocusStartDefaults.targetDurationMs(focusPreset, request.learnedTargetDurationMs, preferLearnedDuration)) == null) FocusTimerMode.STOPWATCH else FocusTimerMode.COUNTDOWN,
                                 willPostponeExisting = snapshot.activeFocus?.task?.id?.let { it != request.taskId } == true,
                                 onDismiss = viewModel::cancelStart,
-                                onConfirm = { mode, targetDurationMs ->
-                                    saveTimerMode(mode)
+                                onConfirm = { _, _ -> },
+                                onChoice = { _, targetDurationMs, custom ->
                                     requestNotificationPermissionIfNeeded()
-                                    viewModel.confirmStart(targetDurationMs)
+                                    showHomeDuringFocus = false
+                                    viewModel.confirmStart(targetDurationMs, custom)
                                 },
                             )
                         }
@@ -250,9 +268,10 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier.align(Alignment.Center),
                                 )
 
-                                snapshot.activeFocus?.session?.status == FocusStatus.RUNNING -> FocusScreen(
+                                snapshot.activeFocus?.session?.status == FocusStatus.RUNNING && !showHomeDuringFocus -> FocusScreen(
                                     activeFocus = requireNotNull(snapshot.activeFocus),
-                                    modalBlocked = externalCapture || showQuickNote || pendingStart != null,
+                                    onHome = { showHomeDuringFocus = true },
+                                    modalBlocked = externalCapture || showQuickNote || pendingStart != null || pendingCapture != null,
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("task",snapshot.activeFocus?.task?.id)) },
                                     onNote = { showQuickNote = true },
                                     onMini = ::enterMiniWindow,
@@ -261,7 +280,7 @@ class MainActivity : ComponentActivity() {
                                     pauseAfterMinutes = pauseAfterMinutes,
                                     onToggleOverlay = ::toggleOverlay,
                                     onQuickCapture = { title, firstStep, after ->
-                                        viewModel.capture(title, firstStep, TaskColor.NEUTRAL, after)
+                                        viewModel.capture(title, firstStep, TaskColor.randomPastel(), after)
                                     },
                                     onInterrupt = viewModel::interrupt,
                                     onComplete = viewModel::complete,
@@ -280,11 +299,17 @@ class MainActivity : ComponentActivity() {
                                 ) { visibleIds, folderId, editTask, workspace -> HomeScreen(
                                     visibleTaskIds = visibleIds,
                                     onEditTask = editTask,
-                                    workspace = workspace,
+                                    workspace = {
+                                        snapshot.activeFocus?.takeIf { it.session.status == FocusStatus.RUNNING }?.let { active ->
+                                            org.lepotager.executivefunction.ui.RunningFocusBanner(active) { showHomeDuringFocus = false }
+                                        }
+                                        workspace()
+                                    },
                                     tasks = snapshot.tasks,
                                     drawRequest = drawRequest,
                                     onApplySuggestedOrder = viewModel::applySuggestedOrder,
                                     eligibleDrawIds = snapshot.eligibleDrawIds,
+                                    lowEnergy = snapshot.lowEnergyUntil != null,
                                     suggestedTaskId = snapshot.suggestedTaskId,
                                     onHelp = { refreshPreferences(); showCheckIn=false; showIntro=true },
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
@@ -294,7 +319,7 @@ class MainActivity : ComponentActivity() {
                                     pauseAfterMinutes = pauseAfterMinutes,
                                     onCapture = { title, step, color, after -> viewModel.captureInFolder(title, step, color, folderId, after) },
                                     homeViewMode = homeViewMode,
-                                    customStartAvailable = quickStartEnabled,
+                                    customStartAvailable = false,
                                     onStart = ::startTaskWithDefaults,
                                     onStartCustom = viewModel::requestStart,
                                     onMoveTask = viewModel::moveTask,
@@ -538,12 +563,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startTaskWithDefaults(taskId: String) {
-        if (!quickStartEnabled) {
-            viewModel.requestStart(taskId)
-            return
-        }
-        requestNotificationPermissionIfNeeded()
-        viewModel.requestStartWithDefaults(taskId, focusPreset, preferLearnedDuration)
+        viewModel.requestStart(taskId)
     }
 
     private fun requestNotificationPermissionIfNeeded() {

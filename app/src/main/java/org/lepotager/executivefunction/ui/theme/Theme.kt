@@ -35,7 +35,7 @@ object AppPalette {
     val DarkMutedText = Color(0xFFC9CECB)
 }
 
-private val LightColors = lightColorScheme(
+internal val LightColors = lightColorScheme(
     primary = AppPalette.Anthracite,
     onPrimary = AppPalette.White,
     primaryContainer = AppPalette.GreenButton,

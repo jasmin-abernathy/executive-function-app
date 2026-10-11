@@ -151,4 +151,26 @@
     <string name="folder_empty_tasks">Ce dossier ne contient pas encore de tâche. Ajoute-en une ci-dessus.</string>
     <string name="capture_new">Ajouter une tâche</string>
     <string name="capture_close">Refermer la saisie</string>
+    <string name="task_color_mint">Menthe</string>
+    <string name="task_color_turquoise">Turquoise</string>
+    <string name="task_color_sky">Ciel</string>
+    <string name="task_color_periwinkle">Pervenche</string>
+    <string name="task_color_lilac">Lilas</string>
+    <string name="task_color_rose">Rose</string>
+    <string name="task_color_coral">Corail</string>
+    <string name="task_color_apricot">Abricot</string>
+    <string name="save_task_timer_title">Comptage pour cette tâche</string>
+    <string name="task_timer_current">Mode proposé : %1$s</string>
+    <string name="task_timer_minutes">%1$d minutes</string>
+    <string name="task_timer_keep">Garder le mode proposé</string>
+    <string name="task_timer_change">Utiliser une autre méthode pour cette tâche</string>
+    <string name="task_timer_save">Enregistrer la tâche</string>
+    <string name="focus_back_home">Revenir à l’accueil</string>
+    <string name="focus_return_timer">Revenir au timer</string>
+    <string name="low_energy_active">Une chose à la fois</string>
+    <string name="low_energy_explanation">Si ton humeur ou ton énergie est basse ou très basse, l’accueil propose une chose à la fois et le dé privilégie les tâches marquées comme demandant peu d’énergie. Tu peux toujours afficher toutes les tâches. Le timer ne change pas. Le mode est réévalué à chaque point d’état et expire après quatre heures.</string>
+    <string name="low_energy_no_suggestion">Pas de suggestion pour le moment. Toutes tes tâches restent accessibles ci-dessous, à ton rythme.</string>
+    <string name="task_date_future">Prévue le %1$s</string>
+    <string name="task_date_today">Prévue aujourd’hui</string>
+    <string name="task_date_passed">Date passée (%1$s) — tu peux la déplacer si besoin</string>
 </resources>

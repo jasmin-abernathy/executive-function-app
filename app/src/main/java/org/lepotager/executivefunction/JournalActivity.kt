@@ -1,5 +1,6 @@
 package org.lepotager.executivefunction
 
+import androidx.compose.ui.res.stringResource
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -71,7 +72,6 @@ class JournalActivity : ComponentActivity() {
         var checkEnabled by remember { mutableStateOf(getSharedPreferences("wellbeing",MODE_PRIVATE).getBoolean("enabled",true)) }
         val preferences=remember {getSharedPreferences("wellbeing",MODE_PRIVATE)}
         var adapt by remember {mutableStateOf(preferences.getBoolean("adapt",false))}
-        var lowEnergy by remember {mutableStateOf(preferences.getBoolean("low_energy",false))}
         var availableMinutes by remember {mutableStateOf(preferences.getInt("available_minutes",0).toString())}
         var currentContext by remember {mutableStateOf(preferences.getString("context","").orEmpty())}
         var taskContext by remember(selected) {mutableStateOf("")}
@@ -81,7 +81,6 @@ class JournalActivity : ComponentActivity() {
             tasks=all
             if(selected!=null && all.none {it.id==selected}) selected=null
             adapt=preferences.getBoolean("adapt",false)
-            lowEnergy=preferences.getBoolean("low_energy",false)
             checkEnabled=preferences.getBoolean("enabled",true)
             checks=withContext(Dispatchers.IO) { journal.checkIns() }
             notes=withContext(Dispatchers.IO) {journal.notes()}
@@ -209,7 +208,7 @@ class JournalActivity : ComponentActivity() {
                                 Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
                                     Text(label("Suggestions et contexte","Suggestions and context"),style=MaterialTheme.typography.titleMedium)
                                     Row {Switch(checked=adapt,onCheckedChange={adapt=it;preferences.edit().putBoolean("adapt",it).apply()});Text(label("Adapter les propositions à mon contexte","Adapt suggestions to my context"))}
-                                    Row {Switch(checked=lowEnergy,onCheckedChange={lowEnergy=it;preferences.edit().putBoolean("low_energy",it).apply()});Text(label("Mode basse énergie","Low-energy mode"))}
+                                    Text(stringResource(R.string.low_energy_explanation))
                                     OutlinedTextField(value=availableMinutes,onValueChange={availableMinutes=it},modifier=Modifier.fillMaxWidth(),label={Text(label("Temps disponible en minutes (0 = sans limite)","Available minutes (0 = unlimited)"))})
                                     OutlinedTextField(value=currentContext,onValueChange={currentContext=it},modifier=Modifier.fillMaxWidth(),label={Text(label("Contexte actuel (facultatif)","Current context (optional)"))})
                                     Button(enabled=availableMinutes.toIntOrNull()?.let {it in 0..10080}==true,onClick={preferences.edit().putInt("available_minutes",availableMinutes.toInt()).putString("context",currentContext.trim()).apply()}) {Text(label("Enregistrer ces filtres","Save these filters"))}

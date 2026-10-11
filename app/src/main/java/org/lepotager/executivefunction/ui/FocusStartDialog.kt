@@ -35,7 +35,10 @@ internal fun FocusStartDialog(
     willPostponeExisting: Boolean = false,
     onDismiss: () -> Unit,
     onConfirm: (FocusTimerMode, Long?) -> Unit,
+    savingTask: Boolean = false,
+    onChoice: ((FocusTimerMode, Long?, Boolean) -> Unit)? = null,
 ) {
+    var custom by rememberSaveable(taskTitle) { mutableStateOf(false) }
     val suggestedMinutes = FocusTimerChoice.suggestedMinutes(learnedTargetDurationMs)
     var mode by rememberSaveable(taskTitle) { mutableStateOf(initialMode) }
     var minutesText by rememberSaveable(taskTitle, learnedTargetDurationMs) {
@@ -46,11 +49,17 @@ internal fun FocusStartDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.focus_start_title)) },
+        title = { Text(stringResource(if (savingTask) R.string.save_task_timer_title else R.string.focus_start_title)) },
         text = {
             Column(modifier = Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(taskTitle)
                 if (willPostponeExisting) Text(stringResource(R.string.start_switch_warning))
+                Text(stringResource(R.string.task_timer_current, stringResource(if (initialMode == FocusTimerMode.STOPWATCH) R.string.timer_mode_stopwatch else R.string.timer_mode_countdown)))
+                if (initialMode == FocusTimerMode.COUNTDOWN && suggestedMinutes != null) Text(stringResource(R.string.task_timer_minutes, suggestedMinutes))
+                TextButton(onClick = { custom = !custom }, modifier = Modifier.testTag("toggle-task-timer")) {
+                    Text(stringResource(if (custom) R.string.task_timer_keep else R.string.task_timer_change))
+                }
+                if (custom) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -96,19 +105,20 @@ internal fun FocusStartDialog(
                     )
                     Text(stringResource(R.string.countdown_zero_support))
                 }
+                }
             }
         },
         confirmButton = {
             TextButton(
-                enabled = canStart,
+                enabled = if (custom) canStart else initialMode == FocusTimerMode.STOPWATCH || suggestedMinutes != null,
                 onClick = {
-                    onConfirm(
-                        mode,
-                        FocusTimerChoice.targetDurationMs(mode, minutes),
-                    )
+                    val chosenMode = if (custom) mode else initialMode
+                    val target = if (custom) FocusTimerChoice.targetDurationMs(chosenMode, minutes)
+                        else if (initialMode == FocusTimerMode.STOPWATCH) null else learnedTargetDurationMs
+                    if (onChoice != null) onChoice(chosenMode, target, custom) else onConfirm(chosenMode, target)
                 },
             ) {
-                Text(stringResource(R.string.start_action))
+                Text(stringResource(if (savingTask) R.string.task_timer_save else R.string.start_action))
             }
         },
         dismissButton = {

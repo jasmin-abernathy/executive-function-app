@@ -151,4 +151,26 @@
     <string name="folder_empty_tasks">No tasks in this folder yet. Add one above.</string>
     <string name="capture_new">Add a task</string>
     <string name="capture_close">Close task entry</string>
+    <string name="task_color_mint">Mint</string>
+    <string name="task_color_turquoise">Turquoise</string>
+    <string name="task_color_sky">Sky</string>
+    <string name="task_color_periwinkle">Periwinkle</string>
+    <string name="task_color_lilac">Lilac</string>
+    <string name="task_color_rose">Rose</string>
+    <string name="task_color_coral">Coral</string>
+    <string name="task_color_apricot">Apricot</string>
+    <string name="save_task_timer_title">Timing for this task</string>
+    <string name="task_timer_current">Suggested mode: %1$s</string>
+    <string name="task_timer_minutes">%1$d minutes</string>
+    <string name="task_timer_keep">Keep the suggested mode</string>
+    <string name="task_timer_change">Use another method for this task</string>
+    <string name="task_timer_save">Save task</string>
+    <string name="focus_back_home">Back to home</string>
+    <string name="focus_return_timer">Return to timer</string>
+    <string name="low_energy_active">One thing at a time</string>
+    <string name="low_energy_explanation">When your mood or energy is low or very low, home suggests one thing at a time and the die picks tasks marked as needing little energy. You can still show every task. The timer stays the same. This mode is reassessed at each check-in and expires after four hours.</string>
+    <string name="low_energy_no_suggestion">No suggestion right now. All your tasks remain available below, at your own pace.</string>
+    <string name="task_date_future">Planned for %1$s</string>
+    <string name="task_date_today">Planned for today</string>
+    <string name="task_date_passed">Date passed (%1$s) — you can move it if needed</string>
 </resources>

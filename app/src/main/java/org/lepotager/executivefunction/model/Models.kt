@@ -21,6 +21,19 @@ enum class TaskColor {
     TERRACOTTA,
     LAVENDER,
     SAND,
+    MINT,
+    TURQUOISE,
+    SKY,
+    PERIWINKLE,
+    LILAC,
+    ROSE,
+    CORAL,
+    APRICOT,
+    ;
+
+    companion object {
+        fun randomPastel(): TaskColor = entries.filter { it != NEUTRAL }.random()
+    }
 }
 
 data class TaskItem(
@@ -32,6 +45,10 @@ data class TaskItem(
     val updatedAt: Long,
     val color: TaskColor = TaskColor.NEUTRAL,
     val sortPosition: Long = 0,
+    val deadlineDay: Long? = null,
+    val deadlineWarningDays: Int = 7,
+    val timerOverride: Boolean = false,
+    val timerTarget: Long? = null,
 )
 
 data class FocusSession(
@@ -58,4 +75,5 @@ data class AppSnapshot(
     val loading: Boolean = true,
     val eligibleDrawIds: Set<String>? = null,
     val suggestedTaskId: String? = null,
+    val lowEnergyUntil: Long? = null,
 )
