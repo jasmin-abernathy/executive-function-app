@@ -116,4 +116,64 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-forms/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-forms/"/>
   </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/dendrila-simple-edit/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-simple-edit/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-simple-edit/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/dendrila-simple-edit/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-simple-edit/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-simple-edit/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/dendrila-forms-wordpress/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-forms-wordpress/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-forms-wordpress/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/dendrila-forms-wordpress/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-forms-wordpress/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-forms-wordpress/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/dendrila-form-sentinel/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-form-sentinel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-form-sentinel/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/dendrila-form-sentinel/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-form-sentinel/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-form-sentinel/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/dendrila-accessibility-assistant/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-accessibility-assistant/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-accessibility-assistant/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/dendrila-accessibility-assistant/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-accessibility-assistant/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-accessibility-assistant/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/dendrila-age-assurance/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-age-assurance/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-age-assurance/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/dendrila-age-assurance/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-age-assurance/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-age-assurance/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/projets/dendrila-monitor/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-monitor/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-monitor/"/>
+  </url>
+  <url>
+    <loc>https://app.lepotager.org/en/projects/dendrila-monitor/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-monitor/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-monitor/"/>
+  </url>
 </urlset>

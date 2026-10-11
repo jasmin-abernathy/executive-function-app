@@ -10,12 +10,12 @@ const external = new Map([
   ['resosoin','/resosoin/'],
   ['librairie-universelle','https://librairie.lepotager.org/'],
 ]);
-const slugs = ['vevak','fonctions-executives','resosoin','resilience-vault','dendrila-cms','mon-manager-web','communication-libre','verger-associations','atelier-epub','librairie-universelle','dendrila-privacy','sans-effort','dendrila-forms'];
+const slugs = ['vevak','fonctions-executives','resosoin','resilience-vault','dendrila-cms','mon-manager-web','communication-libre','verger-associations','atelier-epub','librairie-universelle','dendrila-privacy','sans-effort','dendrila-forms','dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor'];
 const types = {
   'dendrila-privacy':'wordpress',
   'dendrila-cms':'sites','mon-manager-web':'sites','resosoin':'sites',
   'vevak':'applications','fonctions-executives':'applications','resilience-vault':'applications',
-  'communication-libre':'autres','verger-associations':'autres','atelier-epub':'autres','librairie-universelle':'autres','sans-effort':'autres','dendrila-forms':'autres'
+  'communication-libre':'autres','verger-associations':'autres','atelier-epub':'autres','librairie-universelle':'autres','sans-effort':'autres','dendrila-forms':'autres','dendrila-simple-edit':'wordpress','dendrila-forms-wordpress':'wordpress','dendrila-form-sentinel':'wordpress','dendrila-accessibility-assistant':'wordpress','dendrila-age-assurance':'wordpress','dendrila-monitor':'wordpress'
 };
 const categories = ['wordpress','sites','applications','autres'];
 for(const lang of ['fr','en']){
@@ -24,7 +24,7 @@ for(const lang of ['fr','en']){
   const sections=[...home.matchAll(/<section class="project-group" data-project-group="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(sections,categories,lang+' : quatre sections attendues');
   const cards=[...home.matchAll(/<article class="project-card[^\"]*" data-project-category="([^"]+)">([\s\S]*?)<\/article>/g)];
-  assert.equal(cards.length,13,lang+' : treize cartes requises');
+  assert.equal(cards.length,19,lang+' : dix-neuf cartes requises');
   assert.ok(!home.includes('data-project-categories='),lang+' : anciens tags thématiques');
   assert.ok(!home.includes('class="project-tags"'),lang+' : anciennes étiquettes');
   for(const type of ['all',...categories]){
@@ -35,7 +35,7 @@ for(const lang of ['fr','en']){
     assert.ok(href,lang+' : carte sans lien');
     return {category:m[1],href:href[1]};
   });
-  assert.equal(new Set(destinations.map(x=>x.href)).size,13,lang+' : destinations dupliquées');
+  assert.equal(new Set(destinations.map(x=>x.href)).size,19,lang+' : destinations dupliquées');
   for(const slug of slugs){
     const wanted=external.get(slug)||prefix+slug+'/';
     assert.ok(destinations.some(x=>x.href===wanted&&x.category===types[slug]),lang+' : mauvaise famille ou destination pour '+slug);
@@ -46,6 +46,11 @@ for(const lang of ['fr','en']){
     assert.ok(html.includes(lang==='fr'?'/#projets':'/en/#projets'),lang+' : retour manquant '+slug);
     assert.ok(html.includes('class="detail-category"'),lang+' : type absent '+slug);
   }
+  assert.equal(cards.filter(c=>c[1]==='wordpress').length,7,lang+' : sept projets WordPress attendus');
+  for(const [category,number] of [['sites',3],['applications',3],['autres',6]]){
+    assert.equal(cards.filter(c=>c[1]===category).length,number,lang+' : mauvais nombre de projets '+category);
+  }
+  assert.ok(home.includes('Dendrila Accessibility Assistant'),lang+' : dernier plugin manquant');
   assert.ok(home.includes('/assets/style.css?v=20261010-families1'),lang+' : CSS pas actualisé');
   assert.ok(home.includes('/assets/app.js?v=20261010-families1'),lang+' : JS pas actualisé');
 }
@@ -79,4 +84,19 @@ for(const p of ['projets/dendrila-forms/index.html','en/projects/dendrila-forms/
 }
 assert.ok(read('sitemap.xml').includes('/projets/dendrila-forms/'),'Dendrila Forms absent du sitemap');
 assert.ok(js.includes('data-project-category'),'Filtrage par familles non implémenté');
-console.log('OK : 13 projets par langue, 26 fiches, quatre catégories et liens Dendrila Forms.');
+for(const slug of ['dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor']){
+  const fr=read('projets/'+slug+'/index.html');
+  const en=read('en/projects/'+slug+'/index.html');
+  assert.ok(fr.includes('WordPress')&&en.includes('WordPress'),slug+' : catégorie WordPress absente');
+  assert.ok(fr.includes('class="detail-section"')&&en.includes('class="detail-section"'),slug+' : détails incomplets');
+  assert.ok(fr.includes('2026-10-11')&&en.includes('2026-10-11'),slug+' : date de révision manquante');
+  assert.ok(read('sitemap.xml').includes('/projets/'+slug+'/'),slug+' : sitemap FR incomplet');
+  assert.ok(read('sitemap.xml').includes('/en/projects/'+slug+'/'),slug+' : sitemap EN incomplet');
+}
+for(const slug of ['dendrila-simple-edit','dendrila-form-sentinel','dendrila-age-assurance','dendrila-monitor']){
+  assert.ok(!read('projets/'+slug+'/index.html').includes('href="https://github.com/jasmin-abernathy/'+slug+'"'),slug+' : faux lien vers un dépôt privé');
+}
+assert.ok(read('projets/dendrila-form-sentinel/index.html').includes('Aucun test de soumission réelle'), 'Form Sentinel : limite sur la livraison absente');
+assert.ok(read('projets/dendrila-accessibility-assistant/index.html').includes('100 %'), 'Accessibility Assistant : ambiguïté de progression');
+assert.ok(read('projets/dendrila-forms-wordpress/index.html').includes('cache partagé'), 'Dendrila Forms : avertissement cache absent');
+console.log('OK : 19 projets par langue, 38 fiches, quatre catégories et six nouveaux plugins WordPress.');

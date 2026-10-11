@@ -39,7 +39,7 @@ while IFS= read -r path; do
     projets/*/index.html|en/projects/*/index.html) PAGES+=("$rel");;
   esac
 done < <(git -C "$REPO" ls-tree -r --name-only origin/main -- "$SRC/projets" "$SRC/en/projects")
-[[ "${#PAGES[@]}" -eq 26 ]] || fail "26 fiches attendues dans Git, ${#PAGES[@]} trouvées."
+[[ "${#PAGES[@]}" -eq 38 ]] || fail "38 fiches attendues dans Git, ${#PAGES[@]} trouvées."
 FILES+=("${PAGES[@]}")
 
 TMP="$(mktemp -d)"
@@ -62,8 +62,12 @@ for lang in index.html en/index.html; do
   grep -Fq 'data-project-filter="wordpress"' "$TMP/staging/$lang" || fail "Filtre WordPress absent: $lang"
   grep -Fq 'data-project-group="sites"' "$TMP/staging/$lang" || fail "Section Gestion de sites absente: $lang"
   grep -Fq 'Dendrila Forms' "$TMP/staging/$lang" || fail "Dendrila Forms absent: $lang"
+  grep -Fq 'Dendrila Accessibility Assistant' "$TMP/staging/$lang" || fail "Nouveau catalogue WordPress absent: $lang"
+  grep -Fq 'Dendrila Age Assurance' "$TMP/staging/$lang" || fail "Age Assurance absent: $lang"
 done
 grep -Fq 'https://github.com/jasmin-abernathy/dendrila-forms' "$TMP/staging/projets/dendrila-forms/index.html" || fail "Fiche Dendrila Forms invalide."
+grep -Fq 'Aucun test de soumission réelle' "$TMP/staging/projets/dendrila-form-sentinel/index.html" || fail "Limites Form Sentinel absentes."
+grep -Fq 'RGAA' "$TMP/staging/projets/dendrila-accessibility-assistant/index.html" || fail "Limites Accessibility Assistant absentes."
 grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/staging/index.html" || fail "La carte VeVak n'utilise pas son site dédié."
 grep -Fq 'project-card-link' "$TMP/staging/assets/style.css" || fail "Le CSS des cartes cliquables manque."
 if grep -Fq 'project-expand' "$TMP/staging/assets/app.js"; then fail "Ancien accordéon toujours présent dans le JS Git."; fi
@@ -98,7 +102,7 @@ check_http() {
   http_root="https://app.lepotager.org/?_catalogue_check=$stamp"
   http_detail="https://app.lepotager.org/projets/dendrila-privacy/?_catalogue_check=$stamp"
   if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$http_root" -o "$TMP/public-home.html"; then
-    if grep -Fq 'class="project-card-link"' "$TMP/public-home.html" && grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/public-home.html" && grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/public-home.html" && grep -Fq 'Dendrila Forms' "$TMP/public-home.html" && grep -Fq 'data-project-group="sites"' "$TMP/public-home.html"; then
+    if grep -Fq 'class="project-card-link"' "$TMP/public-home.html" && grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/public-home.html" && grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/public-home.html" && grep -Fq 'Dendrila Forms' "$TMP/public-home.html" && grep -Fq 'data-project-group="sites"' "$TMP/public-home.html" && grep -Fq 'Dendrila Accessibility Assistant' "$TMP/public-home.html" && grep -Fq 'Dendrila Age Assurance' "$TMP/public-home.html"; then
       echo "HTTP accueil : nouveau catalogue détecté."
     else
       warn "HTTP accueil : ANCIEN HTML encore servi (dossier incorrect, cache ou synchronisation non appliquée)."
@@ -124,7 +128,7 @@ if [[ "$MODE" == "--check" ]]; then
 fi
 
 if [[ "${#CHANGED[@]}" -eq 0 ]]; then
-  echo "Les 32 fichiers du DocumentRoot sont déjà identiques à Git."
+  echo "Les 44 fichiers du DocumentRoot sont déjà identiques à Git."
   check_http
   exit 0
 fi
