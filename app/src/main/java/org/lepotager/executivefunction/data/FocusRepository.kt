@@ -57,6 +57,12 @@ class FocusRepository internal constructor(
         refresh()
     }
 
+    suspend fun recordCheckIn(mood: Int, motivation: Int, energy: Int) = mutate {
+        require(mood in 0..3 && motivation in 0..3 && energy in 0..3)
+        LearningJournal(database).checkIn(mood, motivation, energy)
+        refresh()
+    }
+
     /** Legacy start path: keep the learned reference when no explicit timer choice is supplied. */
     suspend fun start(taskId: String) = mutate {
         startLocked(taskId, database.suggestedDurationMs(taskId))
