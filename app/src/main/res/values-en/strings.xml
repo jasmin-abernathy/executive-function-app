@@ -77,13 +77,23 @@
     <string name="ok">OK</string>
     <string name="error_title">That was not saved</string>
     <string name="error_message">Nothing was intentionally discarded. Try again; if it keeps happening, restart the app.</string>
-    <string name="open_journal">Planning, steps and learning</string>
+    <string name="open_journal">Tasks, notes and settings</string>
+    <string name="home_check_in">How I feel</string>
     <string name="adaptation_rule">Optional filters: declared energy, available time and context. The die shuffles matching tasks when you request it.</string>
     <string name="adaptation_suggestion">Based on these filters and your importance setting: %1$s</string>
     <string name="adaptation_empty">No tasks match the filters. Change them in Planning or choose manually.</string>
     <string name="check_in_title">How are you feeling now?</string>
     <string name="check_in_body">If you wish, share your mood, motivation and energy. This check-in is optional.</string>
     <string name="check_in_answer">Check in</string>
+    <string name="check_in_scale">Choose what feels closest to right now.</string>
+    <string name="check_in_level_0">Very low</string>
+    <string name="check_in_level_1">Low</string>
+    <string name="check_in_level_2">Medium</string>
+    <string name="check_in_level_3">High</string>
+    <string name="check_in_mood">Mood</string>
+    <string name="check_in_motivation">Motivation</string>
+    <string name="check_in_energy">Energy</string>
+    <string name="check_in_save">Save</string>
     <string name="not_now">Not now</string>
     <string name="mini_timer">Android mini window</string>
     <string name="open_notes">Keep a note</string>
@@ -137,4 +147,8 @@
     <string name="intro_context_body">If you enable it, the app can take your energy, available time and context into account. The die uses eligible tasks only when you ask it to. You stay in control of their order.</string>
     <string name="intro_enable_suggestions">Enable suggestions</string>
     <string name="intro_later">Later</string>
+    <string name="task_steps_folder">Steps and folder</string>
+    <string name="folder_empty_tasks">No tasks in this folder yet. Add one above.</string>
+    <string name="capture_new">Add a task</string>
+    <string name="capture_close">Close task entry</string>
 </resources>

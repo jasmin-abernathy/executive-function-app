@@ -156,39 +156,82 @@ class JournalActivity : ComponentActivity() {
         Scaffold { padding ->
             LazyColumn(Modifier.fillMaxSize().padding(padding),contentPadding=PaddingValues(20.dp),verticalArrangement=Arrangement.spacedBy(12.dp)) {
                 item {
-                    Text(label("Mon organisation et mon suivi","My planning and learning"),style=MaterialTheme.typography.headlineSmall)
-                    TextButton(onClick={if(selected!=null) selected=null else finish()}) { Text(label("Retour","Back")) }
-                    if(selected==null) Row(Modifier.horizontalScroll(rememberScrollState()),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                        listOf("tasks" to label("Tâches et suivi","Tasks & learning"),"state" to label("Mon état","Check-in"),"notes" to label("Notes","Notes"),"settings" to label("Réglages","Settings")).forEach {(key,text) ->
-                            FilterChip(selected=section==key,onClick={section=key},label={Text(text)})
+                    Text(label("Organisation et données","Planning and data"),style=MaterialTheme.typography.headlineSmall)
+                    TextButton(onClick={if(selected!=null) selected=null else finish()}) { Text(label("Retour à l’accueil","Back to home")) }
+                    if(selected==null) {
+                        val tabs=listOf(
+                            "tasks" to label("Tâches","Tasks"),
+                            "state" to label("Historique","History"),
+                            "notes" to label("Notes","Notes"),
+                            "settings" to label("Réglages","Settings"),
+                        )
+                        Column(verticalArrangement=Arrangement.spacedBy(8.dp)) {
+                            tabs.chunked(2).forEach { rowTabs ->
+                                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                    rowTabs.forEach {(key,text) ->
+                                        if(section==key) Button(onClick={section=key},modifier=Modifier.weight(1f)) { Text(text) }
+                                        else OutlinedButton(onClick={section=key},modifier=Modifier.weight(1f)) { Text(text) }
+                                    }
+                                }
+                            }
                         }
                     }
                     if(busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                 }
                 if(task==null) {
                     if(section=="state") item {
-                        Text(label("Comment ça va maintenant ? Facultatif.","How are you feeling now? Optional."),style=MaterialTheme.typography.titleMedium)
-                        Text(label("0 : très bas · 1 : bas · 2 : moyen · 3 : haut","0: very low · 1: low · 2: medium · 3: high"))
-                        Level(label("Humeur","Mood"),mood) { mood=it }
-                        Level(label("Motivation","Motivation"),motivation) { motivation=it }
-                        Level(label("Énergie","Energy"),energy) { energy=it }
-                        Button(enabled=!busy,onClick={val id=editingCheck;run { if(id==null) journal.checkIn(mood,motivation,energy) else journal.editCheckIn(id,mood,motivation,energy) };editingCheck=null}) { Text(if(editingCheck==null) label("Enregistrer cet état","Save this check-in") else label("Corriger cet état","Update check-in")) }
-                        if(editingCheck!=null) TextButton(onClick={editingCheck=null}) {Text(label("Annuler la correction","Cancel editing"))}
-                        Row { Switch(checked=checkEnabled,onCheckedChange={checkEnabled=it;getSharedPreferences("wellbeing",MODE_PRIVATE).edit().putBoolean("enabled",it).apply()});Text(label("Proposer ce point toutes les 4 heures au maximum","Offer a check-in at most every 4 hours")) }
+                        Text(label("Historique de mes états","My check-in history"),style=MaterialTheme.typography.titleLarge)
+                        if(editingCheck==null) {
+                            Text(label("Le point d’état se fait désormais depuis l’accueil : tu renseignes humeur, motivation et énergie sans quitter la page principale.","Check in from the home screen: you can record mood, motivation and energy without leaving your main page."))
+                            FilledTonalButton(onClick={
+                                startActivity(
+                                    android.content.Intent(this@JournalActivity,MainActivity::class.java)
+                                        .addFlags(android.content.Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                        .putExtra("quick_action","check_in")
+                                )
+                                finish()
+                            }) { Text(label("Faire le point depuis l’accueil","Check in from home")) }
+                        } else {
+                            Text(label("Corriger cet état","Edit this check-in"),style=MaterialTheme.typography.titleMedium)
+                            Text(label("0 : très bas · 1 : bas · 2 : moyen · 3 : haut","0: very low · 1: low · 2: medium · 3: high"))
+                            Level(label("Humeur","Mood"),mood) { mood=it }
+                            Level(label("Motivation","Motivation"),motivation) { motivation=it }
+                            Level(label("Énergie","Energy"),energy) { energy=it }
+                            Button(enabled=!busy,onClick={val id=editingCheck;run { if(id!=null) journal.editCheckIn(id,mood,motivation,energy) };editingCheck=null}) { Text(label("Enregistrer la correction","Save changes")) }
+                            TextButton(onClick={editingCheck=null}) {Text(label("Annuler la correction","Cancel editing"))}
+                        }
                         Text(label("Les états restent locaux. Ils ne constituent pas un diagnostic. Tu peux les supprimer ci-dessous.","Check-ins stay local. They are not a diagnosis. You can delete them below."))
                     }
                     if(section=="settings") item {
-                        Text(label("Adaptation facultative","Optional adaptation"),style=MaterialTheme.typography.titleLarge)
-                        Row {Switch(checked=adapt,onCheckedChange={adapt=it;preferences.edit().putBoolean("adapt",it).apply()});Text(label("Filtrer les tâches mélangées au dé et les propositions du widget","Filter tasks shuffled by the die and widget suggestions"))}
-                        Row {Switch(checked=lowEnergy,onCheckedChange={lowEnergy=it;preferences.edit().putBoolean("low_energy",it).apply()});Text(label("Mode basse énergie","Low-energy mode"))}
-                        OutlinedTextField(value=availableMinutes,onValueChange={availableMinutes=it},label={Text(label("Minutes disponibles (0 = sans limite)","Available minutes (0 = unlimited)"))})
-                        OutlinedTextField(value=currentContext,onValueChange={currentContext=it},label={Text(label("Contexte actuel (vide = tous)","Current context (blank = all)"))})
-                        TextButton(enabled=availableMinutes.toIntOrNull()?.let {it in 0..10080}==true,onClick={preferences.edit().putInt("available_minutes",availableMinutes.toInt()).putString("context",currentContext.trim()).apply()}) {Text(label("Appliquer les filtres","Apply filters"))}
-                        Text(label("Ce sont des règles explicites, pas encore des conclusions apprises sur ton humeur. L’état énergétique expire après 4 heures. Un temps inconnu ne fait pas exclure une tâche.","These are explicit rules, not learned conclusions about your mood. Energy expires after 4 hours. Unknown duration does not exclude a task."))
-                        Row {Switch(checked=keepScreen,onCheckedChange={keepScreen=it;getSharedPreferences("app_preferences",MODE_PRIVATE).edit().putBoolean("keep_screen_on",it).apply()});Text(label("Garder l’écran allumé pendant le focus","Keep screen on during focus"))}
-                        Row {Switch(checked=calm,onCheckedChange={calm=it;getSharedPreferences("app_preferences",MODE_PRIVATE).edit().putBoolean("calm",it).apply()});Text(label("Mode calme : sans animation ni vibration du dé","Calm mode: no die animation or vibration"))}
-                        Row {Switch(checked=autoMini,onCheckedChange={autoMini=it;getSharedPreferences("app_preferences",MODE_PRIVATE).edit().putBoolean("auto_pip",it).apply()});Text(label("Mini-fenêtre quand je quitte le focus","Mini window when I leave focus"))}
-                        TextButton(onClick={startActivity(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,packageName))}) {Text(label("Autorisations et notifications Android","Android notification settings"))}
+                        Text(label("Réglages","Settings"),style=MaterialTheme.typography.titleLarge)
+                        Column(verticalArrangement=Arrangement.spacedBy(12.dp)) {
+                            Card(Modifier.fillMaxWidth()) {
+                                Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
+                                    Text(label("Suggestions et contexte","Suggestions and context"),style=MaterialTheme.typography.titleMedium)
+                                    Row {Switch(checked=adapt,onCheckedChange={adapt=it;preferences.edit().putBoolean("adapt",it).apply()});Text(label("Adapter les propositions à mon contexte","Adapt suggestions to my context"))}
+                                    Row {Switch(checked=lowEnergy,onCheckedChange={lowEnergy=it;preferences.edit().putBoolean("low_energy",it).apply()});Text(label("Mode basse énergie","Low-energy mode"))}
+                                    OutlinedTextField(value=availableMinutes,onValueChange={availableMinutes=it},modifier=Modifier.fillMaxWidth(),label={Text(label("Temps disponible en minutes (0 = sans limite)","Available minutes (0 = unlimited)"))})
+                                    OutlinedTextField(value=currentContext,onValueChange={currentContext=it},modifier=Modifier.fillMaxWidth(),label={Text(label("Contexte actuel (facultatif)","Current context (optional)"))})
+                                    Button(enabled=availableMinutes.toIntOrNull()?.let {it in 0..10080}==true,onClick={preferences.edit().putInt("available_minutes",availableMinutes.toInt()).putString("context",currentContext.trim()).apply()}) {Text(label("Enregistrer ces filtres","Save these filters"))}
+                                    Text(label("Ces règles servent uniquement aux suggestions. Elles ne tirent pas de conclusion sur ton humeur.","These rules only shape suggestions. They do not draw conclusions about your mood."),style=MaterialTheme.typography.bodySmall)
+                                }
+                            }
+                            Card(Modifier.fillMaxWidth()) {
+                                Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
+                                    Text(label("Pendant le focus","During focus"),style=MaterialTheme.typography.titleMedium)
+                                    Row {Switch(checked=keepScreen,onCheckedChange={keepScreen=it;getSharedPreferences("app_preferences",MODE_PRIVATE).edit().putBoolean("keep_screen_on",it).apply()});Text(label("Garder l’écran allumé","Keep screen on"))}
+                                    Row {Switch(checked=calm,onCheckedChange={calm=it;getSharedPreferences("app_preferences",MODE_PRIVATE).edit().putBoolean("calm",it).apply()});Text(label("Mode calme (sans animation ni vibration du dé)","Calm mode (no die animation or vibration)"))}
+                                    Row {Switch(checked=autoMini,onCheckedChange={autoMini=it;getSharedPreferences("app_preferences",MODE_PRIVATE).edit().putBoolean("auto_pip",it).apply()});Text(label("Mini-fenêtre quand je quitte le focus","Mini window when I leave focus"))}
+                                }
+                            }
+                            Card(Modifier.fillMaxWidth()) {
+                                Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(10.dp)) {
+                                    Text(label("Rappels et Android","Reminders and Android"),style=MaterialTheme.typography.titleMedium)
+                                    Row { Switch(checked=checkEnabled,onCheckedChange={checkEnabled=it;getSharedPreferences("wellbeing",MODE_PRIVATE).edit().putBoolean("enabled",it).apply()});Text(label("Me proposer un point d’état au maximum toutes les 4 heures","Offer a check-in at most every 4 hours")) }
+                                    TextButton(onClick={startActivity(android.content.Intent(android.provider.Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(android.provider.Settings.EXTRA_APP_PACKAGE,packageName))}) {Text(label("Autorisations et notifications Android","Android notification settings"))}
+                                }
+                            }
+                        }
                     }
                     if(section=="tasks") item {
                         Text(label("Tâches et occurrences","Tasks and occurrences"),style=MaterialTheme.typography.titleLarge)
@@ -198,11 +241,18 @@ class JournalActivity : ComponentActivity() {
                     if(section=="tasks") items(tasks.filter { (!todayOnly || planningMap[it.id]?.today==true) && (showCompleted || !it.completed) },key={it.id}) { t ->
                         OutlinedButton(onClick={selected=t.id},modifier=Modifier.fillMaxWidth()) { Text(t.title+if(t.completed) label(" — terminée"," — completed") else "") }
                     }
-                    if(section=="state") item { Text(label("États enregistrés","Saved check-ins"),style=MaterialTheme.typography.titleLarge) }
+                    if(section=="state" && checks.isNotEmpty()) item { Text(label("Points enregistrés","Saved check-ins"),style=MaterialTheme.typography.titleMedium) }
                     if(section=="state") items(checks,key={it.id}) { c ->
-                        Text(DateFormat.getDateTimeInstance().format(Date(c.date))+" · "+label("Humeur / motivation / énergie : ","Mood / motivation / energy: ")+"${c.mood} / ${c.motivation} / ${c.energy}")
-                        TextButton(enabled=!busy,onClick={run { journal.deleteCheckIn(c.id) }}) { Text(label("Supprimer cet état","Delete check-in")) }
-                        TextButton(enabled=!busy,onClick={editingCheck=c.id;mood=c.mood;motivation=c.motivation;energy=c.energy}) {Text(label("Corriger avec les champs ci-dessus","Edit using the fields above"))}
+                        Card(Modifier.fillMaxWidth()) {
+                            Column(Modifier.padding(16.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
+                                Text(DateFormat.getDateTimeInstance().format(Date(c.date)),style=MaterialTheme.typography.labelLarge)
+                                Text(label("Humeur / motivation / énergie : ","Mood / motivation / energy: ")+"${c.mood} / ${c.motivation} / ${c.energy}")
+                                Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                                    TextButton(enabled=!busy,onClick={editingCheck=c.id;mood=c.mood;motivation=c.motivation;energy=c.energy}) {Text(label("Corriger","Edit"))}
+                                    TextButton(enabled=!busy,onClick={run { journal.deleteCheckIn(c.id) }}) { Text(label("Supprimer","Delete")) }
+                                }
+                            }
+                        }
                     }
                     if(section=="notes") item {
                         OutlinedTextField(value=noteText,onValueChange={noteText=it},label={Text(label("Une idée à garder","An idea to keep"))},modifier=Modifier.fillMaxWidth())

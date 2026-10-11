@@ -27,11 +27,18 @@ class HomeModesTest {
             TaskItem("task-$index", title, null, TaskStatus.READY, index.toLong(), index.toLong())
         }
 
-    private fun render(onStart: (String) -> Unit = {}, onCustom: (String) -> Unit = {}) {
+    private fun render(
+        onStart: (String) -> Unit = {},
+        onCustom: (String) -> Unit = {},
+        onCheckIn: () -> Unit = {},
+        onEditTask: (String) -> Unit = {},
+    ) {
         compose.setContent {
             ExecutiveFunctionTheme {
                 HomeScreen(
                     tasks = tasks,
+                    onCheckIn = onCheckIn,
+                    onEditTask = onEditTask,
                     drawEnabled = false,
                     pauseSuggestionsEnabled = true,
                     pauseAfterMinutes = 25,
@@ -53,6 +60,25 @@ class HomeModesTest {
 
     private fun scrollToTodayPanel() {
         compose.onNodeWithTag("home-task-list").performScrollToNode(hasText("Maintenant"))
+    }
+
+    @Test fun compactHomeOpensTheCurrentTaskStepsWithoutStartingItsTimer() {
+        var edited: String? = null
+        var started: String? = null
+        render(onStart = { started = it }, onEditTask = { edited = it })
+        scrollToTodayPanel()
+        compose.onNodeWithText("Étapes et dossier").performScrollTo().performClick()
+        compose.runOnIdle {
+            assertEquals("task-0", edited)
+            assertEquals(null, started)
+        }
+    }
+
+    @Test fun checkInStaysAvailableFromHome() {
+        var opened = 0
+        render(onCheckIn = { opened += 1 })
+        compose.onNodeWithText("Comment je vais").performClick()
+        compose.runOnIdle { assertEquals(1, opened) }
     }
 
     @Test fun nowNextShowsOnlyCurrentAndTwoAlternatives() {

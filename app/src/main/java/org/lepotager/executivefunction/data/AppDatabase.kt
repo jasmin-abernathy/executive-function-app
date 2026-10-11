@@ -63,6 +63,7 @@ internal class AppDatabase(private val context: Context) :
             "CREATE UNIQUE INDEX one_active_focus ON focus_sessions(is_active) WHERE is_active = 1",
         )
         createLearningTables(db)
+        WorkspaceStore.createTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -84,6 +85,10 @@ internal class AppDatabase(private val context: Context) :
         if (version == 3) {
             createLearningTables(db)
             version = 4
+        }
+        if (version == 4) {
+            WorkspaceStore.createTables(db)
+            version = 5
         }
         check(version == newVersion) { "Missing migration from $oldVersion to $newVersion" }
     }
@@ -266,6 +271,7 @@ internal class AppDatabase(private val context: Context) :
         updateSession(db, session, isActive = false)
         updateTaskStatus(db, session.taskId, taskStatus, session.updatedAt)
         if (session.status == FocusStatus.COMPLETED) {
+            WorkspaceStore(this).completeLinkedStep(session.taskId)
             db.execSQL("INSERT OR IGNORE INTO session_steps(session_id,position,title) SELECT ?,position,title FROM task_steps WHERE task_id=?", arrayOf(session.id,session.taskId))
         }
     }
@@ -394,7 +400,7 @@ internal class AppDatabase(private val context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "executive-function.db"
-        const val DATABASE_VERSION = 4
+        const val DATABASE_VERSION = 5
         val TASK_COLUMNS = arrayOf(
             "id",
             "title",

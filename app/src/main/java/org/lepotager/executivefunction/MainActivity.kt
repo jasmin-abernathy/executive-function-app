@@ -32,6 +32,7 @@ import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.ui.ErrorDialog
 import org.lepotager.executivefunction.ui.FirstRunSetupConfig
 import org.lepotager.executivefunction.ui.FirstRunSetupFlow
+import org.lepotager.executivefunction.ui.CheckInDialog
 import org.lepotager.executivefunction.ui.FocusScreen
 import org.lepotager.executivefunction.ui.FocusStartDialog
 import org.lepotager.executivefunction.ui.HomeScreen
@@ -215,12 +216,13 @@ class MainActivity : ComponentActivity() {
                     }
                     if(showCheckIn && !snapshot.loading && snapshot.activeFocus == null &&
                         !externalCapture && !showQuickNote && !miniWindow && requestedTask == null && pendingStart == null
-                    ) androidx.compose.material3.AlertDialog(
-                        onDismissRequest={showCheckIn=false},
-                        title={androidx.compose.material3.Text(getString(R.string.check_in_title))},
-                        text={androidx.compose.material3.Text(getString(R.string.check_in_body))},
-                        confirmButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false;startActivity(Intent(this@MainActivity,JournalActivity::class.java).putExtra("section","state"))}) {androidx.compose.material3.Text(getString(R.string.check_in_answer))}},
-                        dismissButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false}) {androidx.compose.material3.Text(getString(R.string.not_now))}},
+                    ) CheckInDialog(
+                        onDismiss = { showCheckIn = false },
+                        onSave = { mood, motivation, energy ->
+                            viewModel.recordCheckIn(mood, motivation, energy) {
+                                showCheckIn = false
+                            }
+                        },
                     )
 
                     LaunchedEffect(snapshot.loading, snapshot.activeFocus, miniWindow) {
@@ -271,7 +273,14 @@ class MainActivity : ComponentActivity() {
                                     onPostpone = viewModel::postpone,
                                 )
 
-                                else -> HomeScreen(
+                                else -> org.lepotager.executivefunction.ui.WorkspaceHome(
+                                    tasks = snapshot.tasks,
+                                    onChanged = { viewModel.reload() },
+                                    onStartStep = { id -> viewModel.reload { startTaskWithDefaults(id) } },
+                                ) { visibleIds, folderId, editTask, workspace -> HomeScreen(
+                                    visibleTaskIds = visibleIds,
+                                    onEditTask = editTask,
+                                    workspace = workspace,
                                     tasks = snapshot.tasks,
                                     drawRequest = drawRequest,
                                     onApplySuggestedOrder = viewModel::applySuggestedOrder,
@@ -279,10 +288,11 @@ class MainActivity : ComponentActivity() {
                                     suggestedTaskId = snapshot.suggestedTaskId,
                                     onHelp = { refreshPreferences(); showCheckIn=false; showIntro=true },
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
+                                    onCheckIn = { showCheckIn = true },
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                     pauseAfterMinutes = pauseAfterMinutes,
-                                    onCapture = viewModel::capture,
+                                    onCapture = { title, step, color, after -> viewModel.captureInFolder(title, step, color, folderId, after) },
                                     homeViewMode = homeViewMode,
                                     customStartAvailable = quickStartEnabled,
                                     onStart = ::startTaskWithDefaults,
@@ -293,7 +303,7 @@ class MainActivity : ComponentActivity() {
                                     onSetDrawEnabled = ::saveDrawPreference,
                                     onSetPauseSuggestionsEnabled = ::savePausePreference,
                                     onSetPauseAfterMinutes = ::savePauseInterval,
-                                )
+                                ) }
                             }
                         }
                     }
@@ -416,6 +426,7 @@ class MainActivity : ComponentActivity() {
         when(intent?.getStringExtra("quick_action")) {
             "capture" -> { externalCapture=true; showCheckIn=false }
             "pip_note" -> { showQuickNote=true; returnToMiniWindow=true; showCheckIn=false }
+            "check_in" -> { showCheckIn=true; showIntro=false }
             "draw" -> drawRequest+=1
         }
         intent?.removeExtra("requested_task")
