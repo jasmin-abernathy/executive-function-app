@@ -194,6 +194,7 @@ fun HomeScreen(
     LaunchedEffect(lowEnergy) { if (lowEnergy) showAllTasks = false }
     val effectiveHomeMode = if (lowEnergy) HomeViewMode.ONE_NEXT else homeViewMode
     val visibleTasks = tasks.filter { visibleTaskIds == null || it.id in visibleTaskIds }
+    val drawEligibleIds = TaskDraw.eligibleForView(eligibleDrawIds, visibleTaskIds)
     val reorder = rememberTaskReorder(tasks, onApplyTaskOrder)
     val drawResultRequester = remember { BringIntoViewRequester() }
     var proposalOnly by remember { mutableStateOf(false) }
@@ -201,20 +202,22 @@ fun HomeScreen(
 
     fun beginDraw(previousTaskId: String?, onlyPropose: Boolean = false) {
         if (isDrawing || reorder.saving || reorder.dragged != null) return
-        val order = TaskDraw.permute(tasks, eligibleDrawIds, previousTaskId)
-        val next = if (onlyPropose) TaskDraw.pick(
-            tasks.filter { eligibleDrawIds == null || it.id in eligibleDrawIds }, previousTaskId,
-        ) else order.proposed
+        // Inside a folder, suggest from that folder only; don't reorder other folders.
+        val scopedProposal = onlyPropose || visibleTaskIds != null
+        val order = if (scopedProposal) null else TaskDraw.permute(tasks, drawEligibleIds, previousTaskId)
+        val next = if (scopedProposal) TaskDraw.pick(
+            tasks.filter { drawEligibleIds == null || it.id in drawEligibleIds }, previousTaskId,
+        ) else order?.proposed
         if (next == null) return
         fun present() {
-            proposalOnly = onlyPropose
+            proposalOnly = scopedProposal
             pendingDrawTaskId = next.id
             isDrawing = true
             drawRollKey += 1
         }
-        if (onlyPropose) present() else {
+        if (scopedProposal) present() else {
             reorder.saving = true
-            onApplyTaskOrder(order.tasks.map { it.id }) { saved ->
+            onApplyTaskOrder(requireNotNull(order).tasks.map { it.id }) { saved ->
                 reorder.saving = false
                 if (saved) present()
             }
@@ -439,7 +442,7 @@ fun HomeScreen(
                         onClick = { beginDraw(drawnTaskId) },
                         enabled = !isDrawing && !reorder.saving && reorder.dragged == null && tasks.any {
                             it.status == org.lepotager.executivefunction.model.TaskStatus.READY &&
-                                (eligibleDrawIds == null || it.id in eligibleDrawIds)
+                                (drawEligibleIds == null || it.id in drawEligibleIds)
                         },
                         colors = appTonalButtonColors(),
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
@@ -449,7 +452,7 @@ fun HomeScreen(
                         Text(stringResource(R.string.draw_action))
                     }
                 }
-                if (!isDrawing) tasks.firstOrNull { it.id == drawnTaskId }?.let { task ->
+                if (!isDrawing) tasks.firstOrNull { it.id == drawnTaskId && (visibleTaskIds == null || it.id in visibleTaskIds) }?.let { task ->
                     item(key = "drawn-${task.id}") {
                         Box(Modifier.bringIntoViewRequester(drawResultRequester)) {
                             TaskDrawPanel(

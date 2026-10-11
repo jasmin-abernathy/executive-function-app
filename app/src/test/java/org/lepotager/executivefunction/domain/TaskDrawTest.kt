@@ -21,6 +21,17 @@ class TaskDrawTest {
     }
 
     @Test
+    fun folderDrawRespectsFolderAndEnergyLimits() {
+        assertNull(TaskDraw.eligibleForView(null, null))
+        assertEquals(setOf("a", "b"), TaskDraw.eligibleForView(null, setOf("a", "b")))
+        assertEquals(setOf("b"), TaskDraw.eligibleForView(setOf("b", "c"), setOf("a", "b")))
+        assertEquals(emptySet<String>(), TaskDraw.eligibleForView(setOf("c"), setOf("a", "b")))
+        val tasks = listOf(task("a"), task("b"), task("c"))
+        val pool = TaskDraw.eligibleForView(setOf("b", "c"), setOf("a", "b"))
+        assertEquals("b", TaskDraw.pick(tasks.filter { pool == null || it.id in pool }, random = Random(1))?.id)
+    }
+
+    @Test
     fun redrawAvoidsThePreviousTaskWhenAnotherIsAvailable() {
         val tasks = listOf(task("first"), task("second"))
 

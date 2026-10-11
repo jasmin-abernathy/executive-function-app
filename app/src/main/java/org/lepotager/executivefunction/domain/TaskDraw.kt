@@ -12,6 +12,14 @@ import org.lepotager.executivefunction.model.TaskStatus
 object TaskDraw {
     data class Order(val tasks: List<TaskItem>, val proposed: TaskItem?)
 
+    /** A selected folder further narrows the eligible pool without overriding energy limits. */
+    fun eligibleForView(eligibleIds: Set<String>?, visibleIds: Set<String>?): Set<String>? =
+        when {
+            visibleIds == null -> eligibleIds
+            eligibleIds == null -> visibleIds
+            else -> eligibleIds intersect visibleIds
+        }
+
     fun permute(
         tasks: List<TaskItem>,
         eligibleIds: Set<String>? = null,
