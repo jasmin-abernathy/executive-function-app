@@ -100,15 +100,29 @@ internal fun WorkspaceHome(
         },
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                TextButton(onClick = { showThemes = !showThemes }) {
-                    Text(label("Thèmes", "Themes") +
-                        (selectedFolder?.let { " · " + it.name } ?: "") +
-                        if (showThemes) " ▲" else " ▼")
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(
+                    onClick = { showThemes = !showThemes },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        label("Thèmes", "Themes") +
+                            (selectedFolder?.let { " · " + it.name } ?: "") +
+                            if (showThemes) " ▲" else " ▼",
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
                 }
-                TextButton(onClick = { showNotes = !showNotes }) {
-                    Text(label("Mes notes", "My notes") + " (" + data.notes.size + ")" +
-                        if (showNotes) " ▲" else " ▼")
+                TextButton(
+                    onClick = { showNotes = !showNotes },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        label("Mes notes", "My notes") + " (" + data.notes.size + ")" +
+                            if (showNotes) " ▲" else " ▼",
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    )
                 }
             }
             if (showThemes) {
