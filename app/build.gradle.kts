@@ -3,6 +3,16 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// Release signing is deliberately opt-in. No keystore or password is stored in Git.
+val betaStoreFile = providers.environmentVariable("TDAH_BETA_STORE_FILE")
+val betaStorePassword = providers.environmentVariable("TDAH_BETA_STORE_PASSWORD")
+val betaKeyAlias = providers.environmentVariable("TDAH_BETA_KEY_ALIAS")
+val betaKeyPassword = providers.environmentVariable("TDAH_BETA_KEY_PASSWORD")
+val hasBetaSigning = listOf(
+    betaStoreFile, betaStorePassword, betaKeyAlias, betaKeyPassword,
+).all { it.isPresent }
+
+
 android {
     namespace = "org.lepotager.executivefunction"
     compileSdk = 37
@@ -22,6 +32,17 @@ android {
         buildConfig = false
     }
 
+    signingConfigs {
+        if (hasBetaSigning) {
+            create("betaRelease") {
+                storeFile = file(betaStoreFile.get())
+                storePassword = betaStorePassword.get()
+                keyAlias = betaKeyAlias.get()
+                keyPassword = betaKeyPassword.get()
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -30,6 +51,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            if (hasBetaSigning) {
+                signingConfig = signingConfigs.getByName("betaRelease")
+            }
         }
     }
 

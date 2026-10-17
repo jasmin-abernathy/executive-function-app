@@ -31,8 +31,8 @@ fun ExternalCaptureDialog(onDismiss: () -> Unit, onCapture: (String) -> Unit) {
 }
 
 @Composable
-fun QuickNoteDialog(onDismiss: () -> Unit, onSave: (String) -> Unit) {
-    var text by rememberSaveable { mutableStateOf("") }
+fun QuickNoteDialog(onDismiss: () -> Unit, onSave: (String) -> Unit, initialText: String = "") {
+    var text by rememberSaveable(initialText) { mutableStateOf(initialText) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.quick_note_title)) },

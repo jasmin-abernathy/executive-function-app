@@ -2,7 +2,7 @@ package org.lepotager.executivefunction.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
@@ -28,11 +28,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
+import org.lepotager.executivefunction.ui.theme.LightColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -70,6 +73,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.delay
 import org.lepotager.executivefunction.R
+import org.lepotager.executivefunction.data.JournalStep
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.domain.HomeViewMode
 import org.lepotager.executivefunction.domain.TaskDraw
@@ -78,18 +82,98 @@ import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.model.TaskItem
 
 @Composable
+fun CheckInDialog(
+    onDismiss: () -> Unit,
+    onSave: (mood: Int, motivation: Int, energy: Int) -> Unit,
+) {
+    var mood by remember { mutableIntStateOf(1) }
+    var motivation by remember { mutableIntStateOf(1) }
+    var energy by remember { mutableIntStateOf(1) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.check_in_title)) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.check_in_body))
+                Text(
+                    text = stringResource(R.string.check_in_scale),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                CheckInLevel(stringResource(R.string.check_in_mood), mood) { mood = it }
+                CheckInLevel(stringResource(R.string.check_in_motivation), motivation) { motivation = it }
+                CheckInLevel(stringResource(R.string.check_in_energy), energy) { energy = it }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onSave(mood, motivation, energy) }) {
+                Text(stringResource(R.string.check_in_save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.not_now))
+            }
+        },
+    )
+}
+
+@Composable
+private fun CheckInLevel(
+    label: String,
+    value: Int,
+    onChange: (Int) -> Unit,
+) {
+    val choices = listOf(
+        R.string.check_in_level_0,
+        R.string.check_in_level_1,
+        R.string.check_in_level_2,
+        R.string.check_in_level_3,
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(label, style = MaterialTheme.typography.labelLarge)
+        choices.chunked(2).forEachIndexed { rowIndex, rowChoices ->
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                rowChoices.forEachIndexed { columnIndex, choice ->
+                    val level = rowIndex * 2 + columnIndex
+                    FilterChip(
+                        selected = value == level,
+                        onClick = { onChange(level) },
+                        label = { Text(stringResource(choice)) },
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 fun HomeScreen(
     tasks: List<TaskItem>,
+    visibleTaskIds: Set<String>? = null,
+    onEditTask: (String) -> Unit = {},
+    onAddTask: () -> Unit = {},
+    onAddNote: () -> Unit = {},
+    taskSteps: Map<String, List<JournalStep>> = emptyMap(),
+    onToggleStep: (String, String, Boolean) -> Unit = { _, _, _ -> },
+    workspace: @Composable () -> Unit = {},
     onJournal: () -> Unit = {},
+    onCheckIn: () -> Unit = {},
     onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
     suggestedTaskId: String? = null,
+    recentTaskId: String? = null,
+    lowEnergy: Boolean = false,
     drawRequest: Int = 0,
     onApplySuggestedOrder: () -> Unit = {},
     drawEnabled: Boolean,
     pauseSuggestionsEnabled: Boolean,
     pauseAfterMinutes: Int,
-    onCapture: (String, String?, TaskColor, () -> Unit) -> Unit,
     onStart: (String) -> Unit,
     homeViewMode: HomeViewMode = HomeViewMode.LIST,
     customStartAvailable: Boolean = true,
@@ -101,19 +185,20 @@ fun HomeScreen(
     onSetPauseSuggestionsEnabled: (Boolean) -> Unit,
     onSetPauseAfterMinutes: (Int) -> Unit,
 ) {
-    var title by remember { mutableStateOf("") }
-    var firstStep by remember { mutableStateOf("") }
-    var showCaptureOptions by remember { mutableStateOf(false) }
     var showSupportOptions by remember { mutableStateOf(false) }
+    var showMoreTools by rememberSaveable { mutableStateOf(false) }
     var drawnTaskId by remember { mutableStateOf<String?>(null) }
     var pendingDrawTaskId by remember { mutableStateOf<String?>(null) }
     var drawRollKey by remember { mutableIntStateOf(0) }
     var isDrawing by remember { mutableStateOf(false) }
-    var selectedColor by remember { mutableStateOf(TaskColor.NEUTRAL) }
     var organizing by remember { mutableStateOf(false) }
     var showAllTasks by rememberSaveable { mutableStateOf(homeViewMode == HomeViewMode.LIST) }
     var difficultDay by rememberSaveable { mutableStateOf(false) }
 
+    LaunchedEffect(lowEnergy) { if (lowEnergy) showAllTasks = false }
+    val effectiveHomeMode = if (lowEnergy) HomeViewMode.ONE_NEXT else homeViewMode
+    val visibleTasks = tasks.filter { visibleTaskIds == null || it.id in visibleTaskIds }
+    val drawEligibleIds = TaskDraw.eligibleForView(eligibleDrawIds, visibleTaskIds)
     val reorder = rememberTaskReorder(tasks, onApplyTaskOrder)
     val drawResultRequester = remember { BringIntoViewRequester() }
     var proposalOnly by remember { mutableStateOf(false) }
@@ -121,20 +206,22 @@ fun HomeScreen(
 
     fun beginDraw(previousTaskId: String?, onlyPropose: Boolean = false) {
         if (isDrawing || reorder.saving || reorder.dragged != null) return
-        val order = TaskDraw.permute(tasks, eligibleDrawIds, previousTaskId)
-        val next = if (onlyPropose) TaskDraw.pick(
-            tasks.filter { eligibleDrawIds == null || it.id in eligibleDrawIds }, previousTaskId,
-        ) else order.proposed
+        // Inside a folder, suggest from that folder only; don't reorder other folders.
+        val scopedProposal = onlyPropose || visibleTaskIds != null
+        val order = if (scopedProposal) null else TaskDraw.permute(tasks, drawEligibleIds, previousTaskId)
+        val next = if (scopedProposal) TaskDraw.pick(
+            tasks.filter { drawEligibleIds == null || it.id in drawEligibleIds }, previousTaskId,
+        ) else order?.proposed
         if (next == null) return
         fun present() {
-            proposalOnly = onlyPropose
+            proposalOnly = scopedProposal
             pendingDrawTaskId = next.id
             isDrawing = true
             drawRollKey += 1
         }
-        if (onlyPropose) present() else {
+        if (scopedProposal) present() else {
             reorder.saving = true
-            onApplyTaskOrder(order.tasks.map { it.id }) { saved ->
+            onApplyTaskOrder(requireNotNull(order).tasks.map { it.id }) { saved ->
                 reorder.saving = false
                 if (saved) present()
             }
@@ -164,26 +251,6 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item {
-                TextButton(onClick = onHelp, colors = appTextButtonColors()) {
-                    UtilityGlyph(UtilityGlyphKind.HELP, Modifier.size(20.dp))
-                    Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.help_how_it_works))
-                }
-                TextButton(onClick = onJournal, colors = appTextButtonColors()) {
-                    Text(stringResource(R.string.open_journal))
-                }
-                if (eligibleDrawIds != null) {
-                    Text(stringResource(R.string.adaptation_rule))
-                    tasks.firstOrNull { it.id == suggestedTaskId }?.let {
-                        Text(stringResource(R.string.adaptation_suggestion, it.title))
-                    }
-                    if (eligibleDrawIds.isEmpty()) Text(stringResource(R.string.adaptation_empty))
-                    if (eligibleDrawIds.isNotEmpty()) {
-                        TextButton(onClick = onApplySuggestedOrder, colors = appTextButtonColors()) {
-                            Text(stringResource(R.string.apply_suggested_order))
-                        }
-                    }
-                }
                 Text(
                     text = stringResource(R.string.home_title),
                     style = MaterialTheme.typography.headlineLarge,
@@ -195,72 +262,66 @@ fun HomeScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-            }
-            item {
-                Card(
+                Spacer(Modifier.size(14.dp))
+                OutlinedButton(
+                    onClick = onCheckIn,
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-check-in"),
+                ) { Text(stringResource(R.string.home_check_in)) }
+                Spacer(Modifier.size(8.dp))
+                Row(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = appCardColors(),
-                    border = appBorder(),
-                    shape = RoundedCornerShape(
-                        topStart = 28.dp,
-                        topEnd = 18.dp,
-                        bottomEnd = 28.dp,
-                        bottomStart = 18.dp,
-                    ),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    Button(
+                        onClick = onAddTask,
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 64.dp).testTag("home-add-task"),
+                        colors = appButtonColors(),
                     ) {
-                        OutlinedTextField(
-                            value = title,
-                            onValueChange = { title = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text(stringResource(R.string.capture_label)) },
-                            supportingText = { Text(stringResource(R.string.capture_support)) },
-                            singleLine = true,
-                            colors = appTextFieldColors(),
+                        Text(
+                            stringResource(R.string.capture_new),
+                            textAlign = TextAlign.Center,
                         )
-                        TextButton(
-                            onClick = { showCaptureOptions = !showCaptureOptions },
-                            colors = appTextButtonColors(),
-                        ) {
-                            Text(
-                                stringResource(
-                                    if (showCaptureOptions) R.string.capture_options_hide
-                                    else R.string.capture_options_show,
-                                ),
-                            )
+                    }
+                    OutlinedButton(
+                        onClick = onAddNote,
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 64.dp).testTag("home-add-note"),
+                    ) {
+                        Text(
+                            stringResource(R.string.home_add_note),
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+                if (lowEnergy) {
+                    Text(stringResource(R.string.low_energy_active), style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.low_energy_explanation))
+                }
+                if (eligibleDrawIds != null) {
+                    if (!lowEnergy) Text(stringResource(R.string.adaptation_rule))
+                    tasks.firstOrNull { it.id == suggestedTaskId }?.let {
+                        Text(stringResource(R.string.adaptation_suggestion, it.title))
+                    }
+                    if (eligibleDrawIds.isEmpty()) Text(stringResource(R.string.adaptation_empty))
+                    if (eligibleDrawIds.isNotEmpty()) {
+                        TextButton(onClick = onApplySuggestedOrder, colors = appTextButtonColors()) {
+                            Text(stringResource(R.string.apply_suggested_order))
                         }
-                        if (showCaptureOptions) {
-                            OutlinedTextField(
-                                value = firstStep,
-                                onValueChange = { firstStep = it },
-                                modifier = Modifier.fillMaxWidth(),
-                                label = { Text(stringResource(R.string.first_step_optional)) },
-                                singleLine = true,
-                                colors = appTextFieldColors(),
-                            )
-                            Text(
-                                text = stringResource(R.string.task_color_optional),
-                                style = MaterialTheme.typography.labelLarge,
-                            )
-                            TaskColorPicker(selected = selectedColor, onSelect = { selectedColor = it })
-                        }
-                        Button(
-                            onClick = {
-                                onCapture(title, firstStep, selectedColor) {
-                                    title = ""
-                                    firstStep = ""
-                                    showCaptureOptions = false
-                                    selectedColor = TaskColor.NEUTRAL
-                                }
-                            },
-                            enabled = title.isNotBlank(),
-                            colors = appButtonColors(),
-                            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
-                        ) {
-                            Text(stringResource(R.string.capture_action))
+                    }
+                }
+            }
+            val recent = visibleTasks.firstOrNull { it.id == recentTaskId && it.status == org.lepotager.executivefunction.model.TaskStatus.READY }
+            if (recent != null) item {
+                OutlinedCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(stringResource(R.string.return_to_task_title), style = MaterialTheme.typography.titleMedium)
+                        Text(recent.title, style = MaterialTheme.typography.bodyLarge)
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            TextButton(onClick = { onEditTask(recent.id) }) {
+                                Text(stringResource(R.string.return_to_task_details))
+                            }
+                            FilledTonalButton(onClick = { onStart(recent.id) }) {
+                                Text(stringResource(R.string.return_to_task_action))
+                            }
                         }
                     }
                 }
@@ -277,7 +338,7 @@ fun HomeScreen(
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.semantics { heading() },
                     )
-                    if (tasks.size > 1) {
+                    if (tasks.size > 1 && visibleTaskIds == null) {
                         TextButton(
                             onClick = { organizing = !organizing },
                             colors = appTextButtonColors(),
@@ -292,12 +353,13 @@ fun HomeScreen(
                     }
                 }
             }
-            if (homeViewMode != HomeViewMode.LIST && tasks.isNotEmpty()) {
+            if (effectiveHomeMode != HomeViewMode.LIST && tasks.isNotEmpty()) {
                 item {
                     TodayFocusPanel(
-                        tasks = tasks.filter { it.status == org.lepotager.executivefunction.model.TaskStatus.READY },
-                        mode = homeViewMode,
+                        tasks = visibleTasks.filter { it.status == org.lepotager.executivefunction.model.TaskStatus.READY && (!lowEnergy || eligibleDrawIds == null || it.id in eligibleDrawIds) },
+                        mode = effectiveHomeMode,
                         showAll = showAllTasks,
+                        noSuggestedTask = lowEnergy,
                         difficultDay = difficultDay,
                         customStartAvailable = customStartAvailable,
                         onToggleAll = { showAllTasks = !showAllTasks },
@@ -307,22 +369,28 @@ fun HomeScreen(
                         },
                         onStart = onStart,
                         onStartCustom = onStartCustom,
+                        onEditTask = onEditTask,
+                        stepsByTask = taskSteps,
+                        onToggleStep = onToggleStep,
                     )
                 }
             }
-            if (tasks.isEmpty()) {
-                item { EmptyTasksPanel() }
-            } else if (homeViewMode == HomeViewMode.LIST || showAllTasks) {
-                itemsIndexed(reorder.visibleTasks, key = { _, task -> task.id }) { index, task ->
+            if (visibleTasks.isEmpty()) {
+                item { if (visibleTaskIds == null) EmptyTasksPanel() else Text(stringResource(R.string.folder_empty_tasks)) }
+            } else if (effectiveHomeMode == HomeViewMode.LIST || showAllTasks) {
+                itemsIndexed(reorder.visibleTasks.filter { visibleTaskIds == null || it.id in visibleTaskIds }, key = { _, task -> task.id }) { index, task ->
                     TaskCard(
                         task = task,
-                        handleModifier = reorder.handle(task.id, !isDrawing && !reorder.saving),
-                        organizing = organizing,
-                        canMoveUp = index > 0 && !reorder.saving && reorder.dragged == null && !isDrawing,
-                        canMoveDown = index < tasks.lastIndex && !reorder.saving && reorder.dragged == null && !isDrawing,
+                        handleModifier = reorder.handle(task.id, visibleTaskIds == null && !isDrawing && !reorder.saving),
+                        organizing = organizing && visibleTaskIds == null,
+                        canMoveUp = visibleTaskIds == null && index > 0 && !reorder.saving && reorder.dragged == null && !isDrawing,
+                        canMoveDown = visibleTaskIds == null && index < tasks.lastIndex && !reorder.saving && reorder.dragged == null && !isDrawing,
                         onMoveUp = { onMoveTask(task.id, -1) },
                         onMoveDown = { onMoveTask(task.id, 1) },
                         onSetColor = { onSetTaskColor(task.id, it) },
+                        onEdit = { onEditTask(task.id) },
+                        steps = taskSteps[task.id].orEmpty(),
+                        onToggleStep = { stepId, checked -> onToggleStep(task.id, stepId, checked) },
                         onStart = { onStart(task.id) },
                         customStartAvailable = customStartAvailable,
                         onStartCustom = { onStartCustom(task.id) },
@@ -335,7 +403,7 @@ fun HomeScreen(
                         onClick = { beginDraw(drawnTaskId) },
                         enabled = !isDrawing && !reorder.saving && reorder.dragged == null && tasks.any {
                             it.status == org.lepotager.executivefunction.model.TaskStatus.READY &&
-                                (eligibleDrawIds == null || it.id in eligibleDrawIds)
+                                (drawEligibleIds == null || it.id in drawEligibleIds)
                         },
                         colors = appTonalButtonColors(),
                         modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
@@ -345,7 +413,7 @@ fun HomeScreen(
                         Text(stringResource(R.string.draw_action))
                     }
                 }
-                if (!isDrawing) tasks.firstOrNull { it.id == drawnTaskId }?.let { task ->
+                if (!isDrawing) tasks.firstOrNull { it.id == drawnTaskId && (visibleTaskIds == null || it.id in visibleTaskIds) }?.let { task ->
                     item(key = "drawn-${task.id}") {
                         Box(Modifier.bringIntoViewRequester(drawResultRequester)) {
                             TaskDrawPanel(
@@ -353,9 +421,31 @@ fun HomeScreen(
                                 proposalOnly = proposalOnly,
                                 onRedraw = { beginDraw(task.id, proposalOnly) },
                                 onStart = { onStart(task.id) },
+                                steps = taskSteps[task.id].orEmpty(),
+                                onToggleStep = { stepId, checked -> onToggleStep(task.id, stepId, checked) },
                                 customStartAvailable = customStartAvailable,
                                 onStartCustom = { onStartCustom(task.id) },
                             )
+                        }
+                    }
+                }
+            }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(
+                        onClick = { showMoreTools = !showMoreTools },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) {
+                        Text(stringResource(if (showMoreTools) R.string.home_hide_tools else R.string.home_more_tools))
+                    }
+                    if (showMoreTools) {
+                        OutlinedButton(onClick = onJournal, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)) {
+                            Text(stringResource(R.string.open_journal))
+                        }
+                        TextButton(onClick = onHelp) {
+                            UtilityGlyph(UtilityGlyphKind.HELP, Modifier.size(20.dp))
+                            Spacer(Modifier.size(8.dp))
+                            Text(stringResource(R.string.help_how_it_works))
                         }
                     }
                 }
@@ -386,6 +476,8 @@ fun HomeScreen(
                     )
                 }
             }
+            // Notes and themes remain optional; their detail is the last home block.
+            item(key = "home-workspace-notes") { workspace() }
         }
         if (isDrawing) Box(
             modifier = Modifier.fillMaxSize().zIndex(10f),
@@ -410,22 +502,34 @@ private fun TodayFocusPanel(
     tasks: List<TaskItem>,
     mode: HomeViewMode,
     showAll: Boolean,
+    noSuggestedTask: Boolean = false,
     difficultDay: Boolean,
     customStartAvailable: Boolean,
     onToggleAll: () -> Unit,
     onToggleDifficultDay: () -> Unit,
+    onEditTask: (String) -> Unit,
     onStart: (String) -> Unit,
     onStartCustom: (String) -> Unit,
+    stepsByTask: Map<String, List<JournalStep>> = emptyMap(),
+    onToggleStep: (String, String, Boolean) -> Unit = { _, _, _ -> },
 ) {
     val current = tasks.firstOrNull()
-    Card(modifier = Modifier.fillMaxWidth(), colors = appCardColors(), border = appBorder(), shape = RoundedCornerShape(22.dp)) {
+    Card(modifier = Modifier.fillMaxWidth(), colors = appCardColors(), border = current?.let { taskBorder(it) } ?: appBorder(), shape = RoundedCornerShape(22.dp)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(stringResource(R.string.home_now_label), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             if (current == null) {
-                Text(stringResource(R.string.empty_tasks), style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(if (noSuggestedTask) R.string.low_energy_no_suggestion else R.string.empty_tasks), style = MaterialTheme.typography.bodyLarge)
             } else {
                 Text(current.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
-                current.firstStep?.let { Text(stringResource(R.string.first_step_value, it), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                TextButton(onClick = { onEditTask(current.id) }) { Text(stringResource(R.string.task_steps_folder)) }
+                TaskDeadlineLabel(current)
+                if (stepsByTask[current.id].orEmpty().isNotEmpty()) {
+                    TaskStepChecklist(stepsByTask[current.id].orEmpty()) { stepId, checked ->
+                        onToggleStep(current.id, stepId, checked)
+                    }
+                } else current.firstStep?.let {
+                    Text(stringResource(R.string.first_step_value, it), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 Button(onClick = { onStart(current.id) }, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-primary-start"), colors = appButtonColors()) {
                     ToolGlyph(ToolGlyphKind.START); Spacer(Modifier.size(8.dp)); Text(stringResource(R.string.start_action))
                 }
@@ -549,10 +653,10 @@ private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) 
                         .semantics { contentDescription = name },
                     shape = CircleShape,
                     color = palette.container,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    contentColor = Color(0xFF2D2D2D),
                     border = BorderStroke(
                         if (selected == color) 3.dp else 1.dp,
-                        if (selected == color) MaterialTheme.colorScheme.onSurface else palette.border,
+                        if (selected == color) Color(0xFF2D2D2D) else palette.border,
                     ),
                 ) {
                     if (selected == color) {
@@ -563,7 +667,7 @@ private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) 
                 }
             }
         }
-        Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(12.dp))
     }
 }
 
@@ -571,22 +675,21 @@ private data class TaskPalette(val container: Color, val border: Color)
 
 @Composable
 private fun taskPalette(color: TaskColor): TaskPalette {
-    val dark = isSystemInDarkTheme()
     return when (color) {
-        TaskColor.NEUTRAL -> TaskPalette(
-            MaterialTheme.colorScheme.surface,
-            MaterialTheme.colorScheme.outline,
-        )
-        TaskColor.SAGE -> if (dark) TaskPalette(Color(0xFF28342C), Color(0xFF71917A))
-            else TaskPalette(Color(0xFFEDF6EF), Color(0xFFA9CBB2))
-        TaskColor.BLUE -> if (dark) TaskPalette(Color(0xFF27313A), Color(0xFF7189A0))
-            else TaskPalette(Color(0xFFEEF4FA), Color(0xFFA8C4DD))
-        TaskColor.TERRACOTTA -> if (dark) TaskPalette(Color(0xFF392D29), Color(0xFFA57B6C))
-            else TaskPalette(Color(0xFFF9F0EC), Color(0xFFD6AD9D))
-        TaskColor.LAVENDER -> if (dark) TaskPalette(Color(0xFF322B39), Color(0xFF8E79A0))
-            else TaskPalette(Color(0xFFF4EFF9), Color(0xFFC4ADD8))
-        TaskColor.SAND -> if (dark) TaskPalette(Color(0xFF393428), Color(0xFF9C8B61))
-            else TaskPalette(Color(0xFFFAF5E8), Color(0xFFD9C493))
+        TaskColor.NEUTRAL -> TaskPalette(Color.White, Color(0xFFB7D8BF))
+        TaskColor.SAGE -> TaskPalette(Color(0xFFEDF6EF), Color(0xFFA9CBB2))
+        TaskColor.BLUE -> TaskPalette(Color(0xFFEEF4FA), Color(0xFFA8C4DD))
+        TaskColor.TERRACOTTA -> TaskPalette(Color(0xFFF9F0EC), Color(0xFFD6AD9D))
+        TaskColor.LAVENDER -> TaskPalette(Color(0xFFF4EFF9), Color(0xFFC4ADD8))
+        TaskColor.SAND -> TaskPalette(Color(0xFFFAF5E8), Color(0xFFD9C493))
+        TaskColor.MINT -> TaskPalette(Color(0xFFD8F5E5), Color(0xFF83C8A4))
+        TaskColor.TURQUOISE -> TaskPalette(Color(0xFFD4F3F1), Color(0xFF79C4BF))
+        TaskColor.SKY -> TaskPalette(Color(0xFFD9EEFF), Color(0xFF8DBDE2))
+        TaskColor.PERIWINKLE -> TaskPalette(Color(0xFFE1E5FF), Color(0xFFA0ACE0))
+        TaskColor.LILAC -> TaskPalette(Color(0xFFEEDBFA), Color(0xFFC09AD8))
+        TaskColor.ROSE -> TaskPalette(Color(0xFFFADDE8), Color(0xFFD99DB5))
+        TaskColor.CORAL -> TaskPalette(Color(0xFFFFDDD5), Color(0xFFDD9E8D))
+        TaskColor.APRICOT -> TaskPalette(Color(0xFFFFE8CF), Color(0xFFDCB082))
     }
 }
 
@@ -599,6 +702,14 @@ private fun taskColorName(color: TaskColor): String = stringResource(
         TaskColor.TERRACOTTA -> R.string.task_color_terracotta
         TaskColor.LAVENDER -> R.string.task_color_lavender
         TaskColor.SAND -> R.string.task_color_sand
+        TaskColor.MINT -> R.string.task_color_mint
+        TaskColor.TURQUOISE -> R.string.task_color_turquoise
+        TaskColor.SKY -> R.string.task_color_sky
+        TaskColor.PERIWINKLE -> R.string.task_color_periwinkle
+        TaskColor.LILAC -> R.string.task_color_lilac
+        TaskColor.ROSE -> R.string.task_color_rose
+        TaskColor.CORAL -> R.string.task_color_coral
+        TaskColor.APRICOT -> R.string.task_color_apricot
     },
 )
 
@@ -609,7 +720,37 @@ private fun taskCardColors(color: TaskColor) = CardDefaults.cardColors(
 )
 
 @Composable
-private fun taskBorder(color: TaskColor) = BorderStroke(1.dp, taskPalette(color).border)
+private fun taskBorder(task: TaskItem): BorderStroke {
+    val today = deadlineToday()
+    val strength = task.deadlineDay?.let { org.lepotager.executivefunction.domain.TaskDeadline.intensity(it - today.toEpochDay(), task.deadlineWarningDays) } ?: 0f
+    return BorderStroke((1f + 3f * strength).dp, androidx.compose.ui.graphics.lerp(taskPalette(task.color).border, Color(0xFF7761B3), strength))
+}
+
+@Composable
+private fun deadlineToday(): java.time.LocalDate {
+    var today by remember { mutableStateOf(java.time.LocalDate.now()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            val zone = java.time.ZoneId.systemDefault()
+            val nextDay = java.time.LocalDate.now(zone).plusDays(1).atStartOfDay(zone).toInstant().toEpochMilli()
+            delay((nextDay - System.currentTimeMillis()).coerceAtLeast(1_000L))
+            today = java.time.LocalDate.now()
+        }
+    }
+    return today
+}
+
+@Composable
+private fun TaskDeadlineLabel(task: TaskItem) {
+    val day = task.deadlineDay ?: return
+    val today = deadlineToday()
+    val days = day - today.toEpochDay()
+    val date = java.time.LocalDate.ofEpochDay(day).format(java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM))
+    Text(
+        stringResource(when { days < 0 -> R.string.task_date_passed; days == 0L -> R.string.task_date_today; else -> R.string.task_date_future }, date),
+        style = MaterialTheme.typography.bodyMedium,
+    )
+}
 
 @Composable
 private fun TaskDrawPanel(
@@ -617,25 +758,28 @@ private fun TaskDrawPanel(
     proposalOnly: Boolean,
     onRedraw: () -> Unit,
     onStart: () -> Unit,
+    steps: List<JournalStep> = emptyList(),
+    onToggleStep: (String, Boolean) -> Unit = { _, _ -> },
     customStartAvailable: Boolean,
     onStartCustom: () -> Unit,
 ) {
+    MaterialTheme(colorScheme = LightColors) {
     val startLabel = stringResource(R.string.start_action)
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = taskCardColors(task.color),
-        border = taskBorder(task.color),
+        border = taskBorder(task),
         shape = RoundedCornerShape(22.dp),
     ) {
         Column(
-            modifier = Modifier.padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)
                     .clickable(onClickLabel = startLabel, role = Role.Button, onClick = onStart)
                     .semantics { liveRegion = LiveRegionMode.Polite },
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 ToolBadge(
                     kind = ToolGlyphKind.DRAW,
@@ -652,7 +796,9 @@ private fun TaskDrawPanel(
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.semantics { heading() },
                 )
-                task.firstStep?.let {
+                TaskDeadlineLabel(task)
+                if (steps.isNotEmpty()) TaskStepChecklist(steps, onToggleStep)
+                else task.firstStep?.let {
                     Text(
                         text = stringResource(R.string.first_step_value, it),
                         style = MaterialTheme.typography.bodyMedium,
@@ -665,7 +811,7 @@ private fun TaskDrawPanel(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 OutlinedButton(
                     onClick = onRedraw,
                     colors = appOutlinedButtonColors(),
@@ -691,11 +837,45 @@ private fun TaskDrawPanel(
             }
         }
     }
+    }
+}
+
+@Composable
+private fun TaskStepChecklist(
+    steps: List<JournalStep>,
+    onToggleStep: (String, Boolean) -> Unit,
+) {
+    val firstOpen = steps.indexOfFirst { !it.completed }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+        steps.forEachIndexed { index, step ->
+            Row(
+                Modifier.fillMaxWidth()
+                    .toggleable(value = step.completed, role = Role.Checkbox) {
+                        onToggleStep(step.id, it)
+                    }
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(checked = step.completed, onCheckedChange = null)
+                Text(
+                    step.title,
+                    modifier = Modifier.weight(1f).padding(start = 8.dp),
+                    style = if (index == firstOpen) MaterialTheme.typography.titleSmall
+                    else MaterialTheme.typography.bodyMedium,
+                    color = if (step.completed) MaterialTheme.colorScheme.onSurfaceVariant
+                    else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+    }
 }
 
 @Composable
 private fun TaskCard(
     task: TaskItem,
+    onEdit: () -> Unit,
+    steps: List<JournalStep> = emptyList(),
+    onToggleStep: (String, Boolean) -> Unit = { _, _ -> },
     handleModifier: Modifier = Modifier,
     organizing: Boolean,
     canMoveUp: Boolean,
@@ -707,10 +887,11 @@ private fun TaskCard(
     customStartAvailable: Boolean,
     onStartCustom: () -> Unit,
 ) {
+    MaterialTheme(colorScheme = LightColors) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = taskCardColors(task.color),
-        border = taskBorder(task.color),
+        border = taskBorder(task),
         shape = RoundedCornerShape(
             topStart = 22.dp,
             topEnd = 14.dp,
@@ -719,8 +900,8 @@ private fun TaskCard(
         ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             val handleLabel = stringResource(R.string.reorder_handle, task.title)
             val upLabel = stringResource(R.string.move_task_up)
@@ -744,12 +925,17 @@ private fun TaskCard(
                     contentAlignment = Alignment.Center,
                 ) { DragHandleGlyph() }
             }
-            task.firstStep?.let {
+            TaskDeadlineLabel(task)
+            if (steps.isNotEmpty()) TaskStepChecklist(steps, onToggleStep)
+            else task.firstStep?.let {
                 Text(
                     text = stringResource(R.string.first_step_value, it),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+            OutlinedButton(onClick = onEdit, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.task_steps_folder))
             }
             if (organizing) {
                 Text(
@@ -757,7 +943,7 @@ private fun TaskCard(
                     style = MaterialTheme.typography.labelLarge,
                 )
                 TaskColorPicker(selected = task.color, onSelect = onSetColor)
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(
                         onClick = onMoveUp,
                         enabled = canMoveUp,
@@ -788,6 +974,7 @@ private fun TaskCard(
             }
         }
     }
+    }
 }
 
 @Composable
@@ -795,6 +982,7 @@ fun FocusScreen(
     activeFocus: ActiveFocus,
     modalBlocked: Boolean = false,
     onJournal: () -> Unit = {},
+    onHome: () -> Unit = {},
     onMini: () -> Unit = {},
     onNote: () -> Unit = {},
     overlayEnabled: Boolean,
@@ -867,6 +1055,9 @@ fun FocusScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            OutlinedButton(onClick = onHome, modifier = Modifier.fillMaxWidth().testTag("focus-back-home")) {
+                Text(stringResource(R.string.focus_back_home))
+            }
             Text(
                 text = stringResource(R.string.focus_label),
                 style = MaterialTheme.typography.labelLarge,
@@ -879,6 +1070,7 @@ fun FocusScreen(
                 textAlign = TextAlign.Center,
                 modifier = Modifier.semantics { heading() },
             )
+            TaskDeadlineLabel(activeFocus.task)
             activeFocus.task.firstStep?.let {
                 Text(
                     text = stringResource(R.string.first_step_value, it),
@@ -991,6 +1183,7 @@ fun FocusScreen(
                 Spacer(Modifier.size(8.dp))
                 Text(stringResource(R.string.focus_finish_short))
             }
+            FocusFolderNotes(activeFocus.task.id)
         }
     }
 
@@ -1374,4 +1567,30 @@ private fun formatElapsed(milliseconds: Long): String {
     val minutes = (totalSeconds % 3_600) / 60
     val seconds = totalSeconds % 60
     return if (hours > 0) "%d:%02d:%02d".format(hours, minutes, seconds) else "%02d:%02d".format(minutes, seconds)
+}
+
+@Composable
+internal fun RunningFocusBanner(active: ActiveFocus, onReturn: () -> Unit) {
+    var now by remember(active.session.id) { mutableLongStateOf(System.currentTimeMillis()) }
+    val lifecycle = androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    LaunchedEffect(active.session.id) {
+        lifecycle.repeatOnLifecycle(androidx.lifecycle.Lifecycle.State.STARTED) {
+            while (true) { now = System.currentTimeMillis(); delay(1_000) }
+        }
+    }
+    val elapsed = SessionClock.elapsedMs(active.session, now)
+    val target = active.session.targetDurationMs
+    val remaining = target?.minus(elapsed)
+    val clock = if (remaining == null) formatElapsed(elapsed)
+        else if (remaining >= 0) formatElapsed(remaining) else "+" + formatElapsed(-remaining)
+    Card(Modifier.fillMaxWidth().padding(bottom = 16.dp)) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(active.task.title, style = MaterialTheme.typography.titleMedium)
+            TaskDeadlineLabel(active.task)
+            Text(clock, style = MaterialTheme.typography.headlineSmall)
+            Button(onClick = onReturn, modifier = Modifier.fillMaxWidth().testTag("home-return-timer")) {
+                Text(stringResource(R.string.focus_return_timer))
+            }
+        }
+    }
 }

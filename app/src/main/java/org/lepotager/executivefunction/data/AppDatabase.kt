@@ -63,6 +63,8 @@ internal class AppDatabase(private val context: Context) :
             "CREATE UNIQUE INDEX one_active_focus ON focus_sessions(is_active) WHERE is_active = 1",
         )
         createLearningTables(db)
+        WorkspaceStore.createTables(db)
+        TaskOptionsStore.createTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -85,6 +87,14 @@ internal class AppDatabase(private val context: Context) :
             createLearningTables(db)
             version = 4
         }
+        if (version == 4) {
+            WorkspaceStore.createTables(db)
+            version = 5
+        }
+        if (version == 5) {
+            TaskOptionsStore.createTables(db)
+            version = 6
+        }
         check(version == newVersion) { "Missing migration from $oldVersion to $newVersion" }
     }
 
@@ -102,14 +112,22 @@ internal class AppDatabase(private val context: Context) :
         db.execSQL("CREATE TABLE session_steps (session_id TEXT NOT NULL REFERENCES focus_sessions(id) ON DELETE CASCADE, position INTEGER NOT NULL, title TEXT NOT NULL, PRIMARY KEY(session_id,position))")
     }
 
+    fun lowEnergyUntil(): Long? {
+        val latest = LearningJournal(this).checkIns().firstOrNull() ?: return null
+        return if (org.lepotager.executivefunction.domain.LowEnergyMode.active(latest.mood, latest.energy, latest.date, System.currentTimeMillis()))
+            latest.date + org.lepotager.executivefunction.domain.LowEnergyMode.VALID_FOR_MS else null
+    }
+
     fun eligibleDrawIds(tasks: List<TaskItem>): Set<String>? {
         val preferences=context.getSharedPreferences("wellbeing",Context.MODE_PRIVATE)
-        if(!preferences.getBoolean("adapt",false)) return null
+        val adapt = preferences.getBoolean("adapt",false)
+        val lowEnergy = lowEnergyUntil() != null
+        if (!adapt && !lowEnergy) return null
         val journal=LearningJournal(this)
         val recent=journal.checkIns().firstOrNull()?.takeIf { System.currentTimeMillis()-it.date in 0..14_400_000L }
-        val energy=if(preferences.getBoolean("low_energy",false)) 1 else recent?.energy
-        val minutes=preferences.getInt("available_minutes",0).takeIf { it>0 }
-        val selectedContext=preferences.getString("context","").orEmpty()
+        val energy=if(lowEnergy) 1 else recent?.energy
+        val minutes=preferences.getInt("available_minutes",0).takeIf { adapt && it>0 }
+        val selectedContext=if (adapt) preferences.getString("context","").orEmpty() else ""
         return tasks.filter { task ->
             val plan=journal.planning(task.id)
             org.lepotager.executivefunction.domain.TaskEligibility.accepts(plan.energy,energy,suggestedDurationMs(task.id),minutes,plan.context,selectedContext)
@@ -146,21 +164,41 @@ internal class AppDatabase(private val context: Context) :
         cursor.getLong(0)
     }
 
+    /** Last postponed task still open, with no new reminder or recurring check-in. */
+    fun recentPostponedTaskId(): String? = readableDatabase.rawQuery(
+        """
+            SELECT s.task_id FROM focus_sessions s
+            JOIN tasks t ON t.id=s.task_id
+            WHERE s.status=? AND t.status=?
+            ORDER BY s.updated_at DESC, s.rowid DESC
+            LIMIT 1
+        """.trimIndent(), arrayOf(FocusStatus.POSTPONED.name, TaskStatus.READY.name),
+    ).use { if (it.moveToFirst()) it.getString(0) else null }
+
     fun openTasks(): List<TaskItem> = readableDatabase.query(
         "tasks",
         TASK_COLUMNS,
-        "status != ?",
+        "status != ? AND id NOT IN (SELECT task_id FROM step_tasks)",
         arrayOf(TaskStatus.COMPLETED.name),
         null,
         null,
         "sort_position ASC, created_at ASC",
     ).use { cursor -> buildList { while (cursor.moveToNext()) add(cursor.toTask()) } }
 
+    /** Explicitly close a parent task without requiring the timer to have been started. */
+    fun markTaskCompleted(taskId: String) = transaction { db ->
+        require(db.rawQuery(
+            "SELECT 1 FROM focus_sessions WHERE task_id=? AND is_active=1", arrayOf(taskId)
+        ).use { !it.moveToFirst() })
+        requireNotNull(taskById(taskId))
+        updateTaskStatus(db, taskId, TaskStatus.COMPLETED, System.currentTimeMillis())
+    }
+
     fun moveOpenTask(taskId: String, offset: Int) = transaction { db ->
         val ids = db.query(
             "tasks",
             arrayOf("id"),
-            "status != ?",
+            "status != ? AND id NOT IN (SELECT task_id FROM step_tasks)",
             arrayOf(TaskStatus.COMPLETED.name),
             null,
             null,
@@ -266,6 +304,7 @@ internal class AppDatabase(private val context: Context) :
         updateSession(db, session, isActive = false)
         updateTaskStatus(db, session.taskId, taskStatus, session.updatedAt)
         if (session.status == FocusStatus.COMPLETED) {
+            WorkspaceStore(this).completeLinkedStep(session.taskId)
             db.execSQL("INSERT OR IGNORE INTO session_steps(session_id,position,title) SELECT ?,position,title FROM task_steps WHERE task_id=?", arrayOf(session.id,session.taskId))
         }
     }
@@ -357,7 +396,9 @@ internal class AppDatabase(private val context: Context) :
         if (value.isNullOrBlank()) putNull(key) else put(key, value.trim())
     }
 
-    private fun Cursor.toTask() = TaskItem(
+    private fun Cursor.toTask(): TaskItem {
+        val options = TaskOptionsStore(this@AppDatabase).load(getString(getColumnIndexOrThrow("id")))
+        return TaskItem(
         id = getString(getColumnIndexOrThrow("id")),
         title = getString(getColumnIndexOrThrow("title")),
         firstStep = getNullableString("first_step"),
@@ -368,7 +409,12 @@ internal class AppDatabase(private val context: Context) :
             TaskColor.valueOf(getString(getColumnIndexOrThrow("color_key")))
         }.getOrDefault(TaskColor.NEUTRAL),
         sortPosition = getLong(getColumnIndexOrThrow("sort_position")),
+        deadlineDay = options.deadlineDay,
+        deadlineWarningDays = options.warningDays,
+        timerOverride = options.timerOverride,
+        timerTarget = options.timerTarget,
     )
+    }
 
     private fun Cursor.toSession() = FocusSession(
         id = getString(getColumnIndexOrThrow("id")),
@@ -394,7 +440,7 @@ internal class AppDatabase(private val context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "executive-function.db"
-        const val DATABASE_VERSION = 4
+        const val DATABASE_VERSION = 6
         val TASK_COLUMNS = arrayOf(
             "id",
             "title",

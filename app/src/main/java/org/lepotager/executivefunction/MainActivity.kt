@@ -32,6 +32,7 @@ import org.lepotager.executivefunction.model.TaskColor
 import org.lepotager.executivefunction.ui.ErrorDialog
 import org.lepotager.executivefunction.ui.FirstRunSetupConfig
 import org.lepotager.executivefunction.ui.FirstRunSetupFlow
+import org.lepotager.executivefunction.ui.CheckInDialog
 import org.lepotager.executivefunction.ui.FocusScreen
 import org.lepotager.executivefunction.ui.FocusStartDialog
 import org.lepotager.executivefunction.ui.HomeScreen
@@ -52,8 +53,11 @@ class MainActivity : ComponentActivity() {
     private var miniWindow by mutableStateOf(false)
     private var requestedTask by mutableStateOf<String?>(null)
     private var showQuickNote by mutableStateOf(false)
+    private var sharedText by mutableStateOf<String?>(null)
+    private var requestedWorkspaceTask by mutableStateOf<String?>(null)
     private var returnToMiniWindow = false
     private var externalCapture by mutableStateOf(false)
+    private var showHomeDuringFocus by mutableStateOf(false)
     private var drawRequest by mutableStateOf(0)
     private var introSeen by mutableStateOf(false)
     private var showIntro by mutableStateOf(false)
@@ -87,6 +91,8 @@ class MainActivity : ComponentActivity() {
             requestedTask = it.getString("pending_task")
             externalCapture = it.getBoolean("external_capture")
             showQuickNote = it.getBoolean("quick_note")
+            sharedText = it.getString("shared_text")
+            requestedWorkspaceTask = it.getString("requested_workspace_task")
             returnToMiniWindow = it.getBoolean("return_to_pip")
             showIntro = it.getBoolean("show_intro")
             showCheckIn = it.getBoolean("show_check_in")
@@ -117,7 +123,14 @@ class MainActivity : ComponentActivity() {
                 val error by viewModel.error.collectAsStateWithLifecycle()
                 val completionLeadMinutes by viewModel.completionLeadMinutes.collectAsStateWithLifecycle()
                 val pendingStart by viewModel.pendingStart.collectAsStateWithLifecycle()
+                val pendingCapture by viewModel.pendingCapture.collectAsStateWithLifecycle()
 
+                LaunchedEffect(snapshot.lowEnergyUntil) {
+                    snapshot.lowEnergyUntil?.let { expiry ->
+                        kotlinx.coroutines.delay((expiry - System.currentTimeMillis()).coerceAtLeast(0L) + 1L)
+                        viewModel.reload()
+                    }
+                }
                 LaunchedEffect(requestedTask, snapshot.loading) {
                     val taskId = requestedTask ?: return@LaunchedEffect
                     if (snapshot.loading || pendingStart?.taskId == taskId) return@LaunchedEffect
@@ -137,12 +150,15 @@ class MainActivity : ComponentActivity() {
                     showQuickNote,
                     miniWindow,
                     requestedTask,
+                    requestedWorkspaceTask,
+                    sharedText,
                     pendingStart,
                     introSeen,
                 ) {
                     if (
                         !snapshot.loading && !introSeen && snapshot.activeFocus == null &&
-                        !externalCapture && !showQuickNote && !miniWindow && requestedTask == null && pendingStart == null
+                        !externalCapture && !showQuickNote && sharedText == null && !miniWindow &&
+                        requestedTask == null && requestedWorkspaceTask == null && pendingStart == null
                     ) {
                         showCheckIn = false
                         showIntro = true
@@ -157,14 +173,17 @@ class MainActivity : ComponentActivity() {
                     showQuickNote,
                     miniWindow,
                     requestedTask,
+                    requestedWorkspaceTask,
+                    sharedText,
                     pendingStart,
                 ) {
                     val prefs=getSharedPreferences("wellbeing",MODE_PRIVATE)
                     val now=System.currentTimeMillis()
                     if(
                         !snapshot.loading && introSeen && !showIntro && snapshot.activeFocus==null &&
-                        !externalCapture && !showQuickNote && !miniWindow && requestedTask==null && pendingStart==null &&
-                        prefs.getBoolean("enabled",true) && now-prefs.getLong("last_prompt",0L)>=14_400_000L
+                        !externalCapture && !showQuickNote && sharedText == null && !miniWindow &&
+                        requestedTask==null && requestedWorkspaceTask==null && pendingStart==null &&
+                        prefs.getBoolean("enabled",false) && now-prefs.getLong("last_prompt",0L)>=14_400_000L
                     ) {
                         prefs.edit().putLong("last_prompt",now).apply()
                         showCheckIn=true
@@ -172,8 +191,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 if (
-                    showIntro && !snapshot.loading && snapshot.activeFocus == null && !externalCapture && !showQuickNote && !miniWindow &&
-                    requestedTask == null && pendingStart == null
+                    showIntro && !snapshot.loading && snapshot.activeFocus == null && !externalCapture && !showQuickNote && sharedText == null && !miniWindow &&
+                    requestedTask == null && requestedWorkspaceTask == null && pendingStart == null
                 ) {
                     FirstRunSetupFlow(
                         initial = currentSetupConfig(),
@@ -181,46 +200,70 @@ class MainActivity : ComponentActivity() {
                         onSkip = ::markIntroSeen,
                     )
                 } else {
-                    if(externalCapture && !miniWindow) {
+                    androidx.activity.compose.BackHandler(enabled = snapshot.activeFocus?.session?.status == FocusStatus.RUNNING && !showHomeDuringFocus && pendingStart == null && pendingCapture == null && !showQuickNote && sharedText == null && !externalCapture) { showHomeDuringFocus = true }
+                    if(externalCapture && !miniWindow && pendingCapture == null && sharedText == null) {
                         org.lepotager.executivefunction.ui.ExternalCaptureDialog(
                             onDismiss={externalCapture=false},
-                            onCapture={title->viewModel.capture(title,null,TaskColor.NEUTRAL){externalCapture=false}},
+                            onCapture={title->viewModel.capture(title,null,TaskColor.randomPastel()){externalCapture=false}},
                         )
                     }
-                    if (showQuickNote && !externalCapture && !miniWindow) {
+                    if (showQuickNote && !externalCapture && sharedText == null && !miniWindow) {
                         org.lepotager.executivefunction.ui.QuickNoteDialog(
                             onDismiss = ::closeQuickNote,
                             onSave = { text -> viewModel.addQuickNote(text, ::closeQuickNote) },
                         )
                     }
-                    if (!externalCapture && !showQuickNote && !miniWindow) pendingStart?.let { request ->
+                    if (sharedText != null && !miniWindow) {
+                        org.lepotager.executivefunction.ui.QuickNoteDialog(
+                            onDismiss = { sharedText = null },
+                            onSave = { note ->
+                                viewModel.addQuickNote(note) {
+                                    sharedText = null
+                                    if (!introSeen) markIntroSeen()
+                                }
+                            },
+                            initialText = requireNotNull(sharedText),
+                        )
+                    }
+                    if (sharedText == null) pendingCapture?.let { draft ->
+                        val defaultTarget = FocusStartDefaults.targetDurationMs(focusPreset, null, preferLearnedDuration)
+                        FocusStartDialog(
+                            taskTitle = draft.title,
+                            learnedTargetDurationMs = defaultTarget,
+                            initialMode = FocusStartDefaults.timerMode(focusPreset),
+                            savingTask = true,
+                            onDismiss = viewModel::cancelCapture,
+                            onConfirm = { _, _ -> },
+                            onChoice = { _, target, custom -> viewModel.confirmCapture(target, custom) },
+                        )
+                    }
+                    if (!externalCapture && !showQuickNote && sharedText == null && !miniWindow) pendingStart?.let { request ->
                         key(request.taskId) {
                             FocusStartDialog(
                                 taskTitle = request.title,
-                                learnedTargetDurationMs = request.learnedTargetDurationMs,
-                                initialMode = lastTimerMode ?: if (request.learnedTargetDurationMs == null) {
-                                    FocusTimerMode.STOPWATCH
-                                } else {
-                                    FocusTimerMode.COUNTDOWN
-                                },
+                                learnedTargetDurationMs = viewModel.timerTarget(request.taskId, FocusStartDefaults.targetDurationMs(focusPreset, request.learnedTargetDurationMs, preferLearnedDuration)),
+                                initialMode = if (viewModel.timerTarget(request.taskId, FocusStartDefaults.targetDurationMs(focusPreset, request.learnedTargetDurationMs, preferLearnedDuration)) == null) FocusTimerMode.STOPWATCH else FocusTimerMode.COUNTDOWN,
                                 willPostponeExisting = snapshot.activeFocus?.task?.id?.let { it != request.taskId } == true,
                                 onDismiss = viewModel::cancelStart,
-                                onConfirm = { mode, targetDurationMs ->
-                                    saveTimerMode(mode)
+                                onConfirm = { _, _ -> },
+                                onChoice = { _, targetDurationMs, custom ->
                                     requestNotificationPermissionIfNeeded()
-                                    viewModel.confirmStart(targetDurationMs)
+                                    showHomeDuringFocus = false
+                                    viewModel.confirmStart(targetDurationMs, custom)
                                 },
                             )
                         }
                     }
                     if(showCheckIn && !snapshot.loading && snapshot.activeFocus == null &&
-                        !externalCapture && !showQuickNote && !miniWindow && requestedTask == null && pendingStart == null
-                    ) androidx.compose.material3.AlertDialog(
-                        onDismissRequest={showCheckIn=false},
-                        title={androidx.compose.material3.Text(getString(R.string.check_in_title))},
-                        text={androidx.compose.material3.Text(getString(R.string.check_in_body))},
-                        confirmButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false;startActivity(Intent(this@MainActivity,JournalActivity::class.java).putExtra("section","state"))}) {androidx.compose.material3.Text(getString(R.string.check_in_answer))}},
-                        dismissButton={androidx.compose.material3.TextButton(onClick={showCheckIn=false}) {androidx.compose.material3.Text(getString(R.string.not_now))}},
+                        !externalCapture && !showQuickNote && sharedText == null && !miniWindow &&
+                        requestedTask == null && requestedWorkspaceTask == null && pendingStart == null
+                    ) CheckInDialog(
+                        onDismiss = { showCheckIn = false },
+                        onSave = { mood, motivation, energy ->
+                            viewModel.recordCheckIn(mood, motivation, energy) {
+                                showCheckIn = false
+                            }
+                        },
                     )
 
                     LaunchedEffect(snapshot.loading, snapshot.activeFocus, miniWindow) {
@@ -248,9 +291,10 @@ class MainActivity : ComponentActivity() {
                                     modifier = Modifier.align(Alignment.Center),
                                 )
 
-                                snapshot.activeFocus?.session?.status == FocusStatus.RUNNING -> FocusScreen(
+                                snapshot.activeFocus?.session?.status == FocusStatus.RUNNING && !showHomeDuringFocus -> FocusScreen(
                                     activeFocus = requireNotNull(snapshot.activeFocus),
-                                    modalBlocked = externalCapture || showQuickNote || pendingStart != null,
+                                    onHome = { showHomeDuringFocus = true },
+                                    modalBlocked = externalCapture || showQuickNote || pendingStart != null || pendingCapture != null,
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("task",snapshot.activeFocus?.task?.id)) },
                                     onNote = { showQuickNote = true },
                                     onMini = ::enterMiniWindow,
@@ -259,32 +303,56 @@ class MainActivity : ComponentActivity() {
                                     pauseAfterMinutes = pauseAfterMinutes,
                                     onToggleOverlay = ::toggleOverlay,
                                     onQuickCapture = { title, firstStep, after ->
-                                        viewModel.capture(title, firstStep, TaskColor.NEUTRAL, after)
+                                        viewModel.capture(title, firstStep, TaskColor.randomPastel(), after)
                                     },
                                     onInterrupt = viewModel::interrupt,
                                     onComplete = viewModel::complete,
                                 )
 
-                                snapshot.activeFocus?.session?.status == FocusStatus.INTERRUPTED -> ResumeScreen(
+                                snapshot.activeFocus?.session?.status == FocusStatus.INTERRUPTED && requestedWorkspaceTask == null -> ResumeScreen(
                                     activeFocus = requireNotNull(snapshot.activeFocus),
                                     onResume = viewModel::resume,
                                     onPostpone = viewModel::postpone,
                                 )
 
-                                else -> HomeScreen(
+                                else -> org.lepotager.executivefunction.ui.WorkspaceHome(
+                                    tasks = snapshot.tasks,
+                                    requestedTaskId = requestedWorkspaceTask,
+                                    onRequestedTaskHandled = { requestedWorkspaceTask = null },
+                                    onChanged = { viewModel.reload() },
+                                    onStartStep = { id -> viewModel.reload { startTaskWithDefaults(id) } },
+                                    onCaptureTask = { title, step, color, theme, after ->
+                                        viewModel.captureInFolder(title, step, color, theme, after)
+                                    },
+                                    onCompleteParentTask = viewModel::completeParentTask,
+                                ) { visibleIds, _, editTask, addTask, addNote, taskSteps, toggleStep, workspace -> HomeScreen(
+                                    visibleTaskIds = visibleIds,
+                                    onEditTask = editTask,
+                                    onAddTask = addTask,
+                                    onAddNote = addNote,
+                                    taskSteps = taskSteps,
+                                    onToggleStep = toggleStep,
+                                    workspace = {
+                                        snapshot.activeFocus?.takeIf { it.session.status == FocusStatus.RUNNING }?.let { active ->
+                                            org.lepotager.executivefunction.ui.RunningFocusBanner(active) { showHomeDuringFocus = false }
+                                        }
+                                        workspace()
+                                    },
                                     tasks = snapshot.tasks,
                                     drawRequest = drawRequest,
                                     onApplySuggestedOrder = viewModel::applySuggestedOrder,
                                     eligibleDrawIds = snapshot.eligibleDrawIds,
+                                    lowEnergy = snapshot.lowEnergyUntil != null,
                                     suggestedTaskId = snapshot.suggestedTaskId,
+                                    recentTaskId = snapshot.recentPostponedTaskId,
                                     onHelp = { refreshPreferences(); showCheckIn=false; showIntro=true },
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
+                                    onCheckIn = { showCheckIn = true },
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                     pauseAfterMinutes = pauseAfterMinutes,
-                                    onCapture = viewModel::capture,
                                     homeViewMode = homeViewMode,
-                                    customStartAvailable = quickStartEnabled,
+                                    customStartAvailable = false,
                                     onStart = ::startTaskWithDefaults,
                                     onStartCustom = viewModel::requestStart,
                                     onMoveTask = viewModel::moveTask,
@@ -293,7 +361,7 @@ class MainActivity : ComponentActivity() {
                                     onSetDrawEnabled = ::saveDrawPreference,
                                     onSetPauseSuggestionsEnabled = ::savePausePreference,
                                     onSetPauseAfterMinutes = ::savePauseInterval,
-                                )
+                                ) }
                             }
                         }
                     }
@@ -380,6 +448,8 @@ class MainActivity : ComponentActivity() {
         outState.putString("pending_task", requestedTask ?: viewModel.pendingStart.value?.taskId)
         outState.putBoolean("external_capture", externalCapture)
         outState.putBoolean("quick_note", showQuickNote)
+        outState.putString("shared_text", sharedText)
+        outState.putString("requested_workspace_task", requestedWorkspaceTask)
         outState.putBoolean("return_to_pip", returnToMiniWindow)
         outState.putBoolean("show_intro", showIntro)
         outState.putBoolean("show_check_in", showCheckIn)
@@ -412,13 +482,30 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun consumeIntent(intent: Intent?) {
+        SharedText.from(intent)?.let {
+            sharedText = it
+            showCheckIn = false
+            showIntro = false
+            showHomeDuringFocus = true
+            // A rotation must not import the same external payload twice.
+            intent?.action = null
+            intent?.removeExtra(Intent.EXTRA_TEXT)
+        }
+        intent?.getStringExtra("open_task_details")?.let {
+            requestedWorkspaceTask = it
+            showHomeDuringFocus = true
+            showCheckIn = false
+            showIntro = false
+        }
         intent?.getStringExtra("requested_task")?.let { requestedTask = it; showCheckIn = false }
         when(intent?.getStringExtra("quick_action")) {
             "capture" -> { externalCapture=true; showCheckIn=false }
             "pip_note" -> { showQuickNote=true; returnToMiniWindow=true; showCheckIn=false }
+            "check_in" -> { showCheckIn=true; showIntro=false }
             "draw" -> drawRequest+=1
         }
         intent?.removeExtra("requested_task")
+        intent?.removeExtra("open_task_details")
         intent?.removeExtra("quick_action")
     }
 
@@ -483,7 +570,7 @@ class MainActivity : ComponentActivity() {
             drawEnabled = drawEnabled,
             pauseSuggestionsEnabled = pauseSuggestionsEnabled,
             pauseAfterMinutes = pauseAfterMinutes,
-            checkInEnabled = wellbeing.getBoolean("enabled", true),
+            checkInEnabled = wellbeing.getBoolean("enabled", false),
             adaptationEnabled = wellbeing.getBoolean("adapt", false),
             calmMode = app.getBoolean("calm", false),
             autoMiniWindow = app.getBoolean("auto_pip", false),
@@ -527,12 +614,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startTaskWithDefaults(taskId: String) {
-        if (!quickStartEnabled) {
-            viewModel.requestStart(taskId)
-            return
-        }
-        requestNotificationPermissionIfNeeded()
-        viewModel.requestStartWithDefaults(taskId, focusPreset, preferLearnedDuration)
+        viewModel.requestStart(taskId)
     }
 
     private fun requestNotificationPermissionIfNeeded() {

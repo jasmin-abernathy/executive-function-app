@@ -22,6 +22,31 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val learnedTargetDurationMs: Long?,
     )
 
+    data class PendingCapture(val title: String, val firstStep: String?, val color: TaskColor, val folderId: String?, val after: () -> Unit)
+    private val mutablePendingCapture = MutableStateFlow<PendingCapture?>(null)
+    val pendingCapture = mutablePendingCapture.asStateFlow()
+    private var savingCapture = false
+
+    fun timerTarget(taskId: String, fallback: Long?): Long? {
+        val task = snapshot.value.tasks.firstOrNull { it.id == taskId }
+        return if (task?.timerOverride == true) task.timerTarget else fallback
+    }
+
+    fun cancelCapture() { if (!savingCapture) mutablePendingCapture.value = null }
+
+    fun confirmCapture(target: Long?, custom: Boolean) {
+        val draft = mutablePendingCapture.value ?: return
+        if (savingCapture) return
+        savingCapture = true
+        viewModelScope.launch(exceptionHandler) {
+            try {
+                repository.capture(draft.title, draft.firstStep, draft.color, draft.folderId, custom, target)
+                mutablePendingCapture.value = null
+                draft.after()
+            } finally { savingCapture = false }
+        }
+    }
+
     private val repository = FocusRepository(AppDatabase(application))
     val snapshot = repository.snapshot
 
@@ -45,12 +70,22 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     fun capture(
         title: String,
         firstStep: String? = null,
-        color: TaskColor = TaskColor.NEUTRAL,
+        color: TaskColor = TaskColor.randomPastel(),
         after: () -> Unit = {},
-    ) = launch(after) { repository.capture(title, firstStep, color) }
+    ) { mutablePendingCapture.value = PendingCapture(title, firstStep, color, null, after) }
+
+    fun captureInFolder(title: String, firstStep: String?, color: TaskColor, folderId: String?, after: () -> Unit) =
+        run { mutablePendingCapture.value = PendingCapture(title, firstStep, color, folderId, after) }
 
     fun addQuickNote(text: String, after: () -> Unit = {}) =
         launch(after) { repository.addQuickNote(text) }
+
+    fun recordCheckIn(
+        mood: Int,
+        motivation: Int,
+        energy: Int,
+        after: () -> Unit = {},
+    ) = launch(after) { repository.recordCheckIn(mood, motivation, energy) }
 
     /** Kept for non-interactive/internal callers. Normal UI starts go through requestStart(). */
     fun start(taskId: String) = launch { repository.start(taskId) }
@@ -89,13 +124,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         mutablePendingStart.value = null
     }
 
-    fun confirmStart(targetDurationMs: Long?) {
+    fun confirmStart(targetDurationMs: Long?, custom: Boolean = false) {
         val request = mutablePendingStart.value ?: return
         if (confirmingStart) return
         confirmingStart = true
         viewModelScope.launch(exceptionHandler) {
             try {
                 repository.start(request.taskId, targetDurationMs)
+                if (custom) repository.setTaskTimer(request.taskId, targetDurationMs)
                 try { FocusPresence.sync(getApplication(), snapshot.value.activeFocus) } catch (_: Exception) { }
                 if (mutablePendingStart.value == request) cancelStart()
             } finally {
@@ -104,7 +140,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun reload() = launch { repository.load() }
+    fun reload(after: () -> Unit = {}) = launch(after) { repository.load() }
 
     fun moveTask(taskId: String, offset: Int) = launch { repository.moveTask(taskId, offset) }
     fun applyTaskOrder(ids: List<String>, onSettled: (Boolean) -> Unit) {
@@ -144,6 +180,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             },
         ) { repository.complete() }
     }
+
+    fun completeParentTask(taskId: String) = launch { repository.completeParentTask(taskId) }
 
     fun clearError() {
         mutableError.value = null
