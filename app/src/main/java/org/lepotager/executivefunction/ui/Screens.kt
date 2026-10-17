@@ -637,8 +637,21 @@ private fun SupportOptionsCard(
 }
 
 @Composable
+/**
+ * Put six cheerful warm shades first while keeping the original persisted enum
+ * identifiers (and a real NEUTRAL option) available for existing tasks/backups.
+ */
+internal val taskColorPickerOrder: List<TaskColor> = listOf(
+    TaskColor.ROSE,
+    TaskColor.TERRACOTTA,
+    TaskColor.CORAL,
+    TaskColor.APRICOT,
+    TaskColor.SAND,
+    TaskColor.LEMON,
+).let { warmColors -> warmColors + TaskColor.entries.filterNot { it in warmColors } }
+
 private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) {
-    TaskColor.entries.chunked(3).forEach { rowColors ->
+    taskColorPickerOrder.chunked(3).forEach { rowColors ->
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly,
@@ -671,25 +684,25 @@ private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) 
     }
 }
 
-private data class TaskPalette(val container: Color, val border: Color)
+internal data class TaskPalette(val container: Color, val border: Color)
 
-@Composable
-private fun taskPalette(color: TaskColor): TaskPalette {
+internal fun taskPalette(color: TaskColor): TaskPalette {
     return when (color) {
         TaskColor.NEUTRAL -> TaskPalette(Color.White, Color(0xFFB7D8BF))
         TaskColor.SAGE -> TaskPalette(Color(0xFFEDF6EF), Color(0xFFA9CBB2))
         TaskColor.BLUE -> TaskPalette(Color(0xFFEEF4FA), Color(0xFFA8C4DD))
-        TaskColor.TERRACOTTA -> TaskPalette(Color(0xFFF9F0EC), Color(0xFFD6AD9D))
+        TaskColor.TERRACOTTA -> TaskPalette(Color(0xFFE99883), Color(0xFFAA5848))
         TaskColor.LAVENDER -> TaskPalette(Color(0xFFF4EFF9), Color(0xFFC4ADD8))
-        TaskColor.SAND -> TaskPalette(Color(0xFFFAF5E8), Color(0xFFD9C493))
+        TaskColor.SAND -> TaskPalette(Color(0xFFFFE992), Color(0xFFB99220))
         TaskColor.MINT -> TaskPalette(Color(0xFFD8F5E5), Color(0xFF83C8A4))
         TaskColor.TURQUOISE -> TaskPalette(Color(0xFFD4F3F1), Color(0xFF79C4BF))
         TaskColor.SKY -> TaskPalette(Color(0xFFD9EEFF), Color(0xFF8DBDE2))
         TaskColor.PERIWINKLE -> TaskPalette(Color(0xFFE1E5FF), Color(0xFFA0ACE0))
         TaskColor.LILAC -> TaskPalette(Color(0xFFEEDBFA), Color(0xFFC09AD8))
-        TaskColor.ROSE -> TaskPalette(Color(0xFFFADDE8), Color(0xFFD99DB5))
-        TaskColor.CORAL -> TaskPalette(Color(0xFFFFDDD5), Color(0xFFDD9E8D))
-        TaskColor.APRICOT -> TaskPalette(Color(0xFFFFE8CF), Color(0xFFDCB082))
+        TaskColor.ROSE -> TaskPalette(Color(0xFFF4A0B6), Color(0xFFC45478))
+        TaskColor.CORAL -> TaskPalette(Color(0xFFFFB79B), Color(0xFFD6724C))
+        TaskColor.APRICOT -> TaskPalette(Color(0xFFFFCA82), Color(0xFFCC822D))
+        TaskColor.LEMON -> TaskPalette(Color(0xFFE3F08B), Color(0xFF94AC29))
     }
 }
 
@@ -710,6 +723,7 @@ private fun taskColorName(color: TaskColor): String = stringResource(
         TaskColor.ROSE -> R.string.task_color_rose
         TaskColor.CORAL -> R.string.task_color_coral
         TaskColor.APRICOT -> R.string.task_color_apricot
+        TaskColor.LEMON -> R.string.task_color_lemon
     },
 )
 

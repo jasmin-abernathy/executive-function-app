@@ -13,9 +13,9 @@
     <string name="task_color_neutral">Neutral</string>
     <string name="task_color_sage">Sage green</string>
     <string name="task_color_blue">Mist blue</string>
-    <string name="task_color_terracotta">Pale terracotta</string>
+    <string name="task_color_terracotta">Warm terracotta</string>
     <string name="task_color_lavender">Lavender</string>
-    <string name="task_color_sand">Sand yellow</string>
+    <string name="task_color_sand">Sunshine yellow</string>
     <string name="support_options_title">Optional supports</string>
     <string name="random_draw_option">Task die</string>
     <string name="random_draw_option_support">Use it only when choosing feels difficult.</string>
@@ -156,9 +156,9 @@
     <string name="task_color_sky">Sky</string>
     <string name="task_color_periwinkle">Periwinkle</string>
     <string name="task_color_lilac">Lilac</string>
-    <string name="task_color_rose">Rose</string>
-    <string name="task_color_coral">Coral</string>
-    <string name="task_color_apricot">Apricot</string>
+    <string name="task_color_rose">Raspberry</string>
+    <string name="task_color_coral">Bright coral</string>
+    <string name="task_color_apricot">Apricot orange</string>
     <string name="save_task_timer_title">Timing for this task</string>
     <string name="task_timer_current">Suggested mode: %1$s</string>
     <string name="task_timer_minutes">%1$d minutes</string>
@@ -181,4 +181,5 @@
     <string name="home_add_note">Add a note</string>
     <string name="home_more_tools">Check-in, journal and help</string>
     <string name="home_hide_tools">Hide other tools</string>
+    <string name="task_color_lemon">Lemon yellow</string>
 </resources>

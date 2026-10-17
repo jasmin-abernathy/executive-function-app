@@ -29,6 +29,7 @@ enum class TaskColor {
     ROSE,
     CORAL,
     APRICOT,
+    LEMON,
     ;
 
     companion object {
