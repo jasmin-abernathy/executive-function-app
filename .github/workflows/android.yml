@@ -19,6 +19,7 @@ on:
       - "*.gradle.kts"
       - "gradle.properties"
       - ".github/workflows/android.yml"
+      - ".github/workflows/signed-beta.yml"
 
 permissions:
   contents: read
