@@ -636,7 +636,6 @@ private fun SupportOptionsCard(
     }
 }
 
-@Composable
 /**
  * Put six cheerful warm shades first while keeping the original persisted enum
  * identifiers (and a real NEUTRAL option) available for existing tasks/backups.
@@ -650,6 +649,7 @@ internal val taskColorPickerOrder: List<TaskColor> = listOf(
     TaskColor.LEMON,
 ).let { warmColors -> warmColors + TaskColor.entries.filterNot { it in warmColors } }
 
+@Composable
 private fun TaskColorPicker(selected: TaskColor, onSelect: (TaskColor) -> Unit) {
     taskColorPickerOrder.chunked(3).forEach { rowColors ->
         Row(
