@@ -13,9 +13,9 @@
     <string name="task_color_neutral">Neutre</string>
     <string name="task_color_sage">Vert sauge</string>
     <string name="task_color_blue">Bleu brume</string>
-    <string name="task_color_terracotta">Terracotta pâle</string>
+    <string name="task_color_terracotta">Rouge terre cuite</string>
     <string name="task_color_lavender">Lavande</string>
-    <string name="task_color_sand">Jaune sable</string>
+    <string name="task_color_sand">Jaune soleil</string>
     <string name="support_options_title">Aides facultatives</string>
     <string name="random_draw_option">Tirage au dé</string>
     <string name="random_draw_option_support">À utiliser seulement quand choisir devient difficile.</string>
@@ -156,9 +156,9 @@
     <string name="task_color_sky">Ciel</string>
     <string name="task_color_periwinkle">Pervenche</string>
     <string name="task_color_lilac">Lilas</string>
-    <string name="task_color_rose">Rose</string>
-    <string name="task_color_coral">Corail</string>
-    <string name="task_color_apricot">Abricot</string>
+    <string name="task_color_rose">Framboise</string>
+    <string name="task_color_coral">Corail lumineux</string>
+    <string name="task_color_apricot">Orange abricot</string>
     <string name="save_task_timer_title">Comptage pour cette tâche</string>
     <string name="task_timer_current">Mode proposé : %1$s</string>
     <string name="task_timer_minutes">%1$d minutes</string>
@@ -181,4 +181,5 @@
     <string name="home_add_note">Ajouter une note</string>
     <string name="home_more_tools">Point d’état, journal et aide</string>
     <string name="home_hide_tools">Masquer les autres outils</string>
+    <string name="task_color_lemon">Jaune citron</string>
 </resources>
