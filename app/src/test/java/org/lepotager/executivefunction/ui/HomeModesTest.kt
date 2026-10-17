@@ -42,7 +42,6 @@ class HomeModesTest {
                     drawEnabled = false,
                     pauseSuggestionsEnabled = true,
                     pauseAfterMinutes = 25,
-                    onCapture = { _, _, _, done -> done() },
                     onStart = onStart,
                     homeViewMode = HomeViewMode.NOW_NEXT,
                     customStartAvailable = true,
@@ -62,12 +61,37 @@ class HomeModesTest {
         compose.onNodeWithTag("home-task-list").performScrollToNode(hasText("Maintenant"))
     }
 
+    @Test fun homeOffersClearSeparateCreationActions() {
+        var taskOpened = 0
+        var noteOpened = 0
+        compose.setContent {
+            ExecutiveFunctionTheme {
+                HomeScreen(
+                    tasks = emptyList(),
+                    onAddTask = { taskOpened++ },
+                    onAddNote = { noteOpened++ },
+                    drawEnabled = false, pauseSuggestionsEnabled = false, pauseAfterMinutes = 25,
+                    onStart = {}, onMoveTask = { _, _ -> },
+                    onApplyTaskOrder = { _, done -> done(true) },
+                    onSetTaskColor = { _, _ -> }, onSetDrawEnabled = {},
+                    onSetPauseSuggestionsEnabled = {}, onSetPauseAfterMinutes = {},
+                )
+            }
+        }
+        compose.onNodeWithTag("home-add-task").performClick()
+        compose.onNodeWithTag("home-add-note").performClick()
+        compose.runOnIdle {
+            assertEquals(1, taskOpened)
+            assertEquals(1, noteOpened)
+        }
+    }
+
     @Test fun compactHomeOpensTheCurrentTaskStepsWithoutStartingItsTimer() {
         var edited: String? = null
         var started: String? = null
         render(onStart = { started = it }, onEditTask = { edited = it })
         scrollToTodayPanel()
-        compose.onNodeWithText("Étapes et dossier").performScrollTo().performClick()
+        compose.onNodeWithText("Étapes et thème").performScrollTo().performClick()
         compose.runOnIdle {
             assertEquals("task-0", edited)
             assertEquals(null, started)
@@ -77,6 +101,7 @@ class HomeModesTest {
     @Test fun checkInStaysAvailableFromHome() {
         var opened = 0
         render(onCheckIn = { opened += 1 })
+        compose.onNodeWithText("Point d’état, journal et aide").performClick()
         compose.onNodeWithText("Comment je vais").performClick()
         compose.runOnIdle { assertEquals(1, opened) }
     }

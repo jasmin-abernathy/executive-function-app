@@ -147,8 +147,8 @@
     <string name="intro_context_body">If you enable it, the app can take your energy, available time and context into account. The die uses eligible tasks only when you ask it to. You stay in control of their order.</string>
     <string name="intro_enable_suggestions">Enable suggestions</string>
     <string name="intro_later">Later</string>
-    <string name="task_steps_folder">Steps and folder</string>
-    <string name="folder_empty_tasks">No tasks in this folder yet. Add one above.</string>
+    <string name="task_steps_folder">Steps and theme</string>
+    <string name="folder_empty_tasks">No tasks in this theme yet. You can add one from the top of the home screen.</string>
     <string name="capture_new">Add a task</string>
     <string name="capture_close">Close task entry</string>
     <string name="task_color_mint">Mint</string>
@@ -178,4 +178,7 @@
     <string name="return_to_task_title">Pick up a task, if you like</string>
     <string name="return_to_task_details">View task</string>
     <string name="return_to_task_action">Resume</string>
+    <string name="home_add_note">Add a note</string>
+    <string name="home_more_tools">Check-in, journal and help</string>
+    <string name="home_hide_tools">Hide other tools</string>
 </resources>

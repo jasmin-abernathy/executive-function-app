@@ -147,8 +147,8 @@
     <string name="intro_context_body">Si tu l’actives, l’application peut tenir compte de ton énergie, du temps disponible et du contexte. Le dé utilise les tâches admissibles seulement quand tu le demandes. Tu gardes la main sur leur ordre.</string>
     <string name="intro_enable_suggestions">Activer les suggestions</string>
     <string name="intro_later">Plus tard</string>
-    <string name="task_steps_folder">Étapes et dossier</string>
-    <string name="folder_empty_tasks">Ce dossier ne contient pas encore de tâche. Ajoute-en une ci-dessus.</string>
+    <string name="task_steps_folder">Étapes et thème</string>
+    <string name="folder_empty_tasks">Ce thème ne contient pas encore de tâche. Tu peux en ajouter une depuis le haut de l’accueil.</string>
     <string name="capture_new">Ajouter une tâche</string>
     <string name="capture_close">Refermer la saisie</string>
     <string name="task_color_mint">Menthe</string>
@@ -178,4 +178,7 @@
     <string name="return_to_task_title">Une tâche à retrouver, si tu veux</string>
     <string name="return_to_task_details">Voir la tâche</string>
     <string name="return_to_task_action">Reprendre</string>
+    <string name="home_add_note">Ajouter une note</string>
+    <string name="home_more_tools">Point d’état, journal et aide</string>
+    <string name="home_hide_tools">Masquer les autres outils</string>
 </resources>

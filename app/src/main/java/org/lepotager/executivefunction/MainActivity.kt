@@ -321,9 +321,14 @@ class MainActivity : ComponentActivity() {
                                     onRequestedTaskHandled = { requestedWorkspaceTask = null },
                                     onChanged = { viewModel.reload() },
                                     onStartStep = { id -> viewModel.reload { startTaskWithDefaults(id) } },
-                                ) { visibleIds, folderId, editTask, workspace -> HomeScreen(
+                                    onCaptureTask = { title, step, color, theme, after ->
+                                        viewModel.captureInFolder(title, step, color, theme, after)
+                                    },
+                                ) { visibleIds, _, editTask, addTask, addNote, workspace -> HomeScreen(
                                     visibleTaskIds = visibleIds,
                                     onEditTask = editTask,
+                                    onAddTask = addTask,
+                                    onAddNote = addNote,
                                     workspace = {
                                         snapshot.activeFocus?.takeIf { it.session.status == FocusStatus.RUNNING }?.let { active ->
                                             org.lepotager.executivefunction.ui.RunningFocusBanner(active) { showHomeDuringFocus = false }
@@ -343,7 +348,6 @@ class MainActivity : ComponentActivity() {
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                     pauseAfterMinutes = pauseAfterMinutes,
-                                    onCapture = { title, step, color, after -> viewModel.captureInFolder(title, step, color, folderId, after) },
                                     homeViewMode = homeViewMode,
                                     customStartAvailable = false,
                                     onStart = ::startTaskWithDefaults,

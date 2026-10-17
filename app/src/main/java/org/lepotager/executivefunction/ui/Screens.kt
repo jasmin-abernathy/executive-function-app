@@ -154,6 +154,8 @@ fun HomeScreen(
     tasks: List<TaskItem>,
     visibleTaskIds: Set<String>? = null,
     onEditTask: (String) -> Unit = {},
+    onAddTask: () -> Unit = {},
+    onAddNote: () -> Unit = {},
     workspace: @Composable () -> Unit = {},
     onJournal: () -> Unit = {},
     onCheckIn: () -> Unit = {},
@@ -167,7 +169,6 @@ fun HomeScreen(
     drawEnabled: Boolean,
     pauseSuggestionsEnabled: Boolean,
     pauseAfterMinutes: Int,
-    onCapture: (String, String?, TaskColor, () -> Unit) -> Unit,
     onStart: (String) -> Unit,
     homeViewMode: HomeViewMode = HomeViewMode.LIST,
     customStartAvailable: Boolean = true,
@@ -179,16 +180,12 @@ fun HomeScreen(
     onSetPauseSuggestionsEnabled: (Boolean) -> Unit,
     onSetPauseAfterMinutes: (Int) -> Unit,
 ) {
-    var showCapture by rememberSaveable { mutableStateOf(tasks.isEmpty()) }
-    var title by rememberSaveable { mutableStateOf("") }
-    var firstStep by remember { mutableStateOf("") }
-    var showCaptureOptions by remember { mutableStateOf(false) }
     var showSupportOptions by remember { mutableStateOf(false) }
+    var showMoreTools by rememberSaveable { mutableStateOf(false) }
     var drawnTaskId by remember { mutableStateOf<String?>(null) }
     var pendingDrawTaskId by remember { mutableStateOf<String?>(null) }
     var drawRollKey by remember { mutableIntStateOf(0) }
     var isDrawing by remember { mutableStateOf(false) }
-    var selectedColor by remember { mutableStateOf(TaskColor.randomPastel()) }
     var organizing by remember { mutableStateOf(false) }
     var showAllTasks by rememberSaveable { mutableStateOf(homeViewMode == HomeViewMode.LIST) }
     var difficultDay by rememberSaveable { mutableStateOf(false) }
@@ -260,23 +257,42 @@ fun HomeScreen(
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                Spacer(Modifier.size(8.dp))
-                FilledTonalButton(
-                    onClick = onCheckIn,
+                Spacer(Modifier.size(14.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Button(
+                        onClick = onAddTask,
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 54.dp).testTag("home-add-task"),
+                        colors = appButtonColors(),
+                    ) {
+                        Text(stringResource(R.string.capture_new))
+                    }
+                    OutlinedButton(
+                        onClick = onAddNote,
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 54.dp).testTag("home-add-note"),
+                    ) {
+                        Text(stringResource(R.string.home_add_note))
+                    }
+                }
+                TextButton(
+                    onClick = { showMoreTools = !showMoreTools },
                     modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
                 ) {
-                    Text(stringResource(R.string.home_check_in))
+                    Text(stringResource(if (showMoreTools) R.string.home_hide_tools else R.string.home_more_tools))
                 }
-                OutlinedButton(
-                    onClick = onJournal,
-                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
-                ) {
-                    Text(stringResource(R.string.open_journal))
-                }
-                TextButton(onClick = onHelp, colors = appTextButtonColors()) {
-                    UtilityGlyph(UtilityGlyphKind.HELP, Modifier.size(20.dp))
-                    Spacer(Modifier.size(8.dp))
-                    Text(stringResource(R.string.help_how_it_works))
+                if (showMoreTools) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        OutlinedButton(onClick = onCheckIn, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)) {
+                            Text(stringResource(R.string.home_check_in))
+                        }
+                        OutlinedButton(onClick = onJournal, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)) {
+                            Text(stringResource(R.string.open_journal))
+                        }
+                        TextButton(onClick = onHelp, modifier = Modifier.fillMaxWidth()) {
+                            UtilityGlyph(UtilityGlyphKind.HELP, Modifier.size(20.dp))
+                            Spacer(Modifier.size(8.dp))
+                            Text(stringResource(R.string.help_how_it_works))
+                        }
+                    }
                 }
                 if (lowEnergy) {
                     Text(stringResource(R.string.low_energy_active), style = MaterialTheme.typography.titleMedium)
@@ -309,81 +325,6 @@ fun HomeScreen(
                             FilledTonalButton(onClick = { onStart(recent.id) }) {
                                 Text(stringResource(R.string.return_to_task_action))
                             }
-                        }
-                    }
-                }
-            }
-            item {
-                FilledTonalButton(onClick = { showCapture = !showCapture }, modifier = Modifier.fillMaxWidth()) {
-                    Text(stringResource(if (showCapture) R.string.capture_close else R.string.capture_new))
-                }
-            }
-            if (showCapture) item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = appCardColors(),
-                    border = appBorder(),
-                    shape = RoundedCornerShape(
-                        topStart = 28.dp,
-                        topEnd = 18.dp,
-                        bottomEnd = 28.dp,
-                        bottomStart = 18.dp,
-                    ),
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                    ) {
-                        OutlinedTextField(
-                            value = title,
-                            onValueChange = { title = it },
-                            modifier = Modifier.fillMaxWidth(),
-                            label = { Text(stringResource(R.string.capture_label)) },
-                            supportingText = { Text(stringResource(R.string.capture_support)) },
-                            singleLine = true,
-                            colors = appTextFieldColors(),
-                        )
-                        TextButton(
-                            onClick = { showCaptureOptions = !showCaptureOptions },
-                            colors = appTextButtonColors(),
-                        ) {
-                            Text(
-                                stringResource(
-                                    if (showCaptureOptions) R.string.capture_options_hide
-                                    else R.string.capture_options_show,
-                                ),
-                            )
-                        }
-                        if (showCaptureOptions) {
-                            OutlinedTextField(
-                                value = firstStep,
-                                onValueChange = { firstStep = it },
-                                modifier = Modifier.fillMaxWidth(),
-                                label = { Text(stringResource(R.string.first_step_optional)) },
-                                singleLine = true,
-                                colors = appTextFieldColors(),
-                            )
-                            Text(
-                                text = stringResource(R.string.task_color_optional),
-                                style = MaterialTheme.typography.labelLarge,
-                            )
-                            TaskColorPicker(selected = selectedColor, onSelect = { selectedColor = it })
-                        }
-                        Button(
-                            onClick = {
-                                onCapture(title, firstStep, selectedColor) {
-                                    title = ""
-                                    showCapture = false
-                                    firstStep = ""
-                                    showCaptureOptions = false
-                                    selectedColor = TaskColor.randomPastel()
-                                }
-                            },
-                            enabled = title.isNotBlank(),
-                            colors = appButtonColors(),
-                            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
-                        ) {
-                            Text(stringResource(R.string.capture_action))
                         }
                     }
                 }

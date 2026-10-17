@@ -34,7 +34,7 @@ class HomeAccessibilityTest {
                     HomeScreen(
                         tasks = tasks, drawRequest = 1,
                         drawEnabled = true, pauseSuggestionsEnabled = false, pauseAfterMinutes = 25,
-                        onCapture = { _, _, _, _ -> }, onStart = { started = it },
+                        onStart = { started = it },
                         onMoveTask = { _, _ -> }, onApplyTaskOrder = { _, done -> writes++; done(true) },
                         onSetTaskColor = { _, _ -> }, onSetDrawEnabled = {},
                         onSetPauseSuggestionsEnabled = {}, onSetPauseAfterMinutes = {},
@@ -73,7 +73,7 @@ class HomeAccessibilityTest {
                     HomeScreen(
                         tasks = tasks,
                         drawEnabled = true, pauseSuggestionsEnabled = false, pauseAfterMinutes = 25,
-                        onCapture = { _, _, _, _ -> }, onStart = { started = it },
+                        onStart = { started = it },
                         onMoveTask = { _, _ -> }, onApplyTaskOrder = { ids, done ->
                             savedOrder = ids
                             tasks = ids.map { id -> tasks.first { it.id == id } }
