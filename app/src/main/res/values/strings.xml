@@ -173,4 +173,9 @@
     <string name="task_date_future">Prévue le %1$s</string>
     <string name="task_date_today">Prévue aujourd’hui</string>
     <string name="task_date_passed">Date passée (%1$s) — tu peux la déplacer si besoin</string>
+    <string name="setup_start_now">Commencer sans configurer</string>
+    <string name="setup_personalize_optional">Personnaliser (facultatif)</string>
+    <string name="return_to_task_title">Une tâche à retrouver, si tu veux</string>
+    <string name="return_to_task_details">Voir la tâche</string>
+    <string name="return_to_task_action">Reprendre</string>
 </resources>

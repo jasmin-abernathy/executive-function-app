@@ -75,5 +75,6 @@ data class AppSnapshot(
     val loading: Boolean = true,
     val eligibleDrawIds: Set<String>? = null,
     val suggestedTaskId: String? = null,
+    val recentPostponedTaskId: String? = null,
     val lowEnergyUntil: Long? = null,
 )

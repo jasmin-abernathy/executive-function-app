@@ -173,4 +173,9 @@
     <string name="task_date_future">Planned for %1$s</string>
     <string name="task_date_today">Planned for today</string>
     <string name="task_date_passed">Date passed (%1$s) — you can move it if needed</string>
+    <string name="setup_start_now">Start without setting anything up</string>
+    <string name="setup_personalize_optional">Customize (optional)</string>
+    <string name="return_to_task_title">Pick up a task, if you like</string>
+    <string name="return_to_task_details">View task</string>
+    <string name="return_to_task_action">Resume</string>
 </resources>

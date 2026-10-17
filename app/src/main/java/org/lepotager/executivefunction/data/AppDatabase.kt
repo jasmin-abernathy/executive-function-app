@@ -164,6 +164,17 @@ internal class AppDatabase(private val context: Context) :
         cursor.getLong(0)
     }
 
+    /** Last postponed task still open, with no new reminder or recurring check-in. */
+    fun recentPostponedTaskId(): String? = readableDatabase.rawQuery(
+        """
+            SELECT s.task_id FROM focus_sessions s
+            JOIN tasks t ON t.id=s.task_id
+            WHERE s.status=? AND t.status=?
+            ORDER BY s.updated_at DESC, s.rowid DESC
+            LIMIT 1
+        """.trimIndent(), arrayOf(FocusStatus.POSTPONED.name, TaskStatus.READY.name),
+    ).use { if (it.moveToFirst()) it.getString(0) else null }
+
     fun openTasks(): List<TaskItem> = readableDatabase.query(
         "tasks",
         TASK_COLUMNS,

@@ -195,7 +195,7 @@ internal fun FirstRunSetupFlow(
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                TextButton(onClick = onSkip) { Text(stringResource(R.string.intro_skip)) }
+                if (page > 0) TextButton(onClick = onSkip) { Text(stringResource(R.string.intro_skip)) }
             }
 
             when (page) {
@@ -275,7 +275,16 @@ internal fun FirstRunSetupFlow(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                if (page == totalPages - 1) {
+                if (page == 0) {
+                    Button(
+                        onClick = onSkip,
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_start_now)) }
+                    OutlinedButton(
+                        onClick = { page = 1 },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) { Text(stringResource(R.string.setup_personalize_optional)) }
+                } else if (page == totalPages - 1) {
                     Button(
                         onClick = {
                             onApply(

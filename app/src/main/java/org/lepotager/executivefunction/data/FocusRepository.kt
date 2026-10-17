@@ -197,6 +197,7 @@ class FocusRepository internal constructor(
             loading = false,
             eligibleDrawIds = eligible,
             lowEnergyUntil = database.lowEnergyUntil(),
+            recentPostponedTaskId = database.recentPostponedTaskId(),
             suggestedTaskId = if(eligible==null) null else tasks.filter { it.id in eligible && it.status==TaskStatus.READY }.maxByOrNull { journal.planning(it.id).importance }?.id,
         )
     }

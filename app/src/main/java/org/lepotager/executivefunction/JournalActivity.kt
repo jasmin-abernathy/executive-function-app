@@ -69,7 +69,7 @@ class JournalActivity : ComponentActivity() {
         var energy by remember { mutableIntStateOf(1) }
         var todayOnly by remember { mutableStateOf(false) }
         var planningMap by remember { mutableStateOf(emptyMap<String,Planning>()) }
-        var checkEnabled by remember { mutableStateOf(getSharedPreferences("wellbeing",MODE_PRIVATE).getBoolean("enabled",true)) }
+        var checkEnabled by remember { mutableStateOf(getSharedPreferences("wellbeing",MODE_PRIVATE).getBoolean("enabled",false)) }
         val preferences=remember {getSharedPreferences("wellbeing",MODE_PRIVATE)}
         var adapt by remember {mutableStateOf(preferences.getBoolean("adapt",false))}
         var availableMinutes by remember {mutableStateOf(preferences.getInt("available_minutes",0).toString())}
@@ -81,7 +81,7 @@ class JournalActivity : ComponentActivity() {
             tasks=all
             if(selected!=null && all.none {it.id==selected}) selected=null
             adapt=preferences.getBoolean("adapt",false)
-            checkEnabled=preferences.getBoolean("enabled",true)
+            checkEnabled=preferences.getBoolean("enabled",false)
             checks=withContext(Dispatchers.IO) { journal.checkIns() }
             notes=withContext(Dispatchers.IO) {journal.notes()}
             planningMap=withContext(Dispatchers.IO) { all.associate { it.id to journal.planning(it.id) } }

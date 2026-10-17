@@ -40,6 +40,18 @@ class OnboardingAndTimerChoiceTest {
     }
 
     @Test
+    fun sharedNoteIsPrefilledAndEditable() {
+        var saved: String? = null
+        compose.setContent {
+            ExecutiveFunctionTheme { QuickNoteDialog({}, { saved = it }, "https://example.org") }
+        }
+        compose.onNode(hasSetTextAction()).assertTextContains("https://example.org")
+        compose.onNode(hasSetTextAction()).performTextReplacement("https://example.org/article")
+        compose.onNodeWithText("Enregistrer la note").performClick()
+        compose.runOnIdle { assertEquals("https://example.org/article", saved) }
+    }
+
+    @Test
     fun skippingSetupDoesNotApplyAnySetting() {
         var applied = 0
         var skipped = 0
@@ -49,7 +61,7 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Passer")
+        clickText("Commencer sans configurer")
         compose.runOnIdle {
             assertEquals(0, applied)
             assertEquals(1, skipped)
@@ -64,7 +76,7 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Suivant")
+        clickText("Personnaliser (facultatif)")
         clickText("Décider quoi faire en premier")
         clickText("Suivant")
 
@@ -83,7 +95,7 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Suivant")
+        clickText("Personnaliser (facultatif)")
         clickText("Rester sur l’activité")
         clickText("Suivant")
         clickText("Me proposer une pause après un moment")
@@ -112,7 +124,7 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Suivant")
+        clickText("Personnaliser (facultatif)")
         clickText("Garder la notion du temps")
         clickText("Suivant")
         clickText("Me proposer une pause après un moment")
@@ -142,7 +154,7 @@ class OnboardingAndTimerChoiceTest {
             }
         }
 
-        clickText("Suivant")
+        clickText("Personnaliser (facultatif)")
         clickText("Garder la notion du temps")
         clickText("Suivant")
         clickText("Me proposer une pause après un moment")

@@ -33,6 +33,7 @@ import androidx.compose.material3.IconButton
 import org.lepotager.executivefunction.ui.theme.LightColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
@@ -159,6 +160,7 @@ fun HomeScreen(
     onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
     suggestedTaskId: String? = null,
+    recentTaskId: String? = null,
     lowEnergy: Boolean = false,
     drawRequest: Int = 0,
     onApplySuggestedOrder: () -> Unit = {},
@@ -294,6 +296,23 @@ fun HomeScreen(
                 }
             }
             item { workspace() }
+            val recent = visibleTasks.firstOrNull { it.id == recentTaskId && it.status == org.lepotager.executivefunction.model.TaskStatus.READY }
+            if (recent != null) item {
+                OutlinedCard(Modifier.fillMaxWidth()) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(stringResource(R.string.return_to_task_title), style = MaterialTheme.typography.titleMedium)
+                        Text(recent.title, style = MaterialTheme.typography.bodyLarge)
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            TextButton(onClick = { onEditTask(recent.id) }) {
+                                Text(stringResource(R.string.return_to_task_details))
+                            }
+                            FilledTonalButton(onClick = { onStart(recent.id) }) {
+                                Text(stringResource(R.string.return_to_task_action))
+                            }
+                        }
+                    }
+                }
+            }
             item {
                 FilledTonalButton(onClick = { showCapture = !showCapture }, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(if (showCapture) R.string.capture_close else R.string.capture_new))

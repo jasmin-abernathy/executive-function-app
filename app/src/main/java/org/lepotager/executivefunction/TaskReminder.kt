@@ -30,6 +30,18 @@ internal object TaskReminder {
     fun restore(context: Context,db: AppDatabase) {
         db.readableDatabase.rawQuery("SELECT task_id,due_at FROM task_reminders",null).use {c ->while(c.moveToNext()) context.getSystemService(AlarmManager::class.java).setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,c.getLong(1).coerceAtLeast(System.currentTimeMillis()+1000),alarm(context,c.getString(0)))}
     }
+    /** Tapping the reminder shows context; only its Start action requests a timer. */
+    internal fun taskIntent(context: Context, id: String, start: Boolean): Intent =
+        Intent(context, MainActivity::class.java)
+            .setData(Uri.Builder().scheme("task-context").authority("local")
+                .appendPath(if (start) "start" else "details").appendPath(id).build())
+            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            .putExtra(if (start) "requested_task" else "open_task_details", id)
+
+    private fun taskPendingIntent(context: Context, id: String, start: Boolean): PendingIntent =
+        PendingIntent.getActivity(context, 0, taskIntent(context, id, start),
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
     fun notify(context: Context,db: AppDatabase,id: String) {
         val task=db.taskById(id) ?: return
         if(task.status==TaskStatus.COMPLETED) {cancel(context,db,id);return}
@@ -39,12 +51,13 @@ internal object TaskReminder {
         if(Build.VERSION.SDK_INT>=33 && ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)!=PackageManager.PERMISSION_GRANTED) return
         val manager=context.getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(NotificationChannel("task_reminders",context.getString(R.string.task_reminder),NotificationManager.IMPORTANCE_DEFAULT))
-        val open=PendingIntent.getActivity(context,id.hashCode(),Intent(context,MainActivity::class.java).putExtra("requested_task",id),PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        val open=taskPendingIntent(context,id,false)
+        val start=taskPendingIntent(context,id,true)
         fun action(name: String)=PendingIntent.getBroadcast(context,0,Intent(context,TaskReminderReceiver::class.java).setAction(name).setData(Uri.Builder().scheme("task-reminder").authority("local").appendPath(id).build()),PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         manager.notify(id,3200,NotificationCompat.Builder(context,"task_reminders")
             .setSmallIcon(R.drawable.ic_timer_notification).setContentTitle(context.getString(R.string.task_reminder)).setContentText(task.title)
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(open).setAutoCancel(true)
-            .addAction(0,context.getString(R.string.start_action),open)
+            .addAction(0,context.getString(R.string.start_action),start)
             .addAction(0,context.getString(R.string.complete_action),action("complete"))
             .addAction(0,context.getString(R.string.not_now),action("later")).build())
     }

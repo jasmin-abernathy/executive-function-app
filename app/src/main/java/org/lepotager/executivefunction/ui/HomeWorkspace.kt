@@ -22,6 +22,8 @@ import org.lepotager.executivefunction.model.TaskItem
 @Composable
 internal fun WorkspaceHome(
     tasks: List<TaskItem>,
+    requestedTaskId: String? = null,
+    onRequestedTaskHandled: () -> Unit = {},
     onChanged: () -> Unit,
     onStartStep: (String) -> Unit,
     content: @Composable (Set<String>?, String?, (String) -> Unit, @Composable () -> Unit) -> Unit,
@@ -50,6 +52,12 @@ internal fun WorkspaceHome(
     var noteFolder by rememberSaveable { mutableStateOf<String?>(null) }
     var deleteNote by rememberSaveable { mutableStateOf<String?>(null) }
     var editTask by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(requestedTaskId, tasks) {
+        if (requestedTaskId != null) {
+            if (tasks.any { it.id == requestedTaskId }) editTask = requestedTaskId
+            onRequestedTaskHandled()
+        }
+    }
     var showAllNotes by rememberSaveable { mutableStateOf(false) }
     suspend fun refresh() { data = withContext(Dispatchers.IO) { store.load() }; loaded = true }
     fun run(action: () -> Unit, after: () -> Unit = {}) {
@@ -236,6 +244,21 @@ private fun TaskStepsDialog(taskId: String, database: AppDatabase, data: Workspa
         }
         if (task?.deadlineDay != null) TextButton(enabled = !busy, onClick = { run({ TaskOptionsStore(database).deadline(taskId, null) }) }) { Text(label("Retirer la date", "Remove date")) }
         Text(label("Un repère visuel apparaît progressivement à l’approche de cette date : 7 jours avant si tu la fixes dans les deux prochaines semaines, 14 jours avant sinon. Tu peux la déplacer ou la retirer.", "A visual cue gradually appears as this date approaches: 7 days before if set within the next two weeks, otherwise 14 days before. You can move or remove the date."), style = MaterialTheme.typography.bodySmall)
+        val relatedFolder = data.taskFolders[taskId]
+        val relatedNotes = if (relatedFolder == null) emptyList() else
+            data.notes.filter { data.noteFolders[it.id] == relatedFolder }
+        var showRelatedNotes by rememberSaveable(taskId) { mutableStateOf(false) }
+        if (relatedNotes.isNotEmpty()) {
+            TextButton(onClick = { showRelatedNotes = !showRelatedNotes }) {
+                Text(label(
+                    if (showRelatedNotes) "Masquer les notes liées" else "Consulter les notes liées",
+                    if (showRelatedNotes) "Hide related notes" else "Read related notes",
+                ))
+            }
+            if (showRelatedNotes) relatedNotes.forEach { note ->
+                OutlinedCard(Modifier.fillMaxWidth()) { Text(note.text, Modifier.padding(12.dp)) }
+            }
+        }
         Text(label("Une étape à la fois", "One step at a time"), style = MaterialTheme.typography.titleMedium)
         Text(label("Ajoute de petites actions. Lance une étape seule, ou transforme les étapes restantes en tâches séparées.", "Add small actions. Start one step, or turn the remaining steps into separate tasks."))
         if (steps.isEmpty()) Text(label("Pas encore d’étape.", "No steps yet."), style = MaterialTheme.typography.bodySmall)
