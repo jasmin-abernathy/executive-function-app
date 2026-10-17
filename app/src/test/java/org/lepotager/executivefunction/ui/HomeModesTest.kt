@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,6 +79,12 @@ class HomeModesTest {
                 )
             }
         }
+        val checkInBounds = compose.onNodeWithTag("home-check-in").fetchSemanticsNode().boundsInRoot
+        val taskBounds = compose.onNodeWithTag("home-add-task").fetchSemanticsNode().boundsInRoot
+        val noteBounds = compose.onNodeWithTag("home-add-note").fetchSemanticsNode().boundsInRoot
+        assertTrue(checkInBounds.bottom <= taskBounds.top)
+        assertTrue(kotlin.math.abs(taskBounds.top - noteBounds.top) < 5f)
+        assertTrue(taskBounds.right <= noteBounds.left)
         compose.onNodeWithTag("home-add-task").performClick()
         compose.onNodeWithTag("home-add-note").performClick()
         compose.runOnIdle {
@@ -101,7 +108,6 @@ class HomeModesTest {
     @Test fun checkInStaysAvailableFromHome() {
         var opened = 0
         render(onCheckIn = { opened += 1 })
-        compose.onNodeWithText("Point d’état, journal et aide").performClick()
         compose.onNodeWithText("Comment je vais").performClick()
         compose.runOnIdle { assertEquals(1, opened) }
     }

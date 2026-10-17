@@ -3,7 +3,7 @@
     <string name="app_name">Executive Functions</string>
     <string name="home_title">Where do we start?</string>
     <string name="home_subtitle">Put down what is on your mind, then choose just one thing.</string>
-    <string name="capture_label">Something to remember</string>
+    <string name="capture_label">Task name</string>
     <string name="capture_support">A title is enough. Nothing else is required.</string>
     <string name="first_step_optional">First small step (optional)</string>
     <string name="add_first_step">Add a first small step</string>
@@ -33,7 +33,7 @@
     <string name="finish_organizing">Done</string>
     <string name="move_task_up">↑ Move up</string>
     <string name="move_task_down">↓ Move down</string>
-    <string name="empty_tasks">Nothing waiting. You can begin with one very small thing.</string>
+    <string name="empty_tasks">No tasks saved yet. Choose “Add a task” to start.</string>
     <string name="first_step_value">First step: %1$s</string>
     <string name="start_action">Start</string>
     <string name="focus_label">Just one thing now</string>

@@ -11,6 +11,7 @@ internal data class WorkspaceContent(
     val taskFolders: Map<String, String> = emptyMap(),
     val noteFolders: Map<String, String> = emptyMap(),
     val notes: List<QuickNote> = emptyList(),
+    val taskSteps: Map<String, List<JournalStep>> = emptyMap(),
 )
 
 /** Additive tables keep existing tasks, notes and old backups intact. */
@@ -25,6 +26,7 @@ internal class WorkspaceStore(private val database: AppDatabase) {
         taskFolders = memberships("folder_tasks", "task_id"),
         noteFolders = memberships("folder_notes", "note_id"),
         notes = journal.notes(),
+        taskSteps = database.openTasks().associate { task -> task.id to journal.steps(task.id) },
     )
 
     private fun memberships(table: String, column: String): Map<String, String> =

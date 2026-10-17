@@ -16,6 +16,58 @@ import org.robolectric.annotation.Config
 class WorkspaceStoreTest {
     private val context: Context get() = RuntimeEnvironment.getApplication()
 
+    @Test fun severalSmallStepsRemainAttachedToOneTaskAndKeepParentVisible() = runBlocking {
+        context.deleteDatabase("executive-function.db")
+        val db = AppDatabase(context)
+        try {
+            val repository = FocusRepository(db, Dispatchers.Unconfined)
+            val id = repository.capture("Test de tâche", "Premier petit pas\nDeuxième petit pas\nTroisième petit pas")
+            val journal = LearningJournal(db)
+            assertEquals(listOf("Premier petit pas", "Deuxième petit pas", "Troisième petit pas"),
+                journal.steps(id).map { it.title })
+            assertEquals(listOf(id), db.openTasks().map { it.id })
+            repository.start(id, null)
+            repository.complete()
+            assertEquals(listOf(id), db.openTasks().map { it.id })
+            val steps = journal.steps(id)
+            steps.forEach { journal.finishStep(it.id, true) }
+            assertTrue(journal.steps(id).all { it.completed })
+            assertNotNull(db.taskById(id))
+            assertEquals(listOf(id), db.openTasks().map { it.id })
+            repository.completeParentTask(id)
+            assertTrue(db.openTasks().isEmpty())
+            assertEquals(org.lepotager.executivefunction.model.TaskStatus.COMPLETED, db.taskById(id)?.status)
+        } finally { db.close() }
+    }
+
+    @Test fun firstTaskRemainsSavedAfterDatabaseReopen() = runBlocking {
+        context.deleteDatabase("executive-function.db")
+        var db = AppDatabase(context)
+        try {
+            val taskId = FocusRepository(db, Dispatchers.Unconfined).capture("Une première tâche")
+            assertEquals(listOf(taskId), db.openTasks().map { it.id })
+            db.close()
+            db = AppDatabase(context)
+            assertEquals(listOf(taskId), db.openTasks().map { it.id })
+            assertEquals("Une première tâche", db.taskById(taskId)?.title)
+        } finally { db.close() }
+    }
+
+    @Test fun checkingAllStepsWithoutConfirmingDoesNotFinishParent() = runBlocking {
+        context.deleteDatabase("executive-function.db")
+        val db = AppDatabase(context)
+        try {
+            val repository = FocusRepository(db, Dispatchers.Unconfined)
+            val id = repository.capture("Pas encore terminée", "Un\nDeux")
+            val journal = LearningJournal(db)
+            journal.steps(id).forEach { journal.finishStep(it.id, true) }
+            assertEquals(listOf(id), db.openTasks().map { it.id })
+            journal.finishStep(journal.steps(id).last().id, false)
+            assertEquals("Deux", db.taskById(id)?.firstStep)
+            assertEquals(1, journal.steps(id).count { it.completed })
+        } finally { db.close() }
+    }
+
     @Test fun foldersAndNotesSurviveReopenAndRemovingFolderPreservesContents() = runBlocking {
         context.deleteDatabase("executive-function.db")
         var db = AppDatabase(context)
@@ -56,7 +108,9 @@ class WorkspaceStoreTest {
             assertEquals(child, store.decomposeStep(parent, first))
             val children = store.decomposeAll(parent)
             assertEquals(children, store.decomposeAll(parent))
-            assertEquals(3, db.openTasks().size)
+            // Legacy split tasks keep their history but no longer appear as independent home tasks.
+            assertEquals(1, db.openTasks().size)
+            assertNotNull(db.taskById(child))
             assertEquals(folder, store.load().taskFolders[child])
             repository.start(child, 120_000L)
             assertEquals(child, db.activeFocus()!!.task.id)

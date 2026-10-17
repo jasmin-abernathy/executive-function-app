@@ -5,7 +5,7 @@ import java.util.UUID
 
 internal data class JournalTask(val id: String, val title: String, val key: String, val completed: Boolean)
 internal data class Observation(val id: String, val duration: Long, val date: Long, val included: Boolean, val status: String, val beforeReset: Boolean = false)
-internal data class JournalStep(val id: String, val title: String, val completed: Boolean)
+data class JournalStep(val id: String, val title: String, val completed: Boolean)
 internal data class CheckIn(val id: String, val date: Long, val mood: Int, val motivation: Int, val energy: Int)
 internal data class Planning(val importance: Int = 0, val energy: Int = 0, val context: String = "", val today: Boolean = false)
 internal data class QuickNote(val id: String, val text: String)

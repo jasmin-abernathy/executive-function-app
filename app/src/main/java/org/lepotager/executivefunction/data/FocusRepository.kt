@@ -41,6 +41,7 @@ class FocusRepository internal constructor(
         require(cleanTitle.isNotEmpty())
         val timestamp = now()
         val id = newId()
+        val steps = firstStep.orEmpty().lines().map { it.trim() }.filter { it.isNotEmpty() }
         val db = database.writableDatabase
         db.beginTransaction()
         try {
@@ -48,7 +49,7 @@ class FocusRepository internal constructor(
             TaskItem(
                 id = id,
                 title = cleanTitle,
-                firstStep = firstStep.normalizedOrNull(),
+                firstStep = steps.firstOrNull(),
                 status = TaskStatus.READY,
                 createdAt = timestamp,
                 updatedAt = timestamp,
@@ -58,7 +59,10 @@ class FocusRepository internal constructor(
         )
         if (customTimer) TaskOptionsStore(database).timer(id, timerTarget)
         WorkspaceStore(database).assignTask(id, folderId)
-        WorkspaceStore(database).ensureSteps(id)
+        if (steps.isNotEmpty()) {
+            val journal = LearningJournal(database)
+            steps.forEach { journal.addStep(id, it) }
+        }
         db.setTransactionSuccessful()
         } finally { db.endTransaction() }
         refresh()
@@ -167,7 +171,28 @@ class FocusRepository internal constructor(
 
     suspend fun postpone() = close(FocusStatus.POSTPONED, TaskStatus.READY)
 
-    suspend fun complete() = close(FocusStatus.COMPLETED, TaskStatus.COMPLETED)
+    /** Completing a focus session is not the same as completing a parent with small steps. */
+    suspend fun complete() = mutate {
+        val active = requireNotNull(database.activeFocus())
+        val hasSteps = LearningJournal(database).steps(active.task.id).isNotEmpty()
+        database.closeFocus(
+            FocusTransitions.finish(active.session, now(), FocusStatus.COMPLETED),
+            if (hasSteps) TaskStatus.READY else TaskStatus.COMPLETED,
+        )
+        refresh()
+    }
+
+    /** A positive answer to the "is the main task done?" question closes the parent. */
+    suspend fun completeParentTask(taskId: String) = mutate {
+        val active = database.activeFocus()
+        if (active?.task?.id == taskId) {
+            database.closeFocus(
+                FocusTransitions.finish(active.session, now(), FocusStatus.COMPLETED),
+                TaskStatus.COMPLETED,
+            )
+        } else database.markTaskCompleted(taskId)
+        refresh()
+    }
 
     private suspend fun close(focusStatus: FocusStatus, taskStatus: TaskStatus) = mutate {
         val active = requireNotNull(database.activeFocus())
@@ -202,5 +227,4 @@ class FocusRepository internal constructor(
         )
     }
 
-    private fun String?.normalizedOrNull(): String? = this?.trim()?.takeUnless { it.isEmpty() }
 }

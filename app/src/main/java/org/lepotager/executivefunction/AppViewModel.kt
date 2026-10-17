@@ -181,6 +181,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         ) { repository.complete() }
     }
 
+    fun completeParentTask(taskId: String) = launch { repository.completeParentTask(taskId) }
+
     fun clearError() {
         mutableError.value = null
     }

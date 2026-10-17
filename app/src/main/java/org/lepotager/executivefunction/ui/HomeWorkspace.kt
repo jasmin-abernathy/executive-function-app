@@ -28,7 +28,8 @@ internal fun WorkspaceHome(
     onChanged: () -> Unit,
     onStartStep: (String) -> Unit,
     onCaptureTask: (String, String?, TaskColor, String?, () -> Unit) -> Unit,
-    content: @Composable (Set<String>?, String?, (String) -> Unit, () -> Unit, () -> Unit, @Composable () -> Unit) -> Unit,
+    onCompleteParentTask: (String) -> Unit,
+    content: @Composable (Set<String>?, String?, (String) -> Unit, () -> Unit, () -> Unit, Map<String, List<JournalStep>>, (String, String, Boolean) -> Unit, @Composable () -> Unit) -> Unit,
 ) {
     val context = LocalContext.current
     val french = LocalConfiguration.current.locales[0].language == "fr"
@@ -64,6 +65,7 @@ internal fun WorkspaceHome(
     var noteFolder by rememberSaveable { mutableStateOf<String?>(null) }
     var deleteNote by rememberSaveable { mutableStateOf<String?>(null) }
     var editTask by rememberSaveable { mutableStateOf<String?>(null) }
+    var taskToConfirm by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(requestedTaskId, tasks) {
         if (requestedTaskId != null) {
             if (tasks.any { it.id == requestedTaskId }) editTask = requestedTaskId
@@ -97,6 +99,16 @@ internal fun WorkspaceHome(
             noteFolder = folder
             noteThemeOptions = folder != null
             noteEditor = true
+        },
+        data.taskSteps,
+        { taskId, stepId, checked ->
+            run({ journal.finishStep(stepId, checked) }, {
+                val currentSteps = data.taskSteps[taskId].orEmpty()
+                if (checked && currentSteps.isNotEmpty() && currentSteps.all { it.completed }) {
+                    taskToConfirm = taskId
+                    editTask = null
+                }
+            })
         },
     ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -163,6 +175,17 @@ internal fun WorkspaceHome(
                 }
             }
             if (showNotes) {
+                FilledTonalButton(
+                    enabled = loaded && !busy,
+                    onClick = {
+                        noteId = null
+                        noteText = ""
+                        noteFolder = folder
+                        noteThemeOptions = folder != null
+                        noteEditor = true
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(label("Ajouter une note", "Add a note")) }
                 val notes = data.notes.filter { folder == null || data.noteFolders[it.id] == folder }
                 if (!loaded) LinearProgressIndicator(Modifier.fillMaxWidth())
                 else if (notes.isEmpty()) Text(
@@ -236,14 +259,19 @@ internal fun WorkspaceHome(
         }
         TextButton(enabled = !busy, onClick = { taskStepOptions = !taskStepOptions }) {
             Text(label(
-                if (taskStepOptions) "Masquer la première étape" else "Ajouter une première étape (facultatif)",
-                if (taskStepOptions) "Hide first step" else "Add a first step (optional)",
+                if (taskStepOptions) "Masquer les petits pas" else "Ajouter des petits pas (facultatif)",
+                if (taskStepOptions) "Hide small steps" else "Add small steps (optional)",
             ))
         }
         if (taskStepOptions) OutlinedTextField(
             taskStep, { taskStep = it }, enabled = !busy,
             modifier = Modifier.fillMaxWidth(),
-            label = { Text(label("Une petite première étape", "A small first step")) },
+            minLines = 3,
+            label = { Text(label("Un petit pas par ligne", "One small step per line")) },
+            supportingText = { Text(label(
+                "Ces étapes resteront dans la tâche principale.",
+                "These steps stay inside the main task.",
+            )) },
         )
         Button(
             enabled = !busy && taskTitle.isNotBlank(),
@@ -321,7 +349,32 @@ internal fun WorkspaceHome(
         dismissButton = { TextButton(enabled = !busy, onClick = { deleteNote = null }) { Text(label("Annuler", "Cancel")) } },
     )
     editTask?.let { id ->
-        TaskStepsDialog(id, database, data, onDismiss = { editTask = null }, onChanged = { onChanged(); scope.launch { refresh() } }, onStart = { editTask = null; onStartStep(it) })
+        TaskStepsDialog(
+            id, database, data,
+            onDismiss = { editTask = null },
+            onChanged = { onChanged(); scope.launch { refresh() } },
+            onStart = { editTask = null; onStartStep(it) },
+            onAllStepsDone = { editTask = null; taskToConfirm = id },
+        )
+    }
+    taskToConfirm?.let { id ->
+        val name = tasks.firstOrNull { it.id == id }?.title ?: label("Cette tâche", "This task")
+        AlertDialog(
+            onDismissRequest = { taskToConfirm = null },
+            title = { Text(label("La tâche principale est-elle maintenant terminée ?", "Is the main task finished now?")) },
+            text = { Text(name) },
+            confirmButton = {
+                TextButton(onClick = {
+                    taskToConfirm = null
+                    onCompleteParentTask(id)
+                }) { Text(label("Oui, elle est terminée", "Yes, it's finished")) }
+            },
+            dismissButton = {
+                TextButton(onClick = { taskToConfirm = null }) {
+                    Text(label("Pas encore", "Not yet"))
+                }
+            },
+        )
     }
     if (error) AlertDialog(onDismissRequest = { error = false }, title = { Text(label("Enregistrement impossible", "Could not save")) }, text = { Text(label("Ton texte est conservé. Réessaie.", "Your text is still here. Please try again.")) }, confirmButton = { TextButton(onClick = { error = false }) { Text("OK") } })
 }
@@ -349,7 +402,15 @@ private fun WorkspaceDialog(onDismiss: () -> Unit, content: @Composable ColumnSc
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TaskStepsDialog(taskId: String, database: AppDatabase, data: WorkspaceContent, onDismiss: () -> Unit, onChanged: () -> Unit, onStart: (String) -> Unit) {
+private fun TaskStepsDialog(
+    taskId: String,
+    database: AppDatabase,
+    data: WorkspaceContent,
+    onDismiss: () -> Unit,
+    onChanged: () -> Unit,
+    onStart: (String) -> Unit,
+    onAllStepsDone: () -> Unit,
+) {
     val french = LocalConfiguration.current.locales[0].language == "fr"
     fun label(fr: String, en: String) = if (french) fr else en
     val store = remember(database) { WorkspaceStore(database) }
@@ -362,7 +423,6 @@ private fun TaskStepsDialog(taskId: String, database: AppDatabase, data: Workspa
     var error by remember { mutableStateOf(false) }
     var selectedFolder by remember(taskId) { mutableStateOf(data.taskFolders[taskId]) }
     var showDeadlinePicker by rememberSaveable(taskId) { mutableStateOf(false) }
-    var notice by remember { mutableStateOf(false) }
     suspend fun refresh() {
         val result = withContext(Dispatchers.IO) { store.ensureSteps(taskId); database.taskById(taskId) to journal.steps(taskId) }
         task = result.first; steps = result.second
@@ -402,27 +462,52 @@ private fun TaskStepsDialog(taskId: String, database: AppDatabase, data: Workspa
             }
         }
         Text(label("Une étape à la fois", "One step at a time"), style = MaterialTheme.typography.titleMedium)
-        Text(label("Ajoute de petites actions. Lance une étape seule, ou transforme les étapes restantes en tâches séparées.", "Add small actions. Start one step, or turn the remaining steps into separate tasks."))
+        Text(label(
+            "Ces petits pas restent dans cette tâche. Coche-les au fur et à mesure ; tu choisiras toi-même quand terminer l’ensemble.",
+            "These small steps stay in this task. Tick them off as you go; you decide when the whole task is finished.",
+        ))
         if (steps.isEmpty()) Text(label("Pas encore d’étape.", "No steps yet."), style = MaterialTheme.typography.bodySmall)
         steps.forEachIndexed { index, step ->
             OutlinedCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Text("${index + 1}. ${step.title}", style = MaterialTheme.typography.titleSmall)
-                    if (step.completed) Text(label("Terminée", "Completed"))
-                    else TextButton(enabled = !busy, onClick = {
-                        var child: String? = null
-                        run({ child = store.decomposeStep(taskId, step.id) }, { child?.let(onStart) })
-                    }) { Text(label("Lancer le timer de cette étape", "Start this step’s timer")) }
+                Row(
+                    Modifier.fillMaxWidth().toggleable(
+                        value = step.completed,
+                        enabled = !busy,
+                        role = androidx.compose.ui.semantics.Role.Checkbox,
+                        onValueChange = { checked ->
+                            run({ journal.finishStep(step.id, checked) }, {
+                                if (checked && steps.isNotEmpty() && steps.all { it.completed }) {
+                                    onAllStepsDone()
+                                }
+                            })
+                        },
+                    ).padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                ) {
+                    Checkbox(checked = step.completed, onCheckedChange = null)
+                    Text(
+                        (index + 1).toString() + ". " + step.title,
+                        modifier = Modifier.padding(start = 8.dp),
+                        style = if (!step.completed && steps.take(index).all { it.completed })
+                            MaterialTheme.typography.titleMedium
+                        else MaterialTheme.typography.bodyMedium,
+                    )
                 }
             }
         }
-        OutlinedTextField(text, { text = it }, enabled = !busy, modifier = Modifier.fillMaxWidth(), minLines = 2, label = { Text(label("Étapes : une par ligne", "Steps: one per line")) })
+        if (steps.isNotEmpty() && steps.all { it.completed }) {
+            TextButton(enabled = !busy, onClick = onAllStepsDone) {
+                Text(label("Décider si la tâche est terminée", "Decide if this task is finished"))
+            }
+        }
+        OutlinedTextField(text, { text = it }, enabled = !busy, modifier = Modifier.fillMaxWidth(), minLines = 2, label = { Text(label("Ajouter des petits pas, un par ligne", "Add small steps, one per line")) })
         FilledTonalButton(enabled = !busy && text.isNotBlank(), onClick = {
             val lines = text.lines().map { it.trim() }.filter { it.isNotEmpty() }
             run({ database.writableDatabase.beginTransaction(); try { lines.forEach { journal.addStep(taskId, it) }; database.writableDatabase.setTransactionSuccessful() } finally { database.writableDatabase.endTransaction() } }, { text = "" })
         }) { Text(label("Ajouter les étapes", "Add steps")) }
-        OutlinedButton(enabled = !busy && steps.any { !it.completed }, onClick = { run({ store.decomposeAll(taskId) }, { notice = true }) }) { Text(label("Décomposer en tâches", "Split into tasks")) }
-        if (notice) Text(label("Les tâches sont prêtes sur l’accueil. Les étapes déjà décomposées ont été conservées.", "The tasks are ready on the home screen. Previously created tasks were reused."))
+        Button(enabled = !busy, onClick = { onStart(taskId) }, modifier = Modifier.fillMaxWidth()) {
+            Text(label("Commencer cette tâche", "Start this task"))
+        }
         if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
         if (error) Text(label("Impossible d’enregistrer. Ton texte est conservé ; réessaie.", "Could not save. Your text is still here; please try again."), color = MaterialTheme.colorScheme.error)
         TextButton(enabled = !busy, onClick = onDismiss) { Text(label("Revenir à l’accueil", "Back to home")) }

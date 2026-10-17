@@ -178,18 +178,27 @@ internal class AppDatabase(private val context: Context) :
     fun openTasks(): List<TaskItem> = readableDatabase.query(
         "tasks",
         TASK_COLUMNS,
-        "status != ?",
+        "status != ? AND id NOT IN (SELECT task_id FROM step_tasks)",
         arrayOf(TaskStatus.COMPLETED.name),
         null,
         null,
         "sort_position ASC, created_at ASC",
     ).use { cursor -> buildList { while (cursor.moveToNext()) add(cursor.toTask()) } }
 
+    /** Explicitly close a parent task without requiring the timer to have been started. */
+    fun markTaskCompleted(taskId: String) = transaction { db ->
+        require(db.rawQuery(
+            "SELECT 1 FROM focus_sessions WHERE task_id=? AND is_active=1", arrayOf(taskId)
+        ).use { !it.moveToFirst() })
+        requireNotNull(taskById(taskId))
+        updateTaskStatus(db, taskId, TaskStatus.COMPLETED, System.currentTimeMillis())
+    }
+
     fun moveOpenTask(taskId: String, offset: Int) = transaction { db ->
         val ids = db.query(
             "tasks",
             arrayOf("id"),
-            "status != ?",
+            "status != ? AND id NOT IN (SELECT task_id FROM step_tasks)",
             arrayOf(TaskStatus.COMPLETED.name),
             null,
             null,

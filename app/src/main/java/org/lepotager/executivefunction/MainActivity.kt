@@ -324,11 +324,14 @@ class MainActivity : ComponentActivity() {
                                     onCaptureTask = { title, step, color, theme, after ->
                                         viewModel.captureInFolder(title, step, color, theme, after)
                                     },
-                                ) { visibleIds, _, editTask, addTask, addNote, workspace -> HomeScreen(
+                                    onCompleteParentTask = viewModel::completeParentTask,
+                                ) { visibleIds, _, editTask, addTask, addNote, taskSteps, toggleStep, workspace -> HomeScreen(
                                     visibleTaskIds = visibleIds,
                                     onEditTask = editTask,
                                     onAddTask = addTask,
                                     onAddNote = addNote,
+                                    taskSteps = taskSteps,
+                                    onToggleStep = toggleStep,
                                     workspace = {
                                         snapshot.activeFocus?.takeIf { it.session.status == FocusStatus.RUNNING }?.let { active ->
                                             org.lepotager.executivefunction.ui.RunningFocusBanner(active) { showHomeDuringFocus = false }

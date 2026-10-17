@@ -2,6 +2,7 @@ package org.lepotager.executivefunction.ui
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
@@ -27,6 +28,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
@@ -71,6 +73,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.repeatOnLifecycle
 import kotlinx.coroutines.delay
 import org.lepotager.executivefunction.R
+import org.lepotager.executivefunction.data.JournalStep
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.domain.HomeViewMode
 import org.lepotager.executivefunction.domain.TaskDraw
@@ -156,6 +159,8 @@ fun HomeScreen(
     onEditTask: (String) -> Unit = {},
     onAddTask: () -> Unit = {},
     onAddNote: () -> Unit = {},
+    taskSteps: Map<String, List<JournalStep>> = emptyMap(),
+    onToggleStep: (String, String, Boolean) -> Unit = { _, _, _ -> },
     workspace: @Composable () -> Unit = {},
     onJournal: () -> Unit = {},
     onCheckIn: () -> Unit = {},
@@ -258,40 +263,33 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.size(14.dp))
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                OutlinedButton(
+                    onClick = onCheckIn,
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-check-in"),
+                ) { Text(stringResource(R.string.home_check_in)) }
+                Spacer(Modifier.size(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
                     Button(
                         onClick = onAddTask,
-                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 54.dp).testTag("home-add-task"),
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 64.dp).testTag("home-add-task"),
                         colors = appButtonColors(),
                     ) {
-                        Text(stringResource(R.string.capture_new))
+                        Text(
+                            stringResource(R.string.capture_new),
+                            textAlign = TextAlign.Center,
+                        )
                     }
                     OutlinedButton(
                         onClick = onAddNote,
-                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 54.dp).testTag("home-add-note"),
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 64.dp).testTag("home-add-note"),
                     ) {
-                        Text(stringResource(R.string.home_add_note))
-                    }
-                }
-                TextButton(
-                    onClick = { showMoreTools = !showMoreTools },
-                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
-                ) {
-                    Text(stringResource(if (showMoreTools) R.string.home_hide_tools else R.string.home_more_tools))
-                }
-                if (showMoreTools) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        OutlinedButton(onClick = onCheckIn, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)) {
-                            Text(stringResource(R.string.home_check_in))
-                        }
-                        OutlinedButton(onClick = onJournal, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)) {
-                            Text(stringResource(R.string.open_journal))
-                        }
-                        TextButton(onClick = onHelp, modifier = Modifier.fillMaxWidth()) {
-                            UtilityGlyph(UtilityGlyphKind.HELP, Modifier.size(20.dp))
-                            Spacer(Modifier.size(8.dp))
-                            Text(stringResource(R.string.help_how_it_works))
-                        }
+                        Text(
+                            stringResource(R.string.home_add_note),
+                            textAlign = TextAlign.Center,
+                        )
                     }
                 }
                 if (lowEnergy) {
@@ -311,7 +309,6 @@ fun HomeScreen(
                     }
                 }
             }
-            item { workspace() }
             val recent = visibleTasks.firstOrNull { it.id == recentTaskId && it.status == org.lepotager.executivefunction.model.TaskStatus.READY }
             if (recent != null) item {
                 OutlinedCard(Modifier.fillMaxWidth()) {
@@ -373,6 +370,8 @@ fun HomeScreen(
                         onStart = onStart,
                         onStartCustom = onStartCustom,
                         onEditTask = onEditTask,
+                        stepsByTask = taskSteps,
+                        onToggleStep = onToggleStep,
                     )
                 }
             }
@@ -390,6 +389,8 @@ fun HomeScreen(
                         onMoveDown = { onMoveTask(task.id, 1) },
                         onSetColor = { onSetTaskColor(task.id, it) },
                         onEdit = { onEditTask(task.id) },
+                        steps = taskSteps[task.id].orEmpty(),
+                        onToggleStep = { stepId, checked -> onToggleStep(task.id, stepId, checked) },
                         onStart = { onStart(task.id) },
                         customStartAvailable = customStartAvailable,
                         onStartCustom = { onStartCustom(task.id) },
@@ -420,9 +421,31 @@ fun HomeScreen(
                                 proposalOnly = proposalOnly,
                                 onRedraw = { beginDraw(task.id, proposalOnly) },
                                 onStart = { onStart(task.id) },
+                                steps = taskSteps[task.id].orEmpty(),
+                                onToggleStep = { stepId, checked -> onToggleStep(task.id, stepId, checked) },
                                 customStartAvailable = customStartAvailable,
                                 onStartCustom = { onStartCustom(task.id) },
                             )
+                        }
+                    }
+                }
+            }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    TextButton(
+                        onClick = { showMoreTools = !showMoreTools },
+                        modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp),
+                    ) {
+                        Text(stringResource(if (showMoreTools) R.string.home_hide_tools else R.string.home_more_tools))
+                    }
+                    if (showMoreTools) {
+                        OutlinedButton(onClick = onJournal, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp)) {
+                            Text(stringResource(R.string.open_journal))
+                        }
+                        TextButton(onClick = onHelp) {
+                            UtilityGlyph(UtilityGlyphKind.HELP, Modifier.size(20.dp))
+                            Spacer(Modifier.size(8.dp))
+                            Text(stringResource(R.string.help_how_it_works))
                         }
                     }
                 }
@@ -453,6 +476,8 @@ fun HomeScreen(
                     )
                 }
             }
+            // Notes and themes remain optional; their detail is the last home block.
+            item(key = "home-workspace-notes") { workspace() }
         }
         if (isDrawing) Box(
             modifier = Modifier.fillMaxSize().zIndex(10f),
@@ -485,6 +510,8 @@ private fun TodayFocusPanel(
     onEditTask: (String) -> Unit,
     onStart: (String) -> Unit,
     onStartCustom: (String) -> Unit,
+    stepsByTask: Map<String, List<JournalStep>> = emptyMap(),
+    onToggleStep: (String, String, Boolean) -> Unit = { _, _, _ -> },
 ) {
     val current = tasks.firstOrNull()
     Card(modifier = Modifier.fillMaxWidth(), colors = appCardColors(), border = current?.let { taskBorder(it) } ?: appBorder(), shape = RoundedCornerShape(22.dp)) {
@@ -496,7 +523,13 @@ private fun TodayFocusPanel(
                 Text(current.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold)
                 TextButton(onClick = { onEditTask(current.id) }) { Text(stringResource(R.string.task_steps_folder)) }
                 TaskDeadlineLabel(current)
-                current.firstStep?.let { Text(stringResource(R.string.first_step_value, it), color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                if (stepsByTask[current.id].orEmpty().isNotEmpty()) {
+                    TaskStepChecklist(stepsByTask[current.id].orEmpty()) { stepId, checked ->
+                        onToggleStep(current.id, stepId, checked)
+                    }
+                } else current.firstStep?.let {
+                    Text(stringResource(R.string.first_step_value, it), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
                 Button(onClick = { onStart(current.id) }, modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-primary-start"), colors = appButtonColors()) {
                     ToolGlyph(ToolGlyphKind.START); Spacer(Modifier.size(8.dp)); Text(stringResource(R.string.start_action))
                 }
@@ -725,6 +758,8 @@ private fun TaskDrawPanel(
     proposalOnly: Boolean,
     onRedraw: () -> Unit,
     onStart: () -> Unit,
+    steps: List<JournalStep> = emptyList(),
+    onToggleStep: (String, Boolean) -> Unit = { _, _ -> },
     customStartAvailable: Boolean,
     onStartCustom: () -> Unit,
 ) {
@@ -762,7 +797,8 @@ private fun TaskDrawPanel(
                     modifier = Modifier.semantics { heading() },
                 )
                 TaskDeadlineLabel(task)
-                task.firstStep?.let {
+                if (steps.isNotEmpty()) TaskStepChecklist(steps, onToggleStep)
+                else task.firstStep?.let {
                     Text(
                         text = stringResource(R.string.first_step_value, it),
                         style = MaterialTheme.typography.bodyMedium,
@@ -805,9 +841,41 @@ private fun TaskDrawPanel(
 }
 
 @Composable
+private fun TaskStepChecklist(
+    steps: List<JournalStep>,
+    onToggleStep: (String, Boolean) -> Unit,
+) {
+    val firstOpen = steps.indexOfFirst { !it.completed }
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
+        steps.forEachIndexed { index, step ->
+            Row(
+                Modifier.fillMaxWidth()
+                    .toggleable(value = step.completed, role = Role.Checkbox) {
+                        onToggleStep(step.id, it)
+                    }
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Checkbox(checked = step.completed, onCheckedChange = null)
+                Text(
+                    step.title,
+                    modifier = Modifier.weight(1f).padding(start = 8.dp),
+                    style = if (index == firstOpen) MaterialTheme.typography.titleSmall
+                    else MaterialTheme.typography.bodyMedium,
+                    color = if (step.completed) MaterialTheme.colorScheme.onSurfaceVariant
+                    else MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun TaskCard(
     task: TaskItem,
     onEdit: () -> Unit,
+    steps: List<JournalStep> = emptyList(),
+    onToggleStep: (String, Boolean) -> Unit = { _, _ -> },
     handleModifier: Modifier = Modifier,
     organizing: Boolean,
     canMoveUp: Boolean,
@@ -858,7 +926,8 @@ private fun TaskCard(
                 ) { DragHandleGlyph() }
             }
             TaskDeadlineLabel(task)
-            task.firstStep?.let {
+            if (steps.isNotEmpty()) TaskStepChecklist(steps, onToggleStep)
+            else task.firstStep?.let {
                 Text(
                     text = stringResource(R.string.first_step_value, it),
                     style = MaterialTheme.typography.bodyMedium,

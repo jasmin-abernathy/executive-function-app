@@ -3,7 +3,7 @@
     <string name="app_name">Fonctions exécutives</string>
     <string name="home_title">Par quoi commencer ?</string>
     <string name="home_subtitle">Pose ce qui te traverse l’esprit, puis choisis une seule chose.</string>
-    <string name="capture_label">À ne pas oublier</string>
+    <string name="capture_label">Nom de la tâche</string>
     <string name="capture_support">Un titre suffit. Rien d’autre n’est obligatoire.</string>
     <string name="first_step_optional">Premier petit pas (facultatif)</string>
     <string name="add_first_step">Ajouter un premier petit pas</string>
@@ -33,7 +33,7 @@
     <string name="finish_organizing">Terminer</string>
     <string name="move_task_up">↑ Monter</string>
     <string name="move_task_down">↓ Descendre</string>
-    <string name="empty_tasks">Rien en attente. Tu peux commencer par une toute petite chose.</string>
+    <string name="empty_tasks">Aucune tâche enregistrée pour l’instant. Utilise « Ajouter une tâche » pour commencer.</string>
     <string name="first_step_value">Premier pas : %1$s</string>
     <string name="start_action">Commencer</string>
     <string name="focus_label">Une seule chose maintenant</string>
