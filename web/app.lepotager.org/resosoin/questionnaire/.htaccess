@@ -10,3 +10,17 @@ DirectoryIndex index.php
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 </IfModule>
+
+# Survey availability and answers must never be served from a stale page cache.
+<IfModule LiteSpeed>
+  CacheLookup off
+  CacheDisable public /
+  CacheDisable private /
+</IfModule>
+<IfModule mod_headers.c>
+  <FilesMatch "\.php$">
+    Header always set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header always set X-LiteSpeed-Cache-Control "no-cache"
+    Header always set Expires "0"
+  </FilesMatch>
+</IfModule>
