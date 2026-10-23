@@ -31,21 +31,23 @@ git -C "$REPO" fetch --quiet origin main
 SHA="$(git -C "$REPO" rev-parse origin/main)"
 printf 'Révision GitHub : %s\nDossier cible : %s\n' "$SHA" "$LIVE"
 
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
 FILES=(index.html en/index.html assets/style.css assets/app.js assets/project-detail.css sitemap.xml)
 PAGES=()
+git -C "$REPO" ls-tree -r --name-only origin/main -- "$SRC/projets" "$SRC/en/projects" > "$TMP/pages-list.txt" || fail "Liste des fiches Git indisponible."
 while IFS= read -r path; do
   rel="${path#"$SRC/"}"
   case "$rel" in
     projets/*/index.html|en/projects/*/index.html) PAGES+=("$rel");;
   esac
-done < <(git -C "$REPO" ls-tree -r --name-only origin/main -- "$SRC/projets" "$SRC/en/projects")
+done < "$TMP/pages-list.txt"
 [[ "${#PAGES[@]}" -eq 36 ]] || fail "36 fiches attendues dans Git, ${#PAGES[@]} trouvées."
 FILES+=("${PAGES[@]}")
 # Uniquement les deux anciennes fiches : jamais de suppression globale.
 RETIRED_PAGES=("projets/sans-effort/index.html" "en/projects/sans-effort/index.html")
 
-TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$TMP/staging"
 for rel in "${FILES[@]}"; do
   target="$TMP/staging/$rel"
