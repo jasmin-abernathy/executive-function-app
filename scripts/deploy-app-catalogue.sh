@@ -39,8 +39,10 @@ while IFS= read -r path; do
     projets/*/index.html|en/projects/*/index.html) PAGES+=("$rel");;
   esac
 done < <(git -C "$REPO" ls-tree -r --name-only origin/main -- "$SRC/projets" "$SRC/en/projects")
-[[ "${#PAGES[@]}" -eq 38 ]] || fail "38 fiches attendues dans Git, ${#PAGES[@]} trouvées."
+[[ "${#PAGES[@]}" -eq 36 ]] || fail "36 fiches attendues dans Git, ${#PAGES[@]} trouvées."
 FILES+=("${PAGES[@]}")
+# Uniquement les deux anciennes fiches : jamais de suppression globale.
+RETIRED_PAGES=("projets/sans-effort/index.html" "en/projects/sans-effort/index.html")
 
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
@@ -87,6 +89,19 @@ if command -v node >/dev/null; then
   node --check "$TMP/staging/assets/app.js" >/dev/null || fail "JavaScript du catalogue invalide."
 fi
 
+RETIRED_EXISTING=()
+for rel in "${RETIRED_PAGES[@]}"; do
+  target="$LIVE/$rel"
+  safe_target="$(realpath -m "$target")"
+  [[ "$safe_target" == "$LIVE/"* ]] || fail "Page obsolète hors DocumentRoot : $rel"
+  [[ ! -L "$target" && ! -L "$(dirname "$target")" ]] || fail "Lien symbolique inattendu : $rel"
+  if [[ -e "$target" ]]; then
+    [[ -f "$target" ]] || fail "Page obsolète non régulière : $rel"
+    RETIRED_EXISTING+=("$rel")
+    printf "À RETIRER (sauvegardé avant suppression) : %s\n" "$rel"
+  fi
+done
+
 CHANGED=()
 for rel in "${FILES[@]}"; do
   if ! cmp -s "$TMP/staging/$rel" "$LIVE/$rel"; then
@@ -131,8 +146,8 @@ if [[ "$MODE" == "--check" ]]; then
   exit 0
 fi
 
-if [[ "${#CHANGED[@]}" -eq 0 ]]; then
-  echo "Les 44 fichiers du DocumentRoot sont déjà identiques à Git."
+if [[ "${#CHANGED[@]}" -eq 0 && "${#RETIRED_EXISTING[@]}" -eq 0 ]]; then
+  echo "Les 42 fichiers du DocumentRoot sont déjà identiques à Git."
   check_http
   exit 0
 fi
@@ -153,7 +168,15 @@ for rel in "${CHANGED[@]}"; do
   mv -f "$tmp_target" "$target"
   cmp -s "$TMP/staging/$rel" "$target" || fail "Comparaison après copie échouée : $rel"
 done
-printf 'Copie terminée : %d fichiers corrigés depuis GitHub %s\n' "${#CHANGED[@]}" "$SHA"
-echo "Aucun --delete : questionnaires, paiements, configurations privées et autres services non touchés."
+for rel in "${RETIRED_EXISTING[@]}"; do
+  target="$LIVE/$rel"
+  mkdir -p "$BACKUP/$(dirname "$rel")"
+  cp -p "$target" "$BACKUP/$rel"
+  rm -- "$target"
+  rmdir "$(dirname "$target")" 2>/dev/null || true
+  printf 'Ancienne fiche retirée du DocumentRoot : %s\n' "$rel"
+done
+printf 'Copie terminée : %d fichiers corrigés, %d fiches retirées depuis GitHub %s\n' "${#CHANGED[@]}" "${#RETIRED_EXISTING[@]}" "$SHA"
+echo "Aucun --delete global : seules les deux anciennes fiches ciblées peuvent être retirées. Questionnaires et services non touchés."
 check_http
 echo "Important : vérifier dans un navigateur les cartes FR/EN, les filtres et les fiches."
