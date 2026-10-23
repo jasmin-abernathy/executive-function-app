@@ -150,8 +150,35 @@ if [[ "$MODE" == "--check" ]]; then
   exit 0
 fi
 
+# Les répertoires/fichiers du catalogue sont PUBLICS. Une synchronisation
+# automatisée peut écrire des 0700/0600 sous umask 077, provoquant HTTP 403.
+# Normaliser UNIQUEMENT les chemins statiques explicitement suivis ici.
+fix_public_permissions() {
+  local rel target parent
+  for rel in en projets en/projects; do
+    target="$LIVE/$rel"
+    [[ -d "$target" && ! -L "$target" ]] || fail "Répertoire de catalogue inattendu : $rel"
+    chmod 0755 "$target"
+  done
+  for rel in "${FILES[@]}"; do
+    target="$LIVE/$rel"
+    [[ -f "$target" && ! -L "$target" ]] || fail "Fichier de catalogue manquant : $rel"
+    parent="$(dirname "$target")"
+    [[ "$parent" == "$LIVE" || "$parent" == "$LIVE/"* ]] || fail "Parent hors catalogue : $rel"
+    [[ ! -L "$parent" ]] || fail "Lien symbolique interdit : $parent"
+    case "$rel" in
+      projets/*/index.html|en/projects/*/index.html)
+        chmod 0755 "$parent"
+        ;;
+    esac
+    chmod 0644 "$target"
+  done
+  echo "Permissions vérifiées : pages statiques publiques 0644, répertoires 0755."
+}
+
 if [[ "${#CHANGED[@]}" -eq 0 && "${#RETIRED_EXISTING[@]}" -eq 0 ]]; then
   echo "Les 44 fichiers du DocumentRoot sont déjà identiques à Git."
+  fix_public_permissions
   check_http
   exit 0
 fi
@@ -181,6 +208,7 @@ for rel in "${RETIRED_EXISTING[@]}"; do
   printf 'Ancienne fiche retirée du DocumentRoot : %s\n' "$rel"
 done
 printf 'Copie terminée : %d fichiers corrigés, %d fiches retirées depuis GitHub %s\n' "${#CHANGED[@]}" "${#RETIRED_EXISTING[@]}" "$SHA"
+fix_public_permissions
 echo "Aucun --delete global : seules les deux anciennes fiches ciblées peuvent être retirées. Questionnaires et services non touchés."
 check_http
 echo "Important : vérifier dans un navigateur les cartes FR/EN, les filtres et les fiches."
