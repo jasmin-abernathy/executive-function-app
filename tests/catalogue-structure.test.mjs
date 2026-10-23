@@ -11,12 +11,12 @@ const external = new Map([
   ['librairie-universelle','https://librairie.lepotager.org/'],
   ['atelier-epub','https://epub-gen.lepotager.org/'],
 ]);
-const slugs = ['vevak','fonctions-executives','resosoin','resilience-vault','dendrila-cms','mon-manager-web','communication-libre','verger-associations','atelier-epub','librairie-universelle','dendrila-privacy','dendrila-forms','dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor'];
+const slugs = ['vevak','fonctions-executives','resosoin','resilience-vault','dendrila-cms','mon-manager-web','communication-libre','verger-associations','atelier-epub','librairie-universelle','dendrila-privacy','livraison-commune','dendrila-forms','dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor'];
 const types = {
   'dendrila-privacy':'wordpress',
   'dendrila-cms':'sites','mon-manager-web':'sites','resosoin':'sites',
   'vevak':'applications','fonctions-executives':'applications','resilience-vault':'applications',
-  'communication-libre':'webapps','verger-associations':'applications','atelier-epub':'webapps','librairie-universelle':'webapps','dendrila-forms':'webapps','dendrila-simple-edit':'wordpress','dendrila-forms-wordpress':'wordpress','dendrila-form-sentinel':'wordpress','dendrila-accessibility-assistant':'wordpress','dendrila-age-assurance':'wordpress','dendrila-monitor':'wordpress'
+  'communication-libre':'webapps','verger-associations':'applications','atelier-epub':'webapps','librairie-universelle':'webapps','livraison-commune':'webapps','dendrila-forms':'webapps','dendrila-simple-edit':'wordpress','dendrila-forms-wordpress':'wordpress','dendrila-form-sentinel':'wordpress','dendrila-accessibility-assistant':'wordpress','dendrila-age-assurance':'wordpress','dendrila-monitor':'wordpress'
 };
 const categories = ['wordpress','sites','applications','webapps'];
 for(const lang of ['fr','en']){
@@ -25,7 +25,7 @@ for(const lang of ['fr','en']){
   const sections=[...home.matchAll(/<section class="project-group" data-project-group="([^"]+)"/g)].map(m=>m[1]);
   assert.deepEqual(sections,categories,lang+' : quatre sections attendues');
   const cards=[...home.matchAll(/<article class="project-card[^\"]*" data-project-category="([^"]+)">([\s\S]*?)<\/article>/g)];
-  assert.equal(cards.length,18,lang+' : dix-neuf cartes requises');
+  assert.equal(cards.length,19,lang+' : dix-neuf cartes requises');
   assert.ok(!home.includes('data-project-categories='),lang+' : anciens tags thématiques');
   assert.ok(!home.includes('sans-effort'),lang+' : projet retiré du catalogue');
   assert.ok(!home.includes('class="project-tags"'),lang+' : anciennes étiquettes');
@@ -37,7 +37,7 @@ for(const lang of ['fr','en']){
     assert.ok(href,lang+' : carte sans lien');
     return {category:m[1],href:href[1]};
   });
-  assert.equal(new Set(destinations.map(x=>x.href)).size,18,lang+' : destinations dupliquées');
+  assert.equal(new Set(destinations.map(x=>x.href)).size,19,lang+' : destinations dupliquées');
   for(const slug of slugs){
     const wanted=external.get(slug)||prefix+slug+'/';
     assert.ok(destinations.some(x=>x.href===wanted&&x.category===types[slug]),lang+' : mauvaise famille ou destination pour '+slug);
@@ -54,7 +54,7 @@ for(const lang of ['fr','en']){
   assert.ok(home.includes('https://epub-gen.lepotager.org/'),lang+' : accès direct au générateur EPUB manquant');
   assert.ok(home.includes('PWA v0.3'),lang+' : Verger Associations non actualisé');
   assert.equal(cards.filter(c=>c[1]==='wordpress').length,7,lang+' : sept projets WordPress attendus');
-  for(const [category,number] of [['sites',3],['applications',4],['webapps',4]]){
+  for(const [category,number] of [['sites',3],['applications',4],['webapps',5]]){
     assert.equal(cards.filter(c=>c[1]===category).length,number,lang+' : mauvais nombre de projets '+category);
   }
   assert.ok(home.includes('Dendrila Accessibility Assistant'),lang+' : dernier plugin manquant');
@@ -67,6 +67,7 @@ assert.ok(!js.includes('project-expand'),'ancien accordéon non supprimé');
 assert.ok(css.includes('.project-card-link'),'CSS des cartes absent');
 assert.ok(read('sitemap.xml').includes('/projets/fonctions-executives/'),'Fiches absentes du sitemap');
 assert.ok(!read('sitemap.xml').includes('sans-effort'),'Projet retiré encore dans le sitemap');
+assert.ok(read('sitemap.xml').includes('/projets/livraison-commune/'),'Livraison Commune absente du sitemap');
 assert.ok(!existsSync(join(base,'projets/sans-effort/index.html')) && !existsSync(join(base,'en/projects/sans-effort/index.html')),'Fiches retirées encore présentes');
 for (const p of ['projets/dendrila-privacy/index.html','en/projects/dendrila-privacy/index.html']) {
  const html=read(p);
@@ -95,7 +96,7 @@ assert.ok(read('sitemap.xml').includes('/projets/dendrila-forms/'),'Dendrila For
 for(const lang of ['fr','en']){
   const prefix=lang==='fr'?'projets/':'en/projects/';
   const webLabel=lang==='fr'?'Applis web':'Web apps';
-  const webApps=['communication-libre','atelier-epub','librairie-universelle','dendrila-forms'];
+  const webApps=['communication-libre','atelier-epub','librairie-universelle','livraison-commune','dendrila-forms'];
   for(const slug of webApps) assert.ok(read(prefix+slug+'/index.html').includes('class="detail-category">'+webLabel+'</p>'), lang+' : fiche appli web mal classée '+slug);
   assert.ok(read(prefix+'verger-associations/index.html').includes('class="detail-category">Applications</p>'),lang+' : PWA Verger Associations mal classée');
   const epub=read(prefix+'atelier-epub/index.html');
@@ -118,4 +119,4 @@ for(const slug of ['dendrila-simple-edit','dendrila-form-sentinel','dendrila-age
 assert.ok(read('projets/dendrila-form-sentinel/index.html').includes('Aucun test de soumission réelle'), 'Form Sentinel : limite sur la livraison absente');
 assert.ok(read('projets/dendrila-accessibility-assistant/index.html').includes('100 %'), 'Accessibility Assistant : ambiguïté de progression');
 assert.ok(read('projets/dendrila-forms-wordpress/index.html').includes('cache partagé'), 'Dendrila Forms : avertissement cache absent');
-console.log('OK : 18 projets par langue, 36 fiches, quatre catégories et six nouveaux plugins WordPress.');
+console.log('OK : 19 projets par langue, 38 fiches, quatre catégories et six nouveaux plugins WordPress.');

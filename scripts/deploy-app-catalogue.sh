@@ -43,7 +43,7 @@ while IFS= read -r path; do
     projets/*/index.html|en/projects/*/index.html) PAGES+=("$rel");;
   esac
 done < "$TMP/pages-list.txt"
-[[ "${#PAGES[@]}" -eq 36 ]] || fail "36 fiches attendues dans Git, ${#PAGES[@]} trouvées."
+[[ "${#PAGES[@]}" -eq 38 ]] || fail "38 fiches attendues dans Git, ${#PAGES[@]} trouvées."
 FILES+=("${PAGES[@]}")
 # Uniquement les deux anciennes fiches : jamais de suppression globale.
 RETIRED_PAGES=("projets/sans-effort/index.html" "en/projects/sans-effort/index.html")
@@ -66,6 +66,7 @@ for lang in index.html en/index.html; do
   grep -Fq 'data-project-filter="wordpress"' "$TMP/staging/$lang" || fail "Filtre WordPress absent: $lang"
   grep -Fq 'data-project-group="sites"' "$TMP/staging/$lang" || fail "Section Gestion de sites absente: $lang"
   grep -Fq 'Dendrila Forms' "$TMP/staging/$lang" || fail "Dendrila Forms absent: $lang"
+  grep -Fq 'Livraison Commune' "$TMP/staging/$lang" || fail "Livraison Commune absente: $lang"
   grep -Fq 'Dendrila Accessibility Assistant' "$TMP/staging/$lang" || fail "Nouveau catalogue WordPress absent: $lang"
   grep -Fq 'Dendrila Age Assurance' "$TMP/staging/$lang" || fail "Age Assurance absent: $lang"
   grep -Fq 'data-project-filter="webapps"' "$TMP/staging/$lang" || fail "Filtre Applis web absent : $lang"
@@ -74,6 +75,7 @@ for lang in index.html en/index.html; do
   if grep -Eq 'data-project-(filter|group|category)="autres"' "$TMP/staging/$lang"; then fail "Ancienne rubrique Autres encore présente : $lang"; fi
 done
 grep -Fq 'https://github.com/jasmin-abernathy/dendrila-forms' "$TMP/staging/projets/dendrila-forms/index.html" || fail "Fiche Dendrila Forms invalide."
+grep -Fq 'aucun paiement' "$TMP/staging/projets/livraison-commune/index.html" || fail "Fiche Livraison Commune doit être un prototype fictif."
 grep -Fq 'Aucun test de soumission réelle' "$TMP/staging/projets/dendrila-form-sentinel/index.html" || fail "Limites Form Sentinel absentes."
 grep -Fq 'RGAA' "$TMP/staging/projets/dendrila-accessibility-assistant/index.html" || fail "Limites Accessibility Assistant absentes."
 grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/staging/index.html" || fail "La carte VeVak n'utilise pas son site dédié."
@@ -149,7 +151,7 @@ if [[ "$MODE" == "--check" ]]; then
 fi
 
 if [[ "${#CHANGED[@]}" -eq 0 && "${#RETIRED_EXISTING[@]}" -eq 0 ]]; then
-  echo "Les 42 fichiers du DocumentRoot sont déjà identiques à Git."
+  echo "Les 44 fichiers du DocumentRoot sont déjà identiques à Git."
   check_http
   exit 0
 fi

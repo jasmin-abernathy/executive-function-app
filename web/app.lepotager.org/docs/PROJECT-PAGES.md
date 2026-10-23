@@ -1,6 +1,6 @@
 # Catalogue public du Verger — publication
 
-Le catalogue est composé de deux accueils HTML, 36 fiches détaillées FR/EN et de ressources CSS/JS. Les cartes VeVak, RésoSoin, Librairie universelle et Atelier EPUB pointent vers leurs sites officiels. Dendrila Privacy renvoie vers sa fiche FR/EN enrichie de trois cartes : gratuit, Studio (prototype multi-sites avancé, prix envisagé 99 €/an pour 10 sites), Agence (fonctions encore à développer, prix envisagé 199 €/an pour 50 sites). Aucune offre Solo, aucune souscription active. Les pages indiquent les liens de demandes GitHub et de support WordPress.org.
+Le catalogue est composé de deux accueils HTML, 38 fiches détaillées FR/EN et de ressources CSS/JS. Les cartes VeVak, RésoSoin, Librairie universelle et Atelier EPUB pointent vers leurs sites officiels. Dendrila Privacy renvoie vers sa fiche FR/EN enrichie de trois cartes : gratuit, Studio (prototype multi-sites avancé, prix envisagé 99 €/an pour 10 sites), Agence (fonctions encore à développer, prix envisagé 199 €/an pour 50 sites). Aucune offre Solo, aucune souscription active. Les pages indiquent les liens de demandes GitHub et de support WordPress.org.
 
 ## Diagnostic et synchronisation o2switch
 
@@ -14,7 +14,7 @@ git fetch origin main
 git show origin/main:scripts/deploy-app-catalogue.sh | bash -s -- --check
 ```
 
-Ce diagnostic compare **42 fichiers** du catalogue entre `origin/main` et le dossier public, contrôle la présence du HTML attendu, puis teste les réponses HTTP du site sans écrire aucun fichier. Si le chemin cPanel diffère de `$HOME/public_html/app/app.lepotager.org`, définir `APP_LIVE` avec le vrai DocumentRoot avant la commande.
+Ce diagnostic compare **44 fichiers** du catalogue entre `origin/main` et le dossier public, contrôle la présence du HTML attendu, puis teste les réponses HTTP du site sans écrire aucun fichier. Si le chemin cPanel diffère de `$HOME/public_html/app/app.lepotager.org`, définir `APP_LIVE` avec le vrai DocumentRoot avant la commande.
 
 Après lecture du diagnostic, pour effectuer la synchronisation ciblée :
 
@@ -35,11 +35,11 @@ node --test tests/catalogue-structure.test.mjs
 bash -n scripts/deploy-app-catalogue.sh
 ```
 
-Le test garantit que les accueils FR/EN comportent chacun 18 cartes et destinations, que les 36 fiches existent, que les routes, CSS et JS sont liés, et que le sitemap répertorie des fiches. Ce test n'est **pas** une preuve de déploiement.
+Le test garantit que les accueils FR/EN comportent chacun 19 cartes et destinations, que les 38 fiches existent, que les routes, CSS et JS sont liés, et que le sitemap répertorie des fiches. Ce test n'est **pas** une preuve de déploiement.
 
 ## À vérifier après publication
 
-Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 14 cartes ouvrant des fiches locales et les 4 cartes ouvrant des services dédiés. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
+Tester depuis le navigateur le retour catalogue, les filtres, les modes mobile et accessible, le basculement FR/EN, les 15 cartes ouvrant des fiches locales et les 4 cartes ouvrant des services dédiés. Comparer aussi le HTML effectivement servi et ne pas se limiter à la présence des fonctionnalités dans GitHub.
 
 ## Correctif mobile Dendrila Privacy du 10 octobre 2026
 
@@ -61,7 +61,7 @@ Les anciens tags (autonomie, sécurité, collectifs, services, culture) ont ét�
 
 **Dendrila Forms** apparaît dans « Applis web » avec ses fiches française et anglaise et ses liens vers le dépôt et ses issues GitHub. État : **0.1.0-alpha, démonstration technique**, exclusivement avec des données fictives. Ne pas le présenter comme prêt à recueillir des données personnelles/sensibles ou à gérer des entretiens privés.
 
-La synchronisation attend **18 cartes par langue, 36 fiches FR/EN et 42 fichiers statiques**. Appliquer le diagnostic et la copie ciblée décrits plus haut ; contrôler ensuite la présence de « Dendrila Forms » et `data-project-group="sites"` dans le HTML réellement servi par le domaine.
+La synchronisation attend **19 cartes par langue, 38 fiches FR/EN et 44 fichiers statiques**. Appliquer le diagnostic et la copie ciblée décrits plus haut ; contrôler ensuite la présence de « Dendrila Forms » et `data-project-group="sites"` dans le HTML réellement servi par le domaine.
 
 ## Plugins WordPress en développement — 11 octobre 2026
 
@@ -76,18 +76,22 @@ La famille WordPress regroupe **7 projets** : Dendrila Privacy (0.0.5 publié su
 
 Le moteur PHP « Dendrila Forms » indépendant reste classé dans **Applis web** et possède sa fiche distincte de l'extension WordPress. Les fiches ne créent des liens GitHub publics que lorsque les dépôts le sont. Les dépôts privés renvoient vers le contact du Potager.
 
-**Invariants :** 18 cartes par langue, 7 WordPress, 3 gestion de sites, 4 applications, 4 applis web, 36 fiches et 42 fichiers statiques synchronisés. Contrôler en production le HTML servant « Dendrila Accessibility Assistant » et une fiche FR/EN. GitHub et le site public peuvent être désynchronisés.
+**Invariants :** 19 cartes par langue, 7 WordPress, 3 gestion de sites, 4 applications, 5 applis web, 38 fiches et 44 fichiers statiques synchronisés. Contrôler en production le HTML servant « Dendrila Accessibility Assistant » et une fiche FR/EN. GitHub et le site public peuvent être désynchronisés.
 
 ## Reclassement « Applis web » et Atelier EPUB en ligne — 11 octobre 2026
 
-La rubrique **« Autres » a été supprimée** du catalogue visible et des filtres. Les familles publiques sont désormais : **WordPress** (7), **Gestion de sites** (3), **Applications** (4) et **Applis web** (4). Un projet a une famille unique, quelle que soit sa maturité.
+La rubrique **« Autres » a été supprimée** du catalogue visible et des filtres. Les familles publiques sont désormais : **WordPress** (7), **Gestion de sites** (3), **Applications** (4) et **Applis web** (5). Un projet a une famille unique, quelle que soit sa maturité.
 
 - **Applications** : VeVak, Fonctions exécutives / TDAH, Resilience Vault et **Verger Associations** (PWA v0.3, v0.4 en préparation, adaptation Android Capacitor). Le prototype Webxdc 0.2 de ce dernier n'est plus présenté comme son architecture principale.
 - **Applis web** : Communication libre (laboratoire, non déployé), Atelier EPUB (web en ligne, développement actif), Librairie universelle (alpha web publique), Dendrila Forms (moteur PHP expérimental auto-hébergeable, données fictives uniquement).
 - **Atelier EPUB** : la carte ouvre directement `https://epub-gen.lepotager.org/`, comme VeVak et la Librairie pour leurs sites dédiés. Les fiches locales FR/EN sont conservées pour documenter le développement et contiennent aussi le lien public, le dépôt communautaire et les limites connues. Le déploiement public a été documenté dans `jasmin-abernathy/atelier-epub`, sans que l'existence d'un site signifie que toutes ses fonctions ont été validées.
 
-**Tests à préserver** : aucun filtre/groupe/carte `autres`, 18 cartes par langue (7/3/4/4), 36 fiches FR/EN, 42 fichiers statiques sans suppression, liens vers les services dédiés. Le rendu public Git→o2switch doit être revérifié ; un commit GitHub réussi n'est pas une preuve de synchronisation du DocumentRoot.
+**Tests à préserver** : aucun filtre/groupe/carte `autres`, 19 cartes par langue (7/3/4/5), 38 fiches FR/EN, 44 fichiers statiques sans suppression, liens vers les services dédiés. Le rendu public Git→o2switch doit être revérifié ; un commit GitHub réussi n'est pas une preuve de synchronisation du DocumentRoot.
 
 ## Retrait d’une fiche — 23 octobre 2026
 
-Le comparateur abandonné a été retiré des cartes FR/EN, des deux fiches et du sitemap. Le script de synchronisation sauvegarde puis retire **uniquement** ses deux anciens `index.html` du DocumentRoot, sans suppression récursive. Les 18 cartes par langue, 36 fiches et 42 fichiers statiques attendus sont les nouvelles références. Après `--apply`, vérifier que les anciennes routes ne servent plus la fiche, que les accueils FR/EN affichent quatre applis web et que le sitemap ne répertorie plus les anciennes URLs.
+Le comparateur abandonné a été retiré des cartes FR/EN, des deux fiches et du sitemap. Le script de synchronisation sauvegarde puis retire **uniquement** ses deux anciens `index.html` du DocumentRoot, sans suppression récursive. Les 19 cartes par langue, 38 fiches et 44 fichiers statiques attendus sont les nouvelles références. Après `--apply`, vérifier que les anciennes routes ne servent plus la fiche, que les accueils FR/EN affichent cinq applis web et que le sitemap ne répertorie plus les anciennes URLs.
+
+## 24 octobre 2026 — Livraison Commune
+
+Nouvelle carte en Applis web et fiches FR/EN. Présentation honnête d'une démo fictive de livraison locale coopérative, sans aucun commerce ou livreur partenaire, paiement ni commande réelle. Gouvernance à construire. Le dépôt étant privé, pas de lien GitHub public vers le code. Le catalogue revient à 19 cartes/langue, 38 fiches, 44 fichiers synchronisés. L'ancien comparateur ne doit pas être réintroduit.

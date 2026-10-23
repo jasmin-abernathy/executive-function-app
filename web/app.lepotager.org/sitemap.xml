@@ -166,4 +166,6 @@
     <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-monitor/"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-monitor/"/>
   </url>
+  <url><loc>https://app.lepotager.org/projets/livraison-commune/</loc><xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/livraison-commune/"/><xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/livraison-commune/"/></url>
+  <url><loc>https://app.lepotager.org/en/projects/livraison-commune/</loc><xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/livraison-commune/"/><xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/livraison-commune/"/></url>
 </urlset>
