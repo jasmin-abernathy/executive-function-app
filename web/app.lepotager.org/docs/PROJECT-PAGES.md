@@ -95,3 +95,9 @@ Le comparateur abandonné a été retiré des cartes FR/EN, des deux fiches et d
 ## 24 octobre 2026 — Livraison Commune
 
 Nouvelle carte en Applis web et fiches FR/EN. Présentation honnête d'une démo fictive de livraison locale coopérative, sans aucun commerce ou livreur partenaire, paiement ni commande réelle. Gouvernance à construire. Le dépôt étant privé, pas de lien GitHub public vers le code. Le catalogue revient à 19 cartes/langue, 38 fiches, 44 fichiers synchronisés. L'ancien comparateur ne doit pas être réintroduit.
+
+## 28 octobre 2026 — Contributions à SimpleX Chat
+
+Le projet autonome **Communication libre** disparaît du catalogue public. Il est remplacé par la présentation des **contributions indépendantes à SimpleX Chat**, logiciel libre créé et maintenu par l'équipe SimpleX, et non par Le Potager du Web. Deux PR sont documentées sur le fork `jasmin-abernathy/simplex-chat` : #2 (option Android de proximité, ticket amont #7507) et #1 (export manuel préliminaire vers Resilience Vault). Ni intégration amont ni validation complète ni APK officiel ne doivent être revendiqués. Les demandes #5138/#2398 sur les appels de groupe sont seulement à l'étude.
+
+La carte est rangée dans **Applications** : 7 WordPress, 3 Gestion de sites, **5 Applications**, **4 Applis web** (19 cartes/langue). Les fiches sont désormais `/projets/simplex-chat/` et `/en/projects/simplex-chat/`. Les deux anciennes fiches `communication-libre` sont à retirer de la production par le script sécurisé (sauvegarde avant retrait ciblé). Le total synchronisé reste **38 fiches** et **44 fichiers statiques**. Le sitemap ne doit plus contenir les anciennes routes. Vérifier le déploiement HTTP séparément : un commit GitHub ne vaut pas preuve de publication.
