@@ -19,14 +19,24 @@
 <main id="contenu" class="detail-page"><div class="shell">
 <a class="detail-back" href="/#projets">← Revenir aux projets</a>
 <div class="detail-head"><div><p class="detail-category">WordPress</p><h1>Dendrila Accessibility Assistant</h1><p class="detail-lede">Une aide éditoriale pour repérer des problèmes d’accessibilité et guider les corrections sans présenter une analyse automatisée comme une certification.</p></div>
-<aside class="detail-facts"><dl><dt>État actuel</dt><dd>0.1.0-alpha · expérimental, non testé en production</dd><dt>Plateforme</dt><dd>WordPress 6.5+ · PHP 8.1+ · GPL</dd><dt>Informations revues</dt><dd><time datetime="2026-10-11">11 octobre 2026</time></dd></dl></aside></div>
-<section class="detail-section"><h2>Fonctionnalités en développement</h2><ul><li>Repérage de certaines images sans alternative utile, titres mal structurés, liens sans nom ou champs sans étiquette.</li>
-<li>Prise en charge prudente de contenus WordPress, Elementor et Divi, avec limites clairement signalées.</li>
-<li>Analyse des contenus publiés qui continue en cas d’erreur, en comptant les pages non examinées.</li>
-<li>Assistance à la médiathèque pour compléter les alternatives des nouvelles images ; anciennes images non bloquées.</li></ul></section>
-<section class="detail-section"><h2>Limites actuelles</h2><p>« 100 % » indique uniquement la fin du passage, même si des contenus ont été ignorés ou ont échoué. Ne certifie ni RGAA ni WCAG ; thèmes, interactions clavier, contrastes réels et pages dynamiques exigent un audit complémentaire. Tests pilotes WordPress à faire.</p></section>
-<section class="detail-section"><h2>Suivre le développement</h2><p>Le dépôt public permet de consulter le code, la documentation et les signalements.</p><div class="detail-actions"><a href="https://github.com/jasmin-abernathy/Dendrila-accessibility-assistant">Consulter le code source ↗</a><a href="https://github.com/jasmin-abernathy/Dendrila-accessibility-assistant/issues">Signaler un problème ↗</a></div></section>
-<p class="detail-reviewed">Informations revues dans le dépôt source et les PR de développement le 11 octobre 2026.</p>
+<aside class="detail-facts"><dl><dt>État actuel</dt><dd>0.1.0-alpha · expérimental, non testé en production</dd><dt>Plateforme</dt><dd>WordPress 6.5+ · PHP 8.1+ · GPL</dd><dt>Informations revues</dt><dd><time datetime="2026-10-28">28 octobre 2026</time></dd></dl></aside></div>
+<section class="detail-section"><h2>Ce que fait déjà l’alpha</h2><ul>
+<li>Analyse locale du contenu enregistré : images sans alternative, textes alternatifs ressemblant à des noms de fichiers, titres vides ou sautés, liens ou boutons sans nom apparent et champs sans étiquette.</li>
+<li>Lecture prudente d’Elementor (widgets Image, Texte, Titre et Bouton), des modules Image de Divi 4 et repérage exploratoire de blocs Divi 5. Les contenus et données des constructeurs ne sont pas réécrits.</li>
+<li>Tableau de bord pour analyser volontairement jusqu’aux 100 contenus publics publiés les plus récents, et panneau dans l’éditeur fondé sur le dernier enregistrement. Les erreurs et contenus non examinés sont signalés séparément.</li>
+<li>Aide à la médiathèque : les nouvelles images peuvent être marquées « à compléter », puis validées comme informatives (alternative utile) ou décoratives (alternative vide). Les anciens médias ne sont pas bloqués et restent rattrapables progressivement.</li>
+<li>Traitement local, sans service tiers, sans correction automatique des pages et sans ajout de rôle WordPress.</li>
+</ul></section>
+<section class="detail-section"><h2>Améliorations proposées — PR #4</h2>
+<p>Une <a href="https://github.com/jasmin-abernathy/Dendrila-accessibility-assistant/pull/4">proposition de modifications sur GitHub</a> ajoute le contrôle WordPress Plugin Check, prépare la fabrication d’un ZIP alpha de test et renforce les signalements d’analyses incomplètes : au-delà de 70 observations HTML, sur de gros widgets Texte Elementor ou des structures trop profondes. Ces changements sont à distinguer de la branche principale tant qu’ils ne sont pas fusionnés.</p>
+<p>Les vérifications PHP 8.1 et 8.3 de cette branche ont réussi, avec des tests de régression. Cela ne valide ni une installation réelle ni une publication sur WordPress.org.</p>
+</section>
+<section class="detail-section"><h2>Tests et limites</h2>
+<p><strong>Version 0.1.0-alpha : réservée à des sites pilotes.</strong> Le ZIP installable se construit via un workflow manuel GitHub Actions ; sa disponibilité et son installation sur un WordPress réel restent à confirmer. Des essais sur Gutenberg, Elementor, Divi 4/5, la médiathèque, le clavier et les lecteurs d’écran sont encore nécessaires.</p>
+<p>« 100 % » indique seulement la fin de la tâche, même avec des erreurs ou des contenus ignorés. Les contrôles ne couvrent ni tous les critères RGAA/WCAG, ni le thème, les interactions et contrastes réellement rendus, ni toutes les pages dynamiques. Il ne s’agit pas d’un audit ni d’une certification d’accessibilité.</p>
+</section>
+<section class="detail-section"><h2>Suivre le développement</h2><p>Le dépôt public permet de consulter le code, la documentation et les signalements.</p><div class="detail-actions"><a href="https://github.com/jasmin-abernathy/Dendrila-accessibility-assistant">Consulter le code source ↗</a><a href="https://github.com/jasmin-abernathy/Dendrila-accessibility-assistant/issues">Signaler un problème ↗</a><a href="https://github.com/jasmin-abernathy/Dendrila-accessibility-assistant/pull/4">Voir la PR #4 ↗</a></div></section>
+<p class="detail-reviewed">Informations vérifiées dans le dépôt principal et la PR #4 le 28 octobre 2026.</p>
 <a class="detail-back" href="/#projets">← Revenir aux projets</a></div></main>
 <footer class="site-footer"><div class="shell footer-grid"><div><a class="brand brand-footer" href="/"><span><strong>Le Verger</strong><small>du Numérique</small></span></a><p>Des outils numériques utiles, sobres et respectueux de la vie privée.</p></div><div class="footer-links"><a href="/#projets">← Revenir aux projets</a><a href="/mentions-legales.html">Mentions légales</a><a href="https://www.lepotager.org/">Le Potager du Web</a></div></div></footer>
 <script>document.querySelectorAll('[data-language]').forEach(function(a){a.addEventListener('click',function(){try{localStorage.setItem('lepotager-apps-language',a.dataset.language)}catch(e){}})});</script></body></html>
