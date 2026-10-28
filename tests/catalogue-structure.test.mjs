@@ -11,12 +11,12 @@ const external = new Map([
   ['librairie-universelle','https://librairie.lepotager.org/'],
   ['atelier-epub','https://epub-gen.lepotager.org/'],
 ]);
-const slugs = ['vevak','fonctions-executives','resosoin','resilience-vault','dendrila-cms','mon-manager-web','communication-libre','verger-associations','atelier-epub','librairie-universelle','dendrila-privacy','livraison-commune','dendrila-forms','dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor'];
+const slugs = ['vevak','fonctions-executives','resosoin','resilience-vault','dendrila-cms','mon-manager-web','simplex-chat','verger-associations','atelier-epub','librairie-universelle','dendrila-privacy','livraison-commune','dendrila-forms','dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor'];
 const types = {
   'dendrila-privacy':'wordpress',
   'dendrila-cms':'sites','mon-manager-web':'sites','resosoin':'sites',
   'vevak':'applications','fonctions-executives':'applications','resilience-vault':'applications',
-  'communication-libre':'webapps','verger-associations':'applications','atelier-epub':'webapps','librairie-universelle':'webapps','livraison-commune':'webapps','dendrila-forms':'webapps','dendrila-simple-edit':'wordpress','dendrila-forms-wordpress':'wordpress','dendrila-form-sentinel':'wordpress','dendrila-accessibility-assistant':'wordpress','dendrila-age-assurance':'wordpress','dendrila-monitor':'wordpress'
+  'simplex-chat':'applications','verger-associations':'applications','atelier-epub':'webapps','librairie-universelle':'webapps','livraison-commune':'webapps','dendrila-forms':'webapps','dendrila-simple-edit':'wordpress','dendrila-forms-wordpress':'wordpress','dendrila-form-sentinel':'wordpress','dendrila-accessibility-assistant':'wordpress','dendrila-age-assurance':'wordpress','dendrila-monitor':'wordpress'
 };
 const categories = ['wordpress','sites','applications','webapps'];
 for(const lang of ['fr','en']){
@@ -54,7 +54,7 @@ for(const lang of ['fr','en']){
   assert.ok(home.includes('https://epub-gen.lepotager.org/'),lang+' : accès direct au générateur EPUB manquant');
   assert.ok(home.includes('PWA v0.3'),lang+' : Verger Associations non actualisé');
   assert.equal(cards.filter(c=>c[1]==='wordpress').length,7,lang+' : sept projets WordPress attendus');
-  for(const [category,number] of [['sites',3],['applications',4],['webapps',5]]){
+  for(const [category,number] of [['sites',3],['applications',5],['webapps',4]]){
     assert.equal(cards.filter(c=>c[1]===category).length,number,lang+' : mauvais nombre de projets '+category);
   }
   assert.ok(home.includes('Dendrila Accessibility Assistant'),lang+' : dernier plugin manquant');
@@ -96,13 +96,28 @@ assert.ok(read('sitemap.xml').includes('/projets/dendrila-forms/'),'Dendrila For
 for(const lang of ['fr','en']){
   const prefix=lang==='fr'?'projets/':'en/projects/';
   const webLabel=lang==='fr'?'Applis web':'Web apps';
-  const webApps=['communication-libre','atelier-epub','librairie-universelle','livraison-commune','dendrila-forms'];
+  const webApps=['atelier-epub','librairie-universelle','livraison-commune','dendrila-forms'];
   for(const slug of webApps) assert.ok(read(prefix+slug+'/index.html').includes('class="detail-category">'+webLabel+'</p>'), lang+' : fiche appli web mal classée '+slug);
   assert.ok(read(prefix+'verger-associations/index.html').includes('class="detail-category">Applications</p>'),lang+' : PWA Verger Associations mal classée');
   const epub=read(prefix+'atelier-epub/index.html');
   assert.ok(epub.includes('href="https://epub-gen.lepotager.org/"'),lang+' : lien vers le site EPUB absent de la fiche');
   assert.ok(epub.includes('2026-10-11'),lang+' : statut EPUB obsolète');
 }
+for (const lang of ['fr','en']) {
+  const prefix=lang==='fr'?'projets/':'en/projects/';
+  const home=read(lang==='fr'?'index.html':'en/index.html');
+  const detail=read(prefix+'simplex-chat/index.html');
+  assert.ok(!home.includes('Communication libre'),lang+' : ancien projet toujours visible');
+  assert.ok(!existsSync(join(base,prefix+'communication-libre/index.html')),lang+' : ancienne fiche encore présente');
+  assert.ok(home.includes('/'+prefix+'simplex-chat/'),lang+' : carte SimpleX absente');
+  assert.ok(detail.includes('https://github.com/simplex-chat/simplex-chat'),lang+' : dépôt officiel absent');
+  assert.ok(detail.includes('https://github.com/jasmin-abernathy/simplex-chat/pull/1'),lang+' : contribution Resilience Vault absente');
+  assert.ok(detail.includes('https://github.com/jasmin-abernathy/simplex-chat/pull/2'),lang+' : contribution proximité absente');
+  assert.ok(detail.includes(lang==='fr'?'Je n’en suis ni le créateur':'I am not its creator'),lang+' : rôle indépendant non explicite');
+  assert.ok(detail.includes(lang==='fr'?'Applications · contribution':'Apps · contributions'),lang+' : catégorie SimpleX incorrecte');
+  assert.ok(read('sitemap.xml').includes('/'+prefix+'simplex-chat/'),lang+' : nouvelle fiche absente du sitemap');
+}
+assert.ok(!read('sitemap.xml').includes('communication-libre'),'Ancienne fiche encore indexée');
 assert.ok(js.includes('data-project-category'),'Filtrage par familles non implémenté');
 for(const slug of ['dendrila-simple-edit','dendrila-forms-wordpress','dendrila-form-sentinel','dendrila-accessibility-assistant','dendrila-age-assurance','dendrila-monitor']){
   const fr=read('projets/'+slug+'/index.html');
@@ -119,4 +134,4 @@ for(const slug of ['dendrila-simple-edit','dendrila-form-sentinel','dendrila-age
 assert.ok(read('projets/dendrila-form-sentinel/index.html').includes('Aucun test de soumission réelle'), 'Form Sentinel : limite sur la livraison absente');
 assert.ok(read('projets/dendrila-accessibility-assistant/index.html').includes('100 %'), 'Accessibility Assistant : ambiguïté de progression');
 assert.ok(read('projets/dendrila-forms-wordpress/index.html').includes('cache partagé'), 'Dendrila Forms : avertissement cache absent');
-console.log('OK : 19 projets par langue, 38 fiches, quatre catégories et six nouveaux plugins WordPress.');
+console.log('OK : 19 cartes par langue, 38 fiches, catégories 7/3/5/4, contributions SimpleX et six nouveaux plugins WordPress.');
