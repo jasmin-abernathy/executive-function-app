@@ -45,8 +45,8 @@ while IFS= read -r path; do
 done < "$TMP/pages-list.txt"
 [[ "${#PAGES[@]}" -eq 38 ]] || fail "38 fiches attendues dans Git, ${#PAGES[@]} trouvées."
 FILES+=("${PAGES[@]}")
-# Uniquement les deux anciennes fiches : jamais de suppression globale.
-RETIRED_PAGES=("projets/sans-effort/index.html" "en/projects/sans-effort/index.html")
+# Fiches historiques ciblées uniquement : jamais de suppression globale.
+RETIRED_PAGES=("projets/sans-effort/index.html" "en/projects/sans-effort/index.html" "projets/communication-libre/index.html" "en/projects/communication-libre/index.html")
 
 mkdir -p "$TMP/staging"
 for rel in "${FILES[@]}"; do
@@ -67,6 +67,8 @@ for lang in index.html en/index.html; do
   grep -Fq 'data-project-group="sites"' "$TMP/staging/$lang" || fail "Section Gestion de sites absente: $lang"
   grep -Fq 'Dendrila Forms' "$TMP/staging/$lang" || fail "Dendrila Forms absent: $lang"
   grep -Fq 'Livraison Commune' "$TMP/staging/$lang" || fail "Livraison Commune absente: $lang"
+  grep -Fq 'simplex-chat/' "$TMP/staging/$lang" || fail "Contributions SimpleX absentes: $lang"
+  if grep -Fq 'Communication libre' "$TMP/staging/$lang"; then fail "Ancien projet Communication libre encore affiché : $lang"; fi
   grep -Fq 'Dendrila Accessibility Assistant' "$TMP/staging/$lang" || fail "Nouveau catalogue WordPress absent: $lang"
   grep -Fq 'Dendrila Age Assurance' "$TMP/staging/$lang" || fail "Age Assurance absent: $lang"
   grep -Fq 'data-project-filter="webapps"' "$TMP/staging/$lang" || fail "Filtre Applis web absent : $lang"
@@ -78,6 +80,8 @@ grep -Fq 'https://github.com/jasmin-abernathy/dendrila-forms' "$TMP/staging/proj
 grep -Fq 'aucun paiement' "$TMP/staging/projets/livraison-commune/index.html" || fail "Fiche Livraison Commune doit être un prototype fictif."
 grep -Fq 'Aucun test de soumission réelle' "$TMP/staging/projets/dendrila-form-sentinel/index.html" || fail "Limites Form Sentinel absentes."
 grep -Fq 'RGAA' "$TMP/staging/projets/dendrila-accessibility-assistant/index.html" || fail "Limites Accessibility Assistant absentes."
+grep -Fq 'https://github.com/jasmin-abernathy/simplex-chat/pull/2' "$TMP/staging/projets/simplex-chat/index.html" || fail "PR capteur SimpleX absente."
+grep -Fq 'https://github.com/jasmin-abernathy/simplex-chat/pull/1' "$TMP/staging/en/projects/simplex-chat/index.html" || fail "PR Resilience Vault SimpleX absente."
 grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/staging/index.html" || fail "La carte VeVak n'utilise pas son site dédié."
 grep -Fq 'project-card-link' "$TMP/staging/assets/style.css" || fail "Le CSS des cartes cliquables manque."
 if grep -Fq 'project-expand' "$TMP/staging/assets/app.js"; then fail "Ancien accordéon toujours présent dans le JS Git."; fi
@@ -125,7 +129,7 @@ check_http() {
   http_root="https://app.lepotager.org/?_catalogue_check=$stamp"
   http_detail="https://app.lepotager.org/projets/dendrila-privacy/?_catalogue_check=$stamp"
   if curl -fsSL --max-time 20 -H 'Cache-Control: no-cache' "$http_root" -o "$TMP/public-home.html"; then
-    if grep -Fq 'class="project-card-link"' "$TMP/public-home.html" && grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/public-home.html" && grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/public-home.html" && grep -Fq 'Dendrila Forms' "$TMP/public-home.html" && grep -Fq 'data-project-group="sites"' "$TMP/public-home.html" && grep -Fq 'Dendrila Accessibility Assistant' "$TMP/public-home.html" && grep -Fq 'Dendrila Age Assurance' "$TMP/public-home.html" && grep -Fq 'data-project-group="webapps"' "$TMP/public-home.html" && grep -Fq 'href="https://epub-gen.lepotager.org/"' "$TMP/public-home.html"; then
+    if grep -Fq 'class="project-card-link"' "$TMP/public-home.html" && grep -Fq 'href="https://vevak.lepotager.org/"' "$TMP/public-home.html" && grep -Fq 'href="/projets/dendrila-privacy/"' "$TMP/public-home.html" && grep -Fq 'Dendrila Forms' "$TMP/public-home.html" && grep -Fq 'data-project-group="sites"' "$TMP/public-home.html" && grep -Fq 'Dendrila Accessibility Assistant' "$TMP/public-home.html" && grep -Fq 'Dendrila Age Assurance' "$TMP/public-home.html" && grep -Fq 'simplex-chat/' "$TMP/public-home.html" && grep -Fq 'data-project-group="webapps"' "$TMP/public-home.html" && grep -Fq 'href="https://epub-gen.lepotager.org/"' "$TMP/public-home.html"; then
       echo "HTTP accueil : nouveau catalogue détecté."
     else
       warn "HTTP accueil : ANCIEN HTML encore servi (dossier incorrect, cache ou synchronisation non appliquée)."
@@ -209,6 +213,6 @@ for rel in "${RETIRED_EXISTING[@]}"; do
 done
 printf 'Copie terminée : %d fichiers corrigés, %d fiches retirées depuis GitHub %s\n' "${#CHANGED[@]}" "${#RETIRED_EXISTING[@]}" "$SHA"
 fix_public_permissions
-echo "Aucun --delete global : seules les deux anciennes fiches ciblées peuvent être retirées. Questionnaires et services non touchés."
+echo "Aucun --delete global : seules les fiches historiques ciblées peuvent être retirées. Questionnaires et services non touchés."
 check_http
 echo "Important : vérifier dans un navigateur les cartes FR/EN, les filtres et les fiches."
