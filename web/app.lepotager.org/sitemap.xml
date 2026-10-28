@@ -65,14 +65,14 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/mon-manager-web/"/>
   </url>
   <url>
-    <loc>https://app.lepotager.org/projets/communication-libre/</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/communication-libre/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/communication-libre/"/>
+    <loc>https://app.lepotager.org/projets/simplex-chat/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/simplex-chat/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/simplex-chat/"/>
   </url>
   <url>
-    <loc>https://app.lepotager.org/en/projects/communication-libre/</loc>
-    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/communication-libre/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/communication-libre/"/>
+    <loc>https://app.lepotager.org/en/projects/simplex-chat/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/simplex-chat/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/simplex-chat/"/>
   </url>
   <url>
     <loc>https://app.lepotager.org/projets/verger-associations/</loc>
