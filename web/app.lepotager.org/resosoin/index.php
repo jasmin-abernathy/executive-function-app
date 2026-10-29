@@ -70,7 +70,7 @@
         <a class="nav-link" href="#projet">Le projet</a>
         <a class="nav-link" href="#pour-qui">Pour qui</a>
         <a class="nav-link" href="#etude">L’étude</a>
-        <button class="accessibility-toggle" type="button" data-app-accessibility-toggle aria-pressed="false" aria-label="Activer la version accessible" title="Activer la version accessible"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="6.5" r="1.6" fill="currentColor"/><path d="M6.7 9.4h10.6M12 9.8v4.5m0 0-3 4.5m3-4.5 3 4.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="accessibility-label">Version accessible</span></button>
+        <button class="accessibility-toggle" type="button" data-app-accessibility-toggle aria-pressed="false" aria-label="Activer la version accessible" title="Activer la version accessible"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.9"/></svg><span class="accessibility-label">Version accessible</span></button>
         <a class="button button-small button-primary" href="#etude">Participer</a>
       </nav>
     </div>
