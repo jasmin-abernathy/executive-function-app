@@ -21,15 +21,24 @@
 </div></div></header>
 <main id="contenu" class="detail-page"><div class="shell">
 <a class="detail-back" href="/en/#projets">← Back to all projects</a>
-<div class="detail-head"><div><p class="detail-category">Applications</p><h1>Verger Associations</h1><p class="detail-lede">A local-first PWA for association members, meetings, decisions and actions, with Android Capacitor support under development.</p></div>
-<aside class="detail-facts"><dl><dt>Current stage</dt><dd>PWA v0.3 · v0.4 in preparation</dd>
-<dt>Platform</dt><dd>PWA · Android Capacitor · AGPL</dd><dt>Reviewed</dt><dd><time datetime="2026-10-11">11 October 2026</time></dd></dl></aside></div>
-<section class="detail-section"><h2>What it does and what is planned</h2><ul><li>Meetings, decisions and Markdown/JSON exports</li>
-<li>Older Webxdc 0.2 prototype retained as a reference</li>
-<li>Autonomous offline-capable PWA and optional self-hosted synchronisation; Android Capacitor build in progress</li></ul></section>
-<section class="detail-section"><h2>Latest development</h2><p>The local-first PWA is developed; optional cross-device synchronisation still needs robust access controls before wider pilots.</p></section>
-<section class="detail-section"><h2>Known limitations and next steps</h2><ul><li>Pilots still need testing with real associations.</li>
-<li>Messaging remains a separate project.</li></ul></section>
+<div class="detail-head"><div><p class="detail-category">Applications</p><h1>Verger Associations</h1><p class="detail-lede">An open-source app for meetings, collective decisions, task tracking and volunteer coordination.</p></div>
+<aside class="detail-facts"><dl><dt>Current stage</dt><dd>PWA prototype · v0.4 in preparation</dd>
+<dt>Platform</dt><dd>PWA · Android Capacitor · AGPL</dd><dt>Reviewed</dt><dd><time datetime="2026-11-05">5 November 2026</time></dd></dl></aside></div>
+<section class="detail-section"><h2>What is Verger Associations for?</h2><p>Meetings, group decisions, tasks, events and volunteers are often managed across several unrelated documents. <strong>Verger Associations aims to bring them together in one open-source app</strong>, without requiring a new messaging or accounting platform.</p><p>It targets associations, community groups and cooperatives, with local storage and portable exports.</p></section>
+<section class="detail-section detail-feature-section"><h2>Planned and existing features</h2><div class="detail-feature-grid">
+<article><h3>Members</h3><p>Manage members, roles and optional contact details.</p><small>Built in prototype</small></article>
+<article><h3>Meetings</h3><p>Prepare agendas, gather proposals, objections and amendments, and export minutes.</p><small>Built in prototype</small></article>
+<article><h3>Collective decisions</h3><p>Record decision methods, outcomes, review dates and linked tasks.</p><small>Built in prototype</small></article>
+<article><h3>Task tracking</h3><p>Assign action items, deadlines and statuses to members.</p><small>Built in prototype</small></article>
+<article><h3>Events and volunteers</h3><p>Plan events, advertise volunteer needs and close requests.</p><small>Built in prototype</small></article>
+<article><h3>Onboarding and mutual aid</h3><p>Welcome new members and organize requests or offers of help.</p><small>Early versions</small></article>
+<article><h3>Member consultations</h3><p>Invite identified members to single-choice votes and publish aggregate results after closure.</p><small>Code exists; real-world testing pending</small></article>
+<article><h3>Offline work and backups</h3><p>Store information locally, export/import JSON and eventually synchronize devices.</p><small>Local storage built; sync experimental</small></article>
+</div></section>
+<section class="detail-section"><h2>Example: a committee meeting</h2><ol class="detail-steps"><li>Prepare the agenda.</li><li>Collect a proposal and objections.</li><li>Record the decision and review date.</li><li>Assign a follow-up action.</li><li>Export the meeting record to the association's archives.</li></ol><p>This workflow exists in the prototype but needs field testing with real associations.</p></section>
+<section class="detail-section"><h2>Current development stage</h2><p>The PWA includes members, meetings, decisions, tasks, events, volunteer requests and JSON/Markdown exports. Onboarding, mutual aid and consultations have initial implementations. An older Webxdc prototype served as a proof of concept.</p><p>Offline and reconnect testing on real devices remains pending. The optional sync server still uses a shared token: <strong>it cannot yet securely host unrelated associations.</strong></p></section>
+<section class="detail-section"><h2>What's next and what's out of scope</h2><ul><li>Run a pilot with 4–7 participants and at least two real meetings.</li><li>Add proper accounts, invitations, permissions and revocation.</li><li>Build and test the Capacitor Android version; no public-ready APK is currently announced.</li><li>Consider reporting, alerting and optional integrations only after pilot feedback.</li></ul><p>This is not yet an accounting, official records or messaging system. Avoid sensitive production data until security validation.</p></section>
+<section class="detail-section"><h2>Documentation and contributions</h2><p>AGPL-licensed source and documentation: <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/MODULES.md">feature modules</a>, <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/ROADMAP.md">roadmap</a> and <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/PILOT.md">pilot plan</a>.</p></section>
 <section class="detail-section"><h2>Learn more and participate</h2>
 <div class="detail-actions"><a href="https://github.com/jasmin-abernathy/verger-associations">Source code <span aria-hidden="true">↗</span></a></div>
 <div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Verger%20Associations">Ask about this project →</a></div></section>
