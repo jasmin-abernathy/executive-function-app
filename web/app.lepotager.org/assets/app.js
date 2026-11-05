@@ -5,27 +5,8 @@ const nav = document.querySelector('[data-nav]');
 const LANGUAGE_KEY = 'lepotager-apps-language';
 const currentLanguage = document.documentElement.lang === 'en' ? 'en' : 'fr';
 
-const preferredBrowserLanguage = () => {
-  const languages = Array.isArray(navigator.languages) && navigator.languages.length
-    ? navigator.languages
-    : [navigator.language || 'fr'];
-  return languages.some((language) => String(language).toLowerCase().startsWith('en')) ? 'en' : 'fr';
-};
-
+// Keep public URLs stable for crawlers and visitors. Language selection is explicit.
 const languageTarget = (language) => `${language === 'en' ? '/en/' : '/'}${window.location.hash || ''}`;
-
-try {
-  const savedLanguage = localStorage.getItem(LANGUAGE_KEY);
-  const targetLanguage = savedLanguage === 'fr' || savedLanguage === 'en'
-    ? savedLanguage
-    : preferredBrowserLanguage();
-
-  if (targetLanguage !== currentLanguage) {
-    window.location.replace(languageTarget(targetLanguage));
-  }
-} catch (_) {
-  // localStorage may be unavailable; the visible FR / EN switch still works.
-}
 
 document.querySelectorAll('[data-language]').forEach((link) => {
   link.addEventListener('click', (event) => {
