@@ -70,7 +70,7 @@
 <section class="detail-section"><h2>What is tested, and what is still missing?</h2>
 <div class="verger-stage-grid">
 <article><h3>Implemented and automatically tested</h3><p>PWA association tools, exports, identified consultations, first-run setup and server-side DNS verification.</p></article>
-<article><h3>Integrated in the Android prototype</h3><p>Verger home first, bundled association tools and the SimpleX engine in a single APK. The latest language and interface changes are still being built and checked.</p></article>
+<article><h3>Integrated in the Android prototype</h3><p>Verger opens first, with association tools and the SimpleX engine bundled into one APK. <a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42283808509">The Android build succeeded on 6 November</a>; real-device tests are still needed, while the latest additions, including custom logos, require a new build.</p></article>
 <article><h3>Required before wider availability</h3><p>Real-device testing, complete French messaging, invitation and revocation handling, enforced permissions on all data, isolated synchronization for each association, and server deployment.</p></article>
 </div>
 <p class="verger-caution"><strong>Important distinction:</strong> SimpleX messages are end-to-end encrypted, but this does not automatically encrypt association management data. The pilot Automerge sync server still relies on a shared token and <strong>must not be used to host unrelated associations yet</strong>.</p>
