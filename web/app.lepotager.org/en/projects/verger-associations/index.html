@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#173d2b">
-<meta name="description" content="A local-first PWA for association life, with members, meetings, decisions and actions, plus an Android Capacitor version in preparation.">
+<meta name="description" content="An open-source association app with meetings, tasks, volunteer coordination, a closed-group encrypted SimpleX chat and a DNS-verified onboarding prototype.">
 <title>Verger Associations: Local-first association management | Le Verger</title>
 <link rel="canonical" href="https://app.lepotager.org/en/projects/verger-associations/">
-<meta property="og:title" content="Verger Associations: Local-first association management"><meta property="og:description" content="See the features planned for Verger Associations: meetings, member decisions, tasks, events, volunteering, and the real state of its PWA prototype."><meta property="og:url" content="https://app.lepotager.org/en/projects/verger-associations/"><meta property="og:type" content="article">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://app.lepotager.org/en/projects/verger-associations/#webpage","url":"https://app.lepotager.org/en/projects/verger-associations/","name":"Verger Associations: Local-first association management","description":"A local-first PWA for association life, with members, meetings, decisions and actions, plus an Android Capacitor version in preparation.","inLanguage":"en"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://app.lepotager.org/en/"},{"@type":"ListItem","position":2,"name":"Verger Associations","item":"https://app.lepotager.org/en/projects/verger-associations/"}]}]}</script>
+<meta property="og:title" content="Verger Associations: Local-first association management"><meta property="og:description" content="An association dashboard and encrypted private-group chat in one Android app, alongside local-first management tools and an onboarding wizard."><meta property="og:url" content="https://app.lepotager.org/en/projects/verger-associations/"><meta property="og:type" content="article">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://app.lepotager.org/en/projects/verger-associations/#webpage","url":"https://app.lepotager.org/en/projects/verger-associations/","name":"Verger Associations: Local-first association management","description":"An open-source association app with meetings, tasks, volunteer coordination, a closed-group encrypted SimpleX chat and a DNS-verified onboarding prototype.","inLanguage":"en"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://app.lepotager.org/en/"},{"@type":"ListItem","position":2,"name":"Verger Associations","item":"https://app.lepotager.org/en/projects/verger-associations/"}]}]}</script>
 <link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/verger-associations/">
 <link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/verger-associations/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/style.css?v=20261010-families1"><link rel="stylesheet" href="/assets/project-detail.css?v=20261105-features"><link rel="stylesheet" href="/accessibility.css">
+<link rel="stylesheet" href="/assets/style.css?v=20261010-families1"><link rel="stylesheet" href="/assets/project-detail.css?v=20261106-verger"><link rel="stylesheet" href="/accessibility.css">
 <script defer src="/accessibility.js"></script></head>
 <body><a class="skip-link" href="#contenu">Skip to content</a>
 <header class="site-header"><div class="shell header-inner"><a class="brand" href="/en/" aria-label="Le Verger du Numérique">
@@ -19,31 +19,70 @@
 <a data-language="en" href="/en/projects/verger-associations/" hreflang="en" lang="en" class="is-active" aria-current="page">EN</a></div>
 <button class="accessibility-toggle" type="button" data-app-accessibility-toggle aria-pressed="false">Accessible mode</button>
 </div></div></header>
-<main id="contenu" class="detail-page"><div class="shell">
+<main id="contenu" class="detail-page verger-detail"><div class="shell">
 <a class="detail-back" href="/en/#projets">← Back to all projects</a>
-<div class="detail-head"><div><p class="detail-category">Applications</p><h1>Verger Associations</h1><p class="detail-lede">An open-source app for meetings, collective decisions, task tracking and volunteer coordination.</p></div>
-<aside class="detail-facts"><dl><dt>Current stage</dt><dd>PWA prototype · v0.4 in preparation</dd>
-<dt>Platform</dt><dd>PWA · Android Capacitor · AGPL</dd><dt>Reviewed</dt><dd><time datetime="2026-11-05">5 November 2026</time></dd></dl></aside></div>
-<section class="detail-section"><h2>What is Verger Associations for?</h2><p>Meetings, group decisions, tasks, events and volunteers are often managed across several unrelated documents. <strong>Verger Associations aims to bring them together in one open-source app</strong>, without requiring a new messaging or accounting platform.</p><p>It targets associations, community groups and cooperatives, with local storage and portable exports.</p></section>
-<section class="detail-section detail-feature-section"><h2>Planned and existing features</h2><div class="detail-feature-grid">
-<article><h3>Members</h3><p>Manage members, roles and optional contact details.</p><small>Built in prototype</small></article>
-<article><h3>Meetings</h3><p>Prepare agendas, gather proposals, objections and amendments, and export minutes.</p><small>Built in prototype</small></article>
-<article><h3>Collective decisions</h3><p>Record decision methods, outcomes, review dates and linked tasks.</p><small>Built in prototype</small></article>
-<article><h3>Task tracking</h3><p>Assign action items, deadlines and statuses to members.</p><small>Built in prototype</small></article>
-<article><h3>Events and volunteers</h3><p>Plan events, advertise volunteer needs and close requests.</p><small>Built in prototype</small></article>
-<article><h3>Onboarding and mutual aid</h3><p>Welcome new members and organize requests or offers of help.</p><small>Early versions</small></article>
-<article><h3>Member consultations</h3><p>Invite identified members to single-choice votes and publish aggregate results after closure.</p><small>Code exists; real-world testing pending</small></article>
-<article><h3>Offline work and backups</h3><p>Store information locally, export/import JSON and eventually synchronize devices.</p><small>Local storage built; sync experimental</small></article>
-</div></section>
-<section class="detail-section"><h2>Example: a committee meeting</h2><ol class="detail-steps"><li>Prepare the agenda.</li><li>Collect a proposal and objections.</li><li>Record the decision and review date.</li><li>Assign a follow-up action.</li><li>Export the meeting record to the association's archives.</li></ol><p>This workflow exists in the prototype but needs field testing with real associations.</p></section>
-<section class="detail-section"><h2>Current development stage</h2><p>The PWA includes members, meetings, decisions, tasks, events, volunteer requests and JSON/Markdown exports. Onboarding, mutual aid and consultations have initial implementations. An older Webxdc prototype served as a proof of concept.</p><p>Offline and reconnect testing on real devices remains pending. The optional sync server still uses a shared token: <strong>it cannot yet securely host unrelated associations.</strong></p></section>
-<section class="detail-section"><h2>What's next and what's out of scope</h2><ul><li>Run a pilot with 4–7 participants and at least two real meetings.</li><li>Add proper accounts, invitations, permissions and revocation.</li><li>Build and test the Capacitor Android version; no public-ready APK is currently announced.</li><li>Consider reporting, alerting and optional integrations only after pilot feedback.</li></ul><p>This is not yet an accounting, official records or messaging system. Avoid sensitive production data until security validation.</p></section>
-<section class="detail-section"><h2>Documentation and contributions</h2><p>AGPL-licensed source and documentation: <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/MODULES.md">feature modules</a>, <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/ROADMAP.md">roadmap</a> and <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/PILOT.md">pilot plan</a>.</p></section>
-<section class="detail-section"><h2>Learn more and participate</h2>
-<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/verger-associations">Source code <span aria-hidden="true">↗</span></a></div>
-<div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Verger%20Associations">Ask about this project →</a></div></section>
-<section class="detail-section related-projects"><h2>Related projects</h2><ul><li><a href="/en/projects/livraison-commune/">livraison commune</a></li><li><a href="/en/projects/dendrila-forms/">dendrila forms</a></li></ul></section>
-<p class="detail-reviewed">Information reviewed on 11 October 2026 from the current project repository.</p>
+<div class="detail-head"><div><p class="detail-category">Applications</p><h1>Verger Associations</h1>
+<p class="detail-lede">One app to run an association: organise work, make collective decisions, coordinate volunteers and talk in an encrypted private group.</p>
+<p class="detail-intro-note">Open source and designed for useful offline operation on Android. This remains an alpha prototype; the updated APK and multi-association deployment require further validation.</p></div>
+<aside class="detail-facts"><dl>
+<dt>Stage</dt><dd>Working prototype · alpha testing</dd>
+<dt>Platforms</dt><dd>Local-first PWA · Android APK with embedded SimpleX</dd>
+<dt>Licensing</dt><dd>AGPL-3.0 business features · original component licences retained</dd>
+<dt>Reviewed</dt><dd><time datetime="2026-11-06">6 November 2026</time></dd>
+</dl></aside></div>
+<section class="detail-section"><h2>What is Verger Associations for?</h2>
+<p>Meetings, collective decisions, assigned tasks, welcoming members, running events and requesting help are often scattered across different tools. <strong>Verger Associations brings these activities together</strong> for associations, community groups and cooperatives.</p>
+<p>The association dashboard opens first in the APK. Chat is not a second app that users must install: its encrypted SimpleX engine runs within Verger.</p>
+</section>
+<section class="detail-section detail-feature-section"><h2>Features already developed</h2>
+<p>These features exist in working prototypes or development branches. Code availability does not yet mean production deployment has been approved.</p>
+<div class="detail-feature-grid"><article><h3>Members and onboarding</h3><p>A member directory with roles and optional contact details, plus a welcome checklist for newcomers.</p><small>Implemented</small></article>
+<article><h3>Meetings and decisions</h3><p>Agendas, proposals, objections, amendments, decision methods, meeting records and follow-up actions.</p><small>Implemented</small></article>
+<article><h3>Tasks and responsibilities</h3><p>Assigned tasks, due dates, progress and links back to meetings.</p><small>Implemented</small></article>
+<article><h3>Events and volunteering</h3><p>Events, attendance tracking, volunteer requests and assignments.</p><small>Implemented</small></article>
+<article><h3>Mutual aid, ideas and resources</h3><p>Requests and offers of help, an ideas board, notes and useful links.</p><small>Working prototype</small></article>
+<article><h3>Verified consultations</h3><p>Invitations, accounts and roles, one revisable choice per member, closure and aggregate results.</p><small>API and automated tests</small></article>
+<article><h3>Encrypted group messaging</h3><p>Embedded SimpleX in the Android APK: one locally selected private group and no unrestricted group creation in the Verger interface.</p><small>Integrated Android prototype</small></article>
+<article><h3>Association setup</h3><p>First-run wizard, logo, theme colour, module selection, administrator account and DNS TXT domain-control verification.</p><small>Implemented on development branch</small></article>
+<article><h3>Separate administration</h3><p>A sign-in area for administrators; membership management and technical settings are hidden from the regular navigation.</p><small>Interface under validation</small></article>
+<article><h3>Offline use and backups</h3><p>Local-first Automerge data, portable JSON backups, Markdown meeting reports and ICS event exports.</p><small>Local storage built; sync experimental</small></article></div>
+</section>
+<section class="detail-section"><h2>How does an association set itself up?</h2>
+<ol class="detail-steps verger-journey">
+<li><strong>Introduce the association.</strong> Enter its name and description.</li>
+<li><strong>Personalise the interface.</strong> Add a logo, choose a colour and select the modules you need.</li>
+<li><strong>Set up an administrator.</strong> Supply an email address and create the administrator account.</li>
+<li><strong>Verify the domain.</strong> Copy a temporary DNS TXT record, then ask the server to confirm that it is published.</li>
+<li><strong>Start using Verger.</strong> Open your chosen tools from the dashboard; sensitive settings are kept in a separate administrator area.</li>
+</ol>
+<p>DNS verification shows that the person <strong>technically controls the domain</strong>, not that they have proven their legal mandate to represent the association. No hosting password or domain registrar credentials are required.</p>
+<p class="verger-caution">The setup wizard and server-side DNS checks are implemented and automatically tested, but public self-service registration is not yet live. Associations without their own domain can explore the prototype locally.</p>
+</section>
+<section class="detail-section"><h2>Embedded encrypted messaging, not a social network</h2>
+<p>The Android prototype reuses <a href="/en/projects/simplex-chat/">SimpleX Chat</a> end-to-end encryption in a single APK. Members access <strong>their association’s private group</strong> instead of creating arbitrary conversations and additional groups from the Verger interface.</p>
+<p>Administrators prepare the group and its invitations. Linking it to a Verger space is currently a local action on each phone, and hiding buttons does not replace SimpleX’s own group permissions. French translations are being completed: <strong>some messaging screens may still contain English text</strong>.</p>
+</section>
+<section class="detail-section"><h2>A shorter mobile navigation</h2>
+<p>Four primary destinations on smaller screens:</p>
+<div class="verger-nav-preview" aria-label="Text preview of the mobile menu"><span>Home</span><span>Events</span><span>Messaging</span><span>More</span></div>
+<p>“More” contains the other enabled modules. A separate sign-in area is used for administration, keeping technical settings apart from the everyday member tools.</p>
+</section>
+<section class="detail-section"><h2>What is tested, and what is still missing?</h2>
+<div class="verger-stage-grid">
+<article><h3>Implemented and automatically tested</h3><p>PWA association tools, exports, identified consultations, first-run setup and server-side DNS verification.</p></article>
+<article><h3>Integrated in the Android prototype</h3><p>Verger home first, bundled association tools and the SimpleX engine in a single APK. The latest language and interface changes are still being built and checked.</p></article>
+<article><h3>Required before wider availability</h3><p>Real-device testing, complete French messaging, invitation and revocation handling, enforced permissions on all data, isolated synchronization for each association, and server deployment.</p></article>
+</div>
+<p class="verger-caution"><strong>Important distinction:</strong> SimpleX messages are end-to-end encrypted, but this does not automatically encrypt association management data. The pilot Automerge sync server still relies on a shared token and <strong>must not be used to host unrelated associations yet</strong>.</p>
+<p>Verger does not yet replace association accounting, formal records management or production handling of sensitive information.</p>
+</section>
+<section class="detail-section"><h2>Source code and participation</h2>
+<p>Development is open and under review. Follow the <a href="https://github.com/jasmin-abernathy/verger-associations/pull/12">association app prototype branch</a>, the <a href="https://github.com/jasmin-abernathy/simplex-chat/tree/work/verger-primary-french-20261106">Android SimpleX integration</a> and the <a href="https://github.com/jasmin-abernathy/verger-associations/blob/work/verger-consultations-simplex-20261105/docs/CONFIGURATION-ASSOCIATION.md">association setup guide</a>.</p>
+<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/verger-associations">Source code and documentation <span aria-hidden="true">↗</span></a><a href="https://github.com/jasmin-abernathy/simplex-chat/actions/workflows/verger-prototype-apk.yml">Android test builds <span aria-hidden="true">↗</span></a></div>
+<div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Verger%20Associations">Suggest an association for pilot testing →</a></div>
+</section>
+<section class="detail-section related-projects"><h2>Related projects</h2><ul><li><a href="/en/projects/simplex-chat/">Contributions to SimpleX Chat</a></li><li><a href="/en/projects/dendrila-forms/">Dendrila Forms</a></li></ul></section>
+<p class="detail-reviewed">Updated 6 November 2026 from the project’s development branches and automated checks. No public release is announced yet.</p>
 <a class="detail-back" href="/en/#projets">← Back to all projects</a>
 </div></main><footer class="site-footer"><div class="shell footer-grid"><div><a class="brand brand-footer" href="/en/"><span><strong>Le Verger</strong><small>du Numérique</small></span></a>
 <p>Useful, open and privacy-minded digital tools.</p></div><div class="footer-links">

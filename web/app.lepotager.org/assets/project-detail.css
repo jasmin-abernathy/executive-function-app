@@ -98,3 +98,21 @@
 .detail-feature-grid article small{display:inline-block;border-radius:20px;background:#edf5ef;border:1px solid #c4ddcd;padding:4px 10px;color:#31513b;font-weight:750;font-size:.78rem}
 .detail-steps{padding-left:1.5rem;color:#435249;line-height:1.7}.detail-steps li+li{margin-top:8px}
 @media(max-width:670px){.detail-feature-grid{grid-template-columns:1fr}.detail-feature-grid article{padding:17px}}
+
+/* Verger Associations: product overview and prototype caveats. */
+.verger-detail .detail-intro-note{max-width:58ch;margin-top:18px;color:#586d5b;line-height:1.7}
+.verger-detail .detail-feature-grid article{display:flex;flex-direction:column}
+.verger-detail .detail-feature-grid article p{flex:1}
+.verger-detail .detail-feature-grid article small{align-self:flex-start}
+.verger-detail .verger-journey{padding-left:1.6rem}
+.verger-detail .verger-journey li{padding-left:.3rem}
+.verger-detail .verger-journey strong{color:#173d2b}
+.verger-detail .verger-caution{padding:14px 18px;border-left:4px solid #8b6632;border-radius:0 12px 12px 0;background:#fff7e7;color:#4c3d23}
+.verger-detail .verger-nav-preview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:18px 0}
+.verger-detail .verger-nav-preview span{display:grid;place-items:center;text-align:center;min-height:54px;padding:8px 6px;border:1px solid #b7d5c0;border-radius:12px;background:#f0f7f1;color:#173d2b;font-weight:800;font-size:.87rem;overflow-wrap:anywhere}
+.verger-detail .verger-stage-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin:20px 0}
+.verger-detail .verger-stage-grid article{min-width:0;padding:20px;border:1px solid var(--line);border-radius:14px;background:#fff}
+.verger-detail .verger-stage-grid h3{margin:0 0 12px;color:#173d2b;font-size:1.05rem;line-height:1.35}
+.verger-detail .verger-stage-grid p{margin:0;line-height:1.65}
+@media(max-width:850px){.verger-detail .verger-stage-grid{grid-template-columns:1fr}}
+@media(max-width:450px){.verger-detail .verger-nav-preview{gap:4px}.verger-detail .verger-nav-preview span{font-size:.75rem;padding-inline:3px;min-height:48px}}

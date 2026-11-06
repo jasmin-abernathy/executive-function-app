@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#173d2b">
-<meta name="description" content="Une application associative locale d’abord : membres, réunions, décisions, actions et événements, avec une déclinaison Android en développement.">
+<meta name="description" content="Application libre pour les associations : réunions, bénévolat, décisions, messagerie SimpleX chiffrée et configuration avec vérification du domaine.">
 <title>Verger Associations : logiciel de gestion associative</title>
 <link rel="canonical" href="https://app.lepotager.org/projets/verger-associations/">
-<meta property="og:title" content="Verger Associations : Application de gestion associative local-first"><meta property="og:description" content="Découvrez les fonctionnalités de Verger Associations : réunions, décisions, tâches, événements, bénévolat et avancement réel du prototype."><meta property="og:url" content="https://app.lepotager.org/projets/verger-associations/"><meta property="og:type" content="article">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://app.lepotager.org/projets/verger-associations/#webpage","url":"https://app.lepotager.org/projets/verger-associations/","name":"Verger Associations : Application de gestion associative local-first","description":"Une application associative locale d’abord : membres, réunions, décisions, actions et événements, avec une déclinaison Android en développement.","inLanguage":"fr"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://app.lepotager.org/"},{"@type":"ListItem","position":2,"name":"Verger Associations","item":"https://app.lepotager.org/projets/verger-associations/"}]}]}</script>
+<meta property="og:title" content="Verger Associations : Application de gestion associative local-first"><meta property="og:description" content="Gestion associative, messagerie privée chiffrée et assistant de création : les fonctions de Verger, leur avancement réel et leurs limites."><meta property="og:url" content="https://app.lepotager.org/projets/verger-associations/"><meta property="og:type" content="article">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://app.lepotager.org/projets/verger-associations/#webpage","url":"https://app.lepotager.org/projets/verger-associations/","name":"Verger Associations : Application de gestion associative local-first","description":"Application libre pour les associations : réunions, bénévolat, décisions, messagerie SimpleX chiffrée et configuration avec vérification du domaine.","inLanguage":"fr"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://app.lepotager.org/"},{"@type":"ListItem","position":2,"name":"Verger Associations","item":"https://app.lepotager.org/projets/verger-associations/"}]}]}</script>
 <link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/verger-associations/">
 <link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/verger-associations/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/style.css?v=20261010-families1"><link rel="stylesheet" href="/assets/project-detail.css?v=20261105-features"><link rel="stylesheet" href="/accessibility.css">
+<link rel="stylesheet" href="/assets/style.css?v=20261010-families1"><link rel="stylesheet" href="/assets/project-detail.css?v=20261106-verger"><link rel="stylesheet" href="/accessibility.css">
 <script defer src="/accessibility.js"></script></head>
 <body><a class="skip-link" href="#contenu">Aller au contenu</a>
 <header class="site-header"><div class="shell header-inner"><a class="brand" href="/" aria-label="Le Verger du Numérique">
@@ -19,32 +19,70 @@
 <a data-language="en" href="/en/projects/verger-associations/" hreflang="en" lang="en">EN</a></div>
 <button class="accessibility-toggle" type="button" data-app-accessibility-toggle aria-pressed="false">Version accessible</button>
 </div></div></header>
-<main id="contenu" class="detail-page"><div class="shell">
+<main id="contenu" class="detail-page verger-detail"><div class="shell">
 <a class="detail-back" href="/#projets">← Revenir aux projets</a>
-<div class="detail-head"><div><p class="detail-category">Applications</p><h1>Verger Associations</h1><p class="detail-lede">Un outil libre pour préparer les réunions, prendre des décisions collectives, suivre les tâches et mobiliser les bénévoles.</p></div>
-<aside class="detail-facts"><dl><dt>État actuel</dt><dd>Prototype PWA · v0.4 en préparation</dd>
-<dt>Type</dt><dd>PWA · Android Capacitor · AGPL</dd><dt>Informations vérifiées</dt><dd><time datetime="2026-11-05">5 novembre 2026</time></dd></dl></aside></div>
-<section class="detail-section"><h2>À quoi sert Verger Associations ?</h2><p>Organiser une réunion, décider ensemble, répartir les actions, préparer un événement et mobiliser des bénévoles : ces tâches sont souvent dispersées dans plusieurs documents. <strong>Verger Associations vise à les réunir dans une application libre</strong>, sans imposer une nouvelle messagerie ni un logiciel de comptabilité.</p><p>Le projet s'adresse aux associations, collectifs, SCOP et SCIC. Les données sont conservées d'abord localement et peuvent être exportées.</p></section>
-<section class="detail-section detail-feature-section"><h2>Les fonctionnalités prévues, module par module</h2>
-<div class="detail-feature-grid">
-<article><h3>Membres</h3><p>Créer et modifier les fiches des membres, leurs rôles et des coordonnées facultatives.</p><small>Prototype développé</small></article>
-<article><h3>Réunions</h3><p>Préparer l'ordre du jour, recueillir des propositions, objections et amendements, puis exporter un relevé.</p><small>Prototype développé</small></article>
-<article><h3>Décisions collectives</h3><p>Garder la formulation retenue, la méthode de décision, les actions associées et la date de révision.</p><small>Prototype développé</small></article>
-<article><h3>Tâches</h3><p>Répartir des actions entre membres, fixer des échéances et suivre leur avancement.</p><small>Prototype développé</small></article>
-<article><h3>Événements et bénévolat</h3><p>Créer des événements et publier des besoins de bénévoles, puis clôturer ces besoins.</p><small>Prototype développé</small></article>
-<article><h3>Accueil et entraide</h3><p>Accompagner les nouvelles personnes, publier des demandes et offres d'aide.</p><small>Premières versions à consolider</small></article>
-<article><h3>Consultations</h3><p>Interroger des membres invités, recueillir une réponse par compte et consulter les résultats agrégés après clôture.</p><small>Socle développé, tests réels nécessaires</small></article>
-<article><h3>Travail hors ligne et sauvegardes</h3><p>Conserver les informations sur son appareil et exporter/importer une sauvegarde JSON. Le partage entre appareils reste à fiabiliser.</p><small>Stockage local présent ; synchronisation expérimentale</small></article>
-</div></section>
-<section class="detail-section"><h2>À quoi ressemble une utilisation ?</h2><ol class="detail-steps"><li>Une personne prépare une réunion et son ordre du jour.</li><li>Les membres ajoutent propositions et objections.</li><li>La décision est notée, avec sa méthode et une échéance éventuelle.</li><li>Une action est attribuée à un membre.</li><li>Le relevé de réunion est exporté pour les archives de l'association.</li></ol><p>Le parcours métier est développé, mais il doit encore être éprouvé avec de vraies associations.</p></section>
-<section class="detail-section"><h2>État réel du développement</h2><p>La PWA contient les modules membres, réunions, décisions, actions, événements, bénévolat et des exports JSON/Markdown. L'accueil, l'entraide et les consultations ont des premières implémentations. Un ancien prototype Webxdc a servi à valider les besoins.</p><p>Des vérifications restent nécessaires sur les vrais téléphones et navigateurs, notamment hors ligne et lors de la reconnexion. Le serveur facultatif de synchronisation repose encore sur un jeton partagé : <strong>il n'est pas prêt à héberger plusieurs associations indépendantes avec des garanties de sécurité suffisantes.</strong></p></section>
-<section class="detail-section"><h2>Prochaines étapes et limites</h2><ul><li>Tester l'application avec 4 à 7 personnes au cours d'au moins deux réunions réelles.</li><li>Finaliser les comptes, invitations, droits d'accès et possibilités de révocation.</li><li>Construire et tester la déclinaison Android avec Capacitor ; aucune APK destinée au public n'est encore annoncée.</li><li>Évaluer ensuite les modules de signalements, d'alertes et les connecteurs facultatifs, selon les besoins du pilote.</li></ul><p>Verger Associations ne remplace pas actuellement une comptabilité associative, un archivage réglementaire des procès-verbaux ou une messagerie. Il ne faut pas y déposer de données sensibles pour le moment.</p></section>
-<section class="detail-section"><h2>Documentation et contribution</h2><p>Le code source est ouvert sous licence AGPL. Pour en savoir davantage : <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/MODULES.md">modules et fonctions</a>, <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/ROADMAP.md">feuille de route</a> et <a href="https://github.com/jasmin-abernathy/verger-associations/blob/main/docs/PILOT.md">scénario du premier pilote</a>.</p></section>
-<section class="detail-section"><h2>En savoir plus et participer</h2>
-<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/verger-associations">Code source <span aria-hidden="true">↗</span></a></div>
-<div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Verger%20Associations">Poser une question sur le projet →</a></div></section>
-<section class="detail-section related-projects"><h2>Projets associés</h2><ul><li><a href="/projets/livraison-commune/">livraison commune</a></li><li><a href="/projets/dendrila-forms/">dendrila forms</a></li></ul></section>
-<p class="detail-reviewed">Informations revues le 9 octobre 2026 à partir des dépôts des projets et du catalogue existant.</p>
+<div class="detail-head"><div><p class="detail-category">Applications</p><h1>Verger Associations</h1>
+<p class="detail-lede">Une seule application pour faire vivre son association : organiser, décider, agir et échanger dans un groupe privé chiffré.</p>
+<p class="detail-intro-note">Libre, conçue pour rester utile hors connexion et utilisable sur Android. Le prototype évolue encore : la nouvelle APK et les usages multi-associations doivent être validés avant une diffusion publique.</p></div>
+<aside class="detail-facts"><dl>
+<dt>Avancement</dt><dd>Prototype fonctionnel · version alpha en test</dd>
+<dt>Supports</dt><dd>PWA locale · APK Android intégrant SimpleX</dd>
+<dt>Licence</dt><dd>Code métier AGPL-3.0 · licences des composants conservées</dd>
+<dt>Dernière mise à jour</dt><dd><time datetime="2026-11-06">6 novembre 2026</time></dd>
+</dl></aside></div>
+<section class="detail-section"><h2>À quoi sert Verger Associations ?</h2>
+<p>Préparer une réunion, décider collectivement, répartir des tâches, accueillir des membres, organiser un événement ou demander de l’aide : autant d’activités souvent dispersées entre différentes applications. <strong>Verger Associations les rassemble dans un même espace</strong>, destiné aux associations, collectifs et structures coopératives.</p>
+<p>L’accueil de l’association s’affiche dès l’ouverture de l’APK. La messagerie n’est pas une application à installer séparément : son moteur chiffré SimpleX est intégré derrière l’interface de Verger.</p>
+</section>
+<section class="detail-section detail-feature-section"><h2>Ce qui est déjà développé</h2>
+<p>Ces fonctionnalités existent dans les prototypes et branches de développement. Leur présence dans le code ne signifie pas que leur utilisation en production a déjà été validée.</p>
+<div class="detail-feature-grid"><article><h3>Membres et intégration</h3><p>Annuaire des membres, rôles et coordonnées facultatives, avec suivi de l’accueil des nouveaux arrivants.</p><small>Fonctions présentes</small></article>
+<article><h3>Réunions et décisions</h3><p>Ordres du jour, propositions, objections, amendements, méthode de décision, relevés et actions à suivre.</p><small>Fonctions présentes</small></article>
+<article><h3>Actions et responsabilités</h3><p>Tâches attribuées, échéances, état d’avancement et lien avec les réunions.</p><small>Fonctions présentes</small></article>
+<article><h3>Événements et bénévolat</h3><p>Calendrier d’événements, inscriptions de participants, besoins bénévoles et affectation des volontaires.</p><small>Fonctions présentes</small></article>
+<article><h3>Entraide, idées et ressources</h3><p>Demandes et offres d’aide, boîte à idées, notes et liens utiles partagés avec l’association.</p><small>Prototype développé</small></article>
+<article><h3>Consultations identifiées</h3><p>Invitations, comptes et rôles, un choix modifiable par membre, clôture et résultats agrégés.</p><small>API et tests automatisés</small></article>
+<article><h3>Messagerie de groupe chiffrée</h3><p>SimpleX intégré dans l’APK : un groupe privé associé à l’appareil, sans création libre de nouveaux groupes dans l’interface Verger.</p><small>Prototype Android intégré</small></article>
+<article><h3>Configuration de l’association</h3><p>Assistant de démarrage, logo, couleur, activation des modules, compte responsable et preuve de contrôle du nom de domaine par DNS TXT.</p><small>Implémenté sur branche de test</small></article>
+<article><h3>Administration séparée</h3><p>Espace responsable avec connexion ; gestion des membres et réglages retirés de la navigation ordinaire.</p><small>Interface en validation</small></article>
+<article><h3>Hors ligne et sauvegardes</h3><p>Données d’abord locales avec Automerge, export/import JSON, relevés Markdown et export d’événements au format ICS.</p><small>Stockage local présent ; Sync expérimentale</small></article></div>
+</section>
+<section class="detail-section"><h2>Comment une association crée son espace ?</h2>
+<ol class="detail-steps verger-journey">
+<li><strong>Présenter l’association.</strong> Indiquer son nom et sa description.</li>
+<li><strong>Personnaliser.</strong> Ajouter un logo, choisir une couleur et activer les modules utiles.</li>
+<li><strong>Désigner un responsable.</strong> Renseigner son adresse e-mail et créer son compte d’administration.</li>
+<li><strong>Vérifier le domaine.</strong> Copier un enregistrement DNS TXT temporaire, puis demander au serveur de confirmer sa présence.</li>
+<li><strong>Commencer à utiliser Verger.</strong> Retrouver les outils sélectionnés depuis l’accueil ; les fonctions sensibles sont regroupées dans un espace responsable.</li>
+</ol>
+<p>La vérification DNS prouve que la personne <strong>contrôle techniquement le nom de domaine</strong> de l’association. Elle ne constitue pas à elle seule une preuve juridique de mandat. Aucun mot de passe d’hébergement ou accès au registrar n’est à communiquer à Verger.</p>
+<p class="verger-caution">L’assistant et l’API DNS ont été implémentés et testés automatiquement, mais le service d’inscription n’est pas encore annoncé comme ouvert au public. Les associations sans domaine peuvent explorer le prototype en local.</p>
+</section>
+<section class="detail-section"><h2>Une messagerie intégrée, pas un réseau social</h2>
+<p>Le prototype Android réutilise le chiffrement de bout en bout de <a href="/projets/simplex-chat/">SimpleX Chat</a>, sans exiger l’installation d’une seconde application. Les membres retrouvent le <strong>groupe privé de leur association</strong> plutôt qu’une interface permettant de créer librement des conversations et d’autres groupes.</p>
+<p>Les responsables préparent le groupe et les invitations. Son association à l’espace Verger se fait actuellement sur chaque téléphone, et les restrictions de l’interface ne remplacent pas les autorisations du groupe SimpleX. Les traductions françaises des écrans utiles sont en cours de complément : <strong>toute l’interface de messagerie n’est pas encore garantie en français</strong>.</p>
+</section>
+<section class="detail-section"><h2>Une interface plus simple sur mobile</h2>
+<p>Le prototype présente quatre accès principaux sur petit écran :</p>
+<div class="verger-nav-preview" aria-label="Aperçu textuel de la navigation mobile"><span>Accueil</span><span>Événements</span><span>Messagerie</span><span>Plus</span></div>
+<p>Le menu « Plus » regroupe les autres modules activés. L’administration possède son propre accès, avec connexion, pour éviter de mélanger les réglages techniques aux activités quotidiennes des membres.</p>
+</section>
+<section class="detail-section"><h2>Ce qui fonctionne, ce qui reste à valider</h2>
+<div class="verger-stage-grid">
+<article><h3>Développé et testé automatiquement</h3><p>Fonctions associatives de la PWA, exports, consultations identifiées, assistant de configuration et vérification DNS côté serveur.</p></article>
+<article><h3>Intégré dans le prototype Android</h3><p>Accueil Verger en premier, outils embarqués et moteur SimpleX dans une même APK. Les dernières améliorations de langue et d’interface font encore l’objet d’une compilation et de vérifications.</p></article>
+<article><h3>Encore nécessaire avant une diffusion large</h3><p>Essais sur plusieurs téléphones, messagerie française finalisée, invitations et révocations, droits appliqués à toutes les données, synchronisation véritablement isolée par association et mise en service du serveur.</p></article>
+</div>
+<p class="verger-caution"><strong>À ne pas confondre :</strong> les messages SimpleX sont chiffrés de bout en bout, mais cela ne chiffre pas automatiquement les données de gestion d’association. Le serveur de synchronisation Automerge du pilote repose encore sur un jeton partagé et <strong>n’est pas prêt pour héberger plusieurs associations indépendantes</strong>.</p>
+<p>Verger ne remplace pas encore une comptabilité associative, un système d’archivage réglementaire ou une solution de gestion de données sensibles en production.</p>
+</section>
+<section class="detail-section"><h2>Code source et participation</h2>
+<p>Le développement est ouvert, avec des fonctions en cours de revue. On peut suivre la <a href="https://github.com/jasmin-abernathy/verger-associations/pull/12">branche du prototype associatif</a>, l’<a href="https://github.com/jasmin-abernathy/simplex-chat/tree/work/verger-primary-french-20261106">intégration Android de SimpleX</a>, et le <a href="https://github.com/jasmin-abernathy/verger-associations/blob/work/verger-consultations-simplex-20261105/docs/CONFIGURATION-ASSOCIATION.md">parcours de création d’une association</a>.</p>
+<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/verger-associations">Code source et documentation <span aria-hidden="true">↗</span></a><a href="https://github.com/jasmin-abernathy/simplex-chat/actions/workflows/verger-prototype-apk.yml">Compilations Android de test <span aria-hidden="true">↗</span></a></div>
+<div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Verger%20Associations">Proposer une association pilote →</a></div>
+</section>
+<section class="detail-section related-projects"><h2>Projets associés</h2><ul><li><a href="/projets/simplex-chat/">Contributions à SimpleX Chat</a></li><li><a href="/projets/dendrila-forms/">Dendrila Forms</a></li></ul></section>
+<p class="detail-reviewed">Contenu actualisé le 6 novembre 2026 à partir des branches de développement et des vérifications automatisées. Aucun lancement public n’est annoncé à ce stade.</p>
 <a class="detail-back" href="/#projets">← Revenir aux projets</a>
 </div></main><footer class="site-footer"><div class="shell footer-grid"><div><a class="brand brand-footer" href="/"><span><strong>Le Verger</strong><small>du Numérique</small></span></a>
 <p>Des outils numériques utiles, sobres et respectueux de la vie privée.</p></div><div class="footer-links">

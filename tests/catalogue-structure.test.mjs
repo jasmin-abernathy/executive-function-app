@@ -52,7 +52,7 @@ for(const lang of ['fr','en']){
   assert.ok(home.includes('data-project-filter="webapps"'),lang+' : filtre Applis web manquant');
   assert.ok(home.includes('data-project-group="webapps"'),lang+' : rubrique Applis web manquante');
   assert.ok(home.includes('https://epub-gen.lepotager.org/'),lang+' : accès direct au générateur EPUB manquant');
-  assert.ok(home.includes('PWA v0.3'),lang+' : Verger Associations non actualisé');
+  assert.ok(home.includes(lang==='fr'?'APK Android en test':'Android APK in testing'),lang+' : Verger Associations non actualisé');
   assert.equal(cards.filter(c=>c[1]==='wordpress').length,7,lang+' : sept projets WordPress attendus');
   for(const [category,number] of [['sites',3],['applications',5],['webapps',4]]){
     assert.equal(cards.filter(c=>c[1]===category).length,number,lang+' : mauvais nombre de projets '+category);
@@ -99,6 +99,11 @@ for(const lang of ['fr','en']){
   const webApps=['atelier-epub','librairie-universelle','livraison-commune','dendrila-forms'];
   for(const slug of webApps) assert.ok(read(prefix+slug+'/index.html').includes('class="detail-category">'+webLabel+'</p>'), lang+' : fiche appli web mal classée '+slug);
   assert.ok(read(prefix+'verger-associations/index.html').includes('class="detail-category">Applications</p>'),lang+' : PWA Verger Associations mal classée');
+  const verger=read(prefix+'verger-associations/index.html');
+  assert.ok(verger.includes('2026-11-06'),lang+' : date Verger obsolète');
+  assert.ok(verger.includes('SimpleX') && verger.includes('DNS TXT'),lang+' : nouvelles fonctions Verger absentes');
+  assert.ok(verger.includes('verger-stage-grid') && verger.includes('verger-nav-preview'),lang+' : présentation des avancées Verger absente');
+  assert.ok(verger.includes('https://github.com/jasmin-abernathy/verger-associations/pull/12'),lang+' : suivi du prototype Verger absent');
   const epub=read(prefix+'atelier-epub/index.html');
   assert.ok(epub.includes('href="https://epub-gen.lepotager.org/"'),lang+' : lien vers le site EPUB absent de la fiche');
   assert.ok(epub.includes('2026-10-11'),lang+' : statut EPUB obsolète');
