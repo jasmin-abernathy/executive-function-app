@@ -52,11 +52,11 @@
 <li><strong>Introduce the association.</strong> Enter its name and description.</li>
 <li><strong>Personalise the interface.</strong> Add a logo, choose a colour and select the modules you need.</li>
 <li><strong>Set up an administrator.</strong> Supply an email address and create the administrator account.</li>
-<li><strong>Verify the domain.</strong> Copy a temporary DNS TXT record, then ask the server to confirm that it is published.</li>
+<li><strong>Verify the domain.</strong> Either add a temporary DNS TXT record or download a verification text file to place in your website’s public root; the server checks your chosen method.</li>
 <li><strong>Start using Verger.</strong> Open your chosen tools from the dashboard; sensitive settings are kept in a separate administrator area.</li>
 </ol>
-<p>DNS verification shows that the person <strong>technically controls the domain</strong>, not that they have proven their legal mandate to represent the association. No hosting password or domain registrar credentials are required.</p>
-<p class="verger-caution">The setup wizard and server-side DNS checks are implemented and automatically tested, but public self-service registration is not yet live. Associations without their own domain can explore the prototype locally.</p>
+<p>DNS TXT or HTTPS file verification shows that the person <strong>technically controls the domain or website</strong>, not that they have proven their legal mandate to represent the association. No hosting password or domain registrar credentials are required.</p>
+<p class="verger-caution">The setup wizard and both verification methods (DNS TXT and HTTPS file) are implemented and automatically tested, but public self-service registration is not yet live. Associations without their own domain can explore the prototype locally.</p>
 </section>
 <section class="detail-section"><h2>Embedded encrypted messaging, not a social network</h2>
 <p>The Android prototype reuses <a href="/en/projects/simplex-chat/">SimpleX Chat</a> end-to-end encryption in a single APK. Members access <strong>their association’s private group</strong> instead of creating arbitrary conversations and additional groups from the Verger interface.</p>
@@ -69,7 +69,7 @@
 </section>
 <section class="detail-section"><h2>What is tested, and what is still missing?</h2>
 <div class="verger-stage-grid">
-<article><h3>Implemented and automatically tested</h3><p>PWA association tools, exports, identified consultations, first-run setup and server-side DNS verification.</p></article>
+<article><h3>Implemented and automatically tested</h3><p>PWA association tools, exports, identified consultations, first-run setup and server-side DNS TXT or HTTPS file verification.</p></article>
 <article><h3>Integrated in the Android prototype</h3><p>Verger opens first, with association tools and the SimpleX engine bundled into one APK. <a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42283808509">The Android build succeeded on 6 November</a>; real-device tests are still needed, while the latest additions, including custom logos, require a new build.</p></article>
 <article><h3>Required before wider availability</h3><p>Real-device testing, complete French messaging, invitation and revocation handling, enforced permissions on all data, isolated synchronization for each association, and server deployment.</p></article>
 </div>

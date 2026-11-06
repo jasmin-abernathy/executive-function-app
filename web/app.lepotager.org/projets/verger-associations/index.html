@@ -52,11 +52,11 @@
 <li><strong>Présenter l’association.</strong> Indiquer son nom et sa description.</li>
 <li><strong>Personnaliser.</strong> Ajouter un logo, choisir une couleur et activer les modules utiles.</li>
 <li><strong>Désigner un responsable.</strong> Renseigner son adresse e-mail et créer son compte d’administration.</li>
-<li><strong>Vérifier le domaine.</strong> Copier un enregistrement DNS TXT temporaire, puis demander au serveur de confirmer sa présence.</li>
+<li><strong>Vérifier le domaine.</strong> Au choix : créer un enregistrement DNS TXT ou télécharger un fichier texte à déposer à la racine du site, puis lancer la vérification.</li>
 <li><strong>Commencer à utiliser Verger.</strong> Retrouver les outils sélectionnés depuis l’accueil ; les fonctions sensibles sont regroupées dans un espace responsable.</li>
 </ol>
-<p>La vérification DNS prouve que la personne <strong>contrôle techniquement le nom de domaine</strong> de l’association. Elle ne constitue pas à elle seule une preuve juridique de mandat. Aucun mot de passe d’hébergement ou accès au registrar n’est à communiquer à Verger.</p>
-<p class="verger-caution">L’assistant et l’API DNS ont été implémentés et testés automatiquement, mais le service d’inscription n’est pas encore annoncé comme ouvert au public. Les associations sans domaine peuvent explorer le prototype en local.</p>
+<p>La vérification DNS TXT ou par fichier HTTPS prouve que la personne <strong>contrôle techniquement le nom de domaine ou le site</strong> de l’association. Elle ne constitue pas à elle seule une preuve juridique de mandat. Aucun mot de passe d’hébergement ou accès au registrar n’est à communiquer à Verger.</p>
+<p class="verger-caution">L’assistant et les deux méthodes de vérification (DNS TXT et fichier HTTPS) ont été implémentés et testés automatiquement, mais le service d’inscription n’est pas encore annoncé comme ouvert au public. Les associations sans domaine peuvent explorer le prototype en local.</p>
 </section>
 <section class="detail-section"><h2>Une messagerie intégrée, pas un réseau social</h2>
 <p>Le prototype Android réutilise le chiffrement de bout en bout de <a href="/projets/simplex-chat/">SimpleX Chat</a>, sans exiger l’installation d’une seconde application. Les membres retrouvent le <strong>groupe privé de leur association</strong> plutôt qu’une interface permettant de créer librement des conversations et d’autres groupes.</p>
@@ -69,7 +69,7 @@
 </section>
 <section class="detail-section"><h2>Ce qui fonctionne, ce qui reste à valider</h2>
 <div class="verger-stage-grid">
-<article><h3>Développé et testé automatiquement</h3><p>Fonctions associatives de la PWA, exports, consultations identifiées, assistant de configuration et vérification DNS côté serveur.</p></article>
+<article><h3>Développé et testé automatiquement</h3><p>Fonctions associatives de la PWA, exports, consultations identifiées, assistant de configuration et vérification DNS TXT ou fichier HTTPS côté serveur.</p></article>
 <article><h3>Intégré dans le prototype Android</h3><p>Accueil Verger en premier, outils embarqués et moteur SimpleX dans une même APK. <a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42283808509">La compilation Android du 6 novembre a réussi</a> ; les essais sur téléphones restent à effectuer et les ajouts les plus récents, notamment le logo personnalisable, nécessitent une nouvelle compilation.</p></article>
 <article><h3>Encore nécessaire avant une diffusion large</h3><p>Essais sur plusieurs téléphones, messagerie française finalisée, invitations et révocations, droits appliqués à toutes les données, synchronisation véritablement isolée par association et mise en service du serveur.</p></article>
 </div>
