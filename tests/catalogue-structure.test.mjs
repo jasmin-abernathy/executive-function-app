@@ -129,7 +129,8 @@ for(const slug of ['dendrila-simple-edit','dendrila-forms-wordpress','dendrila-f
   const en=read('en/projects/'+slug+'/index.html');
   assert.ok(fr.includes('WordPress')&&en.includes('WordPress'),slug+' : catégorie WordPress absente');
   assert.ok(fr.includes('class="detail-section"')&&en.includes('class="detail-section"'),slug+' : détails incomplets');
-  assert.ok(fr.includes('2026-10-11')&&en.includes('2026-10-11'),slug+' : date de révision manquante');
+  const reviewed = slug === 'dendrila-accessibility-assistant' ? '2026-10-28' : '2026-10-11';
+  assert.ok(fr.includes(reviewed) && en.includes(reviewed), slug+' : date de révision manquante');
   assert.ok(read('sitemap.xml').includes('/projets/'+slug+'/'),slug+' : sitemap FR incomplet');
   assert.ok(read('sitemap.xml').includes('/en/projects/'+slug+'/'),slug+' : sitemap EN incomplet');
 }
