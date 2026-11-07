@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="fr">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#173d2b">
-<meta name="description" content="Application libre pour les associations : réunions, bénévolat, décisions, messagerie SimpleX chiffrée et configuration avec vérification du domaine.">
+<meta name="description" content="Verger Associations : application libre en alpha pour réunions, décisions, bénévolat, accès par rôle et messagerie chiffrée intégrée sur Android.">
 <title>Verger Associations : logiciel de gestion associative</title>
 <link rel="canonical" href="https://app.lepotager.org/projets/verger-associations/">
 <meta property="og:title" content="Verger Associations : Application de gestion associative local-first"><meta property="og:description" content="Gestion associative, messagerie privée chiffrée et assistant de création : les fonctions de Verger, leur avancement réel et leurs limites."><meta property="og:url" content="https://app.lepotager.org/projets/verger-associations/"><meta property="og:type" content="article">
@@ -23,16 +23,16 @@
 <a class="detail-back" href="/#projets">← Revenir aux projets</a>
 <div class="detail-head"><div><p class="detail-category">Applications</p><h1>Verger Associations</h1>
 <p class="detail-lede">Une seule application pour faire vivre son association : organiser, décider, agir et échanger dans un groupe privé chiffré.</p>
-<p class="detail-intro-note">Libre, conçue pour rester utile hors connexion et utilisable sur Android. Le prototype évolue encore : la nouvelle APK et les usages multi-associations doivent être validés avant une diffusion publique.</p></div>
+<p class="detail-intro-note">Une version alpha Android a été compilée et testée automatiquement le 7 novembre 2026. Le pilote est en cours, mais les essais sur différents téléphones et la synchronisation entre membres restent à finaliser avant une ouverture publique.</p></div>
 <aside class="detail-facts"><dl>
 <dt>Avancement</dt><dd>Prototype fonctionnel · version alpha en test</dd>
 <dt>Supports</dt><dd>PWA locale · APK Android intégrant SimpleX</dd>
 <dt>Licence</dt><dd>Code métier AGPL-3.0 · licences des composants conservées</dd>
-<dt>Dernière mise à jour</dt><dd><time datetime="2026-11-06">6 novembre 2026</time></dd>
+<dt>Dernière mise à jour</dt><dd><time datetime="2026-11-07">7 novembre 2026</time></dd>
 </dl></aside></div>
 <section class="detail-section"><h2>À quoi sert Verger Associations ?</h2>
 <p>Préparer une réunion, décider collectivement, répartir des tâches, accueillir des membres, organiser un événement ou demander de l’aide : autant d’activités souvent dispersées entre différentes applications. <strong>Verger Associations les rassemble dans un même espace</strong>, destiné aux associations, collectifs et structures coopératives.</p>
-<p>L’accueil de l’association s’affiche dès l’ouverture de l’APK. La messagerie n’est pas une application à installer séparément : son moteur chiffré SimpleX est intégré derrière l’interface de Verger.</p>
+<p>À l’ouverture, chaque personne choisit son parcours d’accès. Une fois connectée, elle retrouve l’accueil de son association. Le moteur de messagerie chiffrée SimpleX est intégré à l’APK : il n’y a pas de seconde application à installer.</p>
 </section>
 <section class="detail-section detail-feature-section"><h2>Ce qui est déjà développé</h2>
 <p>Ces fonctionnalités existent dans les prototypes et branches de développement. Leur présence dans le code ne signifie pas que leur utilisation en production a déjà été validée.</p>
@@ -41,48 +41,60 @@
 <article><h3>Actions et responsabilités</h3><p>Tâches attribuées, échéances, état d’avancement et lien avec les réunions.</p><small>Fonctions présentes</small></article>
 <article><h3>Événements et bénévolat</h3><p>Calendrier d’événements, inscriptions de participants, besoins bénévoles et affectation des volontaires.</p><small>Fonctions présentes</small></article>
 <article><h3>Entraide, idées et ressources</h3><p>Demandes et offres d’aide, boîte à idées, notes et liens utiles partagés avec l’association.</p><small>Prototype développé</small></article>
-<article><h3>Consultations identifiées</h3><p>Invitations, comptes et rôles, un choix modifiable par membre, clôture et résultats agrégés.</p><small>API et tests automatisés</small></article>
-<article><h3>Messagerie de groupe chiffrée</h3><p>SimpleX intégré dans l’APK : un groupe privé associé à l’appareil, sans création libre de nouveaux groupes dans l’interface Verger.</p><small>Prototype Android intégré</small></article>
-<article><h3>Configuration de l’association</h3><p>Assistant de démarrage, logo, couleur, activation des modules, compte responsable et preuve de contrôle du nom de domaine par DNS TXT.</p><small>Implémenté sur branche de test</small></article>
-<article><h3>Administration séparée</h3><p>Espace responsable avec connexion ; gestion des membres et réglages retirés de la navigation ordinaire.</p><small>Interface en validation</small></article>
-<article><h3>Hors ligne et sauvegardes</h3><p>Données d’abord locales avec Automerge, export/import JSON, relevés Markdown et export d’événements au format ICS.</p><small>Stockage local présent ; Sync expérimentale</small></article></div>
+<article><h3>Consultations identifiées</h3><p>Comptes authentifiés, rôles serveur, un choix modifiable par membre, clôture et résultats agrégés. Les autorisations sont contrôlées côté serveur.</p><small>API pilote et tests automatisés</small></article>
+<article><h3>Messagerie de groupe chiffrée</h3><p>SimpleX intégré dans l’APK : création du groupe privé par la présidence authentifiée, entrée des autres membres par invitation et retour vers l’accueil connecté.</p><small>APK alpha compilée · à retester sur téléphone</small></article>
+<article><h3>Configuration de l’association</h3><p>Assistant de démarrage, logo, couleur principale et modules, compte responsable, puis vérification du domaine par DNS TXT ou fichier HTTPS.</p><small>Implémenté dans le pilote</small></article>
+<article><h3>Administration et demandes d’accès</h3><p>Connexion dédiée, traitement des demandes des bénévoles ou du bureau et émission de codes d’invitation. Les droits ne dépendent pas du bouton choisi à l’entrée.</p><small>API et interface testées automatiquement</small></article>
+<article><h3>Hors ligne et sauvegardes</h3><p>Données locales avec Automerge, export/import JSON, relevés Markdown et événements ICS. La synchronisation des documents entre appareils n’est pas encore activée.</p><small>Stockage local présent · sync non opérationnelle</small></article>
+<article><h3>Identité visuelle adaptable</h3><p>Une couleur choisie pour l’association produit des variantes harmonisées pour les cartes, fonds, boutons et messages, en modes clair et sombre, avec ajustement du contraste.</p><small>Présent dans la dernière APK</small></article></div>
+</section>
+<section class="detail-section"><h2>Trois accès, selon sa place dans l’association</h2>
+<p>L’écran d’entrée propose ces parcours dans cet ordre. Il ne suffit pas de choisir un bouton pour obtenir des autorisations : <strong>les droits sont déterminés par le compte validé sur le serveur</strong>.</p>
+<div class="verger-stage-grid">
+<article><h3>Bénévoles</h3><p>Se connecter, demander à rejoindre l’association ou activer une invitation reçue. Une fois autorisé, accéder aux modules mis à disposition.</p></article>
+<article><h3>Bureau / fondateurs</h3><p>Se connecter à l’espace de l’association, demander un accès adapté ou utiliser son code d’invitation. Ce parcours ne donne pas automatiquement les droits d’administration.</p></article>
+<article><h3>Présidence / coprésidence</h3><p>Créer et vérifier l’espace de l’association ou se connecter à un compte de responsable existant. Les comptes administrateurs peuvent examiner les demandes d’accès et préparer le groupe chiffré.</p></article>
+</div>
+<p>Les demandes sont examinées depuis l’administration. Si elles sont acceptées, un code d’invitation est créé et transmis par un responsable : <strong>aucun e-mail automatique ni contrôle de propriété de l’adresse e-mail n’est encore en place</strong>.</p>
 </section>
 <section class="detail-section"><h2>Comment une association crée son espace ?</h2>
 <ol class="detail-steps verger-journey">
+<li><strong>Choisir « Présidence / coprésidence ».</strong> Ouvrir le parcours de création d’un espace ou se connecter comme responsable.</li>
 <li><strong>Présenter l’association.</strong> Indiquer son nom et sa description.</li>
-<li><strong>Personnaliser.</strong> Ajouter un logo, choisir une couleur et activer les modules utiles.</li>
+<li><strong>Personnaliser.</strong> Ajouter un logo, choisir une couleur principale déclinée automatiquement dans toute l’interface et activer les modules utiles.</li>
 <li><strong>Désigner un responsable.</strong> Renseigner son adresse e-mail et créer son compte d’administration.</li>
 <li><strong>Vérifier le domaine.</strong> Au choix : créer un enregistrement DNS TXT ou télécharger un fichier texte à déposer à la racine du site, puis lancer la vérification.</li>
 <li><strong>Commencer à utiliser Verger.</strong> Retrouver les outils sélectionnés depuis l’accueil ; les fonctions sensibles sont regroupées dans un espace responsable.</li>
 </ol>
 <p>La vérification DNS TXT ou par fichier HTTPS prouve que la personne <strong>contrôle techniquement le nom de domaine ou le site</strong> de l’association. Elle ne constitue pas à elle seule une preuve juridique de mandat. Aucun mot de passe d’hébergement ou accès au registrar n’est à communiquer à Verger.</p>
-<p class="verger-caution">L’assistant et les deux méthodes de vérification (DNS TXT et fichier HTTPS) ont été implémentés et testés automatiquement, mais le service d’inscription n’est pas encore annoncé comme ouvert au public. Les associations sans domaine peuvent explorer le prototype en local.</p>
+<p class="verger-caution">L’inscription publique n’est pas ouverte : seul un pilote restreint est en cours. La vérification DNS TXT ou par fichier HTTPS prouve le contrôle technique d’un domaine, pas le mandat juridique de représenter une association. Un code de vérification temporaire doit être régénéré après expiration. Sur Android 10 et plus, le fichier est enregistré directement dans « Téléchargements ».</p>
 </section>
 <section class="detail-section"><h2>Une messagerie intégrée, pas un réseau social</h2>
-<p>Le prototype Android réutilise le chiffrement de bout en bout de <a href="/projets/simplex-chat/">SimpleX Chat</a>, sans exiger l’installation d’une seconde application. Les membres retrouvent le <strong>groupe privé de leur association</strong> plutôt qu’une interface permettant de créer librement des conversations et d’autres groupes.</p>
-<p>Les responsables préparent le groupe et les invitations. Son association à l’espace Verger se fait actuellement sur chaque téléphone, et les restrictions de l’interface ne remplacent pas les autorisations du groupe SimpleX. Les traductions françaises des écrans utiles sont en cours de complément : <strong>toute l’interface de messagerie n’est pas encore garantie en français</strong>.</p>
+<p>Dans la version alpha Android, la <strong>présidence authentifiée peut ouvrir directement le formulaire de création du groupe privé</strong>, sans code d’invitation. Les autres membres rejoignent le groupe par invitation. Un profil de messagerie chiffrée reste nécessaire lors de la première utilisation ; il n’y a pas d’installation séparée de SimpleX. Le chiffrement de bout en bout repose sur <a href="/projets/simplex-chat/">SimpleX Chat</a>.</p>
+<p>Le groupe choisi est associé localement à l’association sur le téléphone. La dernière APK conserve l’accueil connecté derrière la messagerie pour permettre un retour Android vers Verger. Ce parcours a passé les tests automatisés, mais la création de groupe et le retour doivent encore être confirmés sur téléphone. Les droits internes du groupe restent ceux de SimpleX et certains écrans du moteur chiffré peuvent encore contenir de l’anglais.</p>
 </section>
 <section class="detail-section"><h2>Une interface plus simple sur mobile</h2>
-<p>Le prototype présente quatre accès principaux sur petit écran :</p>
+<p>Après connexion, l’interface présente quatre entrées principales sur petit écran :</p>
 <div class="verger-nav-preview" aria-label="Aperçu textuel de la navigation mobile"><span>Accueil</span><span>Événements</span><span>Messagerie</span><span>Plus</span></div>
 <p>Le menu « Plus » regroupe les autres modules activés. L’administration possède son propre accès, avec connexion, pour éviter de mélanger les réglages techniques aux activités quotidiennes des membres.</p>
 </section>
 <section class="detail-section"><h2>Ce qui fonctionne, ce qui reste à valider</h2>
 <div class="verger-stage-grid">
-<article><h3>Développé et testé automatiquement</h3><p>Fonctions associatives de la PWA, exports, consultations identifiées, assistant de configuration et vérification DNS TXT ou fichier HTTPS côté serveur.</p></article>
-<article><h3>Intégré dans le prototype Android</h3><p>Accueil Verger en premier, outils embarqués et moteur SimpleX dans une même APK. <a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42283808509">La compilation Android du 6 novembre a réussi</a> ; les essais sur téléphones restent à effectuer et les ajouts les plus récents, notamment le logo personnalisable, nécessitent une nouvelle compilation.</p></article>
-<article><h3>Encore nécessaire avant une diffusion large</h3><p>Essais sur plusieurs téléphones, messagerie française finalisée, invitations et révocations, droits appliqués à toutes les données, synchronisation véritablement isolée par association et mise en service du serveur.</p></article>
+<article><h3>Développé et testé automatiquement</h3><p>Interface PWA et modules associatifs, exports, consultations identifiées, demandes d’accès, rôles serveur, vérification DNS TXT ou fichier HTTPS et palettes de couleurs : des tests automatisés couvrent ces éléments. Le serveur du pilote répond en HTTPS et gère les comptes.</p></article>
+<article><h3>Intégré dans le prototype Android</h3><p>Une seule APK contient les outils Verger et la messagerie SimpleX. Le parcours de création du groupe pour la présidence, le retour à l’accueil connecté et le thème de l’association sont inclus dans <a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42366126221">la compilation réussie du 7 novembre 2026</a>. Ces interactions nécessitent encore un essai complet sur téléphone.</p></article>
+<article><h3>Encore nécessaire avant une diffusion large</h3><p>Synchronisation réelle des données de gestion entre membres et appareils, droits sur toutes les données locales, essais Android sur plusieurs versions, invitations/révocations vérifiées de bout en bout, traductions restantes et tests de sécurité avant ouverture au public.</p></article>
 </div>
-<p class="verger-caution"><strong>À ne pas confondre :</strong> les messages SimpleX sont chiffrés de bout en bout, mais cela ne chiffre pas automatiquement les données de gestion d’association. Le serveur de synchronisation Automerge du pilote repose encore sur un jeton partagé et <strong>n’est pas prêt pour héberger plusieurs associations indépendantes</strong>.</p>
+<p class="verger-caution"><strong>Deux systèmes distincts :</strong> les messages SimpleX sont chiffrés de bout en bout ; les données de gestion ne le deviennent pas automatiquement. Le serveur du pilote traite déjà les comptes, invitations et consultations, mais <strong>la synchronisation des documents Automerge entre téléphones n’est pas encore activée</strong>. Chaque appareil garde ses données locales ; une désinstallation sans sauvegarde peut les faire perdre.</p>
 <p>Verger ne remplace pas encore une comptabilité associative, un système d’archivage réglementaire ou une solution de gestion de données sensibles en production.</p>
 </section>
 <section class="detail-section"><h2>Code source et participation</h2>
-<p>Le développement est ouvert, avec des fonctions en cours de revue. On peut suivre la <a href="https://github.com/jasmin-abernathy/verger-associations/pull/12">branche du prototype associatif</a>, l’<a href="https://github.com/jasmin-abernathy/simplex-chat/tree/work/verger-primary-french-20261106">intégration Android de SimpleX</a>, et le <a href="https://github.com/jasmin-abernathy/verger-associations/blob/work/verger-consultations-simplex-20261105/docs/CONFIGURATION-ASSOCIATION.md">parcours de création d’une association</a>.</p>
-<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/verger-associations">Code source et documentation <span aria-hidden="true">↗</span></a><a href="https://github.com/jasmin-abernathy/simplex-chat/actions/workflows/verger-prototype-apk.yml">Compilations Android de test <span aria-hidden="true">↗</span></a></div>
+<p>Le projet avance dans deux dépôts : <a href="https://github.com/jasmin-abernathy/verger-associations/tree/work/verger-consultations-simplex-20261105">les outils associatifs, leurs tests et le serveur pilote</a>, et <a href="https://github.com/jasmin-abernathy/simplex-chat/tree/work/verger-primary-french-20261106">l’intégration Android de la messagerie chiffrée</a>. Le <a href="https://github.com/jasmin-abernathy/verger-associations/blob/work/verger-consultations-simplex-20261105/docs/CONFIGURATION-ASSOCIATION.md">guide de configuration</a> décrit les étapes et leurs limites.</p>
+<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42366126221">APK Android alpha du 7 novembre (GitHub Actions) <span aria-hidden="true">↗</span></a><a href="https://github.com/jasmin-abernathy/verger-associations">Code source des outils associatifs <span aria-hidden="true">↗</span></a><a href="https://github.com/jasmin-abernathy/simplex-chat/tree/work/verger-primary-french-20261106">Code de la messagerie Android <span aria-hidden="true">↗</span></a></div>
+<p class="detail-intro-note">L’APK est fournie dans l’artefact « verger-simplex-prototype » du lien GitHub Actions (une connexion GitHub peut être nécessaire). C’est une version de test, non destinée à la production. Avant de remplacer ou désinstaller une version, sauvegardez les données locales.</p>
 <div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Verger%20Associations">Proposer une association pilote →</a></div>
 </section>
 <section class="detail-section related-projects"><h2>Projets associés</h2><ul><li><a href="/projets/simplex-chat/">Contributions à SimpleX Chat</a></li><li><a href="/projets/dendrila-forms/">Dendrila Forms</a></li></ul></section>
-<p class="detail-reviewed">Contenu actualisé le 6 novembre 2026 à partir des branches de développement et des vérifications automatisées. Aucun lancement public n’est annoncé à ce stade.</p>
+<p class="detail-reviewed">Contenu vérifié le 7 novembre 2026 sur les deux dépôts du projet, la compilation Android et le serveur pilote. Alpha en test : aucune diffusion publique stable n’est annoncée.</p>
 <a class="detail-back" href="/#projets">← Revenir aux projets</a>
 </div></main><footer class="site-footer"><div class="shell footer-grid"><div><a class="brand brand-footer" href="/"><span><strong>Le Verger</strong><small>du Numérique</small></span></a>
 <p>Des outils numériques utiles, sobres et respectueux de la vie privée.</p></div><div class="footer-links">

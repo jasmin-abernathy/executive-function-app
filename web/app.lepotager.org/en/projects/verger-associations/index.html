@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#173d2b">
-<meta name="description" content="An open-source association app with meetings, tasks, volunteer coordination, a closed-group encrypted SimpleX chat and a DNS-verified onboarding prototype.">
+<meta name="description" content="Verger Associations: an open-source alpha app for meetings, decisions, volunteer coordination, verified roles and integrated encrypted Android messaging.">
 <title>Verger Associations: Local-first association management | Le Verger</title>
 <link rel="canonical" href="https://app.lepotager.org/en/projects/verger-associations/">
 <meta property="og:title" content="Verger Associations: Local-first association management"><meta property="og:description" content="An association dashboard and encrypted private-group chat in one Android app, alongside local-first management tools and an onboarding wizard."><meta property="og:url" content="https://app.lepotager.org/en/projects/verger-associations/"><meta property="og:type" content="article">
@@ -23,16 +23,16 @@
 <a class="detail-back" href="/en/#projets">← Back to all projects</a>
 <div class="detail-head"><div><p class="detail-category">Applications</p><h1>Verger Associations</h1>
 <p class="detail-lede">One app to run an association: organise work, make collective decisions, coordinate volunteers and talk in an encrypted private group.</p>
-<p class="detail-intro-note">Open source and designed for useful offline operation on Android. This remains an alpha prototype; the updated APK and multi-association deployment require further validation.</p></div>
+<p class="detail-intro-note">An Android alpha build passed automated tests on 7 November 2026. A limited pilot is under way, but real-device checks and cross-device association data synchronization are still needed before a public release.</p></div>
 <aside class="detail-facts"><dl>
 <dt>Stage</dt><dd>Working prototype · alpha testing</dd>
 <dt>Platforms</dt><dd>Local-first PWA · Android APK with embedded SimpleX</dd>
 <dt>Licensing</dt><dd>AGPL-3.0 business features · original component licences retained</dd>
-<dt>Reviewed</dt><dd><time datetime="2026-11-06">6 November 2026</time></dd>
+<dt>Reviewed</dt><dd><time datetime="2026-11-07">7 November 2026</time></dd>
 </dl></aside></div>
 <section class="detail-section"><h2>What is Verger Associations for?</h2>
 <p>Meetings, collective decisions, assigned tasks, welcoming members, running events and requesting help are often scattered across different tools. <strong>Verger Associations brings these activities together</strong> for associations, community groups and cooperatives.</p>
-<p>The association dashboard opens first in the APK. Chat is not a second app that users must install: its encrypted SimpleX engine runs within Verger.</p>
+<p>On launch, users choose the access journey that fits their role. Once signed in, they reach their association dashboard. The end-to-end encrypted SimpleX messaging engine is built into the APK: no separate chat app needs installing.</p>
 </section>
 <section class="detail-section detail-feature-section"><h2>Features already developed</h2>
 <p>These features exist in working prototypes or development branches. Code availability does not yet mean production deployment has been approved.</p>
@@ -41,48 +41,60 @@
 <article><h3>Tasks and responsibilities</h3><p>Assigned tasks, due dates, progress and links back to meetings.</p><small>Implemented</small></article>
 <article><h3>Events and volunteering</h3><p>Events, attendance tracking, volunteer requests and assignments.</p><small>Implemented</small></article>
 <article><h3>Mutual aid, ideas and resources</h3><p>Requests and offers of help, an ideas board, notes and useful links.</p><small>Working prototype</small></article>
-<article><h3>Verified consultations</h3><p>Invitations, accounts and roles, one revisable choice per member, closure and aggregate results.</p><small>API and automated tests</small></article>
-<article><h3>Encrypted group messaging</h3><p>Embedded SimpleX in the Android APK: one locally selected private group and no unrestricted group creation in the Verger interface.</p><small>Integrated Android prototype</small></article>
-<article><h3>Association setup</h3><p>First-run wizard, logo, theme colour, module selection, administrator account and DNS TXT domain-control verification.</p><small>Implemented on development branch</small></article>
-<article><h3>Separate administration</h3><p>A sign-in area for administrators; membership management and technical settings are hidden from the regular navigation.</p><small>Interface under validation</small></article>
-<article><h3>Offline use and backups</h3><p>Local-first Automerge data, portable JSON backups, Markdown meeting reports and ICS event exports.</p><small>Local storage built; sync experimental</small></article></div>
+<article><h3>Verified consultations</h3><p>Authenticated accounts, server-side roles, one revisable choice per member, closure and aggregate results. Authorization checks run on the server.</p><small>Pilot API and automated tests</small></article>
+<article><h3>Encrypted group messaging</h3><p>SimpleX built into Android: authenticated presidents can create the private group, members join by invitation, and Android Back returns to the signed-in dashboard.</p><small>Compiled alpha APK · device retest pending</small></article>
+<article><h3>Association setup</h3><p>Setup wizard, logo, association colour and modules, administrator account, followed by DNS TXT or HTTPS file verification of domain control.</p><small>Implemented in pilot</small></article>
+<article><h3>Administration and access requests</h3><p>Dedicated login, review of volunteer and board requests, and invitation-code generation. The opening-screen role button does not grant privileges.</p><small>API and interface automatically tested</small></article>
+<article><h3>Offline use and backups</h3><p>Local Automerge data, portable JSON backup/import, Markdown reports and ICS exports. Cross-device document synchronization is not enabled yet.</p><small>Local storage works · sync unavailable</small></article>
+<article><h3>Adaptive association colours</h3><p>One association colour generates harmonious variations for backgrounds, cards, buttons and chat bubbles in light and dark modes, with contrast adjustments.</p><small>Included in the latest APK</small></article></div>
+</section>
+<section class="detail-section"><h2>Three access paths for association members</h2>
+<p>The opening screen shows these paths in the order below. <strong>Choosing a button does not grant permissions</strong>: actual privileges come from the account verified by the server.</p>
+<div class="verger-stage-grid">
+<article><h3>Volunteers</h3><p>Sign in, request access to the association, or accept an invitation. Once approved, use the modules made available to members.</p></article>
+<article><h3>Board / founders</h3><p>Sign in to the association, request a suitable level of access, or use an invitation code. This choice does not automatically confer administrator privileges.</p></article>
+<article><h3>Presidency / co-presidency</h3><p>Create and verify the association space, or sign in with an existing administrator account. Administrators can review access requests and set up encrypted group chat.</p></article>
+</div>
+<p>Administrators review access requests and, when approved, generate an invitation code to share manually. <strong>Automatic email delivery and email-address ownership verification are not yet available.</strong></p>
 </section>
 <section class="detail-section"><h2>How does an association set itself up?</h2>
 <ol class="detail-steps verger-journey">
+<li><strong>Choose “Presidency / co-presidency”.</strong> Create an association space or sign in with an administrator account.</li>
 <li><strong>Introduce the association.</strong> Enter its name and description.</li>
-<li><strong>Personalise the interface.</strong> Add a logo, choose a colour and select the modules you need.</li>
+<li><strong>Personalise the interface.</strong> Add a logo, pick one accent colour that is automatically applied throughout the interface, and select the modules you need.</li>
 <li><strong>Set up an administrator.</strong> Supply an email address and create the administrator account.</li>
 <li><strong>Verify the domain.</strong> Either add a temporary DNS TXT record or download a verification text file to place in your website’s public root; the server checks your chosen method.</li>
 <li><strong>Start using Verger.</strong> Open your chosen tools from the dashboard; sensitive settings are kept in a separate administrator area.</li>
 </ol>
 <p>DNS TXT or HTTPS file verification shows that the person <strong>technically controls the domain or website</strong>, not that they have proven their legal mandate to represent the association. No hosting password or domain registrar credentials are required.</p>
-<p class="verger-caution">The setup wizard and both verification methods (DNS TXT and HTTPS file) are implemented and automatically tested, but public self-service registration is not yet live. Associations without their own domain can explore the prototype locally.</p>
+<p class="verger-caution">Public registration is not available yet: this is a restricted pilot. DNS TXT or HTTPS file verification establishes technical control of a domain, not legal authority to represent an association. Expired verification challenges must be generated again. On Android 10+, the proof file is saved directly to Downloads.</p>
 </section>
 <section class="detail-section"><h2>Embedded encrypted messaging, not a social network</h2>
-<p>The Android prototype reuses <a href="/en/projects/simplex-chat/">SimpleX Chat</a> end-to-end encryption in a single APK. Members access <strong>their association’s private group</strong> instead of creating arbitrary conversations and additional groups from the Verger interface.</p>
-<p>Administrators prepare the group and its invitations. Linking it to a Verger space is currently a local action on each phone, and hiding buttons does not replace SimpleX’s own group permissions. French translations are being completed: <strong>some messaging screens may still contain English text</strong>.</p>
+<p>In the current Android alpha, <strong>an authenticated president can open the private-group creation form directly</strong>, without supplying a group invitation code. Other members join via an invitation. A first-time encrypted messaging profile is still required, but SimpleX does not need to be installed separately. End-to-end encryption is powered by <a href="/en/projects/simplex-chat/">SimpleX Chat</a>.</p>
+<p>The selected group is linked locally to the association on that phone. The latest APK preserves the signed-in Verger dashboard behind messaging so Android Back can return to it. Automated tests passed, but the actual group-creation and navigation flows still need checking on a phone. Group-level permissions remain under SimpleX, and some native chat screens may still include English text.</p>
 </section>
 <section class="detail-section"><h2>A shorter mobile navigation</h2>
-<p>Four primary destinations on smaller screens:</p>
+<p>After signing in, four primary destinations appear on smaller screens:</p>
 <div class="verger-nav-preview" aria-label="Text preview of the mobile menu"><span>Home</span><span>Events</span><span>Messaging</span><span>More</span></div>
 <p>“More” contains the other enabled modules. A separate sign-in area is used for administration, keeping technical settings apart from the everyday member tools.</p>
 </section>
 <section class="detail-section"><h2>What is tested, and what is still missing?</h2>
 <div class="verger-stage-grid">
-<article><h3>Implemented and automatically tested</h3><p>PWA association tools, exports, identified consultations, first-run setup and server-side DNS TXT or HTTPS file verification.</p></article>
-<article><h3>Integrated in the Android prototype</h3><p>Verger opens first, with association tools and the SimpleX engine bundled into one APK. <a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42283808509">The Android build succeeded on 6 November</a>; real-device tests are still needed, while the latest additions, including custom logos, require a new build.</p></article>
-<article><h3>Required before wider availability</h3><p>Real-device testing, complete French messaging, invitation and revocation handling, enforced permissions on all data, isolated synchronization for each association, and server deployment.</p></article>
+<article><h3>Implemented and automatically tested</h3><p>PWA association features, exports, identified consultations, access requests, server-side roles, DNS TXT/HTTPS file verification, and adaptive colour palettes are covered by automated tests. The pilot server is running over HTTPS and handles accounts.</p></article>
+<article><h3>Integrated in the Android prototype</h3><p>The same APK embeds Verger and the SimpleX messaging engine. President-led group creation, navigation back to the signed-in home screen, and association theming are included in <a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42366126221">the successful 7 November 2026 build</a>. Full device testing remains necessary.</p></article>
+<article><h3>Required before wider availability</h3><p>Actual association-data synchronization across members and devices, complete permissions for local data, Android testing across devices and versions, end-to-end invitation/revocation testing, remaining translations, and security review before public availability.</p></article>
 </div>
-<p class="verger-caution"><strong>Important distinction:</strong> SimpleX messages are end-to-end encrypted, but this does not automatically encrypt association management data. The pilot Automerge sync server still relies on a shared token and <strong>must not be used to host unrelated associations yet</strong>.</p>
+<p class="verger-caution"><strong>Two separate systems:</strong> SimpleX messages use end-to-end encryption, but association management data is not automatically encrypted. The pilot server already handles accounts, invitations and consultations, while <strong>Automerge document synchronization between phones is not yet enabled</strong>. Data stays local to each device and can be lost after uninstalling without a backup.</p>
 <p>Verger does not yet replace association accounting, formal records management or production handling of sensitive information.</p>
 </section>
 <section class="detail-section"><h2>Source code and participation</h2>
-<p>Development is open and under review. Follow the <a href="https://github.com/jasmin-abernathy/verger-associations/pull/12">association app prototype branch</a>, the <a href="https://github.com/jasmin-abernathy/simplex-chat/tree/work/verger-primary-french-20261106">Android SimpleX integration</a> and the <a href="https://github.com/jasmin-abernathy/verger-associations/blob/work/verger-consultations-simplex-20261105/docs/CONFIGURATION-ASSOCIATION.md">association setup guide</a>.</p>
-<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/verger-associations">Source code and documentation <span aria-hidden="true">↗</span></a><a href="https://github.com/jasmin-abernathy/simplex-chat/actions/workflows/verger-prototype-apk.yml">Android test builds <span aria-hidden="true">↗</span></a></div>
+<p>Work continues in two repositories: <a href="https://github.com/jasmin-abernathy/verger-associations/tree/work/verger-consultations-simplex-20261105">association tools, tests and the pilot server</a>, and <a href="https://github.com/jasmin-abernathy/simplex-chat/tree/work/verger-primary-french-20261106">Android encrypted messaging integration</a>. The <a href="https://github.com/jasmin-abernathy/verger-associations/blob/work/verger-consultations-simplex-20261105/docs/CONFIGURATION-ASSOCIATION.md">setup guide</a> documents the procedure and current limitations.</p>
+<div class="detail-actions"><a href="https://github.com/jasmin-abernathy/simplex-chat/actions/runs/42366126221">7 November Android alpha APK (GitHub Actions) <span aria-hidden="true">↗</span></a><a href="https://github.com/jasmin-abernathy/verger-associations">Association tools source code <span aria-hidden="true">↗</span></a><a href="https://github.com/jasmin-abernathy/simplex-chat/tree/work/verger-primary-french-20261106">Android messaging source code <span aria-hidden="true">↗</span></a></div>
+<p class="detail-intro-note">The APK is inside the “verger-simplex-prototype” artifact on the GitHub Actions page (GitHub sign-in may be required). It is a test build, not a production release. Back up local data before replacing or uninstalling an earlier version.</p>
 <div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Verger%20Associations">Suggest an association for pilot testing →</a></div>
 </section>
 <section class="detail-section related-projects"><h2>Related projects</h2><ul><li><a href="/en/projects/simplex-chat/">Contributions to SimpleX Chat</a></li><li><a href="/en/projects/dendrila-forms/">Dendrila Forms</a></li></ul></section>
-<p class="detail-reviewed">Updated 6 November 2026 from the project’s development branches and automated checks. No public release is announced yet.</p>
+<p class="detail-reviewed">Verified on 7 November 2026 against both project repositories, the Android build and the pilot server. Alpha testing only; no stable public release announced.</p>
 <a class="detail-back" href="/en/#projets">← Back to all projects</a>
 </div></main><footer class="site-footer"><div class="shell footer-grid"><div><a class="brand brand-footer" href="/en/"><span><strong>Le Verger</strong><small>du Numérique</small></span></a>
 <p>Useful, open and privacy-minded digital tools.</p></div><div class="footer-links">
