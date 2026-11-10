@@ -184,7 +184,7 @@ $adminPage = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/
 check(str_contains($adminPage, 'export.php?format=json&amp;lang=') && str_contains($adminPage, 'export.php?format=csv&amp;lang='),
     'Authenticated dashboard has JSON and CSV download links');
 $exportEndpoint = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/admin/export.php');
-check(str_contains($exportEndpoint, "empty(\\$_SESSION['v2_admin'])")
+check(str_contains($exportEndpoint, 'if (empty($_SESSION[\'v2_admin\']))')
     && str_contains($exportEndpoint, "Cache-Control: private, no-store"),
     'Export endpoint requires authentication and disables caching');
 
