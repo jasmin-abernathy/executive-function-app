@@ -51,6 +51,7 @@ class JournalActivity : ComponentActivity() {
         var noteText by remember {mutableStateOf("")}
         var editingCheck by remember {mutableStateOf<String?>(null)}
         var recurrence by remember {mutableStateOf<Int?>(null)}
+        var reminderDue by remember {mutableStateOf<Long?>(null)}
         var stepRecommendation by remember {mutableStateOf<StepRecommendation?>(null)}
         var repeatDays by remember(selected) {mutableStateOf("")}
         var pendingDelete by remember {mutableStateOf<String?>(null)}
@@ -80,6 +81,7 @@ class JournalActivity : ComponentActivity() {
             val all=withContext(Dispatchers.IO) { journal.tasks() }
             tasks=all
             if(selected!=null && all.none {it.id==selected}) selected=null
+            reminderDue=selected?.let { withContext(Dispatchers.IO) { TaskReminder.pendingAt(database,it) } }
             adapt=preferences.getBoolean("adapt",false)
             checkEnabled=preferences.getBoolean("enabled",false)
             checks=withContext(Dispatchers.IO) { journal.checkIns() }
@@ -280,7 +282,11 @@ class JournalActivity : ComponentActivity() {
                         Text(label("Une occurrence apparaît à l’ouverture quand elle est due. Une absence ne crée jamais une pile de tâches en retard.","A due occurrence appears when you open the app. Absence never creates a backlog."))
                         Text(label("Me rappeler cette tâche dans…","Remind me about this task in…"))
                         Row(horizontalArrangement=Arrangement.spacedBy(4.dp)) {
-                            listOf(5,15,60).forEach {delay->TextButton(enabled=!busy&&!task.completed,onClick={run{TaskReminder.set(this@JournalActivity,database,task.id,delay)}}){Text("$delay min")}}
+                            listOf(10,30,60).forEach {delay->TextButton(enabled=!busy&&!task.completed,onClick={run{TaskReminder.set(this@JournalActivity,database,task.id,delay)}}){Text("$delay min")}}
+                        }
+                        reminderDue?.let { due ->
+                            Text(label("Rappel prévu : ","Reminder set for: ")+
+                                DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT).format(Date(due)))
                         }
                         TextButton(enabled=!busy,onClick={run{TaskReminder.cancel(this@JournalActivity,database,task.id)}}){Text(label("Annuler le rappel","Cancel reminder"))}
                         Text(label("Android peut décaler légèrement le rappel. Autorise les notifications dans Réglages.","Android may delay the reminder slightly. Allow notifications in Settings."))

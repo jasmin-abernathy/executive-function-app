@@ -114,7 +114,14 @@ class FocusActionReceiver : BroadcastReceiver() {
                         val minutes=context.getSharedPreferences("app_preferences",Context.MODE_PRIVATE).getInt("pause_after_minutes",25)
                         PauseSchedule.set(context,updated,SessionClock.elapsedMs(updated.session,System.currentTimeMillis())+minutes*60_000L)
                     }
-                    "complete" -> db.closeFocus(FocusTransitions.finish(active.session,System.currentTimeMillis(),FocusStatus.COMPLETED),TaskStatus.COMPLETED)
+                    "complete" -> {
+                        val parentHasSteps = org.lepotager.executivefunction.data.LearningJournal(db)
+                            .steps(active.task.id).isNotEmpty()
+                        db.closeFocus(
+                            FocusTransitions.finish(active.session,System.currentTimeMillis(),FocusStatus.COMPLETED),
+                            org.lepotager.executivefunction.domain.FocusCompletionPolicy.taskStatus(parentHasSteps),
+                        )
+                    }
                     "later" -> PauseSchedule.set(context,active,SessionClock.elapsedMs(active.session,System.currentTimeMillis())+600_000)
                     "continue" -> PauseSchedule.set(context,active,Long.MAX_VALUE)
                 }

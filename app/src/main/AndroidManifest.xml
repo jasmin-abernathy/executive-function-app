@@ -13,6 +13,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ExecutiveFunction">
         <activity android:name=".JournalActivity" android:exported="false" />
+        <activity android:name=".RoutineActivity" android:exported="false" />
         <receiver android:name=".FocusActionReceiver" android:exported="false" />
         <receiver android:name=".ToolsWidget" android:exported="false" android:label="@string/open_journal">
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>

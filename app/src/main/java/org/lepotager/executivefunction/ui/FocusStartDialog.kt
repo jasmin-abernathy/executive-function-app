@@ -59,6 +59,17 @@ internal fun FocusStartDialog(
                 TextButton(onClick = { custom = !custom }, modifier = Modifier.testTag("toggle-task-timer")) {
                     Text(stringResource(if (custom) R.string.task_timer_keep else R.string.task_timer_change))
                 }
+                if (custom && !savingTask) {
+                    // Explicit, one-off long session; do not mutate per-task preferences.
+                    TextButton(
+                        onClick = {
+                            val twoHours = 120 * 60_000L
+                            if (onChoice != null) onChoice(FocusTimerMode.COUNTDOWN, twoHours, false)
+                            else onConfirm(FocusTimerMode.COUNTDOWN, twoHours)
+                        },
+                        modifier = Modifier.fillMaxWidth().testTag("focus-long-once"),
+                    ) { Text(stringResource(R.string.focus_long_once)) }
+                }
                 if (custom) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

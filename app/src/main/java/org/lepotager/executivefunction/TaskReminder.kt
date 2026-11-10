@@ -37,6 +37,15 @@ internal object TaskReminder {
         db.writableDatabase.insertWithOnConflict("task_reminders",null,ContentValues().apply{put("task_id",id);put("due_at",due)},android.database.sqlite.SQLiteDatabase.CONFLICT_REPLACE)
         context.getSystemService(AlarmManager::class.java).setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,due,alarm(context,id))
     }
+    /** A parent with any small steps requires explicit completion in the UI. */
+    internal fun needsCompletionReview(db: AppDatabase, id: String): Boolean =
+        db.readableDatabase.rawQuery("SELECT 1 FROM task_steps WHERE task_id=? LIMIT 1", arrayOf(id)).use { it.moveToFirst() }
+
+    internal fun pendingAt(db: AppDatabase, id: String): Long? =
+        db.readableDatabase.rawQuery("SELECT due_at FROM task_reminders WHERE task_id=?", arrayOf(id)).use { c ->
+            if (c.moveToFirst()) c.getLong(0) else null
+        }
+
     fun cancel(context: Context,db: AppDatabase,id: String) {
         db.writableDatabase.delete("task_reminders","task_id=?",arrayOf(id))
         context.getSystemService(AlarmManager::class.java).cancel(alarm(context,id))
@@ -77,12 +86,16 @@ internal object TaskReminder {
         val open=taskPendingIntent(context,id,false)
         val start=taskPendingIntent(context,id,true)
         fun action(name: String)=PendingIntent.getBroadcast(context,0,Intent(context,TaskReminderReceiver::class.java).setAction(name).setData(Uri.Builder().scheme("task-reminder").authority("local").appendPath(id).build()),PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        manager.notify(id,3200,NotificationCompat.Builder(context,"task_reminders")
+        val notification = NotificationCompat.Builder(context,"task_reminders")
             .setSmallIcon(R.drawable.ic_timer_notification).setContentTitle(context.getString(R.string.task_reminder)).setContentText(task.title)
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE).setContentIntent(open).setAutoCancel(true)
             .addAction(0,context.getString(R.string.start_action),start)
-            .addAction(0,context.getString(R.string.complete_action),action("complete"))
-            .addAction(0,context.getString(R.string.not_now),action("later")).build())
+        // Never offer an instant "Done" for a parent with small steps.
+        if (!needsCompletionReview(db,id)) {
+            notification.addAction(0,context.getString(R.string.complete_action),action("complete"))
+        }
+        notification.addAction(0,context.getString(R.string.not_now),action("later"))
+        manager.notify(id,3200,notification.build())
         // Remove only after notifying succeeds; blocked notifications must not lose the reminder.
         db.writableDatabase.delete("task_reminders","task_id=?",arrayOf(id))
     }
@@ -112,6 +125,15 @@ class TaskReminderReceiver: BroadcastReceiver() {
                         context.getSystemService(NotificationManager::class.java).cancel(id,3200)
                     }
                     "complete" -> {
+                        if (TaskReminder.needsCompletionReview(db,id)) {
+                            // Old notifications may still expose the previous action.
+                            // Open details instead of silently closing the parent.
+                            context.getSystemService(NotificationManager::class.java).cancel(id,3200)
+                            context.startActivity(
+                                TaskReminder.taskIntent(context,id,false).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                            return@execute
+                        }
                         val active=db.activeFocus()
                         if(active?.task?.id==id) {
                             db.closeFocus(org.lepotager.executivefunction.domain.FocusTransitions.finish(active.session,System.currentTimeMillis(),org.lepotager.executivefunction.model.FocusStatus.COMPLETED),TaskStatus.COMPLETED)

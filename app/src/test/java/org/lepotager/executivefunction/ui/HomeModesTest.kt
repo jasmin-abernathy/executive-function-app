@@ -32,6 +32,7 @@ class HomeModesTest {
         onStart: (String) -> Unit = {},
         onCustom: (String) -> Unit = {},
         onCheckIn: () -> Unit = {},
+        onRoutines: () -> Unit = {},
         onEditTask: (String) -> Unit = {},
     ) {
         compose.setContent {
@@ -39,6 +40,7 @@ class HomeModesTest {
                 HomeScreen(
                     tasks = tasks,
                     onCheckIn = onCheckIn,
+                    onRoutines = onRoutines,
                     onEditTask = onEditTask,
                     drawEnabled = false,
                     pauseSuggestionsEnabled = true,
@@ -91,6 +93,13 @@ class HomeModesTest {
             assertEquals(1, taskOpened)
             assertEquals(1, noteOpened)
         }
+    }
+
+    @Test fun routinesRemainAccessibleWithoutOpeningOtherTools() {
+        var opened = 0
+        render(onRoutines = { opened++ })
+        compose.onNodeWithTag("home-open-routines").performClick()
+        compose.runOnIdle { assertEquals(1, opened) }
     }
 
     @Test fun compactHomeOpensTheCurrentTaskStepsWithoutStartingItsTimer() {

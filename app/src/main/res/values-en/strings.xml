@@ -69,6 +69,10 @@
     <string name="resume_subtitle">There is nothing to catch up on. Just choose what helps now.</string>
     <string name="resume_context">You were here: %1$s</string>
     <string name="resume_action">Resume</string>
+    <string name="focus_long_once">Two-hour focus (this session only)</string>
+    <string name="focus_tap_pause_description">Pause the focus session</string>
+    <string name="focus_tap_pause_hint">Tap the time to pause.</string>
+    <string name="focus_note_while_paused">Add a note while paused</string>
     <string name="make_smaller_action">Make the first step smaller</string>
     <string name="choose_another_action">Postpone and choose something else</string>
     <string name="make_smaller_title">What is the smallest possible step?</string>
@@ -80,6 +84,7 @@
     <string name="error_message">Nothing was intentionally discarded. Try again; if it keeps happening, restart the app.</string>
     <string name="open_journal">Journal and settings</string>
     <string name="home_check_in">How I feel</string>
+    <string name="home_routines">My routines</string>
     <string name="adaptation_rule">Optional filters: declared energy, available time and context. The die shuffles matching tasks when you request it.</string>
     <string name="adaptation_suggestion">Based on these filters and your importance setting: %1$s</string>
     <string name="adaptation_empty">No tasks match the filters. Change them in Planning or choose manually.</string>
