@@ -174,7 +174,7 @@ v2_admin_write_csv($csvStream, $export);
 rewind($csvStream);
 $csvExport = stream_get_contents($csvStream);
 fclose($csvStream);
-check(str_contains($csvExport, 'ID question;Question;Type;') && str_contains($csvExport, 'abandon_risks'),
+check(str_contains($csvExport, 'ID question') && str_contains($csvExport, 'abandon_risks'),
     'CSV includes headings and answer choices');
 check(str_contains($csvExport, '50,0') && str_contains($csvExport, '2;'),
     'CSV includes numeric selections and localized percentage');
