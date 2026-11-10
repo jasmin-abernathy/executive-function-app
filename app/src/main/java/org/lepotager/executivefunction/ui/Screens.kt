@@ -164,6 +164,7 @@ fun HomeScreen(
     onToggleStep: (String, String, Boolean) -> Unit = { _, _, _ -> },
     workspace: @Composable () -> Unit = {},
     onJournal: () -> Unit = {},
+    onRoutines: () -> Unit = {},
     onCheckIn: () -> Unit = {},
     onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
@@ -288,8 +289,13 @@ fun HomeScreen(
                         )
                     }
                 }
-                // First show immediate capture actions; the optional state check remains
-                // available on the home screen without blocking first use.
+                // Routines are directly discoverable, but do not displace the two
+                // immediate capture actions.
+                TextButton(
+                    onClick = onRoutines,
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-open-routines"),
+                ) { Text(stringResource(R.string.home_routines)) }
+                // Optional check-ins must never block the first useful action.
                 Spacer(Modifier.size(8.dp))
                 OutlinedButton(
                     onClick = onCheckIn,
