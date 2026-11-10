@@ -65,6 +65,7 @@ internal class AppDatabase(private val context: Context) :
         createLearningTables(db)
         WorkspaceStore.createTables(db)
         TaskOptionsStore.createTables(db)
+        RoutineStore.createTables(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -94,6 +95,10 @@ internal class AppDatabase(private val context: Context) :
         if (version == 5) {
             TaskOptionsStore.createTables(db)
             version = 6
+        }
+        if (version == 6) {
+            RoutineStore.createTables(db)
+            version = 7
         }
         check(version == newVersion) { "Missing migration from $oldVersion to $newVersion" }
     }
@@ -440,7 +445,7 @@ internal class AppDatabase(private val context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "executive-function.db"
-        const val DATABASE_VERSION = 6
+        const val DATABASE_VERSION = 7
         val TASK_COLUMNS = arrayOf(
             "id",
             "title",

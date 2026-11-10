@@ -313,6 +313,7 @@ class MainActivity : ComponentActivity() {
                                     activeFocus = requireNotNull(snapshot.activeFocus),
                                     onResume = viewModel::resume,
                                     onPostpone = viewModel::postpone,
+                                    onQuickNote = { showQuickNote = true },
                                 )
 
                                 else -> org.lepotager.executivefunction.ui.WorkspaceHome(
@@ -347,6 +348,7 @@ class MainActivity : ComponentActivity() {
                                     recentTaskId = snapshot.recentPostponedTaskId,
                                     onHelp = { refreshPreferences(); showCheckIn=false; showIntro=true },
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
+                                    onRoutines = { startActivity(Intent(this@MainActivity, RoutineActivity::class.java)) },
                                     onCheckIn = { showCheckIn = true },
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,

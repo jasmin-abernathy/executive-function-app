@@ -248,6 +248,36 @@ class OnboardingAndTimerChoiceTest {
         }
     }
     @Test
+    fun longFocusChoiceIsOneOffAndDoesNotSaveTaskOverride() {
+        var customChoice: Boolean? = null
+        var target: Long? = null
+        var selectedMode: FocusTimerMode? = null
+        compose.setContent {
+            ExecutiveFunctionTheme {
+                FocusStartDialog(
+                    taskTitle = "Travailler",
+                    learnedTargetDurationMs = 25 * 60_000L,
+                    initialMode = FocusTimerMode.COUNTDOWN,
+                    onDismiss = {},
+                    onConfirm = { _, _ -> },
+                    onChoice = { mode, duration, custom ->
+                        selectedMode = mode
+                        target = duration
+                        customChoice = custom
+                    },
+                )
+            }
+        }
+        compose.onNodeWithTag("toggle-task-timer").performClick()
+        compose.onNodeWithTag("focus-long-once").performClick()
+        compose.runOnIdle {
+            assertEquals(FocusTimerMode.COUNTDOWN, selectedMode)
+            assertEquals(120 * 60_000L, target)
+            assertEquals(false, customChoice)
+        }
+    }
+
+    @Test
     fun countdownDraftSurvivesSavedStateRestoration() {
         val restoration = StateRestorationTester(compose)
         var target: Long? = null
