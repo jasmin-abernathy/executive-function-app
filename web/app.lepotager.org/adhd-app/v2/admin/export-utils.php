@@ -24,16 +24,20 @@ function v2_admin_export_payload(
             $n = (int) ($stats['n'] ?? 0);
             $counts = $stats['counts'] ?? [];
             $options = [];
+            $hiddenLegacyCodes = [];
 
             foreach ($question[$lang]['options'] ?? [] as $option) {
                 $options[(string) $option[0]] = $option;
             }
-            // Preserve old codes, but do not invent their historical wording.
+            // Historical or unexpected values may contain user-entered text.
+            // Keep their aggregate counts, but never reveal their raw contents.
             foreach ($counts as $code => $count) {
                 if (!isset($options[(string) $code])) {
+                    $alias = 'historical_unknown_' . (count($hiddenLegacyCodes) + 1);
+                    $hiddenLegacyCodes[(string) $code] = $alias;
                     $options[(string) $code] = [
                         (string) $code,
-                        ($lang === 'fr' ? 'Ancien choix — libellé indisponible : ' : 'Historical choice — label unavailable: ') . $code,
+                        $lang === 'fr' ? 'Choix historique non reconnu (code masqué)' : 'Unrecognized historical choice (code hidden)',
                     ];
                 }
             }
@@ -43,7 +47,7 @@ function v2_admin_export_payload(
                 $code = (string) $option[0];
                 $count = (int) ($counts[$code] ?? 0);
                 $choices[] = [
-                    'code' => $code,
+                    'code' => $hiddenLegacyCodes[$code] ?? $code,
                     'label' => (string) $option[1],
                     'description' => (string) ($option[2] ?? ''),
                     'selections' => $count,
@@ -81,9 +85,12 @@ function v2_admin_export_payload(
     $dropoff = [];
     foreach ($progress as $row) {
         $step = (string) $row['current_step'];
+        $knownStep = isset($catalog['questions'][$step]) || isset($steps[$step]);
         $dropoff[] = [
-            'step' => $step,
-            'step_label' => (string) ($catalog['questions'][$step][$lang]['title'] ?? $steps[$step][$lang] ?? $step),
+            'step' => $knownStep ? $step : 'unknown_step',
+            'step_label' => $knownStep
+                ? (string) ($catalog['questions'][$step][$lang]['title'] ?? $steps[$step][$lang] ?? $step)
+                : ($lang === 'fr' ? 'Étape inconnue' : 'Unknown step'),
             'status' => (string) $row['status'],
             'sessions' => (int) $row['n'],
         ];
