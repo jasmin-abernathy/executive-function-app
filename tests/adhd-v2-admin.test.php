@@ -178,6 +178,16 @@ check(str_contains($csvExport, 'ID question') && str_contains($csvExport, 'aband
     'CSV includes headings and answer choices');
 check(str_contains($csvExport, '50,0') && str_contains($csvExport, '2;'),
     'CSV includes numeric selections and localized percentage');
+$privacySample = v2_admin_export_payload($catalog, [
+    'survey_ease' => ['n' => 1, 'counts' => ['someone@example.net' => 1]],
+], [], [
+    ['current_step' => 'participant@invalid.test', 'status' => 'active', 'n' => 1],
+], 'fr');
+$privacyJson = json_encode($privacySample, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+check(!str_contains($privacyJson, 'someone@example.net')
+    && !str_contains($privacyJson, 'participant@invalid.test')
+    && str_contains($privacyJson, 'historical_unknown_1')
+    && str_contains($privacyJson, 'unknown_step'), 'Unexpected historical values cannot expose user-entered text');
 $exportEn = v2_admin_export_payload($catalog, $stats, [], [], 'en');
 check($exportEn['language'] === 'en' && $exportEn['groups'][0]['title'] === 'Core questions', 'English export translated');
 $adminPage = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/admin/index.php');
