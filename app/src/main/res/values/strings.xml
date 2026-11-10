@@ -69,6 +69,10 @@
     <string name="resume_subtitle">Aucun retard à rattraper. Choisis simplement ce qui t’aide maintenant.</string>
     <string name="resume_context">Tu en étais là : %1$s</string>
     <string name="resume_action">Reprendre</string>
+    <string name="focus_long_once">Session longue de 2 h (cette fois seulement)</string>
+    <string name="focus_tap_pause_description">Mettre en pause la session</string>
+    <string name="focus_tap_pause_hint">Touchez le temps pour mettre en pause.</string>
+    <string name="focus_note_while_paused">Ajouter une note pendant la pause</string>
     <string name="make_smaller_action">Rendre le premier pas plus petit</string>
     <string name="choose_another_action">Reporter et choisir autre chose</string>
     <string name="make_smaller_title">Quel serait le plus petit pas possible ?</string>

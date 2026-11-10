@@ -1063,6 +1063,7 @@ fun FocusScreen(
         displayedSeconds % 60,
     )
     val captureDescription = stringResource(R.string.focus_tool_capture)
+    val pauseTapDescription = stringResource(R.string.focus_tap_pause_description)
 
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
@@ -1118,8 +1119,14 @@ fun FocusScreen(
                 text = (if (overtime > 0) "+" else "") + formatElapsed(displayedTime),
                 fontSize = 54.sp,
                 fontWeight = FontWeight.Light,
-                modifier = Modifier.semantics { contentDescription = accessibleElapsed },
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .sizeIn(minWidth = 160.dp, minHeight = 64.dp)
+                    .clickable(role = Role.Button, onClick = { onInterrupt(null) })
+                    .testTag("focus-timer-tap-pause")
+                    .semantics { contentDescription = accessibleElapsed + ". " + pauseTapDescription },
             )
+            Text(stringResource(R.string.focus_tap_pause_hint), style = MaterialTheme.typography.bodySmall)
         }
 
         Column(
@@ -1251,6 +1258,7 @@ fun ResumeScreen(
     activeFocus: ActiveFocus,
     onResume: (String?) -> Unit,
     onPostpone: () -> Unit,
+    onQuickNote: () -> Unit = {},
 ) {
     var showSmaller by remember { mutableStateOf(false) }
     val returningAfterLongAbsence = ReturnAfterAbsence.shouldAskWhatHelpsNow(
@@ -1311,6 +1319,10 @@ fun ResumeScreen(
             Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.make_smaller_action))
         }
+        TextButton(
+            onClick = onQuickNote,
+            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("resume-quick-note"),
+        ) { Text(stringResource(R.string.focus_note_while_paused)) }
         OutlinedButton(
             onClick = onPostpone,
             colors = appOutlinedButtonColors(),
