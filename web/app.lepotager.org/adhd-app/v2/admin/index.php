@@ -75,6 +75,11 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .kpi{border:1px solid var(--line);border-radius:16px;padding:14px;background:white}
 .kpi strong{display:block;font-size:1.8rem}
+.export-tools{margin:20px 0;border:1px solid var(--line);border-radius:18px;padding:18px;background:var(--green2)}
+.export-tools h2{font-size:1.3rem;margin:0 0 8px}
+.export-tools p{margin:0;line-height:1.5}
+.export-tools .actions{margin-top:14px}
+
 table{width:100%;border-collapse:collapse;min-width:620px}
 th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
 .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:16px}
@@ -97,6 +102,15 @@ details{margin:24px 0}summary{cursor:pointer;font-weight:700;padding:12px 0}
 <?php else:?><header class="header"><div><p class="eyebrow">V2 admin</p><h1><?=tr('Résultats du questionnaire V2', 'Product-research dashboard')?></h1></div><div class="actions"><a class="btn secondary" href="?lang=fr" lang="fr">Français</a><a class="btn secondary" href="?lang=en" lang="en">English</a><a class="btn secondary" href="v1-comparison.php"><?=tr('Comparaison avec la V1', 'V1 comparison')?></a><a class="btn quiet" href="?logout=1"><?=tr('Se déconnecter', 'Sign out')?></a></div></header>
 <?php if(!$data):?><div class="notice error"><?=tr('Les tables du questionnaire V2 ne sont pas installées.', 'V2 tables are not installed.')?> <a href="../install.php"><?=tr('Ouvrir l’installation', 'Run installer')?></a>.</div>
 <?php else:?><div class="kpis"><div class="kpi"><span><?=tr('Commencés', 'Started')?></span><strong><?=$data['started']?></strong></div><div class="kpi"><span><?=tr('Partie obligatoire envoyée', 'Required submitted')?></span><strong><?=$data['core']?></strong></div><div class="kpi"><span><?=tr('Terminés intégralement', 'Fully finished')?></span><strong><?=$data['done']?></strong></div><div class="kpi"><span><?=tr('Réponses de mineurs', 'Minor submitted')?></span><strong><?=$data['minor']?></strong></div></div>
+
+<section class="export-tools" aria-labelledby="export-heading">
+  <h2 id="export-heading"><?=tr('Exporter les résultats', 'Export research results')?></h2>
+  <p><?=tr('Télécharge les résultats agrégés, avec les questions et les pourcentages. Aucun nom, contact ni réponse individuelle. Le JSON inclut aussi les étapes et abandons : c’est le format conseillé pour analyser les résultats et faire évoluer l’application.', 'Download aggregate results with question labels and percentages. No names, contacts or individual responses. JSON also includes progress and drop-off: it is the recommended format for reviewing results and improving the app.')?></p>
+  <div class="actions">
+    <a class="btn primary" href="export.php?format=json&amp;lang=<?=v2_h($lang)?>" download><?=tr('Télécharger JSON (complet)', 'Download JSON (full)')?></a>
+    <a class="btn secondary" href="export.php?format=csv&amp;lang=<?=v2_h($lang)?>" download><?=tr('Télécharger CSV (tableur)', 'Download CSV (spreadsheet)')?></a>
+  </div>
+</section>
 <details><summary><?=tr('Parcours et abandons', 'Progress and drop-off')?></summary><div class="tablewrap"><table><thead><tr><th><?=tr('Étape', 'Step')?></th><th><?=tr('Statut', 'Status')?></th><th>Sessions</th></tr></thead><tbody><?php foreach($rows as $r):
 $stepLabels = ['completed'=>tr('Questionnaire terminé','Questionnaire completed'),'optional_hub'=>tr('Modules facultatifs','Optional modules'),'core_submitted'=>tr('Partie obligatoire envoyée','Core submitted')];
 $statusLabels = ['active'=>tr('En cours','In progress'),'core_submitted'=>tr('Partie obligatoire envoyée','Core submitted'),'completed'=>tr('Terminé','Completed'),'deleted'=>tr('Supprimé','Deleted')];

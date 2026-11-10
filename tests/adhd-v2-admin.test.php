@@ -140,4 +140,62 @@ foreach (['<?=$value?>', '<?=$count?>', 'Il y a actuellement {$n}', 'There are c
 $survey = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/runtime-js/questionnaire-v131.php');
 check(str_contains($survey, 'View public results (%)') && str_contains($survey, 'Voir les résultats publics (%)') && str_contains($survey, 'href="results.php?lang='), 'Completion screen links to localized public results');
 
+
+// Export shares the dashboard's aggregate denominators and never exposes
+// respondent-level records, even for small respondent counts.
+require __DIR__ . '/../web/app.lepotager.org/adhd-app/v2/admin/export-utils.php';
+$export = v2_admin_export_payload($catalog, $stats, [
+    'started' => 4, 'core' => 3, 'done' => 2, 'adult' => 2, 'minor' => 1,
+], [
+    ['current_step' => 'optional_hub', 'status' => 'core_submitted', 'n' => 1],
+], 'fr');
+check($export['scope'] === 'aggregated_results_only' && $export['format_version'] === 1, 'Portable aggregate JSON version');
+check($export['summary']['started'] === 4 && $export['summary']['minor_submitted'] === 1, 'Full funnel and cohort totals included');
+check($export['progress'][0]['sessions'] === 1 && $export['progress'][0]['step_label'] === 'Modules facultatifs', 'Drop-off included without session timestamps');
+$risks = null;
+foreach ($export['groups'] as $group) {
+    foreach ($group['questions'] as $q) {
+        if ($q['id'] === 'abandon_risks') $risks = $q;
+    }
+}
+check($risks !== null && $risks['respondents'] === 2 && $risks['multiple_choice'], 'Aggregated multiple-choice question preserved');
+$choices = array_column($risks['choices'], null, 'code');
+check($choices['streak']['selections'] === 2 && $choices['streak']['percentage_of_respondents'] === 100.0, 'Selections and question-level denominator');
+check($choices['cloud']['selections'] === 1 && $choices['cloud']['percentage_of_respondents'] === 50.0, 'Choice-level percentages calculated');
+$jsonExport = json_encode($export, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+check(!str_contains($jsonExport, 'session_id') && !str_contains($jsonExport, 'answer_json')
+    && !str_contains($jsonExport, 'resume_token') && !str_contains($jsonExport, 'email_encrypted'),
+    'No raw or identifying fields in JSON export');
+check(v2_admin_csv_safe('=1+1') === "'=1+1"
+    && v2_admin_csv_safe("  -SUM(A1:A2)") === "'  -SUM(A1:A2)"
+    && v2_admin_csv_safe("hello") === "hello", 'CSV formula injection neutralized');
+$csvStream = fopen('php://temp', 'w+');
+v2_admin_write_csv($csvStream, $export);
+rewind($csvStream);
+$csvExport = stream_get_contents($csvStream);
+fclose($csvStream);
+check(str_contains($csvExport, 'ID question') && str_contains($csvExport, 'abandon_risks'),
+    'CSV includes headings and answer choices');
+check(str_contains($csvExport, '50,0') && str_contains($csvExport, '2;'),
+    'CSV includes numeric selections and localized percentage');
+$privacySample = v2_admin_export_payload($catalog, [
+    'survey_ease' => ['n' => 1, 'counts' => ['someone@example.net' => 1]],
+], [], [
+    ['current_step' => 'participant@invalid.test', 'status' => 'active', 'n' => 1],
+], 'fr');
+$privacyJson = json_encode($privacySample, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+check(!str_contains($privacyJson, 'someone@example.net')
+    && !str_contains($privacyJson, 'participant@invalid.test')
+    && str_contains($privacyJson, 'historical_unknown_1')
+    && str_contains($privacyJson, 'unknown_step'), 'Unexpected historical values cannot expose user-entered text');
+$exportEn = v2_admin_export_payload($catalog, $stats, [], [], 'en');
+check($exportEn['language'] === 'en' && $exportEn['groups'][0]['title'] === 'Core questions', 'English export translated');
+$adminPage = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/admin/index.php');
+check(str_contains($adminPage, 'export.php?format=json&amp;lang=') && str_contains($adminPage, 'export.php?format=csv&amp;lang='),
+    'Authenticated dashboard has JSON and CSV download links');
+$exportEndpoint = file_get_contents(__DIR__ . '/../web/app.lepotager.org/adhd-app/v2/admin/export.php');
+check(str_contains($exportEndpoint, 'if (empty($_SESSION[\'v2_admin\']))')
+    && str_contains($exportEndpoint, "Cache-Control: private, no-store"),
+    'Export endpoint requires authentication and disables caching');
+
 echo "V2 admin: catalogue, dynamic choices, denominators, empty states and escaping OK\n";
