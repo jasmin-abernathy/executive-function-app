@@ -313,6 +313,7 @@ class MainActivity : ComponentActivity() {
                                     activeFocus = requireNotNull(snapshot.activeFocus),
                                     onResume = viewModel::resume,
                                     onPostpone = viewModel::postpone,
+                                    onQuickNote = { showQuickNote = true },
                                 )
 
                                 else -> org.lepotager.executivefunction.ui.WorkspaceHome(

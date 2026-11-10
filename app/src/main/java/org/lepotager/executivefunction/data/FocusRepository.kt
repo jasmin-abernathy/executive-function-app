@@ -177,7 +177,7 @@ class FocusRepository internal constructor(
         val hasSteps = LearningJournal(database).steps(active.task.id).isNotEmpty()
         database.closeFocus(
             FocusTransitions.finish(active.session, now(), FocusStatus.COMPLETED),
-            if (hasSteps) TaskStatus.READY else TaskStatus.COMPLETED,
+            org.lepotager.executivefunction.domain.FocusCompletionPolicy.taskStatus(hasSteps),
         )
         refresh()
     }
