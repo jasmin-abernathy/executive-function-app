@@ -65,6 +65,7 @@
     <string name="interrupt_note_optional">Où en étais-tu ? (facultatif)</string>
     <string name="save_and_stop">Enregistrer et arrêter</string>
     <string name="resume_title">On reprend doucement</string>
+    <string name="resume_after_absence_question">De quoi as-tu besoin aujourd’hui ?</string>
     <string name="resume_subtitle">Aucun retard à rattraper. Choisis simplement ce qui t’aide maintenant.</string>
     <string name="resume_context">Tu en étais là : %1$s</string>
     <string name="resume_action">Reprendre</string>

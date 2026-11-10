@@ -65,6 +65,7 @@
     <string name="interrupt_note_optional">Where were you? (optional)</string>
     <string name="save_and_stop">Save and stop</string>
     <string name="resume_title">Let’s ease back in</string>
+    <string name="resume_after_absence_question">What would help you today?</string>
     <string name="resume_subtitle">There is nothing to catch up on. Just choose what helps now.</string>
     <string name="resume_context">You were here: %1$s</string>
     <string name="resume_action">Resume</string>

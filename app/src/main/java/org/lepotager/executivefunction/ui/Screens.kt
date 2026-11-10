@@ -76,6 +76,7 @@ import org.lepotager.executivefunction.R
 import org.lepotager.executivefunction.data.JournalStep
 import org.lepotager.executivefunction.domain.SessionClock
 import org.lepotager.executivefunction.domain.HomeViewMode
+import org.lepotager.executivefunction.domain.ReturnAfterAbsence
 import org.lepotager.executivefunction.domain.TaskDraw
 import org.lepotager.executivefunction.model.ActiveFocus
 import org.lepotager.executivefunction.model.TaskColor
@@ -263,11 +264,6 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.size(14.dp))
-                OutlinedButton(
-                    onClick = onCheckIn,
-                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-check-in"),
-                ) { Text(stringResource(R.string.home_check_in)) }
-                Spacer(Modifier.size(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -292,6 +288,14 @@ fun HomeScreen(
                         )
                     }
                 }
+                // First show immediate capture actions; the optional state check remains
+                // available on the home screen without blocking first use.
+                Spacer(Modifier.size(8.dp))
+                OutlinedButton(
+                    onClick = onCheckIn,
+                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-check-in"),
+                ) { Text(stringResource(R.string.home_check_in)) }
+                Spacer(Modifier.size(8.dp))
                 if (lowEnergy) {
                     Text(stringResource(R.string.low_energy_active), style = MaterialTheme.typography.titleMedium)
                     Text(stringResource(R.string.low_energy_explanation))
@@ -1249,13 +1253,17 @@ fun ResumeScreen(
     onPostpone: () -> Unit,
 ) {
     var showSmaller by remember { mutableStateOf(false) }
+    val returningAfterLongAbsence = ReturnAfterAbsence.shouldAskWhatHelpsNow(
+        interruptedAtMs = activeFocus.session.updatedAt,
+        nowMs = System.currentTimeMillis(),
+    )
     Column(
         modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterVertically),
     ) {
         Text(
-            text = stringResource(R.string.resume_title),
+            text = stringResource(if (returningAfterLongAbsence) R.string.resume_after_absence_question else R.string.resume_title),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.SemiBold,
             textAlign = TextAlign.Center,

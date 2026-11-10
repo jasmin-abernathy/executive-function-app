@@ -382,6 +382,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        // Re-arm locally queued reminders after a permission change or a missed alarm.
+        // The receiver performs database access off the UI thread.
+        sendBroadcast(Intent(this, TaskReminderReceiver::class.java).setAction("restore"))
         viewModel.reload()
         refreshPreferences()
         miniWindow = isInPictureInPictureMode
