@@ -80,6 +80,7 @@
     <string name="error_message">Rien n’a été perdu volontairement. Réessaie ; si le problème continue, redémarre l’application.</string>
     <string name="open_journal">Journal et réglages</string>
     <string name="home_check_in">Comment je vais</string>
+    <string name="home_routines">Mes routines</string>
     <string name="adaptation_rule">Filtres facultatifs : énergie déclarée, temps disponible et contexte. Le dé mélange les tâches compatibles si tu le demandes.</string>
     <string name="adaptation_suggestion">Selon ces filtres et l’importance renseignée : %1$s</string>
     <string name="adaptation_empty">Aucune tâche ne correspond aux filtres. Tu peux les modifier dans Organisation ou choisir manuellement.</string>
