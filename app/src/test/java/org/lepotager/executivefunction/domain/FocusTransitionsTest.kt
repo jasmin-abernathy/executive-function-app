@@ -38,6 +38,17 @@ class FocusTransitionsTest {
         assertNull(result.segmentStartedAt)
     }
 
+    @Test
+    fun postponingAfterMultipleSegmentsPreservesEarlierWork() {
+        val interrupted = FocusTransitions.interrupt(runningSession(), now = 15_000, note = "Reprendre demain")
+        val resumed = FocusTransitions.resume(interrupted, now = 86_415_000)
+        val postponed = FocusTransitions.finish(resumed, now = 86_418_000, status = FocusStatus.POSTPONED)
+        assertEquals(FocusStatus.POSTPONED, postponed.status)
+        assertEquals(10_000L, postponed.elapsedBeforeSegmentMs)
+        assertEquals("Reprendre demain", postponed.interruptionNote)
+        assertNull(postponed.segmentStartedAt)
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun interruptedSessionCannotBeInterruptedAgain() {
         val interrupted = FocusTransitions.interrupt(runningSession(), now = 15_000, note = null)
