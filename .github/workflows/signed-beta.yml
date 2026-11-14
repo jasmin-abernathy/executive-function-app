@@ -1,10 +1,15 @@
-name: Signed Android beta (manual only)
+name: Signed Android beta and Play bundle (manual only)
 
 on:
   workflow_dispatch:
     inputs:
       confirm_signed_beta:
-        description: "Build a signed beta APK from reviewed main, using a persistent signing key"
+        description: "Build signed APK/AAB for later testing, never upload to Google automatically"
+        type: boolean
+        required: true
+        default: false
+      confirm_companion_integrated:
+        description: "Confirm the official companion is integrated and ready for release testing"
         type: boolean
         required: true
         default: false
@@ -18,7 +23,7 @@ concurrency:
 
 jobs:
   signed-beta:
-    if: github.ref == 'refs/heads/main' && inputs.confirm_signed_beta
+    if: github.ref == 'refs/heads/main' && inputs.confirm_signed_beta && inputs.confirm_companion_integrated
     runs-on: ubuntu-latest
     timeout-minutes: 35
     environment: android-signing
@@ -46,7 +51,7 @@ jobs:
           chmod 600 "$STORE_PATH"
           echo "TDAH_BETA_STORE_FILE=$STORE_PATH" >> "$GITHUB_ENV"
 
-      - name: Test, lint and assemble release APK
+      - name: Test, lint, assemble release APK and Play App Bundle
         shell: bash
         env:
           TDAH_BETA_STORE_PASSWORD: ${{ secrets.TDAH_BETA_STORE_PASSWORD }}
@@ -57,26 +62,34 @@ jobs:
           test -n "$TDAH_BETA_STORE_PASSWORD" || { echo "Store password missing"; exit 1; }
           test -n "$TDAH_BETA_KEY_ALIAS" || { echo "Key alias missing"; exit 1; }
           test -n "$TDAH_BETA_KEY_PASSWORD" || { echo "Key password missing"; exit 1; }
-          ./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleRelease --stacktrace
+          ./gradlew --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleRelease :app:bundleRelease --stacktrace
 
-      - name: Verify APK signature and publish checksum
+      - name: Verify signed APK, signed AAB and checksums
         shell: bash
         run: |
           set -euo pipefail
           APK="app/build/outputs/apk/release/app-release.apk"
+          AAB="app/build/outputs/bundle/release/app-release.aab"
           test -s "$APK"
+          test -s "$AAB"
           APKSIGNER="$(find "$ANDROID_HOME/build-tools" -maxdepth 2 -type f -name apksigner -print | sort -V | tail -n 1)"
           test -n "$APKSIGNER"
           "$APKSIGNER" verify --verbose --print-certs "$APK"
+          # An Android upload certificate is self-signed: -strict rejects expected CA warnings.
+          jarsigner -verify "$AAB"
           sha256sum "$APK" > "$APK.sha256"
+          sha256sum "$AAB" > "$AAB.sha256"
 
-      - name: Publish signed APK for beta testing
+      - name: Save signed files to GitHub only (no Google Play API access)
         uses: actions/upload-artifact@v7
         with:
-          name: executive-function-beta-signed-apk
+          name: executive-function-beta-signed-apk-and-play-aab
           path: |
             app/build/outputs/apk/release/app-release.apk
             app/build/outputs/apk/release/app-release.apk.sha256
+            app/build/outputs/bundle/release/app-release.aab
+            app/build/outputs/bundle/release/app-release.aab.sha256
+            app/build/outputs/mapping/release/mapping.txt
           if-no-files-found: error
           retention-days: 7
 
