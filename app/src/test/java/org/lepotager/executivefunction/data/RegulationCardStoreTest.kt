@@ -1,6 +1,7 @@
 package org.lepotager.executivefunction.data
 
-import androidx.test.core.app.ApplicationProvider
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
 import android.content.Context
 import org.junit.Assert.*
 import org.junit.Test
@@ -8,9 +9,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [28])
 class RegulationCardStoreTest {
     private fun database(): AppDatabase {
-        val context = ApplicationProvider.getApplicationContext<Context>()
+        val context: Context = RuntimeEnvironment.getApplication()
         context.deleteDatabase("executive-function.db")
         return AppDatabase(context)
     }
