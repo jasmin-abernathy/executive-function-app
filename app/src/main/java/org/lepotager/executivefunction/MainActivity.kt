@@ -36,6 +36,7 @@ import org.lepotager.executivefunction.ui.CheckInDialog
 import org.lepotager.executivefunction.ui.FocusScreen
 import org.lepotager.executivefunction.ui.FocusStartDialog
 import org.lepotager.executivefunction.ui.HomeScreen
+import org.lepotager.executivefunction.ui.OverloadSupportDialog
 import org.lepotager.executivefunction.ui.ResumeScreen
 import org.lepotager.executivefunction.ui.theme.ExecutiveFunctionTheme
 
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
     private var pauseAfterMinutes by mutableStateOf(25)
     private var waitingForOverlayPermission = false
     private var showCheckIn by mutableStateOf(false)
+    private var showOverload by mutableStateOf(false)
     private var miniWindow by mutableStateOf(false)
     private var requestedTask by mutableStateOf<String?>(null)
     private var showQuickNote by mutableStateOf(false)
@@ -96,6 +98,7 @@ class MainActivity : ComponentActivity() {
             returnToMiniWindow = it.getBoolean("return_to_pip")
             showIntro = it.getBoolean("show_intro")
             showCheckIn = it.getBoolean("show_check_in")
+            showOverload = it.getBoolean("show_overload")
             drawRequest = it.getInt("draw_request")
             waitingForOverlayPermission = it.getBoolean("waiting_overlay")
         }
@@ -294,6 +297,7 @@ class MainActivity : ComponentActivity() {
                                 snapshot.activeFocus?.session?.status == FocusStatus.RUNNING && !showHomeDuringFocus -> FocusScreen(
                                     activeFocus = requireNotNull(snapshot.activeFocus),
                                     onHome = { showHomeDuringFocus = true },
+                                    onOverload = { showOverload = true },
                                     modalBlocked = externalCapture || showQuickNote || pendingStart != null || pendingCapture != null,
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("task",snapshot.activeFocus?.task?.id)) },
                                     onNote = { showQuickNote = true },
@@ -313,6 +317,7 @@ class MainActivity : ComponentActivity() {
                                     activeFocus = requireNotNull(snapshot.activeFocus),
                                     onResume = viewModel::resume,
                                     onPostpone = viewModel::postpone,
+                                    onOverload = { showOverload = true },
                                 )
 
                                 else -> org.lepotager.executivefunction.ui.WorkspaceHome(
@@ -348,6 +353,7 @@ class MainActivity : ComponentActivity() {
                                     onHelp = { refreshPreferences(); showCheckIn=false; showIntro=true },
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java)) },
                                     onCheckIn = { showCheckIn = true },
+                                    onOverload = { showOverload = true },
                                     drawEnabled = drawEnabled,
                                     pauseSuggestionsEnabled = pauseSuggestionsEnabled,
                                     pauseAfterMinutes = pauseAfterMinutes,
@@ -366,6 +372,20 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
+                    if (
+                        showOverload && !snapshot.loading && !miniWindow && !showIntro &&
+                        !externalCapture && !showQuickNote && sharedText == null &&
+                        pendingStart == null && pendingCapture == null
+                    ) {
+                        OverloadSupportDialog(
+                            hasRunningFocus = snapshot.activeFocus?.session?.status == FocusStatus.RUNNING,
+                            onKeepPlace = {
+                                showHomeDuringFocus = false
+                                viewModel.interrupt(null)
+                            },
+                            onDismiss = { showOverload = false },
+                        )
+                    }
                     if (error != null) {
                         ErrorDialog(onDismiss = viewModel::clearError)
                     }
@@ -410,7 +430,7 @@ class MainActivity : ComponentActivity() {
     override fun onUserLeaveHint() {
         super.onUserLeaveHint()
         if(!waitingForOverlayPermission && !showQuickNote && !externalCapture &&
-            !showIntro && viewModel.pendingStart.value == null && requestedTask == null &&
+            !showIntro && !showOverload && viewModel.pendingStart.value == null && requestedTask == null &&
             appPreferences().getBoolean("auto_pip",false)) enterMiniWindow()
     }
 
@@ -453,6 +473,7 @@ class MainActivity : ComponentActivity() {
         outState.putBoolean("return_to_pip", returnToMiniWindow)
         outState.putBoolean("show_intro", showIntro)
         outState.putBoolean("show_check_in", showCheckIn)
+        outState.putBoolean("show_overload", showOverload)
         outState.putInt("draw_request", drawRequest)
         outState.putBoolean("waiting_overlay", waitingForOverlayPermission)
         super.onSaveInstanceState(outState)
