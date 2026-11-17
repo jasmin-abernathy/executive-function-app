@@ -157,11 +157,13 @@ class MainActivity : ComponentActivity() {
                     sharedText,
                     pendingStart,
                     introSeen,
+                    showOverload,
                 ) {
                     if (
                         !snapshot.loading && !introSeen && snapshot.activeFocus == null &&
                         !externalCapture && !showQuickNote && sharedText == null && !miniWindow &&
-                        requestedTask == null && requestedWorkspaceTask == null && pendingStart == null
+                        requestedTask == null && requestedWorkspaceTask == null && pendingStart == null &&
+                        !showOverload
                     ) {
                         showCheckIn = false
                         showIntro = true
@@ -523,6 +525,7 @@ class MainActivity : ComponentActivity() {
             "capture" -> { externalCapture=true; showCheckIn=false }
             "pip_note" -> { showQuickNote=true; returnToMiniWindow=true; showCheckIn=false }
             "check_in" -> { showCheckIn=true; showIntro=false }
+            "overload" -> { showOverload=true; showCheckIn=false; showIntro=false }
             "draw" -> drawRequest+=1
         }
         intent?.removeExtra("requested_task")
