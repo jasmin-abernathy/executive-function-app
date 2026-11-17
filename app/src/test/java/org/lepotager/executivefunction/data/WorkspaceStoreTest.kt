@@ -134,12 +134,14 @@ class WorkspaceStoreTest {
             val id = db.openTasks().single().id
             LearningJournal(db).note("Note ancienne")
             // Recreate the actual v4 shape: only the four additive tables differ.
-            WorkspaceStore.tables.reversed().forEach { db.writableDatabase.execSQL("DROP TABLE $it") }
+            (WorkspaceStore.tables + TaskOptionsStore.tables + RegulationCardStore.tables).reversed().forEach {
+                db.writableDatabase.execSQL("DROP TABLE $it")
+            }
             db.writableDatabase.delete("task_steps", null, null)
             db.writableDatabase.version = 4
             db.close(); db = AppDatabase(context)
             val store = WorkspaceStore(db)
-            assertEquals(6, db.writableDatabase.version)
+            assertEquals(7, db.writableDatabase.version)
             store.ensureSteps(id); store.ensureSteps(id)
             assertEquals("Premier geste", LearningJournal(db).steps(id).single().title)
             assertEquals("Note ancienne", store.load().notes.single().text)

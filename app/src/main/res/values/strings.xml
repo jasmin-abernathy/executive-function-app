@@ -182,4 +182,28 @@
     <string name="home_more_tools">Point d’état, journal et aide</string>
     <string name="home_hide_tools">Masquer les autres outils</string>
     <string name="task_color_lemon">Jaune citron</string>
+
+    <string name="overload_title">Je sature</string>
+    <string name="overload_intro">Tu peux souffler sans te justifier. Rien ne démarre automatiquement, et tu peux fermer cet écran quand tu veux.</string>
+    <string name="overload_keep_place">Mettre le focus en pause et garder ma place</string>
+    <string name="overload_choose_card">Une aide pour maintenant, si tu veux</string>
+    <string name="overload_builtin_senses_title">Réduire les sollicitations</string>
+    <string name="overload_builtin_senses_step1">Si possible, éloigne-toi quelques instants du bruit ou de la lumière.</string>
+    <string name="overload_builtin_senses_step2">Coupe les notifications ou mets un casque si ça t’aide.</string>
+    <string name="overload_builtin_senses_step3">Choisis quand tu veux revenir, sans chronomètre.</string>
+    <string name="overload_builtin_restart_title">Retrouver un petit pas</string>
+    <string name="overload_builtin_restart_step1">Pose ce que tu étais en train de faire.</string>
+    <string name="overload_builtin_restart_step2">Choisis une action très petite et concrète, pas toute la tâche.</string>
+    <string name="overload_builtin_restart_step3">Tu peux la faire ou la garder pour plus tard.</string>
+    <string name="overload_add_card">Créer ma propre fiche</string>
+    <string name="overload_edit_card">Modifier cette fiche</string>
+    <string name="overload_delete_card">Supprimer cette fiche</string>
+    <string name="overload_confirm_delete">Supprimer définitivement cette fiche personnelle ?</string>
+    <string name="overload_editor_hint">Écris jusqu’à trois petits gestes concrets. Cette fiche reste sur ton téléphone.</string>
+    <string name="overload_card_title">Titre (80 caractères maximum)</string>
+    <string name="overload_card_steps">Une étape par ligne (3 maximum, 160 caractères chacune)</string>
+    <string name="overload_save_card">Enregistrer ma fiche</string>
+    <string name="overload_save_error">La fiche n’a pas pu être enregistrée. Réessaie.</string>
+    <string name="overload_privacy">Fiches enregistrées localement. Elles sont incluses dans la sauvegarde manuelle de l’application.</string>
+    <string name="overload_close">Fermer</string>
 </resources>

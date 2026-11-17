@@ -8,6 +8,8 @@
 
 **Capturer ce qui compte. Choisir une prochaine action réaliste. Commencer avec moins de friction. Revenir sans transformer l’absence en échec.**
 
+**Nouveau soutien facultatif — « Je sature » :** depuis l’accueil, le focus, la reprise ou un widget Android distinct, accéder à des fiches courtes (deux proposées, d’autres personnalisables) sans démarrer un nouveau minuteur. Pendant un focus, l’action « garder ma place » utilise l’interruption habituelle et conserve le contexte et le temps actif. Les fiches personnelles restent hors ligne et suivent la sauvegarde JSON locale. Voir [ADR 0013](docs/adr/0013-quiet-overload-support.md). Cette évolution doit encore être validée sur téléphone.
+
 ---
 
 ## Pourquoi ce projet existe
