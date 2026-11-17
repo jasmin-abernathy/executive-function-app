@@ -56,6 +56,12 @@ class RegulationCardStoreTest {
             backup.restore(exported)
             assertEquals(listOf(created), cards.list())
 
+            val invalid = org.json.JSONObject(exported)
+            invalid.getJSONArray("regulation_cards").getJSONObject(0)
+                .put("steps_json", "[\"\"]")
+            assertThrows(Exception::class.java) { backup.restore(invalid.toString()) }
+            assertEquals(listOf(created), cards.list())
+
             val legacy = org.json.JSONObject(exported).apply {
                 put("version", 6)
                 remove("regulation_cards")
