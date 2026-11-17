@@ -18,6 +18,10 @@
             <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/tools_widget_info" />
         </receiver>
+        <receiver android:name=".OverloadWidget" android:exported="false" android:label="@string/overload_title">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/overload_widget_info" />
+        </receiver>
         <receiver android:name=".TaskReminderReceiver" android:exported="false">
             <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
         </receiver>
