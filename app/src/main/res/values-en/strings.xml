@@ -182,4 +182,28 @@
     <string name="home_more_tools">Check-in, journal and help</string>
     <string name="home_hide_tools">Hide other tools</string>
     <string name="task_color_lemon">Lemon yellow</string>
+
+    <string name="overload_title">I'm overwhelmed</string>
+    <string name="overload_intro">You can take a moment without explaining yourself. Nothing starts automatically. Close this screen whenever you want.</string>
+    <string name="overload_keep_place">Pause focus and keep my place</string>
+    <string name="overload_choose_card">Something that might help right now</string>
+    <string name="overload_builtin_senses_title">Reduce stimulation</string>
+    <string name="overload_builtin_senses_step1">If possible, step away from noise or bright light for a moment.</string>
+    <string name="overload_builtin_senses_step2">Mute notifications or use headphones if that helps.</string>
+    <string name="overload_builtin_senses_step3">Come back when you choose, without a countdown.</string>
+    <string name="overload_builtin_restart_title">Find one small next step</string>
+    <string name="overload_builtin_restart_step1">Set down whatever you were doing.</string>
+    <string name="overload_builtin_restart_step2">Pick one tiny concrete action, not the whole task.</string>
+    <string name="overload_builtin_restart_step3">Do it if you want, or save it for later.</string>
+    <string name="overload_add_card">Create my own card</string>
+    <string name="overload_edit_card">Edit this card</string>
+    <string name="overload_delete_card">Delete this card</string>
+    <string name="overload_confirm_delete">Permanently delete this personal card?</string>
+    <string name="overload_editor_hint">Write up to three concrete small steps. This card stays on your phone.</string>
+    <string name="overload_card_title">Title (up to 80 characters)</string>
+    <string name="overload_card_steps">One step per line (up to 3, max 160 characters each)</string>
+    <string name="overload_save_card">Save card</string>
+    <string name="overload_save_error">Could not save the card. Try again.</string>
+    <string name="overload_privacy">Cards are stored locally and included in the app's manual backup.</string>
+    <string name="overload_close">Close</string>
 </resources>
