@@ -18,10 +18,11 @@ Ces pages **ne sont pas** des décors complets, des inventaires d'objets, des po
 
 1. **Deux destinations de l'espace d'accueil** : `Aujourd'hui` (défaut et chemin le plus court vers capture et focus), et `Mon univers` (optionnel). Pas de nouvel écran imposé au premier lancement ; ne jamais remplacer la vue des tâches par le monde.
 2. **Un univers persistant mais facultatif**, avec un espace initial limité, des objets que l'utilisateur pourra disposer et un compagnon qui réagit à un état de session. Les décors et les objets devront être dessinés et validés ultérieurement.
-3. **Un petit aperçu facultatif** sur `Aujourd'hui` après les actions essentielles, sans repousser le premier geste, les notes ou la tâche en cours en dessous du premier écran.
-4. **Un compagnon flottant distinct de l'univers complet** : silhouette seule, transparente, mobile, masquable. Lorsqu'une session est en cours, il paraît actif ; en cas d'interruption, il paraît au repos ; lorsqu'il n'y a pas de session, l'overlay disparaît.
-5. **Les modes existants restent disponibles** : écran de focus, notifications, PiP (sans permission de superposition) et minuteur flottant classique. Le personnage flottant est **opt-in**, jamais un remplacement forcé ni une nouvelle permission automatique.
-6. **Aucune sanction de l'absence** : pas de série, points de rendement, niveau obligatoire, objet retiré, personnage attristé ou progrès perdu. L'aménagement libre ne dépend pas exclusivement des tâches achevées ; toute animation, suggestion ou création d'objet est optionnelle.
+3. **Évolution progressive sans gamification punitive** : le personnage peut s'occuper d'une création décorative facultative pendant une session, la laisser en cours pendant la pause, puis la reprendre. L'objet en cours reste enregistré ; aucune obligation de terminer une tâche pour aménager le décor, aucun « niveau » ni rythme de progression fixé avant les tests utilisateur. Les interactions précises et les objets restent à illustrer par Charly plus tard.
+4. **Un petit aperçu facultatif** sur `Aujourd'hui` après les actions essentielles, sans repousser le premier geste, les notes ou la tâche en cours en dessous du premier écran.
+5. **Un compagnon flottant distinct de l'univers complet** : silhouette seule, transparente, mobile, masquable. Lorsqu'une session est en cours, il paraît actif ; en cas d'interruption, il paraît au repos ; lorsqu'il n'y a pas de session, l'overlay disparaît.
+6. **Les modes existants restent disponibles** : écran de focus, notifications, PiP (sans permission de superposition) et minuteur flottant classique. Le personnage flottant est **opt-in**, jamais un remplacement forcé ni une nouvelle permission automatique.
+7. **Aucune sanction de l'absence** : pas de série, points de rendement, niveau obligatoire, objet retiré, personnage attristé ou progrès perdu. L'aménagement libre ne dépend pas exclusivement des tâches achevées ; toute animation, suggestion ou création d'objet est optionnelle.
 
 ## Contrat de présentation de l'état
 

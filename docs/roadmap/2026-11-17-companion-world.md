@@ -54,7 +54,7 @@ Le **seul** document admis pour le compagnon est `compagnon_timide_silhouettes2.
 
 1. Introduire un `CompanionPresentationState` pur, alimenté **uniquement** par le statut du focus (neutre/actif/repos). Jamais un deuxième chrono ou un sondage caché.
 2. Définir les préférences distinctes : `universeEnabled`, `homePreviewEnabled`, `floatingStyle = CLASSIC|COMPANION`, `animationEnabled`, `timerLabelVisible`. Respecter le mode calme existant et l'accessibilité.
-3. Prévoir un modèle `WorldState` local à un environnement initial : objets décoratifs identifiés, emplacement normalisé, z-index facultatif et réinitialisation. Aucune logique de déblocage punitive.
+3. Prévoir un modèle `WorldState` local à **un seul** environnement initial : objets décoratifs identifiés, emplacement normalisé, z-index facultatif, réinitialisation et **création facultative en cours** (identifiant d'objet, état persistant). Durant un focus, le compagnon peut paraître s'en occuper ; durant une pause, il cesse visuellement et l'avancement reste intact. Les déclencheurs de progression restent réversibles et à valider avec les personnes testant l'application : **pas de rendement horaire, de quota, ni de déblocage par tâche obligatoire**.
 4. Ajouter **après stabilisation des migrations en cours** les tables nécessaires à `AppDatabase` et `LocalBackup` ; export vN, restauration atomique compatible avec versions antérieures, suppression complète.
 5. Tests du résolveur, des préférences et de la restauration ; ne pas activer d'onglet vide en production.
 
@@ -73,6 +73,7 @@ Le **seul** document admis pour le compagnon est `compagnon_timide_silhouettes2.
 
 - Installer un sélecteur de deux destinations limité à l'accueil. « Aujourd'hui » reste valeur par défaut.
 - Écran Compose utilisant **uniquement les assets livrés** ; environnement local persistant, déplacement d'objets facultatif, invitation non intrusive à l'aménagement.
+- Si Charly livre une représentation de fabrication : une seule création facultative « en cours » à la fois ; l'utilisateur peut en reprendre l'aménagement plus tard, aucune disparition pendant une absence. **Ne pas inventer l'objet ou l'animation tant que les fichiers ne sont pas disponibles**.
 - Aperçu discret après les commandes essentielles (ou masqué au choix) ; aucune notification « reviens voir ton monde ».
 - Pas de pénalité après absence, pas de points, de scores, de série quotidienne, de mesure « meilleur travailleur ». Le décor n'est pas la contrepartie obligatoire d'un focus.
 - Si les assets manquent, **ne pas montrer l'onglet**, conserver l'interface existante.
