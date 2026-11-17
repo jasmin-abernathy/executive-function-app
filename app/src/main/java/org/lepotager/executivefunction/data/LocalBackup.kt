@@ -54,6 +54,18 @@ internal class LocalBackup(private val database: AppDatabase) {
             val columns=columnTypes.keys
             val array=if ((root.getInt("version") == 4 && table in WorkspaceStore.tables) || (root.getInt("version") < 6 && table in TaskOptionsStore.tables) || (root.getInt("version") < 7 && table in RegulationCardStore.tables)) JSONArray() else root.getJSONArray(table)
             require(array.length()<=100_000)
+            if (table in RegulationCardStore.tables) {
+                require(array.length() <= RegulationCardRules.MAX_CARDS)
+                // Corrupt or oversized user-created cards must not replace good local data.
+                (0 until array.length()).forEach { index ->
+                    val row = array.getJSONObject(index)
+                    val title = row.getString("title")
+                    val stepsJson = JSONArray(row.getString("steps_json"))
+                    val steps = (0 until stepsJson.length()).map(stepsJson::getString)
+                    val normalized = RegulationCardRules.normalize(title, steps)
+                    require(normalized.first == title && normalized.second == steps)
+                }
+            }
             (0 until array.length()).map { index ->
                 val obj=array.getJSONObject(index)
                 require(obj.keys().asSequence().toSet()==columns)
