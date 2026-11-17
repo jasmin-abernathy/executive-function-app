@@ -70,7 +70,7 @@ Le mode sombre doit rester moins contrasté visuellement qu’un thème noir et 
 
 Le futur compagnon pourra devenir une source de chaleur et de personnalité de l’interface. Il restera facultatif, discret et jamais culpabilisant. Sa présence ne devra ni masquer une action ni ajouter une étape obligatoire.
 
-Aucun personnage, avatar de remplacement ou silhouette générée n’est intégré avant la livraison des illustrations officielles. Les emplacements et réactions seront validés directement avec ces fichiers afin d’éviter qu’un visuel provisoire ne devienne une référence involontaire.
+Exception autorisée le 17 novembre 2026 : la silhouette **neutre remplie en noir et gris**, tirée uniquement de la page 3 de `compagnon_timide_silhouettes2.pdf` (vignette miniature à droite), est utilisée **provisoirement comme icône de lancement Android**. Les tracés et les couleurs de Charly sont conservés ; seul un cadrage uniforme et un fond blanc Android sont ajoutés. Le compagnon n’est pas pour autant intégré dans l’interface ni décliné en nouvelles poses. Les illustrations complètes attendront leur validation.
 
 États envisagés après réception des illustrations :
 
