@@ -1,5 +1,7 @@
 # Executive Function App
 
+**Optional “I'm overwhelmed” support:** a quiet action with local personalized cards, using the existing interruption flow to keep progress. See [ADR 0013](docs/adr/0013-quiet-overload-support.md). Device validation is pending.
+
 [🇫🇷 Français](README.fr.md) · **🇬🇧 English**
 
 > **Working title.** The final product name is still under discussion.
