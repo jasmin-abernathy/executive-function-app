@@ -61,7 +61,7 @@ internal class LocalBackup(private val database: AppDatabase) {
                     val row = array.getJSONObject(index)
                     val title = row.getString("title")
                     val stepsJson = JSONArray(row.getString("steps_json"))
-                    val steps = (0 until stepsJson.length()).map(stepsJson::getString)
+                    val steps = (0 until stepsJson.length()).map { item -> stepsJson.getString(item) }
                     val normalized = RegulationCardRules.normalize(title, steps)
                     require(normalized.first == title && normalized.second == steps)
                 }
