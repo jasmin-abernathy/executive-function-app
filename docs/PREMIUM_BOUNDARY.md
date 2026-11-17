@@ -30,3 +30,7 @@ Only if they create ongoing cost or substantial optional power:
 - the ability to resume after interruption;
 - basic privacy settings;
 - removal of advertising (the app should have no advertising in the first place).
+
+## Companion-world boundary (planned, not shipped)
+
+If the optional base companion/world is delivered, it must not require a purchase to understand task/focus status, choose pause/reprise or keep a basic, usable world. Extra **cosmetic-only** variants could be evaluated later; the default companion, accessibility, deletion/export and all executive-function tools must stay usable without them. The second artistic quote has **not** been commissioned by this document.

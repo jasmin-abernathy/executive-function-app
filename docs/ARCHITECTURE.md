@@ -42,3 +42,15 @@ The choice-paralysis aid exposes a pure proposal selector and a pure full-order 
 - analytics SDK;
 - dependency injection framework solely for ceremony;
 - multi-module architecture without a demonstrated need.
+
+## Deferred optional companion-world layer (decision only, no code)
+
+See [ADR 0014](adr/0014-companion-world-planned.md) and [the implementation roadmap](roadmap/2026-11-17-companion-world.md).
+
+- UI architecture: `Aujourd'hui` remains the default; an opt-in `Mon univers` destination and small optional preview are deferred until approved art is available.
+- Pure state resolver derives neutral / active / resting from existing `AppSnapshot.activeFocus`. There is no second clock, backend, psychological inference or new notification loop.
+- Optional local world persistence and backup extension must be versioned **against the then-current database**, reconciling any pending migration PRs. No speculative migration now.
+- The existing rectangle in `FocusOverlayService` must continue to work. A separate future visual mode can show the companion over other apps with explicit permission and may display a resting state while `INTERRUPTED`, without counting pause time. PiP stays independent.
+- A blank tab or placeholder world is deliberately **not** part of the current implementation. Visual integration waits for the second illustrator quote to become possible.
+
+**Only graphic source:** `compagnon_timide_silhouettes2.pdf` by Charly. The temporary authorized neutral logo is not a complete character/world art package.

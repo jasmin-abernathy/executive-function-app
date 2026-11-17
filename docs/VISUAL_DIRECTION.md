@@ -78,11 +78,19 @@ Exception autorisée le 17 novembre 2026 : la silhouette **neutre remplie en noi
 - réaction curieuse au toucher ;
 - confirmation douce après une capture réussie ;
 - présence rassurante sur l’écran de reprise ;
-- absence volontaire pendant le focus afin de limiter la distraction.
+- absence volontaire sur **l'écran principal de focus** afin de limiter la distraction, mais **compagnon actif dans la fenêtre flottante si l'utilisateur l'active explicitement** ; à l'interruption, il adoptera une pose de repos.
 
 Le ton est doux, un peu étrange et socialement maladroit. Il peut employer un humour sec ou naïf, mais jamais un vocabulaire de coach, une félicitation excessive, une série quotidienne, une mine triste après une absence ou une formulation laissant entendre que l’utilisateur a échoué.
 
 Les illustrations officielles devront fonctionner sur fond transparent, rester lisibles sur le blanc et sur le mode sombre, et respecter les couleurs de l’interface. Elles ne devront jamais être indispensables à la compréhension d’une action.
+
+## Projet « Mon univers » (en attente des illustrations du second devis)
+
+**Ne pas anticiper la commande artistique.** Le seul document de référence est `compagnon_timide_silhouettes2.pdf` : trois états et formes réduites (pp. 1–3), pétales qui saisissent ou poussent (p. 4). Il ne fournit **aucun** décor de pièce, inventaire d'objets ou animation finalisée. Aucune illustration d'une autre proposition ni d'une IA ne doit servir de substitution.
+
+À terme, l'écran « Aujourd'hui » restera prioritaire avec les tâches et notes. L'onglet facultatif **« Mon univers »** présentera un premier espace à aménager. Un petit aperçu facultatif pourra figurer sur l'accueil **après** les commandes essentielles. Le compagnon flottant, à la place du rectangle uniquement sur choix explicite, sera actif lors d'un focus, au repos lors d'une pause et absent sans session. Aucune réaction à la baisse d'activité ne doit être culpabilisante.
+
+L'ensemble est défini dans [ADR 0014](adr/0014-companion-world-planned.md) et [sa feuille de route](roadmap/2026-11-17-companion-world.md). **Actuellement, seul le logo neutre est intégré ; aucun écran, décor ni compagnon flottant n'est disponible.**
 
 ## Interdits
 

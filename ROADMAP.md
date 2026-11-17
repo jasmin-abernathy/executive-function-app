@@ -23,4 +23,8 @@ La [décision 0006](docs/adr/0006-transparent-learning-and-user-led-planning.md)
 
 Prochaine validation : parcours sur téléphone, permissions refusées/accordées, verrouillage, reprise après arrêt du processus, notifications/PiP, grandes polices, TalkBack et appréciation des couleurs et de l'animation. Une compilation de contrôle ne valide pas ces usages. Un APK d'essai attend une demande explicite.
 
-Les idées suivantes restent des évolutions distinctes : planification autour de rendez-vous fixes, agenda externe, récurrences complexes, relais PC, wearables, anti-distraction entre applications. Aucun de ces éléments n'est présenté comme déjà implémenté. Compagnon, objets illustrés et identité artistique restent hors de cette tranche.
+Les idées suivantes restent des évolutions distinctes : planification autour de rendez-vous fixes, agenda externe, récurrences complexes, relais PC, wearables, anti-distraction entre applications. Aucun de ces éléments n'est présenté comme déjà implémenté.
+
+## Compagnon et environnement évolutif — prévu, **non implémenté**
+
+Un second espace facultatif « Mon univers », son aperçu discret depuis « Aujourd'hui » et un **compagnon flottant actif/au repos** sont spécifiés dans [la feuille de route du 17 novembre 2026](docs/roadmap/2026-11-17-companion-world.md) et [l'ADR 0014](docs/adr/0014-companion-world-planned.md) (suivi : [épic #68](https://github.com/jasmin-abernathy/executive-function-app/issues/68)). **Source graphique unique : `compagnon_timide_silhouettes2.pdf`.** L'icône neutre existante reste provisoirement en place. Les nouveaux décors, objets et animations sont **en attente du financement et de la livraison du second devis de Charly** ; aucun onglet monde ou mode flottant personnage n'est activé dans le code actuel.
