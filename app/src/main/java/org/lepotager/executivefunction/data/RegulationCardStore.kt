@@ -16,7 +16,7 @@ internal object RegulationCardRules {
 
     fun normalize(title: String, steps: List<String>): Pair<String, List<String>> {
         val cleanTitle = title.trim()
-        val cleanSteps = steps.map(String::trim).filter(String::isNotEmpty)
+        val cleanSteps = steps.map { it.trim() }.filter { it.isNotEmpty() }
         require(cleanTitle.length in 1..MAX_TITLE_LENGTH) { "Card title must contain 1 to 80 characters" }
         require(cleanSteps.size in 1..MAX_STEPS) { "Card must contain 1 to 3 steps" }
         require(cleanSteps.all { it.length <= MAX_STEP_LENGTH }) { "Card step is too long" }
@@ -36,7 +36,7 @@ internal class RegulationCardStore(private val database: AppDatabase) {
                 val array = JSONArray(cursor.getString(2))
                 add(RegulationCard(
                     cursor.getString(0), cursor.getString(1),
-                    (0 until array.length()).map(array::getString),
+                    (0 until array.length()).map { index -> array.getString(index) },
                 ))
             }
         }
