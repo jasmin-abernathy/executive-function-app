@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    android:background="@drawable/widget_background">
+    <Button
+        android:id="@+id/overload_widget_button"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
+        android:text="@string/overload_title" />
+</FrameLayout>
