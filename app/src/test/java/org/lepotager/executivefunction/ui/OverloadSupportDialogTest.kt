@@ -29,7 +29,7 @@ class OverloadSupportDialogTest {
             }
         }
         compose.onNodeWithText("Réduire les sollicitations").performClick()
-        compose.onNodeWithText("Si possible, éloigne-toi quelques instants du bruit ou de la lumière.",
+        compose.onNodeWithText("1. Si possible, éloigne-toi quelques instants du bruit ou de la lumière.",
         ).assertExists()
         compose.onNodeWithText("Retour").performClick()
         compose.onNodeWithText("Fermer").performClick()
