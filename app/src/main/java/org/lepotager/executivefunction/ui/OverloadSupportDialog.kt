@@ -17,6 +17,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,7 +45,9 @@ fun OverloadSupportDialog(
     onDismiss: () -> Unit,
 ) {
     val context = LocalContext.current.applicationContext
-    val store = remember(context) { RegulationCardStore(AppDatabase(context)) }
+    val database = remember(context) { AppDatabase(context) }
+    DisposableEffect(database) { onDispose { database.close() } }
+    val store = remember(database) { RegulationCardStore(database) }
     var customCards by remember { mutableStateOf(store.list()) }
     var selected by remember { mutableStateOf<SupportCard?>(null) }
     var editing by remember { mutableStateOf(false) }
