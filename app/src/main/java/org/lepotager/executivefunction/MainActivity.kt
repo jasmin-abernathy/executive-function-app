@@ -300,7 +300,7 @@ class MainActivity : ComponentActivity() {
                                     activeFocus = requireNotNull(snapshot.activeFocus),
                                     onHome = { showHomeDuringFocus = true },
                                     onOverload = { showOverload = true },
-                                    modalBlocked = externalCapture || showQuickNote || pendingStart != null || pendingCapture != null,
+                                    modalBlocked = externalCapture || showQuickNote || showOverload || pendingStart != null || pendingCapture != null,
                                     onJournal = { startActivity(Intent(this@MainActivity, JournalActivity::class.java).putExtra("task",snapshot.activeFocus?.task?.id)) },
                                     onNote = { showQuickNote = true },
                                     onMini = ::enterMiniWindow,
