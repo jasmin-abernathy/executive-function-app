@@ -164,6 +164,7 @@ fun HomeScreen(
     workspace: @Composable () -> Unit = {},
     onJournal: () -> Unit = {},
     onCheckIn: () -> Unit = {},
+    onOverload: () -> Unit = {},
     onHelp: () -> Unit = {},
     eligibleDrawIds: Set<String>? = null,
     suggestedTaskId: String? = null,
@@ -263,10 +264,19 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.size(14.dp))
-                OutlinedButton(
-                    onClick = onCheckIn,
-                    modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("home-check-in"),
-                ) { Text(stringResource(R.string.home_check_in)) }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    OutlinedButton(
+                        onClick = onCheckIn,
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 56.dp).testTag("home-check-in"),
+                    ) { Text(stringResource(R.string.home_check_in), textAlign = TextAlign.Center) }
+                    OutlinedButton(
+                        onClick = onOverload,
+                        modifier = Modifier.weight(1f).sizeIn(minHeight = 56.dp).testTag("home-overload"),
+                    ) { Text(stringResource(R.string.overload_title), textAlign = TextAlign.Center) }
+                }
                 Spacer(Modifier.size(8.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -997,6 +1007,7 @@ fun FocusScreen(
     modalBlocked: Boolean = false,
     onJournal: () -> Unit = {},
     onHome: () -> Unit = {},
+    onOverload: () -> Unit = {},
     onMini: () -> Unit = {},
     onNote: () -> Unit = {},
     overlayEnabled: Boolean,
@@ -1072,6 +1083,10 @@ fun FocusScreen(
             OutlinedButton(onClick = onHome, modifier = Modifier.fillMaxWidth().testTag("focus-back-home")) {
                 Text(stringResource(R.string.focus_back_home))
             }
+            TextButton(
+                onClick = onOverload,
+                modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("focus-overload"),
+            ) { Text(stringResource(R.string.overload_title)) }
             Text(
                 text = stringResource(R.string.focus_label),
                 style = MaterialTheme.typography.labelLarge,
@@ -1247,6 +1262,7 @@ fun ResumeScreen(
     activeFocus: ActiveFocus,
     onResume: (String?) -> Unit,
     onPostpone: () -> Unit,
+    onOverload: () -> Unit = {},
 ) {
     var showSmaller by remember { mutableStateOf(false) }
     Column(
@@ -1313,6 +1329,10 @@ fun ResumeScreen(
             Spacer(Modifier.size(8.dp))
             Text(stringResource(R.string.choose_another_action))
         }
+        TextButton(
+            onClick = onOverload,
+            modifier = Modifier.fillMaxWidth().sizeIn(minHeight = 48.dp).testTag("resume-overload"),
+        ) { Text(stringResource(R.string.overload_title)) }
     }
 
     if (showSmaller) {
