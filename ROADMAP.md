@@ -1,4 +1,6 @@
-# État fonctionnel Android — septembre 2026
+# État fonctionnel Android — novembre 2026
+
+> Évolution proposée : mode « Je sature », fiches de régulation locales et widget d’accès direct. Code et tests dans la [PR #66](https://github.com/jasmin-abernathy/executive-function-app/pull/66) ; ne pas considérer les parcours comme validés sur appareil avant la vérification décrite dans [ADR 0013](docs/adr/0013-quiet-overload-support.md).
 
 Cette liste distingue les comportements présents dans le code des pistes futures. Elle ne présente pas le prototype comme validé sur tous les appareils.
 
