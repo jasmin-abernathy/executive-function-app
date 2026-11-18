@@ -74,7 +74,7 @@ internal class RegulationCardStore(private val database: AppDatabase) {
 
         fun createTables(db: SQLiteDatabase) {
             db.execSQL(
-                """CREATE TABLE regulation_cards (
+                """CREATE TABLE IF NOT EXISTS regulation_cards (
                     id TEXT PRIMARY KEY NOT NULL,
                     title TEXT NOT NULL CHECK(length(trim(title)) BETWEEN 1 AND 80),
                     steps_json TEXT NOT NULL,
