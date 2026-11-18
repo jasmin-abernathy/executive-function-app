@@ -19,13 +19,22 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [28])
 class CompanionWorldStoreTest {
+    private inline fun <T> withDatabase(context: Context, block: (AppDatabase) -> T): T {
+        val db = AppDatabase(context)
+        try {
+            return block(db)
+        } finally {
+            db.close()
+        }
+    }
+
     @Test
     fun worldSurvivesReopenAndBackupAndCanBeCleared() {
         val context: Context = RuntimeEnvironment.getApplication()
         context.deleteDatabase("executive-function.db")
         val preferences = CompanionPreferences(true, true, CompanionFloatingStyle.COMPANION, false, false)
         val placement = DecorationPlacement(250, 900)
-        val draftId = AppDatabase(context).use { db ->
+        val draftId = withDatabase(context) { db ->
             val world = CompanionWorldStore(db)
             assertEquals(CompanionPreferences(), world.preferences())
             assertEquals(CompanionWorld(emptyList(), null), world.load())
@@ -39,7 +48,7 @@ class CompanionWorldStoreTest {
             draft
         }
 
-        AppDatabase(context).use { db ->
+        withDatabase(context) { db ->
             val world = CompanionWorldStore(db)
             val backup = LocalBackup(db)
             val before = world.load()
@@ -76,7 +85,7 @@ class CompanionWorldStoreTest {
     fun versionSixDatabaseAndBackupPreserveTasks() = runBlocking {
         val context: Context = RuntimeEnvironment.getApplication()
         context.deleteDatabase("executive-function.db")
-        val (taskId, legacyBackup) = AppDatabase(context).use { db ->
+        val (taskId, legacyBackup) = withDatabase(context) { db ->
             val id = FocusRepository(db, Dispatchers.Unconfined).capture("Existing task")
             val legacy = JSONObject(LocalBackup(db).export()).put("version", 6)
             CompanionWorldStore.tables.forEach {
@@ -87,7 +96,7 @@ class CompanionWorldStoreTest {
             id to legacy.toString()
         }
 
-        AppDatabase(context).use { db ->
+        withDatabase(context) { db ->
             val world = CompanionWorldStore(db)
             assertEquals("Existing task", db.taskById(taskId)?.title)
             assertEquals(CompanionWorld(emptyList(), null), world.load())
