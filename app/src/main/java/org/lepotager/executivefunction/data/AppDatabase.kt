@@ -65,6 +65,8 @@ internal class AppDatabase(private val context: Context) :
         createLearningTables(db)
         WorkspaceStore.createTables(db)
         TaskOptionsStore.createTables(db)
+        RoutineStore.createTables(db)
+        RegulationCardStore.createTables(db)
         CompanionWorldStore.createTables(db)
     }
 
@@ -96,8 +98,10 @@ internal class AppDatabase(private val context: Context) :
             TaskOptionsStore.createTables(db)
             version = 6
         }
-        if (version == 6 && newVersion >= 8) {
-            // Version 7 is reserved for the routines and support-card integration.
+        if (version in 6..7 && newVersion >= 8) {
+            // Each version 7 branch introduced a different, independent set of tables.
+            RoutineStore.createTables(db)
+            RegulationCardStore.createTables(db)
             CompanionWorldStore.createTables(db)
             version = 8
         }
