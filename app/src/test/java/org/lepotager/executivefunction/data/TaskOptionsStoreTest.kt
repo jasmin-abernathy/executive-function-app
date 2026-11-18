@@ -56,7 +56,7 @@ class TaskOptionsStoreTest {
             db = AppDatabase(context)
             assertEquals("Déjà là", db.taskById(id)!!.title)
             assertNull(db.taskById(id)!!.deadlineDay)
-            assertEquals(AppDatabase.DATABASE_VERSION, db.writableDatabase.version)
+            assertEquals(8, db.writableDatabase.version)
         } finally { db.close() }
     }
 }
