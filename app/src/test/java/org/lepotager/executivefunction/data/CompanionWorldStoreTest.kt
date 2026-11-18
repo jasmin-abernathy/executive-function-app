@@ -21,7 +21,7 @@ class CompanionWorldStoreTest {
     @Test
     fun worldSurvivesReopenAndBackupAndCanBeCleared() {
         val context = RuntimeEnvironment.getApplication()
-        context.deleteDatabase(AppDatabase.DATABASE_NAME)
+        context.deleteDatabase("executive-function.db")
         val preferences = CompanionPreferences(true, true, CompanionFloatingStyle.COMPANION, false, false)
         val placement = DecorationPlacement(250, 900)
         val draftId = AppDatabase(context).use { db ->
@@ -74,7 +74,7 @@ class CompanionWorldStoreTest {
     @Test
     fun versionSixDatabaseAndBackupPreserveTasks() = runBlocking {
         val context = RuntimeEnvironment.getApplication()
-        context.deleteDatabase(AppDatabase.DATABASE_NAME)
+        context.deleteDatabase("executive-function.db")
         val (taskId, legacyBackup) = AppDatabase(context).use { db ->
             val id = FocusRepository(db, Dispatchers.Unconfined).capture("Existing task")
             val legacy = JSONObject(LocalBackup(db).export()).put("version", 6)
