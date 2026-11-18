@@ -50,12 +50,13 @@ class TaskOptionsStoreTest {
         try {
             val id = FocusRepository(db, Dispatchers.Unconfined).capture("Déjà là")
             db.writableDatabase.execSQL("DROP TABLE task_options")
+            CompanionWorldStore.tables.forEach { db.writableDatabase.execSQL("DROP TABLE $it") }
             db.writableDatabase.version = 5
             db.close()
             db = AppDatabase(context)
             assertEquals("Déjà là", db.taskById(id)!!.title)
             assertNull(db.taskById(id)!!.deadlineDay)
-            assertEquals(6, db.writableDatabase.version)
+            assertEquals(AppDatabase.DATABASE_VERSION, db.writableDatabase.version)
         } finally { db.close() }
     }
 }
