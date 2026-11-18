@@ -6,7 +6,7 @@ import org.json.JSONObject
 
 /** Explicit plaintext export. Import is atomic and checks schema and foreign keys. */
 internal class LocalBackup(private val database: AppDatabase) {
-    private val tables = listOf("tasks", "focus_sessions", "learning_exclusions", "learning_overrides", "task_steps", "task_planning", "check_ins", "quick_notes", "session_context", "learning_resets", "recurrences", "task_reminders", "session_steps") + WorkspaceStore.tables + TaskOptionsStore.tables + CompanionWorldStore.tables
+    private val tables = listOf("tasks", "focus_sessions", "learning_exclusions", "learning_overrides", "task_steps", "task_planning", "check_ins", "quick_notes", "session_context", "learning_resets", "recurrences", "task_reminders", "session_steps") + WorkspaceStore.tables + TaskOptionsStore.tables + RoutineStore.tables + RegulationCardStore.tables + CompanionWorldStore.tables
 
     fun export(): String {
         val db=database.readableDatabase
@@ -45,7 +45,12 @@ internal class LocalBackup(private val database: AppDatabase) {
         require(text.length <= 10_000_000) { "Backup too large" }
         val root=JSONObject(text)
         val version = root.getInt("version")
-        require(root.getString("format") == "executive-function-local" && (version in 4..6 || version == 8))
+        require(root.getString("format") == "executive-function-local" && version in 4..8)
+        val hasRoutines = RoutineStore.tables.any { root.has(it) }
+        val hasCards = RegulationCardStore.tables.any { root.has(it) }
+        if (version == 7) {
+            require(hasRoutines || hasCards) { "Unrecognized version 7 backup" }
+        }
         val exportedAt=root.getLong("exported_at")
         require(exportedAt>0 && exportedAt<=System.currentTimeMillis()+300_000L)
         val db=database.writableDatabase
@@ -56,10 +61,24 @@ internal class LocalBackup(private val database: AppDatabase) {
             val array = when {
                 version == 4 && table in WorkspaceStore.tables -> JSONArray()
                 version < 6 && table in TaskOptionsStore.tables -> JSONArray()
+                (version < 7 || (version == 7 && !hasRoutines)) && table in RoutineStore.tables -> JSONArray()
+                (version < 7 || (version == 7 && !hasCards)) && table in RegulationCardStore.tables -> JSONArray()
                 version < 8 && table in CompanionWorldStore.tables -> JSONArray()
                 else -> root.getJSONArray(table)
             }
             require(array.length()<=100_000)
+            if (table in RegulationCardStore.tables) {
+                require(array.length() <= RegulationCardRules.MAX_CARDS)
+                // Corrupt or oversized user-created cards must not replace good local data.
+                (0 until array.length()).forEach { index ->
+                    val row = array.getJSONObject(index)
+                    val title = row.getString("title")
+                    val stepsJson = JSONArray(row.getString("steps_json"))
+                    val steps = (0 until stepsJson.length()).map { item -> stepsJson.getString(item) }
+                    val normalized = RegulationCardRules.normalize(title, steps)
+                    require(normalized.first == title && normalized.second == steps)
+                }
+            }
             (0 until array.length()).map { index ->
                 val obj=array.getJSONObject(index)
                 require(obj.keys().asSequence().toSet()==columns)
