@@ -6,11 +6,11 @@ import org.json.JSONObject
 
 /** Explicit plaintext export. Import is atomic and checks schema and foreign keys. */
 internal class LocalBackup(private val database: AppDatabase) {
-    private val tables = listOf("tasks", "focus_sessions", "learning_exclusions", "learning_overrides", "task_steps", "task_planning", "check_ins", "quick_notes", "session_context", "learning_resets", "recurrences", "task_reminders", "session_steps") + WorkspaceStore.tables + TaskOptionsStore.tables
+    private val tables = listOf("tasks", "focus_sessions", "learning_exclusions", "learning_overrides", "task_steps", "task_planning", "check_ins", "quick_notes", "session_context", "learning_resets", "recurrences", "task_reminders", "session_steps") + WorkspaceStore.tables + TaskOptionsStore.tables + CompanionWorldStore.tables
 
     fun export(): String {
         val db=database.readableDatabase
-        val result=JSONObject().put("format","executive-function-local").put("version",6).put("exported_at",System.currentTimeMillis())
+        val result=JSONObject().put("format","executive-function-local").put("version",8).put("exported_at",System.currentTimeMillis())
         db.beginTransaction()
         try {
             tables.forEach { table ->
@@ -44,7 +44,8 @@ internal class LocalBackup(private val database: AppDatabase) {
     fun restore(text: String) {
         require(text.length <= 10_000_000) { "Backup too large" }
         val root=JSONObject(text)
-        require(root.getString("format")=="executive-function-local" && root.getInt("version") in 4..6)
+        val version = root.getInt("version")
+        require(root.getString("format") == "executive-function-local" && (version in 4..6 || version == 8))
         val exportedAt=root.getLong("exported_at")
         require(exportedAt>0 && exportedAt<=System.currentTimeMillis()+300_000L)
         val db=database.writableDatabase
@@ -52,7 +53,12 @@ internal class LocalBackup(private val database: AppDatabase) {
         val rows=tables.associateWith { table ->
             val columnTypes=db.rawQuery("PRAGMA table_info($table)",null).use { c ->buildMap {while(c.moveToNext()) put(c.getString(1),c.getString(2))} }
             val columns=columnTypes.keys
-            val array=if ((root.getInt("version") == 4 && table in WorkspaceStore.tables) || (root.getInt("version") < 6 && table in TaskOptionsStore.tables)) JSONArray() else root.getJSONArray(table)
+            val array = when {
+                version == 4 && table in WorkspaceStore.tables -> JSONArray()
+                version < 6 && table in TaskOptionsStore.tables -> JSONArray()
+                version < 8 && table in CompanionWorldStore.tables -> JSONArray()
+                else -> root.getJSONArray(table)
+            }
             require(array.length()<=100_000)
             (0 until array.length()).map { index ->
                 val obj=array.getJSONObject(index)
