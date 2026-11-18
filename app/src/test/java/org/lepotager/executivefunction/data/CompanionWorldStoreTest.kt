@@ -106,4 +106,68 @@ class CompanionWorldStoreTest {
             assertEquals(CompanionWorld(emptyList(), null), world.load())
         }
     }
+
+    @Test
+    fun eitherVersionSevenDatabaseAndBackupUpgradeWithoutLosingData() {
+        val context: Context = RuntimeEnvironment.getApplication()
+        for (routinesOnly in listOf(true, false)) {
+            context.deleteDatabase("executive-function.db")
+            val legacyBackup = withDatabase(context) { db ->
+                val absentTables = if (routinesOnly) {
+                    val routines = RoutineStore(db)
+                    val id = routines.create("Morning")
+                    routines.addStep(id, "Open notes", 480)
+                    routines.pause(routines.startOrResume(id))
+                    RegulationCardStore.tables
+                } else {
+                    RegulationCardStore(db).save(null, "Take a break", listOf("Breathe"))
+                    RoutineStore.tables
+                }
+                val legacy = JSONObject(LocalBackup(db).export()).put("version", 7)
+                (absentTables + CompanionWorldStore.tables).reversed().forEach {
+                    legacy.remove(it)
+                    db.writableDatabase.execSQL("DROP TABLE $it")
+                }
+                db.writableDatabase.version = 7
+                legacy.toString()
+            }
+
+            withDatabase(context) { db ->
+                val backup = LocalBackup(db)
+                val routines = RoutineStore(db)
+                val cards = RegulationCardStore(db)
+                val expectedRoutines = routines.load()
+                val expectedCards = cards.list()
+                if (routinesOnly) {
+                    assertEquals("PAUSED", expectedRoutines.single().openRun?.status)
+                    assertEquals("Open notes", expectedRoutines.single().openRun?.steps?.single()?.title)
+                    assertTrue(expectedCards.isEmpty())
+                } else {
+                    assertEquals(listOf("Breathe"), expectedCards.single().steps)
+                    assertTrue(expectedRoutines.isEmpty())
+                }
+
+                backup.clear()
+                backup.restore(legacyBackup)
+                assertEquals(expectedRoutines, routines.load())
+                assertEquals(expectedCards, cards.list())
+                assertEquals(CompanionWorld(emptyList(), null), CompanionWorldStore(db).load())
+
+                val unifiedBackup = backup.export()
+                backup.clear()
+                backup.restore(unifiedBackup)
+                assertEquals(expectedRoutines, routines.load())
+                assertEquals(expectedCards, cards.list())
+
+                val incomplete = JSONObject(legacyBackup)
+                incomplete.remove(if (routinesOnly) "routine_steps" else "regulation_cards")
+                assertThrows(org.json.JSONException::class.java) {
+                    if (!routinesOnly) incomplete.put("regulation_cards", "invalid")
+                    backup.restore(incomplete.toString())
+                }
+                assertEquals(expectedRoutines, routines.load())
+                assertEquals(expectedCards, cards.list())
+            }
+        }
+    }
 }
