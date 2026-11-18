@@ -82,7 +82,7 @@ class HomeModesTest {
         val checkInBounds = compose.onNodeWithTag("home-check-in").fetchSemanticsNode().boundsInRoot
         val taskBounds = compose.onNodeWithTag("home-add-task").fetchSemanticsNode().boundsInRoot
         val noteBounds = compose.onNodeWithTag("home-add-note").fetchSemanticsNode().boundsInRoot
-        assertTrue(checkInBounds.bottom <= taskBounds.top)
+        assertTrue(taskBounds.bottom <= checkInBounds.top)
         assertTrue(kotlin.math.abs(taskBounds.top - noteBounds.top) < 5f)
         assertTrue(taskBounds.right <= noteBounds.left)
         compose.onNodeWithTag("home-add-task").performClick()
