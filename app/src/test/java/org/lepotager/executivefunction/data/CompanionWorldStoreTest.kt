@@ -1,5 +1,6 @@
 package org.lepotager.executivefunction.data
 
+import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
@@ -20,7 +21,7 @@ import org.robolectric.annotation.Config
 class CompanionWorldStoreTest {
     @Test
     fun worldSurvivesReopenAndBackupAndCanBeCleared() {
-        val context = RuntimeEnvironment.getApplication()
+        val context: Context = RuntimeEnvironment.getApplication()
         context.deleteDatabase("executive-function.db")
         val preferences = CompanionPreferences(true, true, CompanionFloatingStyle.COMPANION, false, false)
         val placement = DecorationPlacement(250, 900)
@@ -73,7 +74,7 @@ class CompanionWorldStoreTest {
 
     @Test
     fun versionSixDatabaseAndBackupPreserveTasks() = runBlocking {
-        val context = RuntimeEnvironment.getApplication()
+        val context: Context = RuntimeEnvironment.getApplication()
         context.deleteDatabase("executive-function.db")
         val (taskId, legacyBackup) = AppDatabase(context).use { db ->
             val id = FocusRepository(db, Dispatchers.Unconfined).capture("Existing task")
