@@ -100,10 +100,10 @@ for(const lang of ['fr','en']){
   for(const slug of webApps) assert.ok(read(prefix+slug+'/index.html').includes('class="detail-category">'+webLabel+'</p>'), lang+' : fiche appli web mal classée '+slug);
   assert.ok(read(prefix+'verger-associations/index.html').includes('class="detail-category">Applications</p>'),lang+' : PWA Verger Associations mal classée');
   const verger=read(prefix+'verger-associations/index.html');
-  assert.ok(verger.includes('2026-11-06'),lang+' : date Verger obsolète');
+  assert.ok(verger.includes('2026-11-20'),lang+' : date Verger obsolète');
   assert.ok(verger.includes('SimpleX') && verger.includes('DNS TXT'),lang+' : nouvelles fonctions Verger absentes');
   assert.ok(verger.includes('verger-stage-grid') && verger.includes('verger-nav-preview'),lang+' : présentation des avancées Verger absente');
-  assert.ok(verger.includes('https://github.com/jasmin-abernathy/verger-associations/pull/12'),lang+' : suivi du prototype Verger absent');
+  assert.ok(verger.includes('https://github.com/jasmin-abernathy/verger-associations/tree/work/verger-consultations-simplex-20261105'),lang+' : suivi du prototype Verger absent');
   const epub=read(prefix+'atelier-epub/index.html');
   assert.ok(epub.includes('href="https://epub-gen.lepotager.org/"'),lang+' : lien vers le site EPUB absent de la fiche');
   assert.ok(epub.includes('2026-10-11'),lang+' : statut EPUB obsolète');
@@ -129,15 +129,21 @@ for(const slug of ['dendrila-simple-edit','dendrila-forms-wordpress','dendrila-f
   const en=read('en/projects/'+slug+'/index.html');
   assert.ok(fr.includes('WordPress')&&en.includes('WordPress'),slug+' : catégorie WordPress absente');
   assert.ok(fr.includes('class="detail-section"')&&en.includes('class="detail-section"'),slug+' : détails incomplets');
-  const reviewed = slug === 'dendrila-accessibility-assistant' ? '2026-10-28' : '2026-10-11';
+  const reviewDates = {'dendrila-accessibility-assistant': '2026-10-28', 'dendrila-simple-edit': '2026-11-26'};
+  const reviewed = reviewDates[slug] || '2026-10-11';
   assert.ok(fr.includes(reviewed) && en.includes(reviewed), slug+' : date de révision manquante');
   assert.ok(read('sitemap.xml').includes('/projets/'+slug+'/'),slug+' : sitemap FR incomplet');
   assert.ok(read('sitemap.xml').includes('/en/projects/'+slug+'/'),slug+' : sitemap EN incomplet');
 }
-for(const slug of ['dendrila-simple-edit','dendrila-form-sentinel','dendrila-age-assurance','dendrila-monitor']){
+for(const slug of ['dendrila-form-sentinel','dendrila-age-assurance','dendrila-monitor']){
   assert.ok(!read('projets/'+slug+'/index.html').includes('href="https://github.com/jasmin-abernathy/'+slug+'"'),slug+' : faux lien vers un dépôt privé');
 }
 assert.ok(read('projets/dendrila-form-sentinel/index.html').includes('Aucun test de soumission réelle'), 'Form Sentinel : limite sur la livraison absente');
 assert.ok(read('projets/dendrila-accessibility-assistant/index.html').includes('100 %'), 'Accessibility Assistant : ambiguïté de progression');
 assert.ok(read('projets/dendrila-forms-wordpress/index.html').includes('cache partagé'), 'Dendrila Forms : avertissement cache absent');
 console.log('OK : 19 cartes par langue, 38 fiches, catégories 7/3/5/4, contributions SimpleX et six nouveaux plugins WordPress.');
+
+for (const prefix of ['projets/', 'en/projects/']) {
+  const page = read(prefix + 'dendrila-simple-edit/index.html');
+  assert.ok(page.includes('href="https://github.com/jasmin-abernathy/dendrila-simple-edit"'));
+}

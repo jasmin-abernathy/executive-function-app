@@ -2,13 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#173d2b">
-<meta name="description" content="A guided editing interface that lets designated people update approved website content without changing the site's layout or technical configuration.">
+<meta name="description" content="Delegate WordPress pages, menus and WooCommerce products by role with Dendrila Simple Edit. Explore the lab version, setup guide and public source code.">
 <title>Dendrila Simple Edit: Simplified WordPress content editing | Le Verger</title>
 <link rel="canonical" href="https://app.lepotager.org/en/projects/dendrila-simple-edit/">
-<meta property="og:title" content="Dendrila Simple Edit: Simplified WordPress content editing"><meta property="og:description" content="A guided editing interface that lets designated people update approved website content without changing the site's layout or technical configuration."><meta property="og:url" content="https://app.lepotager.org/en/projects/dendrila-simple-edit/"><meta property="og:type" content="article">
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://app.lepotager.org/en/projects/dendrila-simple-edit/#webpage","url":"https://app.lepotager.org/en/projects/dendrila-simple-edit/","name":"Dendrila Simple Edit: Simplified WordPress content editing","description":"A guided editing interface that lets designated people update approved website content without changing the site's layout or technical configuration.","inLanguage":"en"},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://app.lepotager.org/en/"},{"@type":"ListItem","position":2,"name":"Dendrila Simple Edit","item":"https://app.lepotager.org/en/projects/dendrila-simple-edit/"}]}]}</script>
+<meta property="og:title" content="Dendrila Simple Edit: Simplified WordPress content editing"><meta property="og:description" content="Delegate WordPress pages, menus and WooCommerce products by role with Dendrila Simple Edit. Explore the lab version, setup guide and public source code."><meta property="og:url" content="https://app.lepotager.org/en/projects/dendrila-simple-edit/"><meta property="og:type" content="article">
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://app.lepotager.org/en/projects/dendrila-simple-edit/#webpage","url":"https://app.lepotager.org/en/projects/dendrila-simple-edit/","name":"Dendrila Simple Edit: Simplified WordPress content editing","description":"Delegate WordPress pages, menus and WooCommerce products by role with Dendrila Simple Edit. Explore the lab version, setup guide and public source code.","inLanguage":"en","dateModified":"2026-11-26","about":{"@type":"SoftwareSourceCode","name":"Dendrila Simple Edit","codeRepository":"https://github.com/jasmin-abernathy/dendrila-simple-edit","programmingLanguage":"PHP"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://app.lepotager.org/en/"},{"@type":"ListItem","position":2,"name":"Dendrila Simple Edit","item":"https://app.lepotager.org/en/projects/dendrila-simple-edit/"}]}]}</script>
 <link rel="alternate" hreflang="fr" href="https://app.lepotager.org/projets/dendrila-simple-edit/">
 <link rel="alternate" hreflang="en" href="https://app.lepotager.org/en/projects/dendrila-simple-edit/">
+<link rel="alternate" hreflang="x-default" href="https://app.lepotager.org/projets/dendrila-simple-edit/">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="/assets/style.css?v=20261010-families1"><link rel="stylesheet" href="/assets/project-detail.css?v=20261010-mobilefix1"><link rel="stylesheet" href="/accessibility.css">
 <script defer src="/accessibility.js"></script></head>
@@ -20,18 +21,19 @@
 <button class="accessibility-toggle" type="button" data-app-accessibility-toggle aria-pressed="false">Accessible mode</button></div></div></header>
 <main id="contenu" class="detail-page"><div class="shell"><a class="detail-back" href="/en/#projets">← Back to all projects</a>
 <div class="detail-head"><div><p class="detail-category">WordPress</p><h1>Dendrila Simple Edit</h1>
-<p class="detail-lede">A guided editing interface that lets designated people update approved website content without changing the site's layout or technical configuration.</p></div>
-<aside class="detail-facts"><dl><dt>Current stage</dt><dd>Prototype in development branches and PRs · unreleased</dd><dt>Platform</dt><dd>WordPress 6.5+ · PHP 7.4+</dd><dt>Reviewed</dt><dd><time datetime="2026-10-11">11 October 2026</time></dd></dl></aside></div>
-<section class="detail-section detail-usecase"><h2>What is it for?</h2><p>To let a nontechnical site manager correct text or select approved images without changing the layout, settings or technical administration. Permissions and interfaces still require real-world testing.</p></section>
-<section class="detail-section"><h2>What this project is building</h2><ul><li>A minimum-permission “Site Manager” role.</li>
-<li>Explicitly approved global text regions, with optional limited ACF support.</li>
-<li>Choice of approved images without blanket upload permissions.</li>
-<li>PR work on delegated newsletter drafts and WooCommerce product fields.</li></ul></section>
-<section class="detail-section"><h2>Current limitations</h2><p>Divi, Elementor, ACF and WooCommerce integrations still require real WordPress tests. Feature PRs are not merged and no deployment has been validated.</p></section>
-<section class="detail-section"><h2>Development and feedback</h2><p>This project’s code repository is private while development and real-world testing continue.</p>
+<p class="detail-lede">Give an editor permission to update an article, change a menu or prepare a product while you keep control of publication.</p></div>
+<aside class="detail-facts"><dl><dt>Current stage</dt><dd>0.0.1 · active on the WordPress test site</dd><dt>Platform</dt><dd>WordPress 6.5+ · PHP 7.4+</dd><dt>Reviewed</dt><dd><time datetime="2026-11-26">26 November 2026</time></dd></dl></aside></div>
+<section class="detail-section detail-usecase"><h2>What is it for?</h2><p>Choose the content types and actions for each WordPress role. The five-step setup wizard opens on first installation. Try the editor with a test account before assigning permissions on a working site.</p></section>
+<section class="detail-section"><h2>What editors can do</h2><ul>
+<li>Edit approved pages, posts, menus and images; navigate or reorder menus with the keyboard.</li>
+<li>Delegate product and stock editing with WooCommerce while orders and payments stay in WooCommerce.</li>
+<li>Prepare newsletters and manage subscriptions. Sending requires a configured FluentSMTP connection.</li>
+</ul></section>
+<section class="detail-section"><h2>Current limitations</h2><p>The plugin is active on the test site running WordPress 7.1.5. Compatibility with a particular theme, page builder, product catalogue or mail setup needs testing on that installation.</p></section>
+<section class="detail-section"><h2>Development and feedback</h2><p><a href="https://github.com/jasmin-abernathy/dendrila-simple-edit">Read the installation guide and public source code on GitHub</a>.</p>
 <div class="detail-actions"><a href="mailto:contact@lepotager.org?subject=Dendrila%20Simple%20Edit">Ask a question by e-mail ↗</a></div></section>
-<section class="detail-section related-projects"><h2>Related projects</h2><ul><li><a href="/en/projects/dendrila-cms/">dendrila cms</a></li><li><a href="/en/projects/dendrila-accessibility-assistant/">dendrila accessibility assistant</a></li></ul></section>
-<p class="detail-reviewed">Information reviewed on 11 October 2026 from the project's README and development state.</p>
+<section class="detail-section related-projects"><h2>Related projects</h2><ul><li><a href="/en/projects/dendrila-cms/">Dendrila CMS</a></li><li><a href="/en/projects/dendrila-accessibility-assistant/">Dendrila Accessibility Assistant</a></li></ul></section>
+<p class="detail-reviewed">Reviewed on 26 November 2026 using the plugin package and the WordPress test site.</p>
 <a class="detail-back" href="/en/#projets">← Back to all projects</a></div></main>
 <footer class="site-footer"><div class="shell footer-grid"><div><a class="brand brand-footer" href="/en/"><span><strong>Le Verger</strong><small>du Numérique</small></span></a><p>Useful, open and privacy-minded digital tools.</p></div><div class="footer-links"><a href="/en/#projets">← Back to all projects</a>
 <a href="/en/legal-notice.html">Legal notice</a><a href="https://www.lepotager.org/">Le Potager du Web</a></div></div></footer>
