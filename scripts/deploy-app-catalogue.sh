@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Synchronisation statique non destructive du catalogue app.lepotager.org.
+# Synchronisation non destructive du catalogue et du point d’entrée public du questionnaire.
 # Usage: bash scripts/deploy-app-catalogue.sh --check|--apply
 set -euo pipefail
 umask 077
@@ -34,7 +34,8 @@ printf 'Révision GitHub : %s\nDossier cible : %s\n' "$SHA" "$LIVE"
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
-FILES=(index.html en/index.html assets/style.css assets/app.js assets/project-detail.css sitemap.xml)
+FILES=(index.html en/index.html assets/style.css assets/app.js assets/project-detail.css sitemap.xml adhd-app/v2/index.php)
+[[ -f "$LIVE/adhd-app/v2/index.php" && ! -L "$LIVE/adhd-app/v2/index.php" ]] || fail "Point d’entrée existant du questionnaire non identifié."
 PAGES=()
 git -C "$REPO" ls-tree -r --name-only origin/main -- "$SRC/projets" "$SRC/en/projects" > "$TMP/pages-list.txt" || fail "Liste des fiches Git indisponible."
 while IFS= read -r path; do
@@ -181,7 +182,7 @@ fix_public_permissions() {
 }
 
 if [[ "${#CHANGED[@]}" -eq 0 && "${#RETIRED_EXISTING[@]}" -eq 0 ]]; then
-  echo "Les 44 fichiers du DocumentRoot sont déjà identiques à Git."
+  echo "Les ${#FILES[@]} fichiers du DocumentRoot sont déjà identiques à Git."
   fix_public_permissions
   check_http
   exit 0
@@ -213,6 +214,6 @@ for rel in "${RETIRED_EXISTING[@]}"; do
 done
 printf 'Copie terminée : %d fichiers corrigés, %d fiches retirées depuis GitHub %s\n' "${#CHANGED[@]}" "${#RETIRED_EXISTING[@]}" "$SHA"
 fix_public_permissions
-echo "Aucun --delete global : seules les fiches historiques ciblées peuvent être retirées. Questionnaires et services non touchés."
+echo "Aucun --delete global : seules les fiches historiques ciblées peuvent être retirées. Seul le point d’entrée du questionnaire est synchronisé ; les réponses, réglages et services restent hors du lot."
 check_http
 echo "Important : vérifier dans un navigateur les cartes FR/EN, les filtres et les fiches."
